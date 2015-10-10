@@ -11,5 +11,7 @@ func handler(resp http.ResponseWriter, req *http.Request) {
 
 func main() {
 	http.HandleFunc("/", handler)
+	fmt.Println("Listening on http://localhost:8080/")
+	fmt.Println("Press Ctrl-C to kill server")
 	http.ListenAndServe(":8080", nil)
 }
