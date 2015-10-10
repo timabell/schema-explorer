@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"os"
 )
 
 func handler(resp http.ResponseWriter, req *http.Request) {
@@ -10,6 +11,8 @@ func handler(resp http.ResponseWriter, req *http.Request) {
 }
 
 func main() {
+	db := os.Args[1]
+	fmt.Printf("Connecting to db: %s\n", db)
 	http.HandleFunc("/", handler)
 	fmt.Println("Listening on http://localhost:8080/")
 	fmt.Println("Press Ctrl-C to kill server")
