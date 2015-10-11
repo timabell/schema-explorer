@@ -46,6 +46,16 @@ func showTable(resp http.ResponseWriter, dbc *sql.DB, table string) {
 	}
 	defer rows.Close()
 	fmt.Fprintf(resp, "<h2>Table %s</h2><table border=1>", table)
+	cols, err := rows.Columns()
+	if (err != nil) {
+		fmt.Println("error getting column names", err)
+		return
+	}
+	fmt.Fprintf(resp, "<tr>")
+	for _, col := range cols {
+		fmt.Fprintf(resp, "<th>%s</th>", col)
+	}
+	fmt.Fprintf(resp, "</tr>")
 	for rows.Next() {
 		var id int
 		var name string
