@@ -10,6 +10,15 @@ import (
 
 var db string
 
+func main() {
+	db = os.Args[1]
+	fmt.Printf("Connecting to db: %s\n", db)
+	http.HandleFunc("/", handler)
+	fmt.Println("Listening on http://localhost:8080/")
+	fmt.Println("Press Ctrl-C to kill server")
+	http.ListenAndServe(":8080", nil)
+}
+
 func handler(resp http.ResponseWriter, req *http.Request) {
 	fmt.Fprintf(resp, "<h1>bonjour!</h1>\n<p>Hello soapie</p>")
 	dbc, err :=sql.Open("sqlite3", db)
@@ -33,13 +42,4 @@ func handler(resp http.ResponseWriter, req *http.Request) {
 	}
 	fmt.Fprintf(resp, "</table>")
 	defer dbc.Close()
-}
-
-func main() {
-	db = os.Args[1]
-	fmt.Printf("Connecting to db: %s\n", db)
-	http.HandleFunc("/", handler)
-	fmt.Println("Listening on http://localhost:8080/")
-	fmt.Println("Press Ctrl-C to kill server")
-	http.ListenAndServe(":8080", nil)
 }
