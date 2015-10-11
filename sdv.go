@@ -28,8 +28,14 @@ func handler(resp http.ResponseWriter, req *http.Request) {
 	}
 	defer dbc.Close()
 	fmt.Fprintf(resp, "<p>Connected to %s</p>", db)
-	showTable(resp, dbc, "foo")
-	showTable(resp, dbc, "woof")
+	tables, err := getTables(dbc)
+	if (err != nil) {
+		fmt.Println("error getting table list", err)
+		return
+	}
+	for _, table := range tables {
+		showTable(resp, dbc, table)
+	}
 }
 
 func showTable(resp http.ResponseWriter, dbc *sql.DB, table string) {
@@ -65,4 +71,18 @@ func fks(resp http.ResponseWriter, dbc *sql.DB, table string) {
 		fmt.Fprintf(resp, "<li>key: %s references %s.%s</li>", from, parentTable, to)
 	}
 	fmt.Fprintf(resp, "</ul>")
+}
+
+func getTables(dbc *sql.DB) (tables []string, err error){
+	rows, err := dbc.Query("SELECT name FROM sqlite_master WHERE type='table';")
+	if (err != nil) {
+		return nil, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var name string
+		rows.Scan(&name)
+		tables = append(tables, name)
+	}
+	return tables, nil
 }
