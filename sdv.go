@@ -15,9 +15,24 @@ func handler(resp http.ResponseWriter, req *http.Request) {
 	dbc, err :=sql.Open("sqlite3", db)
 	if (err != nil) {
 		fmt.Println("connection error", err)
+		return
 	}
-	defer dbc.Close()
 	fmt.Fprintf(resp, "<p>Connected to %s</p>", db)
+	rows, err := dbc.Query("select * from foo;")
+	if (err != nil) {
+		fmt.Println("select error", err)
+		return
+	}
+	defer rows.Close()
+	fmt.Fprintf(resp, "<table border=1>")
+	for rows.Next() {
+		var id int
+		var name string
+		rows.Scan(&id, &name)
+		fmt.Fprintf(resp, "<tr><td>%d</td><td>%s</td></tr>", id, name)
+	}
+	fmt.Fprintf(resp, "</table>")
+	defer dbc.Close()
 }
 
 func main() {
