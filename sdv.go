@@ -47,4 +47,22 @@ func showTable(resp http.ResponseWriter, dbc *sql.DB, table string) {
 		fmt.Fprintf(resp, "<tr><td>%d</td><td>%s</td></tr>", id, name)
 	}
 	fmt.Fprintf(resp, "</table>")
+	fks(resp, dbc, table)
+}
+
+func fks(resp http.ResponseWriter, dbc *sql.DB, table string) {
+	rows, err := dbc.Query("PRAGMA foreign_key_list('" + table + "');")
+	if (err != nil) {
+		fmt.Println("select error", err)
+		return
+	}
+	defer rows.Close()
+	fmt.Fprintf(resp, "<ul>")
+	for rows.Next() {
+		var id, seq int
+		var parentTable, from, to, on_update, on_delete string
+		rows.Scan(&id, &seq, &parentTable, &from, &to, &on_update, &on_delete)
+		fmt.Fprintf(resp, "<li>key: %s references %s.%s</li>", from, parentTable, to)
+	}
+	fmt.Fprintf(resp, "</ul>")
 }
