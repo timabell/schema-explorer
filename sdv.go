@@ -26,14 +26,20 @@ func handler(resp http.ResponseWriter, req *http.Request) {
 		fmt.Println("connection error", err)
 		return
 	}
+	defer dbc.Close()
 	fmt.Fprintf(resp, "<p>Connected to %s</p>", db)
-	rows, err := dbc.Query("select * from foo;")
+	showTable(resp, dbc, "foo")
+	showTable(resp, dbc, "woof")
+}
+
+func showTable(resp http.ResponseWriter, dbc *sql.DB, table string) {
+	rows, err := dbc.Query("select * from " + table)
 	if (err != nil) {
 		fmt.Println("select error", err)
 		return
 	}
 	defer rows.Close()
-	fmt.Fprintf(resp, "<table border=1>")
+	fmt.Fprintf(resp, "<h2>Table %s</h2><table border=1>", table)
 	for rows.Next() {
 		var id int
 		var name string
@@ -41,5 +47,4 @@ func handler(resp http.ResponseWriter, req *http.Request) {
 		fmt.Fprintf(resp, "<tr><td>%d</td><td>%s</td></tr>", id, name)
 	}
 	fmt.Fprintf(resp, "</table>")
-	defer dbc.Close()
 }
