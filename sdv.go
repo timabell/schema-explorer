@@ -20,7 +20,7 @@ func main() {
 }
 
 func handler(resp http.ResponseWriter, req *http.Request) {
-	fmt.Fprintf(resp, "<h1>bonjour!</h1>\n<p>Hello soapie</p>")
+	fmt.Fprint(resp, "<html><head><style type='text/css'>.null { color: #999; }</style></head><body><h1>bonjour!</h1>\n<p>Hello soapie</p>")
 	dbc, err :=sql.Open("sqlite3", db)
 	if (err != nil) {
 		fmt.Println("connection error", err)
@@ -36,6 +36,7 @@ func handler(resp http.ResponseWriter, req *http.Request) {
 	for _, table := range tables {
 		showTable(resp, dbc, table)
 	}
+	fmt.Fprint(resp, "</body></html>")
 }
 
 func showTable(resp http.ResponseWriter, dbc *sql.DB, table string) {
@@ -70,7 +71,17 @@ func showTable(resp http.ResponseWriter, dbc *sql.DB, table string) {
 		}
 		fmt.Fprintf(resp, "<tr>")
 		for colIndex := range cols {
-			fmt.Fprintf(resp, "<td>%s</td>", rowData[colIndex])
+			colData := rowData[colIndex]
+			fmt.Fprint(resp, "<td>")
+			switch colData.(type) {
+				case int64:
+					fmt.Fprintf(resp, "%d", colData)
+				case nil:
+					fmt.Fprint(resp, "<span class='null'>[null]</span>", colData)
+				default:
+					fmt.Fprintf(resp, "%s", colData)
+			}
+			fmt.Fprint(resp, "</td>")
 		}
 		fmt.Fprintf(resp, "</tr>")
 	}
