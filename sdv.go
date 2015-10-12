@@ -56,11 +56,23 @@ func showTable(resp http.ResponseWriter, dbc *sql.DB, table string) {
 		fmt.Fprintf(resp, "<th>%s</th>", col)
 	}
 	fmt.Fprintf(resp, "</tr>")
+	// http://stackoverflow.com/a/23507765/10245 - getting ad-hoc column data
+	rowData := make([]interface{}, len(cols))
+	rowDataPointers := make([]interface{}, len(cols))
+	for i := 0; i < len(cols); i++ {
+		rowDataPointers[i] = &rowData[i]
+	}
 	for rows.Next() {
-		var id int
-		var name string
-		rows.Scan(&id, &name)
-		fmt.Fprintf(resp, "<tr><td>%d</td><td>%s</td></tr>", id, name)
+		err := rows.Scan(rowDataPointers...)
+		if (err != nil) {
+			fmt.Println("error reading row data", err)
+			return
+		}
+		fmt.Fprintf(resp, "<tr>")
+		for colIndex := range cols {
+			fmt.Fprintf(resp, "<td>%s</td>", rowData[colIndex])
+		}
+		fmt.Fprintf(resp, "</tr>")
 	}
 	fmt.Fprintf(resp, "</table>")
 	fks(resp, dbc, table)
