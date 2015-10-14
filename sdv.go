@@ -1,11 +1,11 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
+	_ "github.com/mattn/go-sqlite3"
 	"net/http"
 	"os"
-	"database/sql"
-	_ "github.com/mattn/go-sqlite3"
 )
 
 var db string
@@ -21,15 +21,15 @@ func main() {
 
 func handler(resp http.ResponseWriter, req *http.Request) {
 	fmt.Fprint(resp, "<html><head><style type='text/css'>.null { color: #999; }</style></head><body><h1>bonjour!</h1>\n<p>Hello soapie</p>")
-	dbc, err :=sql.Open("sqlite3", db)
-	if (err != nil) {
+	dbc, err := sql.Open("sqlite3", db)
+	if err != nil {
 		fmt.Println("connection error", err)
 		return
 	}
 	defer dbc.Close()
 	fmt.Fprintf(resp, "<p>Connected to %s</p>", db)
 	tables, err := getTables(dbc)
-	if (err != nil) {
+	if err != nil {
 		fmt.Println("error getting table list", err)
 		return
 	}
@@ -41,14 +41,14 @@ func handler(resp http.ResponseWriter, req *http.Request) {
 
 func showTable(resp http.ResponseWriter, dbc *sql.DB, table string) {
 	rows, err := dbc.Query("select * from " + table)
-	if (err != nil) {
+	if err != nil {
 		fmt.Println("select error", err)
 		return
 	}
 	defer rows.Close()
 	fmt.Fprintf(resp, "<h2>Table %s</h2><table border=1>", table)
 	cols, err := rows.Columns()
-	if (err != nil) {
+	if err != nil {
 		fmt.Println("error getting column names", err)
 		return
 	}
@@ -65,7 +65,7 @@ func showTable(resp http.ResponseWriter, dbc *sql.DB, table string) {
 	}
 	for rows.Next() {
 		err := rows.Scan(rowDataPointers...)
-		if (err != nil) {
+		if err != nil {
 			fmt.Println("error reading row data", err)
 			return
 		}
@@ -74,12 +74,12 @@ func showTable(resp http.ResponseWriter, dbc *sql.DB, table string) {
 			colData := rowData[colIndex]
 			fmt.Fprint(resp, "<td>")
 			switch colData.(type) {
-				case int64:
-					fmt.Fprintf(resp, "%d", colData)
-				case nil:
-					fmt.Fprint(resp, "<span class='null'>[null]</span>", colData)
-				default:
-					fmt.Fprintf(resp, "%s", colData)
+			case int64:
+				fmt.Fprintf(resp, "%d", colData)
+			case nil:
+				fmt.Fprint(resp, "<span class='null'>[null]</span>", colData)
+			default:
+				fmt.Fprintf(resp, "%s", colData)
 			}
 			fmt.Fprint(resp, "</td>")
 		}
@@ -91,7 +91,7 @@ func showTable(resp http.ResponseWriter, dbc *sql.DB, table string) {
 
 func fks(resp http.ResponseWriter, dbc *sql.DB, table string) {
 	rows, err := dbc.Query("PRAGMA foreign_key_list('" + table + "');")
-	if (err != nil) {
+	if err != nil {
 		fmt.Println("select error", err)
 		return
 	}
@@ -106,9 +106,9 @@ func fks(resp http.ResponseWriter, dbc *sql.DB, table string) {
 	fmt.Fprintf(resp, "</ul>")
 }
 
-func getTables(dbc *sql.DB) (tables []string, err error){
+func getTables(dbc *sql.DB) (tables []string, err error) {
 	rows, err := dbc.Query("SELECT name FROM sqlite_master WHERE type='table';")
-	if (err != nil) {
+	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
