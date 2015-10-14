@@ -37,7 +37,10 @@ func handler(resp http.ResponseWriter, req *http.Request) {
 <head>
 	<title>Sql Data Viewer</title>
 	<style type='text/css'>
+		body { background-color: #f9fff9; margin: 1em; }
 		.null { color: #999; }
+		#connected { font-style: italic; }
+		.config-value { background-color: #eee; }
 		footer { color: #666; text-align: right; font-size: smaller; }
 		footer a { color: #66c; }
 	</style>
@@ -50,7 +53,7 @@ func handler(resp http.ResponseWriter, req *http.Request) {
 		return
 	}
 	defer dbc.Close()
-	fmt.Fprintf(resp, "<p>Connected to %s</p>\n", db)
+	fmt.Fprintf(resp, "<p id='connected'>Connected to <span class='config-value'>%s</span></p>\n", db)
 	tables, err := getTables(dbc)
 	if err != nil {
 		fmt.Println("error getting table list", err)
