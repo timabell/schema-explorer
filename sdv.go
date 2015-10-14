@@ -1,3 +1,14 @@
+/*
+Sql Data Viewer, Copyright Tim Abell 2015
+All rights reserved.
+
+A tool for browsing the data in any rdbms databse
+through a series of generated html pages.
+
+Provides navigation between tables via the foreign keys
+defined in the database's schema.
+*/
+
 package main
 
 import (
