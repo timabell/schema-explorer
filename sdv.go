@@ -112,8 +112,8 @@ func fks(resp http.ResponseWriter, dbc *sql.DB, table string) {
 	fmt.Fprintln(resp, "<ul>")
 	for rows.Next() {
 		var id, seq int
-		var parentTable, from, to, on_update, on_delete string
-		rows.Scan(&id, &seq, &parentTable, &from, &to, &on_update, &on_delete)
+		var parentTable, from, to, onUpdate, onDelete string
+		rows.Scan(&id, &seq, &parentTable, &from, &to, &onUpdate, &onDelete)
 		fmt.Fprintf(resp, "\t<li>key: %s references %s.%s</li>\n", from, parentTable, to)
 	}
 	fmt.Fprintln(resp, "</ul>")
