@@ -20,6 +20,12 @@ import (
 	"strings"
 )
 
+// reference to a field in another table, part of a foreign key
+type ref struct {
+	table string
+	col   string
+}
+
 var db string
 
 func main() {
@@ -68,6 +74,7 @@ func showTableList(resp http.ResponseWriter, dbc *sql.DB) {
 }
 
 func showTable(resp http.ResponseWriter, dbc *sql.DB, table string) {
+	fks := fks(dbc, table)
 	rows, err := dbc.Query("select * from " + table)
 	if err != nil {
 		fmt.Println("select error", err)
@@ -99,9 +106,13 @@ func showTable(resp http.ResponseWriter, dbc *sql.DB, table string) {
 			return
 		}
 		fmt.Fprintln(resp, "\t<tr>")
-		for colIndex := range cols {
+		for colIndex, col := range cols {
 			colData := rowData[colIndex]
 			fmt.Fprint(resp, "\t\t<td>")
+			ref, refExists := fks[col]
+			if refExists && colData != nil {
+				fmt.Fprintf(resp, "<a href='%s?%s=%d' class='fk'>", ref.table, ref.col, colData)
+			}
 			switch colData.(type) {
 			case int64:
 				fmt.Fprintf(resp, "%d", colData)
@@ -110,29 +121,36 @@ func showTable(resp http.ResponseWriter, dbc *sql.DB, table string) {
 			default:
 				fmt.Fprintf(resp, "%s", colData)
 			}
+			if refExists && colData != nil {
+				fmt.Fprintf(resp, "</a>")
+			}
 			fmt.Fprintln(resp, "</td>")
 		}
 		fmt.Fprintln(resp, "\t</tr>")
 	}
 	fmt.Fprintln(resp, "</table>")
-	fks(resp, dbc, table)
 }
 
-func fks(resp http.ResponseWriter, dbc *sql.DB, table string) {
+func fks(dbc *sql.DB, table string) (fks map[string]ref) {
 	rows, err := dbc.Query("PRAGMA foreign_key_list('" + table + "');")
 	if err != nil {
 		fmt.Println("select error", err)
 		return
 	}
 	defer rows.Close()
-	fmt.Fprintln(resp, "<ul>")
+	//fmt.Fprintln(resp, `<h3>foreign keys</h3> <ul>`)
+	fks = make(map[string]ref)
 	for rows.Next() {
 		var id, seq int
 		var parentTable, from, to, onUpdate, onDelete, match string
 		rows.Scan(&id, &seq, &parentTable, &from, &to, &onUpdate, &onDelete, &match)
-		fmt.Fprintf(resp, "\t<li>key: %s references %s.%s</li>\n", from, parentTable, to)
+		//thisFk := Fk{FromCol: from, ToTable parentTable, col: to}
+		thisRef := ref{col: to, table: parentTable}
+		fks[from] = thisRef
+		//fmt.Fprintf(resp, "\t<li>key: %s references %s.%s</li>\n", from, parentTable, to)
 	}
-	fmt.Fprintln(resp, "</ul>")
+	//fmt.Fprintln(resp, "</ul>")
+	return
 }
 
 func getTables(dbc *sql.DB) (tables []string, err error) {
