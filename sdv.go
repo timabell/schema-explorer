@@ -53,7 +53,8 @@ func handler(resp http.ResponseWriter, req *http.Request) {
 	case "tables":
 		// todo: check not missing table name
 		table := folders[2]
-		showTable(resp, dbc, table)
+		query := req.URL.Query()
+		showTable(resp, dbc, table, query)
 	default:
 		showTableList(resp, dbc)
 	}
@@ -73,15 +74,28 @@ func showTableList(resp http.ResponseWriter, dbc *sql.DB) {
 	fmt.Fprintln(resp, "</table>")
 }
 
-func showTable(resp http.ResponseWriter, dbc *sql.DB, table string) {
+func showTable(resp http.ResponseWriter, dbc *sql.DB, table string, query map[string][]string) {
 	fks := fks(dbc, table)
-	rows, err := dbc.Query("select * from " + table)
+	fmt.Fprintf(resp, "<h2>Table %s</h2>\n", table)
+	if len(query) > 0 {
+		fmt.Fprintf(resp, "<p class='filtered'>Filtered - %s<p>", query)
+	}
+	sql := "select * from " + table
+	if len(query) > 0 {
+		sql = sql + " where "
+		clauses := make([]string, 0, len(query))
+		for k, v := range query {
+			clauses = append(clauses, k+" = "+v[0])
+		}
+		sql = sql + strings.Join(clauses, " and ")
+	}
+	fmt.Println(sql)
+	rows, err := dbc.Query(sql)
 	if err != nil {
 		fmt.Println("select error", err)
 		return
 	}
 	defer rows.Close()
-	fmt.Fprintf(resp, "<h2>Table %s</h2>\n", table)
 	fmt.Fprintln(resp, `<table border=1>`)
 	cols, err := rows.Columns()
 	if err != nil {
