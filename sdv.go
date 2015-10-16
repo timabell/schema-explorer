@@ -18,6 +18,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"time"
 )
 
 // reference to a field in another table, part of a foreign key
@@ -31,6 +32,8 @@ var db string
 func main() {
 	db = os.Args[1]
 	fmt.Println("Sql Data Viewer; Copyright 2015 Tim Abell <tim@timwise.co.uk>")
+	licensing()
+	fmt.Printf("# This pre-release software will expire on: %s,\n#  contact tim@timwise.co.uk for a license.\n", expiryRFC822)
 	fmt.Printf("Connecting to db: %s\n", db)
 	http.HandleFunc("/", handler)
 	fmt.Println("Listening on http://localhost:8080/")
@@ -39,6 +42,7 @@ func main() {
 }
 
 func handler(resp http.ResponseWriter, req *http.Request) {
+	licensing()
 	fmt.Printf("req: %s\n", req.URL)
 	fmt.Fprintln(resp, htmlHeader)
 	dbc, err := sql.Open("sqlite3", db)
@@ -180,6 +184,15 @@ func getTables(dbc *sql.DB) (tables []string, err error) {
 	}
 	return tables, nil
 }
+
+func licensing() {
+	expiry, _ := time.Parse(time.RFC822, expiryRFC822)
+	if time.Now().After(expiry) {
+		panic("expired trial, contact Tim Abell <tim@timwise.co.uk> to obtain a license")
+	}
+}
+
+const expiryRFC822 = "16 Jan 16 00:00 UTC" // 3 months from when this was written
 
 const htmlHeader = `<!DOCTYPE html>
 <html lang='en'>
