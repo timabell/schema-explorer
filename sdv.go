@@ -15,6 +15,7 @@ import (
 	"database/sql"
 	"fmt"
 	_ "github.com/mattn/go-sqlite3"
+	"log"
 	"net/http"
 	"os"
 	"strings"
@@ -31,23 +32,23 @@ var db string
 
 func main() {
 	db = os.Args[1]
-	fmt.Println("Sql Data Viewer; Copyright 2015 Tim Abell <tim@timwise.co.uk>")
+	log.Println("Sql Data Viewer; Copyright 2015 Tim Abell <tim@timwise.co.uk>")
 	licensing()
-	fmt.Printf("# This pre-release software will expire on: %s,\n#  contact tim@timwise.co.uk for a license.\n", expiryRFC822)
-	fmt.Printf("Connecting to db: %s\n", db)
+	log.Printf("## This pre-release software will expire on: %s, contact tim@timwise.co.uk for a license. ##", expiryRFC822)
+	log.Printf("Connecting to db: %s\n", db)
 	http.HandleFunc("/", handler)
-	fmt.Println("Listening on http://localhost:8080/")
-	fmt.Println("Press Ctrl-C to kill server")
+	log.Println("Listening on http://localhost:8080/")
+	log.Println("Press Ctrl-C to kill server")
 	http.ListenAndServe(":8080", nil)
 }
 
 func handler(resp http.ResponseWriter, req *http.Request) {
 	licensing()
-	fmt.Printf("req: %s\n", req.URL)
+	log.Printf("req: %s\n", req.URL)
 	fmt.Fprintln(resp, htmlHeader)
 	dbc, err := sql.Open("sqlite3", db)
 	if err != nil {
-		fmt.Println("connection error", err)
+		log.Println("connection error", err)
 		return
 	}
 	defer dbc.Close()
@@ -93,17 +94,17 @@ func showTable(resp http.ResponseWriter, dbc *sql.DB, table string, query map[st
 		}
 		sql = sql + strings.Join(clauses, " and ")
 	}
-	fmt.Println(sql)
+	log.Println(sql)
 	rows, err := dbc.Query(sql)
 	if err != nil {
-		fmt.Println("select error", err)
+		log.Println("select error", err)
 		return
 	}
 	defer rows.Close()
 	fmt.Fprintln(resp, `<table border=1>`)
 	cols, err := rows.Columns()
 	if err != nil {
-		fmt.Println("error getting column names", err)
+		log.Println("error getting column names", err)
 		return
 	}
 	fmt.Fprintln(resp, "<tr>")
@@ -120,7 +121,7 @@ func showTable(resp http.ResponseWriter, dbc *sql.DB, table string, query map[st
 	for rows.Next() {
 		err := rows.Scan(rowDataPointers...)
 		if err != nil {
-			fmt.Println("error reading row data", err)
+			log.Println("error reading row data", err)
 			return
 		}
 		fmt.Fprintln(resp, "\t<tr>")
@@ -152,7 +153,7 @@ func showTable(resp http.ResponseWriter, dbc *sql.DB, table string, query map[st
 func fks(dbc *sql.DB, table string) (fks map[string]ref) {
 	rows, err := dbc.Query("PRAGMA foreign_key_list('" + table + "');")
 	if err != nil {
-		fmt.Println("select error", err)
+		log.Println("select error", err)
 		return
 	}
 	defer rows.Close()
@@ -188,7 +189,7 @@ func getTables(dbc *sql.DB) (tables []string, err error) {
 func licensing() {
 	expiry, _ := time.Parse(time.RFC822, expiryRFC822)
 	if time.Now().After(expiry) {
-		panic("expired trial, contact Tim Abell <tim@timwise.co.uk> to obtain a license")
+		log.Panic("expired trial, contact Tim Abell <tim@timwise.co.uk> to obtain a license")
 	}
 }
 
