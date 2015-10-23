@@ -37,9 +37,9 @@ func main() {
 	log.Printf("## This pre-release software will expire on: %s, contact tim@timwise.co.uk for a license. ##", expiryRFC822)
 	log.Printf("Connecting to db: %s\n", db)
 	http.HandleFunc("/", handler)
-	log.Println("Listening on http://localhost:8080/")
-	log.Println("Press Ctrl-C to kill server")
-	http.ListenAndServe(":8080", nil)
+	log.Println("Starting server on http://localhost:8080/ - Press Ctrl-C to kill server.")
+	log.Fatal(http.ListenAndServe(":8080", nil))
+	log.Panic("http.ListenAndServe didn't block")
 }
 
 func handler(resp http.ResponseWriter, req *http.Request) {
