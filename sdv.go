@@ -30,6 +30,8 @@ const version = "0.2"
 // matches type of url.Values so can pass straight through
 type rowFilter map[string][]string
 
+type fkList map[string]ref
+
 // reference to a field in another table, part of a foreign key
 type ref struct {
 	table string
@@ -247,7 +249,7 @@ func showTable(resp http.ResponseWriter, dbc *sql.DB, table string, query rowFil
 	}
 }
 
-func fks(dbc *sql.DB, table string) (fks map[string]ref) {
+func fks(dbc *sql.DB, table string) (fks fkList) {
 	rows, err := dbc.Query("PRAGMA foreign_key_list('" + table + "');")
 	if err != nil {
 		log.Println("select error", err)
