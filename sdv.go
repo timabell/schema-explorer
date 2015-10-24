@@ -371,7 +371,7 @@ const headerHtml = `
 		.config-value { background-color: #eee; }
 		footer { color: #666; text-align: right; font-size: smaller; }
 		footer a { color: #66c; }
-		th.parents { font-style: italic }
+		th.references { font-style: italic }
 	</style>
 </head>
 <body>
@@ -418,7 +418,7 @@ const dataHtml = `
 		{{ range .Cols }}
 			<th>{{.}}</th>
 		{{end}}
-		<th class='parents'>parents</th>
+		<th class='references'>referenced by</th>
 		</tr>
 		{{ range .Rows }}
 		<tr>
