@@ -105,13 +105,14 @@ func handler(resp http.ResponseWriter, req *http.Request) {
 		// todo: check not missing table name
 		table := folders[2]
 		var query = req.URL.Query()
-		// todo: avoid name clashes with column names
 		var rowLimit int
-		rowLimitString := query.Get("rows")
+		// todo: more robust separation of query param keys
+		const rowLimitKey = "_rowLimit" // this should be reasonably safe from clashes with column names
+		rowLimitString := query.Get(rowLimitKey)
 		if rowLimitString != "" {
 			rowLimit, err = strconv.Atoi(rowLimitString)
 			// exclude from column filters
-			query.Del("rows")
+			query.Del(rowLimitKey)
 			if err != nil {
 				fmt.Println("error converting rows querystring value to int: ", err)
 				return
