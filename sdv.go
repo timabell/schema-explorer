@@ -19,6 +19,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -103,8 +104,21 @@ func handler(resp http.ResponseWriter, req *http.Request) {
 	case "tables":
 		// todo: check not missing table name
 		table := folders[2]
-		var query = rowFilter(req.URL.Query())
-		showTable(resp, dbc, table, query)
+		var query = req.URL.Query()
+		// todo: avoid name clashes with column names
+		var rowLimit int
+		rowLimitString := query.Get("rows")
+		if rowLimitString != "" {
+			rowLimit, err = strconv.Atoi(rowLimitString)
+			// exclude from column filters
+			query.Del("rows")
+			if err != nil {
+				fmt.Println("error converting rows querystring value to int: ", err)
+				return
+			}
+		}
+		var rowFilter = rowFilter(query)
+		showTable(resp, dbc, table, rowFilter, rowLimit)
 	default:
 		showTableList(resp, dbc)
 	}
@@ -131,7 +145,7 @@ func showTableList(resp http.ResponseWriter, dbc *sql.DB) {
 	}
 }
 
-func showTable(resp http.ResponseWriter, dbc *sql.DB, table string, query rowFilter) {
+func showTable(resp http.ResponseWriter, dbc *sql.DB, table string, query rowFilter, rowLimit int) {
 	var formattedQuery string
 	if len(query) > 0 {
 		formattedQuery = fmt.Sprintf("%s", query)
@@ -148,6 +162,7 @@ func showTable(resp http.ResponseWriter, dbc *sql.DB, table string, query rowFil
 	fks := fks(dbc, table)
 
 	sql := "select * from " + table
+
 	if len(query) > 0 {
 		sql = sql + " where "
 		clauses := make([]string, 0, len(query))
@@ -156,7 +171,13 @@ func showTable(resp http.ResponseWriter, dbc *sql.DB, table string, query rowFil
 		}
 		sql = sql + strings.Join(clauses, " and ")
 	}
+
+	if rowLimit > 0 {
+		sql = sql + " limit " + strconv.Itoa(rowLimit)
+	}
+
 	log.Println(sql)
+
 	rows, err := dbc.Query(sql)
 	if err != nil {
 		log.Println("select error", err)
