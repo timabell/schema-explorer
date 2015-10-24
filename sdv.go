@@ -317,7 +317,7 @@ const tablesHtml = `
 {{template "header" .LayoutData}}
 <table border=1>
 {{range .Tables}}
-	<tr><td><a href='tables/{{.}}'>{{.}}</a></td></tr>
+	<tr><td><a href='tables/{{.}}?_rowLimit=100'>{{.}}</a></td></tr>
 {{end}}
 </table>
 {{template "footer" .LayoutData}}
