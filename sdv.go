@@ -220,6 +220,8 @@ func showTable(resp http.ResponseWriter, dbc *sql.DB, table string, query rowFil
 			switch colData.(type) {
 			case int64:
 				valueHtml = valueHtml + template.HTMLEscapeString(fmt.Sprintf("%d", colData))
+			case float64:
+				valueHtml = valueHtml + template.HTMLEscapeString(fmt.Sprintf("%f", colData))
 			case nil:
 				valueHtml = valueHtml + "<span class='null'>[null]</span>"
 			default:
