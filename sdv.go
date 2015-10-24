@@ -54,6 +54,7 @@ type dataViewModel struct {
 	LayoutData pageTemplateModel
 	TableName  string
 	Query      string
+	RowLimit   int
 	Cols       []string
 	Rows       []cells
 }
@@ -160,6 +161,7 @@ func showTable(resp http.ResponseWriter, dbc *sql.DB, table string, query rowFil
 		LayoutData: layoutData,
 		TableName:  table,
 		Query:      formattedQuery,
+		RowLimit:   rowLimit,
 		Cols:       []string{},
 		Rows:       []cells{},
 	}
@@ -336,6 +338,9 @@ const dataHtml = `
 	<h2>Table {{.TableName}}</h2>
 	{{ if .Query }}
 		<p class='filtered'>Filtered - {{.Query}}<p>
+	{{end}}
+	{{ if .RowLimit }}
+		<p class='filtered'>First {{.RowLimit}} rows<p>
 	{{end}}
 	<table border=1>
 		<tr>
