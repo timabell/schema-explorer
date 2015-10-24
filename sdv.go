@@ -23,6 +23,10 @@ import (
 	"time"
 )
 
+// filtering of results with column name / value(s) pairs,
+// matches type of url.Values so can pass straight through
+type rowFilter map[string][]string
+
 // reference to a field in another table, part of a foreign key
 type ref struct {
 	table string
@@ -99,7 +103,7 @@ func handler(resp http.ResponseWriter, req *http.Request) {
 	case "tables":
 		// todo: check not missing table name
 		table := folders[2]
-		query := req.URL.Query()
+		var query = rowFilter(req.URL.Query())
 		showTable(resp, dbc, table, query)
 	default:
 		showTableList(resp, dbc)
@@ -127,7 +131,7 @@ func showTableList(resp http.ResponseWriter, dbc *sql.DB) {
 	}
 }
 
-func showTable(resp http.ResponseWriter, dbc *sql.DB, table string, query map[string][]string) {
+func showTable(resp http.ResponseWriter, dbc *sql.DB, table string, query rowFilter) {
 	var formattedQuery string
 	if len(query) > 0 {
 		formattedQuery = fmt.Sprintf("%s", query)
