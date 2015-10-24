@@ -26,17 +26,27 @@ import (
 
 const version = "0.2"
 
+// alias to make it clear when we're dealing with table names
+type tableName string
+
+// alias to make it clear when we're dealing with column names
+type columnName string
+
 // filtering of results with column name / value(s) pairs,
 // matches type of url.Values so can pass straight through
 type rowFilter map[string][]string
 
-type fkList map[string]ref
-
 // reference to a field in another table, part of a foreign key
 type ref struct {
-	table string
-	col   string
+	table tableName  // target table for the fk
+	col   columnName // target col for the fk
 }
+
+// list of foreign keys, the column in the current table that the fk is defined on
+type fkList map[columnName]ref
+
+// for each table in the database, the list of fks defined on that table
+type globalFkList map[tableName]fkList
 
 type pageTemplateModel struct {
 	Title     string
@@ -47,21 +57,19 @@ type pageTemplateModel struct {
 
 type tablesViewModel struct {
 	LayoutData pageTemplateModel
-	Tables     tableList
+	Tables     []tableName
 }
 
 type cells []template.HTML
 
 type dataViewModel struct {
 	LayoutData pageTemplateModel
-	TableName  string
+	TableName  tableName
 	Query      string
 	RowLimit   int
 	Cols       []string
 	Rows       []cells
 }
-
-type tableList []string
 
 var db string
 var tmpl *template.Template
@@ -110,7 +118,7 @@ func handler(resp http.ResponseWriter, req *http.Request) {
 	switch folders[1] {
 	case "tables":
 		// todo: check not missing table name
-		table := folders[2]
+		table := tableName(folders[2])
 		var query = req.URL.Query()
 		var rowLimit int
 		// todo: more robust separation of query param keys
@@ -153,7 +161,7 @@ func showTableList(resp http.ResponseWriter, dbc *sql.DB) {
 	}
 }
 
-func showTable(resp http.ResponseWriter, dbc *sql.DB, table string, query rowFilter, rowLimit int) {
+func showTable(resp http.ResponseWriter, dbc *sql.DB, table tableName, query rowFilter, rowLimit int) {
 	var formattedQuery string
 	if len(query) > 0 {
 		formattedQuery = fmt.Sprintf("%s", query)
@@ -168,9 +176,13 @@ func showTable(resp http.ResponseWriter, dbc *sql.DB, table string, query rowFil
 		Rows:       []cells{},
 	}
 
-	fks := fks(dbc, table)
+	fks := allFks(dbc)
 
-	sql := "select * from " + table
+	// find all the of the fks that point at this table
+	inwardFks := findParents(fks, table)
+	fmt.Println("found: ", inwardFks)
+
+	sql := "select * from " + string(table)
 
 	if len(query) > 0 {
 		sql = sql + " where "
@@ -221,7 +233,7 @@ func showTable(resp http.ResponseWriter, dbc *sql.DB, table string, query rowFil
 		for colIndex, col := range cols {
 			colData := rowData[colIndex]
 			var valueHtml string
-			ref, refExists := fks[col]
+			ref, refExists := fks[table][columnName(col)]
 			if refExists && colData != nil {
 				valueHtml = fmt.Sprintf("<a href='%s?%s=%d' class='fk'>", ref.table, ref.col, colData)
 			}
@@ -240,6 +252,22 @@ func showTable(resp http.ResponseWriter, dbc *sql.DB, table string, query rowFil
 			}
 			row = append(row, template.HTML(valueHtml))
 		}
+		parentHtml := ""
+		// todo: factor out row limit, move to a cookie perhaps
+		// todo: stable sort order http://stackoverflow.com/questions/23330781/sort-golang-map-values-by-keys
+		// todo: pre-calculate fk info so this isn't repeated for every row
+		for parentTable, parentFks := range inwardFks {
+			for parentCol, ref := range parentFks {
+				parentHtml = parentHtml + fmt.Sprintf(
+					"<a href='%s?%s=%d&_rowLimit=100' class='parentFk'>%s.%s</a>&nbsp;",
+					template.URLQueryEscaper(parentTable),
+					template.URLQueryEscaper(parentCol),
+					rowData[IndexOf(cols, string(ref.col))],
+					template.HTMLEscaper(parentTable),
+					template.HTMLEscaper(parentCol))
+			}
+		}
+		row = append(row, template.HTML(parentHtml))
 		model.Rows = append(model.Rows, row)
 	}
 
@@ -249,25 +277,65 @@ func showTable(resp http.ResponseWriter, dbc *sql.DB, table string, query rowFil
 	}
 }
 
-func fks(dbc *sql.DB, table string) (fks fkList) {
-	rows, err := dbc.Query("PRAGMA foreign_key_list('" + table + "');")
+func IndexOf(slice []string, value string) (index int) {
+	var curValue string
+	for index, curValue = range slice {
+		if curValue == value {
+			return
+		}
+	}
+	log.Panic(value, " not found in slice")
+	return
+}
+
+// filter the fk list down to keys that reference the "child" table
+func findParents(fks globalFkList, child tableName) (parents globalFkList) {
+	parents = globalFkList{}
+	for srcTable, tableFks := range fks {
+		newFkList := fkList{}
+		for srcCol, ref := range tableFks {
+			if ref.table == child {
+				// match; copy into new list
+				newFkList[srcCol] = ref
+				parents[srcTable] = newFkList
+			}
+		}
+	}
+	return
+}
+
+func allFks(dbc *sql.DB) (allFks globalFkList) {
+	tables, err := getTables(dbc)
+	if err != nil {
+		fmt.Println("error getting table list while building global fk list", err)
+		return
+	}
+	allFks = globalFkList{}
+	for _, table := range tables {
+		allFks[table] = fks(dbc, table)
+	}
+	return
+}
+
+func fks(dbc *sql.DB, table tableName) (fks fkList) {
+	rows, err := dbc.Query("PRAGMA foreign_key_list('" + string(table) + "');")
 	if err != nil {
 		log.Println("select error", err)
 		return
 	}
 	defer rows.Close()
-	fks = make(map[string]ref)
+	fks = fkList{}
 	for rows.Next() {
 		var id, seq int
 		var parentTable, from, to, onUpdate, onDelete, match string
 		rows.Scan(&id, &seq, &parentTable, &from, &to, &onUpdate, &onDelete, &match)
-		thisRef := ref{col: to, table: parentTable}
-		fks[from] = thisRef
+		thisRef := ref{col: columnName(to), table: tableName(parentTable)}
+		fks[columnName(from)] = thisRef
 	}
 	return
 }
 
-func getTables(dbc *sql.DB) (tables tableList, err error) {
+func getTables(dbc *sql.DB) (tables []tableName, err error) {
 	rows, err := dbc.Query("SELECT name FROM sqlite_master WHERE type='table';")
 	if err != nil {
 		return nil, err
@@ -276,7 +344,7 @@ func getTables(dbc *sql.DB) (tables tableList, err error) {
 	for rows.Next() {
 		var name string
 		rows.Scan(&name)
-		tables = append(tables, name)
+		tables = append(tables, tableName(name))
 	}
 	return tables, nil
 }
@@ -303,6 +371,7 @@ const headerHtml = `
 		.config-value { background-color: #eee; }
 		footer { color: #666; text-align: right; font-size: smaller; }
 		footer a { color: #66c; }
+		th.parents { font-style: italic }
 	</style>
 </head>
 <body>
@@ -349,6 +418,7 @@ const dataHtml = `
 		{{ range .Cols }}
 			<th>{{.}}</th>
 		{{end}}
+		<th class='parents'>parents</th>
 		</tr>
 		{{ range .Rows }}
 		<tr>
