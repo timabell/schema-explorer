@@ -40,6 +40,16 @@ type tablesViewModel struct {
 	Tables     tableList
 }
 
+type cells []template.HTML
+
+type dataViewModel struct {
+	LayoutData pageTemplateModel
+	TableName  string
+	Query      string
+	Cols       []string
+	Rows       []cells
+}
+
 type tableList []string
 
 var db string
@@ -56,6 +66,7 @@ func main() {
 	tmpl = template.Must(template.New("template").Parse(headerHtml))
 	tmpl = template.Must(tmpl.Parse(footerHtml))
 	tmpl = template.Must(tmpl.Parse(tablesHtml))
+	tmpl = template.Must(tmpl.Parse(dataHtml))
 
 	log.Printf("## This pre-release software will expire on: %s, contact tim@timwise.co.uk for a license. ##", expiryRFC822)
 	log.Printf("Connecting to db: %s\n", db)
@@ -83,7 +94,6 @@ func handler(resp http.ResponseWriter, req *http.Request) {
 		Timestamp: time.Now().String(),
 	}
 
-	// todo: put output in template
 	folders := strings.Split(req.URL.Path, "/")
 	switch folders[1] {
 	case "tables":
@@ -118,11 +128,21 @@ func showTableList(resp http.ResponseWriter, dbc *sql.DB) {
 }
 
 func showTable(resp http.ResponseWriter, dbc *sql.DB, table string, query map[string][]string) {
-	fks := fks(dbc, table)
-	fmt.Fprintf(resp, "<h2>Table %s</h2>\n", table)
+	var formattedQuery string
 	if len(query) > 0 {
-		fmt.Fprintf(resp, "<p class='filtered'>Filtered - %s<p>", query)
+		formattedQuery = fmt.Sprintf("%s", query)
 	}
+
+	model := dataViewModel{
+		LayoutData: layoutData,
+		TableName:  table,
+		Query:      formattedQuery,
+		Cols:       []string{},
+		Rows:       []cells{},
+	}
+
+	fks := fks(dbc, table)
+
 	sql := "select * from " + table
 	if len(query) > 0 {
 		sql = sql + " where "
@@ -139,17 +159,17 @@ func showTable(resp http.ResponseWriter, dbc *sql.DB, table string, query map[st
 		return
 	}
 	defer rows.Close()
-	fmt.Fprintln(resp, `<table border=1>`)
 	cols, err := rows.Columns()
 	if err != nil {
 		log.Println("error getting column names", err)
+		// todo: send 500 error to client
 		return
 	}
-	fmt.Fprintln(resp, "<tr>")
+
 	for _, col := range cols {
-		fmt.Fprintf(resp, "<th>%s</th>\n", col)
+		model.Cols = append(model.Cols, col)
 	}
-	fmt.Fprintln(resp, "</tr>")
+
 	// http://stackoverflow.com/a/23507765/10245 - getting ad-hoc column data
 	rowData := make([]interface{}, len(cols))
 	rowDataPointers := make([]interface{}, len(cols))
@@ -157,35 +177,40 @@ func showTable(resp http.ResponseWriter, dbc *sql.DB, table string, query map[st
 		rowDataPointers[i] = &rowData[i]
 	}
 	for rows.Next() {
+		row := cells{}
+
 		err := rows.Scan(rowDataPointers...)
 		if err != nil {
 			log.Println("error reading row data", err)
 			return
 		}
-		fmt.Fprintln(resp, "\t<tr>")
 		for colIndex, col := range cols {
 			colData := rowData[colIndex]
-			fmt.Fprint(resp, "\t\t<td>")
+			var valueHtml string
 			ref, refExists := fks[col]
 			if refExists && colData != nil {
-				fmt.Fprintf(resp, "<a href='%s?%s=%d' class='fk'>", ref.table, ref.col, colData)
+				valueHtml = fmt.Sprintf("<a href='%s?%s=%d' class='fk'>", ref.table, ref.col, colData)
 			}
 			switch colData.(type) {
 			case int64:
-				fmt.Fprintf(resp, "%d", colData)
+				valueHtml = valueHtml + template.HTMLEscapeString(fmt.Sprintf("%d", colData))
 			case nil:
-				fmt.Fprint(resp, "<span class='null'>[null]</span>")
+				valueHtml = valueHtml + "<span class='null'>[null]</span>"
 			default:
-				fmt.Fprintf(resp, "%s", colData)
+				valueHtml = valueHtml + template.HTMLEscapeString(fmt.Sprintf("%s", colData))
 			}
 			if refExists && colData != nil {
-				fmt.Fprintf(resp, "</a>")
+				valueHtml = valueHtml + "</a>"
 			}
-			fmt.Fprintln(resp, "</td>")
+			row = append(row, template.HTML(valueHtml))
 		}
-		fmt.Fprintln(resp, "\t</tr>")
+		model.Rows = append(model.Rows, row)
 	}
-	fmt.Fprintln(resp, "</table>")
+
+	err = tmpl.ExecuteTemplate(resp, "data", model)
+	if err != nil {
+		log.Print("template exexution error", err)
+	}
 }
 
 func fks(dbc *sql.DB, table string) (fks map[string]ref) {
@@ -195,18 +220,14 @@ func fks(dbc *sql.DB, table string) (fks map[string]ref) {
 		return
 	}
 	defer rows.Close()
-	//fmt.Fprintln(resp, `<h3>foreign keys</h3> <ul>`)
 	fks = make(map[string]ref)
 	for rows.Next() {
 		var id, seq int
 		var parentTable, from, to, onUpdate, onDelete, match string
 		rows.Scan(&id, &seq, &parentTable, &from, &to, &onUpdate, &onDelete, &match)
-		//thisFk := Fk{FromCol: from, ToTable parentTable, col: to}
 		thisRef := ref{col: to, table: parentTable}
 		fks[from] = thisRef
-		//fmt.Fprintf(resp, "\t<li>key: %s references %s.%s</li>\n", from, parentTable, to)
 	}
-	//fmt.Fprintln(resp, "</ul>")
 	return
 }
 
@@ -273,6 +294,31 @@ const tablesHtml = `
 	<tr><td><a href='tables/{{.}}'>{{.}}</a></td></tr>
 {{end}}
 </table>
+{{template "footer" .LayoutData}}
+{{end}}
+`
+
+const dataHtml = `
+{{define "data"}}
+{{template "header" .LayoutData}}
+	<h2>Table {{.TableName}}</h2>
+	{{ if .Query }}
+		<p class='filtered'>Filtered - {{.Query}}<p>
+	{{end}}
+	<table border=1>
+		<tr>
+		{{ range .Cols }}
+			<th>{{.}}</th>
+		{{end}}
+		</tr>
+		{{ range .Rows }}
+		<tr>
+		{{ range . }}
+			<td>{{.}}</td>
+		{{end}}
+		</tr>
+		{{end}}
+	</table>
 {{template "footer" .LayoutData}}
 {{end}}
 `
