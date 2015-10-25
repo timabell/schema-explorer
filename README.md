@@ -1,7 +1,15 @@
+# Sql Data Viewer
+
+Copyright 2015 Tim Abell
+
+[http://www.timwise.co.uk/sdv/](http://www.timwise.co.uk/sdv/)
+
 An html based viewer of SQL Server Databases written in
 [Go](https://golang.org/)
 
-Copyright 2015 Tim Abell
+Currently supports sqlite, but planned to support sql server.
+
+Support for mysql, sql server, oracle, postgres etc will depend on demand.
 
 Note there is no protection against:
 
