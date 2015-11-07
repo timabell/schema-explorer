@@ -78,7 +78,21 @@ var layoutData pageTemplateModel
 // var pageTemplate template.Template
 
 func main() {
+	if len(os.Args) <= 1 {
+		log.Fatal("missing argument: path to sqlite database file")
+	}
 	db = os.Args[1]
+
+	port := 8080
+	if len(os.Args) > 2 {
+		portString := os.Args[2]
+		var err error
+		port, err = strconv.Atoi(portString)
+		if err != nil {
+			log.Fatal("invalid port ", portString)
+		}
+	}
+
 	log.Printf("Sql Data Viewer v%s; Copyright 2015 Tim Abell <tim@timwise.co.uk>", version)
 	licensing()
 
@@ -91,8 +105,9 @@ func main() {
 	log.Printf("Connecting to db: %s\n", db)
 	// todo: use multiple handlers properly
 	http.HandleFunc("/", handler)
-	log.Println("Starting server on http://localhost:8080/ - Press Ctrl-C to kill server.")
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	listenOn := fmt.Sprintf("localhost:%d", port)
+	log.Printf("Starting server on http://%s/ - Press Ctrl-C to kill server.\n", listenOn)
+	log.Fatal(http.ListenAndServe(listenOn, nil))
 	log.Panic("http.ListenAndServe didn't block")
 }
 
