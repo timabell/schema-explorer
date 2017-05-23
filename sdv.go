@@ -12,7 +12,7 @@ defined in the database's schema.
 package main
 
 import (
-	"./srv"
+	"./sdv"
 	"database/sql"
 	"fmt"
 	_ "github.com/mattn/go-sqlite3"
@@ -104,7 +104,7 @@ func main() {
 	tmpl = template.Must(tmpl.Parse(dataHTML))
 
 	log.Printf("Connecting to db: %s\n", db)
-	srv.Serve(handler, port)
+	sdv.Serve(handler, port)
 }
 
 func handler(resp http.ResponseWriter, req *http.Request) {
