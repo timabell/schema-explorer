@@ -12,7 +12,6 @@ defined in the database's schema.
 package main
 
 import (
-	"./sdv"
 	"database/sql"
 	"fmt"
 	_ "github.com/mattn/go-sqlite3"
@@ -23,31 +22,10 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"sql-data-viewer/sdv"
 )
 
 const version = "0.2"
-
-// alias to make it clear when we're dealing with table names
-type tableName string
-
-// alias to make it clear when we're dealing with column names
-type columnName string
-
-// filtering of results with column name / value(s) pairs,
-// matches type of url.Values so can pass straight through
-type rowFilter map[string][]string
-
-// reference to a field in another table, part of a foreign key
-type ref struct {
-	table tableName  // target table for the fk
-	col   columnName // target col for the fk
-}
-
-// list of foreign keys, the column in the current table that the fk is defined on
-type fkList map[columnName]ref
-
-// for each table in the database, the list of fks defined on that table
-type globalFkList map[tableName]fkList
 
 type pageTemplateModel struct {
 	Title     string
@@ -58,14 +36,14 @@ type pageTemplateModel struct {
 
 type tablesViewModel struct {
 	LayoutData pageTemplateModel
-	Tables     []tableName
+	Tables     []sdv.TableName
 }
 
 type cells []template.HTML
 
 type dataViewModel struct {
 	LayoutData pageTemplateModel
-	TableName  tableName
+	TableName  sdv.TableName
 	Query      string
 	RowLimit   int
 	Cols       []string
@@ -129,7 +107,7 @@ func handler(resp http.ResponseWriter, req *http.Request) {
 	switch folders[1] {
 	case "tables":
 		// todo: check not missing table name
-		table := tableName(folders[2])
+		table := sdv.TableName(folders[2])
 		var query = req.URL.Query()
 		var rowLimit int
 		// todo: more robust separation of query param keys
@@ -144,7 +122,7 @@ func handler(resp http.ResponseWriter, req *http.Request) {
 				return
 			}
 		}
-		var rowFilter = rowFilter(query)
+		var rowFilter = sdv.RowFilter(query)
 		showTable(resp, dbc, table, rowFilter, rowLimit)
 	default:
 		showTableList(resp, dbc)
@@ -155,7 +133,7 @@ func handler(resp http.ResponseWriter, req *http.Request) {
 }
 
 func showTableList(resp http.ResponseWriter, dbc *sql.DB) {
-	tables, err := getTables(dbc)
+	tables, err := sdv.GetTables(dbc)
 	if err != nil {
 		fmt.Println("error getting table list", err)
 		return
@@ -172,13 +150,13 @@ func showTableList(resp http.ResponseWriter, dbc *sql.DB) {
 	}
 }
 
-func showTable(resp http.ResponseWriter, dbc *sql.DB, table tableName, query rowFilter, rowLimit int) {
+func showTable(resp http.ResponseWriter, dbc *sql.DB, table sdv.TableName, query sdv.RowFilter, rowLimit int) {
 	var formattedQuery string
 	if len(query) > 0 {
 		formattedQuery = fmt.Sprintf("%s", query)
 	}
 
-	model := dataViewModel{
+	viewModel := dataViewModel{
 		LayoutData: layoutData,
 		TableName:  table,
 		Query:      formattedQuery,
@@ -187,10 +165,10 @@ func showTable(resp http.ResponseWriter, dbc *sql.DB, table tableName, query row
 		Rows:       []cells{},
 	}
 
-	fks := allFks(dbc)
+	fks := sdv.AllFks(dbc)
 
 	// find all the of the fks that point at this table
-	inwardFks := findParents(fks, table)
+	inwardFks := table.FindParents(fks)
 	fmt.Println("found: ", inwardFks)
 
 	sql := "select * from " + string(table)
@@ -224,7 +202,7 @@ func showTable(resp http.ResponseWriter, dbc *sql.DB, table tableName, query row
 	}
 
 	for _, col := range cols {
-		model.Cols = append(model.Cols, col)
+		viewModel.Cols = append(viewModel.Cols, col)
 	}
 
 	// http://stackoverflow.com/a/23507765/10245 - getting ad-hoc column data
@@ -244,9 +222,9 @@ func showTable(resp http.ResponseWriter, dbc *sql.DB, table tableName, query row
 		for colIndex, col := range cols {
 			colData := rowData[colIndex]
 			var valueHTML string
-			ref, refExists := fks[table][columnName(col)]
+			ref, refExists := fks[table][sdv.ColumnName(col)]
 			if refExists && colData != nil {
-				valueHTML = fmt.Sprintf("<a href='%s?%s=%d' class='fk'>", ref.table, ref.col, colData)
+				valueHTML = fmt.Sprintf("<a href='%s?%s=%d' class='fk'>", ref.Table, ref.Col, colData)
 			}
 			switch colData.(type) {
 			case int64:
@@ -273,16 +251,16 @@ func showTable(resp http.ResponseWriter, dbc *sql.DB, table tableName, query row
 					"<a href='%s?%s=%d&_rowLimit=100' class='parentFk'>%s.%s</a>&nbsp;",
 					template.URLQueryEscaper(parentTable),
 					template.URLQueryEscaper(parentCol),
-					rowData[indexOf(cols, string(ref.col))],
+					rowData[indexOf(cols, string(ref.Col))],
 					template.HTMLEscaper(parentTable),
 					template.HTMLEscaper(parentCol))
 			}
 		}
 		row = append(row, template.HTML(parentHTML))
-		model.Rows = append(model.Rows, row)
+		viewModel.Rows = append(viewModel.Rows, row)
 	}
 
-	err = tmpl.ExecuteTemplate(resp, "data", model)
+	err = tmpl.ExecuteTemplate(resp, "data", viewModel)
 	if err != nil {
 		log.Print("template exexution error", err)
 	}
@@ -297,67 +275,6 @@ func indexOf(slice []string, value string) (index int) {
 	}
 	log.Panic(value, " not found in slice")
 	return
-}
-
-// filter the fk list down to keys that reference the "child" table
-func findParents(fks globalFkList, child tableName) (parents globalFkList) {
-	parents = globalFkList{}
-	for srcTable, tableFks := range fks {
-		newFkList := fkList{}
-		for srcCol, ref := range tableFks {
-			if ref.table == child {
-				// match; copy into new list
-				newFkList[srcCol] = ref
-				parents[srcTable] = newFkList
-			}
-		}
-	}
-	return
-}
-
-func allFks(dbc *sql.DB) (allFks globalFkList) {
-	tables, err := getTables(dbc)
-	if err != nil {
-		fmt.Println("error getting table list while building global fk list", err)
-		return
-	}
-	allFks = globalFkList{}
-	for _, table := range tables {
-		allFks[table] = fks(dbc, table)
-	}
-	return
-}
-
-func fks(dbc *sql.DB, table tableName) (fks fkList) {
-	rows, err := dbc.Query("PRAGMA foreign_key_list('" + string(table) + "');")
-	if err != nil {
-		log.Println("select error", err)
-		return
-	}
-	defer rows.Close()
-	fks = fkList{}
-	for rows.Next() {
-		var id, seq int
-		var parentTable, from, to, onUpdate, onDelete, match string
-		rows.Scan(&id, &seq, &parentTable, &from, &to, &onUpdate, &onDelete, &match)
-		thisRef := ref{col: columnName(to), table: tableName(parentTable)}
-		fks[columnName(from)] = thisRef
-	}
-	return
-}
-
-func getTables(dbc *sql.DB) (tables []tableName, err error) {
-	rows, err := dbc.Query("SELECT name FROM sqlite_master WHERE type='table';")
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	for rows.Next() {
-		var name string
-		rows.Scan(&name)
-		tables = append(tables, tableName(name))
-	}
-	return tables, nil
 }
 
 func licensing() {
