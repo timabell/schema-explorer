@@ -76,7 +76,7 @@ func fks(dbc *sql.DB, table TableName) (fks FkList) {
 	return
 }
 
-func GetTables(dbc *sql.DB) (tables []TableName, err error) {
+func GetTables() (tables []TableName, err error) {
 	rows, err := dbc.Query("SELECT name FROM sqlite_master WHERE type='table';")
 	if err != nil {
 		return nil, err

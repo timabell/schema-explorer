@@ -45,19 +45,13 @@ func SetupTemplate() {
 
 }
 
-func showTableList(resp http.ResponseWriter, dbc *sql.DB) {
-	tables, err := GetTables(dbc)
-	if err != nil {
-		fmt.Println("error getting table list", err)
-		return
-	}
-
+func showTableList(resp http.ResponseWriter, tables []TableName) {
 	model := tablesViewModel{
 		LayoutData: layoutData,
 		Tables:     tables,
 	}
 
-	err = tmpl.ExecuteTemplate(resp, "tables", model)
+	err := tmpl.ExecuteTemplate(resp, "tables", model)
 	if err != nil {
 		log.Fatal(err)
 	}

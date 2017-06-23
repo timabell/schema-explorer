@@ -4,21 +4,19 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"database/sql"
 	"time"
 	"strings"
 	"strconv"
 )
 
 var db string
+var driver string
 
-func RunServer(dbConn string, port int){
+func RunServer(driverInfo string, dbConn string, port int){
 	db = dbConn
+	driver = driverInfo
 
 	SetupTemplate()
-
-	// todo: test connection
-	log.Printf("Connecting to db: %s\n", db)
 
 	serve(handler, port)
 }
@@ -36,12 +34,14 @@ func handler(resp http.ResponseWriter, req *http.Request) {
 	Licensing()
 	log.Printf("req: %s\n", req.URL)
 
-	dbc, err := sql.Open("sqlite3", db)
-	if err != nil {
-		log.Println("connection error", err)
-		return
+	var model dbInterface
+	switch driver {
+	case "mssql":
+		model = NewMssql(db)
+	case "sqlite":
+		model = NewSqlite(db)
 	}
-	defer dbc.Close()
+
 
 	layoutData = pageTemplateModel{
 		Db:        db,
@@ -73,7 +73,14 @@ func handler(resp http.ResponseWriter, req *http.Request) {
 		var rowFilter = RowFilter(query)
 		showTable(resp, dbc, table, rowFilter, rowLimit)
 	default:
-		showTableList(resp, dbc)
+		tables, err := GetTables(dbc)
+		if err != nil {
+			fmt.Println("error getting table list", err)
+			return
+		}
+
+		tables := model.
+		showTableList(resp, tables)
 	}
 	if err != nil {
 		log.Fatal(err) //todo: make non-fatal
