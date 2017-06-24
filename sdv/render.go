@@ -3,11 +3,11 @@ package sdv
 import (
 	"html/template"
 	"net/http"
-	"database/sql"
-	"fmt"
+	//"database/sql"
+	//"fmt"
 	"log"
-	"strings"
-	"strconv"
+	//"strings"
+	//"strconv"
 )
 
 type pageTemplateModel struct {
@@ -57,121 +57,121 @@ func showTableList(resp http.ResponseWriter, tables []TableName) {
 	}
 }
 
-func showTable(resp http.ResponseWriter, dbc *sql.DB, table TableName, query RowFilter, rowLimit int) {
-	var formattedQuery string
-	if len(query) > 0 {
-		formattedQuery = fmt.Sprintf("%s", query)
-	}
-
-	viewModel := dataViewModel{
-		LayoutData: layoutData,
-		TableName:  table,
-		Query:      formattedQuery,
-		RowLimit:   rowLimit,
-		Cols:       []string{},
-		Rows:       []cells{},
-	}
-
-	fks := AllFks(dbc)
-
-	// find all the of the fks that point at this table
-	inwardFks := table.FindParents(fks)
-	fmt.Println("found: ", inwardFks)
-
-	sql := "select * from " + string(table)
-
-	if len(query) > 0 {
-		sql = sql + " where "
-		clauses := make([]string, 0, len(query))
-		for k, v := range query {
-			clauses = append(clauses, k+" = "+v[0])
-		}
-		sql = sql + strings.Join(clauses, " and ")
-	}
-
-	if rowLimit > 0 {
-		sql = sql + " limit " + strconv.Itoa(rowLimit)
-	}
-
-	log.Println(sql)
-
-	rows, err := dbc.Query(sql)
-	if err != nil {
-		log.Println("select error", err)
-		return
-	}
-	defer rows.Close()
-	cols, err := rows.Columns()
-	if err != nil {
-		log.Println("error getting column names", err)
-		// todo: send 500 error to client
-		return
-	}
-
-	for _, col := range cols {
-		viewModel.Cols = append(viewModel.Cols, col)
-	}
-
-	// http://stackoverflow.com/a/23507765/10245 - getting ad-hoc column data
-	rowData := make([]interface{}, len(cols))
-	rowDataPointers := make([]interface{}, len(cols))
-	for i := 0; i < len(cols); i++ {
-		rowDataPointers[i] = &rowData[i]
-	}
-	for rows.Next() {
-		row := cells{}
-
-		err := rows.Scan(rowDataPointers...)
-		if err != nil {
-			log.Println("error reading row data", err)
-			return
-		}
-		for colIndex, col := range cols {
-			colData := rowData[colIndex]
-			var valueHTML string
-			ref, refExists := fks[table][ColumnName(col)]
-			if refExists && colData != nil {
-				valueHTML = fmt.Sprintf("<a href='%s?%s=%d' class='fk'>", ref.Table, ref.Col, colData)
-			}
-			switch colData.(type) {
-			case int64:
-				valueHTML = valueHTML + template.HTMLEscapeString(fmt.Sprintf("%d", colData))
-			case float64:
-				valueHTML = valueHTML + template.HTMLEscapeString(fmt.Sprintf("%f", colData))
-			case nil:
-				valueHTML = valueHTML + "<span class='null'>[null]</span>"
-			default:
-				valueHTML = valueHTML + template.HTMLEscapeString(fmt.Sprintf("%s", colData))
-			}
-			if refExists && colData != nil {
-				valueHTML = valueHTML + "</a>"
-			}
-			row = append(row, template.HTML(valueHTML))
-		}
-		parentHTML := ""
-		// todo: factor out row limit, move to a cookie perhaps
-		// todo: stable sort order http://stackoverflow.com/questions/23330781/sort-golang-map-values-by-keys
-		// todo: pre-calculate fk info so this isn't repeated for every row
-		for parentTable, parentFks := range inwardFks {
-			for parentCol, ref := range parentFks {
-				parentHTML = parentHTML + fmt.Sprintf(
-					"<a href='%s?%s=%d&_rowLimit=100' class='parentFk'>%s.%s</a>&nbsp;",
-					template.URLQueryEscaper(parentTable),
-					template.URLQueryEscaper(parentCol),
-					rowData[indexOf(cols, string(ref.Col))],
-					template.HTMLEscaper(parentTable),
-					template.HTMLEscaper(parentCol))
-			}
-		}
-		row = append(row, template.HTML(parentHTML))
-		viewModel.Rows = append(viewModel.Rows, row)
-	}
-
-	err = tmpl.ExecuteTemplate(resp, "data", viewModel)
-	if err != nil {
-		log.Print("template exexution error", err)
-	}
-}
+//func showTable(resp http.ResponseWriter, model dbInterface, table TableName, query RowFilter, rowLimit int) {
+//	var formattedQuery string
+//	if len(query) > 0 {
+//		formattedQuery = fmt.Sprintf("%s", query)
+//	}
+//
+//	viewModel := dataViewModel{
+//		LayoutData: layoutData,
+//		TableName:  table,
+//		Query:      formattedQuery,
+//		RowLimit:   rowLimit,
+//		Cols:       []string{},
+//		Rows:       []cells{},
+//	}
+//
+//	fks := AllFks(dbc)
+//
+//	// find all the of the fks that point at this table
+//	inwardFks := table.FindParents(fks)
+//	fmt.Println("found: ", inwardFks)
+//
+//	sql := "select * from " + string(table)
+//
+//	if len(query) > 0 {
+//		sql = sql + " where "
+//		clauses := make([]string, 0, len(query))
+//		for k, v := range query {
+//			clauses = append(clauses, k+" = "+v[0])
+//		}
+//		sql = sql + strings.Join(clauses, " and ")
+//	}
+//
+//	if rowLimit > 0 {
+//		sql = sql + " limit " + strconv.Itoa(rowLimit)
+//	}
+//
+//	log.Println(sql)
+//
+//	rows, err := dbc.Query(sql)
+//	if err != nil {
+//		log.Println("select error", err)
+//		return
+//	}
+//	defer rows.Close()
+//	cols, err := rows.Columns()
+//	if err != nil {
+//		log.Println("error getting column names", err)
+//		// todo: send 500 error to client
+//		return
+//	}
+//
+//	for _, col := range cols {
+//		viewModel.Cols = append(viewModel.Cols, col)
+//	}
+//
+//	// http://stackoverflow.com/a/23507765/10245 - getting ad-hoc column data
+//	rowData := make([]interface{}, len(cols))
+//	rowDataPointers := make([]interface{}, len(cols))
+//	for i := 0; i < len(cols); i++ {
+//		rowDataPointers[i] = &rowData[i]
+//	}
+//	for rows.Next() {
+//		row := cells{}
+//
+//		err := rows.Scan(rowDataPointers...)
+//		if err != nil {
+//			log.Println("error reading row data", err)
+//			return
+//		}
+//		for colIndex, col := range cols {
+//			colData := rowData[colIndex]
+//			var valueHTML string
+//			ref, refExists := fks[table][ColumnName(col)]
+//			if refExists && colData != nil {
+//				valueHTML = fmt.Sprintf("<a href='%s?%s=%d' class='fk'>", ref.Table, ref.Col, colData)
+//			}
+//			switch colData.(type) {
+//			case int64:
+//				valueHTML = valueHTML + template.HTMLEscapeString(fmt.Sprintf("%d", colData))
+//			case float64:
+//				valueHTML = valueHTML + template.HTMLEscapeString(fmt.Sprintf("%f", colData))
+//			case nil:
+//				valueHTML = valueHTML + "<span class='null'>[null]</span>"
+//			default:
+//				valueHTML = valueHTML + template.HTMLEscapeString(fmt.Sprintf("%s", colData))
+//			}
+//			if refExists && colData != nil {
+//				valueHTML = valueHTML + "</a>"
+//			}
+//			row = append(row, template.HTML(valueHTML))
+//		}
+//		parentHTML := ""
+//		// todo: factor out row limit, move to a cookie perhaps
+//		// todo: stable sort order http://stackoverflow.com/questions/23330781/sort-golang-map-values-by-keys
+//		// todo: pre-calculate fk info so this isn't repeated for every row
+//		for parentTable, parentFks := range inwardFks {
+//			for parentCol, ref := range parentFks {
+//				parentHTML = parentHTML + fmt.Sprintf(
+//					"<a href='%s?%s=%d&_rowLimit=100' class='parentFk'>%s.%s</a>&nbsp;",
+//					template.URLQueryEscaper(parentTable),
+//					template.URLQueryEscaper(parentCol),
+//					rowData[indexOf(cols, string(ref.Col))],
+//					template.HTMLEscaper(parentTable),
+//					template.HTMLEscaper(parentCol))
+//			}
+//		}
+//		row = append(row, template.HTML(parentHTML))
+//		viewModel.Rows = append(viewModel.Rows, row)
+//	}
+//
+//	err = tmpl.ExecuteTemplate(resp, "data", viewModel)
+//	if err != nil {
+//		log.Print("template exexution error", err)
+//	}
+//}
 
 func indexOf(slice []string, value string) (index int) {
 	var curValue string
