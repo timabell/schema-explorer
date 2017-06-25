@@ -23,7 +23,7 @@ func (model mssqlModel) GetTables() (tables []TableName, err error) {
 		return
 	}
 	defer dbc.Close()
-	rows, err := dbc.Query("SELECT name FROM sqlite_master WHERE type='table';")
+	rows, err := dbc.Query("select sch.name + '.' + tbl.name from sys.tables tbl inner join sys.schemas sch on sch.schema_id = tbl.schema_id order by sch.name, tbl.name;")
 	if err != nil {
 		return nil, err
 	}
