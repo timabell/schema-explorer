@@ -19,7 +19,7 @@ func NewSqlite(path string) sqliteModel {
 	}
 }
 
-func (model sqliteModel) GetTables() (tables []schema.TableName, err error) {
+func (model sqliteModel) GetTables() (tables []schema.Table, err error) {
 	dbc, err := getConnection(model.path)
 	if err != nil {
 		return
@@ -34,7 +34,7 @@ func (model sqliteModel) GetTables() (tables []schema.TableName, err error) {
 	for rows.Next() {
 		var name string
 		rows.Scan(&name)
-		tables = append(tables, schema.TableName(name))
+		tables = append(tables, schema.Table(name))
 	}
 	return tables, nil
 }
@@ -74,7 +74,7 @@ func (model sqliteModel) AllFks() (allFks schema.GlobalFkList, err error) {
 	return
 }
 
-func fks(dbc *sql.DB, table schema.TableName) (fks schema.FkList, err error) {
+func fks(dbc *sql.DB, table schema.Table) (fks schema.FkList, err error) {
 	rows, err := dbc.Query("PRAGMA foreign_key_list('" + string(table) + "');")
 	if err != nil {
 		return
@@ -85,13 +85,13 @@ func fks(dbc *sql.DB, table schema.TableName) (fks schema.FkList, err error) {
 		var id, seq int
 		var parentTable, from, to, onUpdate, onDelete, match string
 		rows.Scan(&id, &seq, &parentTable, &from, &to, &onUpdate, &onDelete, &match)
-		thisRef := schema.Ref{Col: schema.ColumnName(to), Table: schema.TableName(parentTable)}
-		fks[schema.ColumnName(from)] = thisRef
+		thisRef := schema.Ref{Col: schema.Column(to), Table: schema.Table(parentTable)}
+		fks[schema.Column(from)] = thisRef
 	}
 	return
 }
 
-func (model sqliteModel) GetRows(query schema.RowFilter, table schema.TableName, rowLimit int) (rows *sql.Rows, err error) {
+func (model sqliteModel) GetRows(query schema.RowFilter, table schema.Table, rowLimit int) (rows *sql.Rows, err error) {
 	sql := "select * from " + string(table)
 
 	if len(query) > 0 {
@@ -120,6 +120,6 @@ func (model sqliteModel) GetRows(query schema.RowFilter, table schema.TableName,
 	return
 }
 
-func (model sqliteModel) Columns(table schema.TableName) (columns []string, err error) {
+func (model sqliteModel) Columns(table schema.Table) (columns []string, err error) {
 	panic("not implemented")
 }

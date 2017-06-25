@@ -19,7 +19,7 @@ func NewMssql(connectionString string) mssqlModel {
 	}
 }
 
-func (model mssqlModel) GetTables() (tables []schema.TableName, err error) {
+func (model mssqlModel) GetTables() (tables []schema.Table, err error) {
 	dbc, err := getConnection(model.connectionString)
 	if err != nil {
 		return
@@ -34,7 +34,7 @@ func (model mssqlModel) GetTables() (tables []schema.TableName, err error) {
 	for rows.Next() {
 		var name string
 		rows.Scan(&name)
-		tables = append(tables, schema.TableName(name))
+		tables = append(tables, schema.Table(name))
 	}
 	return tables, nil
 }
@@ -104,17 +104,17 @@ func (model mssqlModel) AllFks() (allFks schema.GlobalFkList, err error) {
 		var id, seq int
 		var parentTable, parentCol, childTable, childCol string
 		rows.Scan(&id, &seq, &parentTable, &parentCol, &childTable, &childCol)
-		table := schema.TableName(parentTable)
-		col := schema.ColumnName(parentCol)
+		table := schema.Table(parentTable)
+		col := schema.Column(parentCol)
 		if allFks[table] == nil { // todo: probably need to set up map before using
 			allFks[table] = schema.FkList{}
 		}
-		allFks[table][col] = schema.Ref{Col: schema.ColumnName(childCol), Table: table}
+		allFks[table][col] = schema.Ref{Col: schema.Column(childCol), Table: table}
 	}
 	return
 }
 
-func (model mssqlModel) GetRows(query schema.RowFilter, table schema.TableName, rowLimit int) (rows *sql.Rows, err error) {
+func (model mssqlModel) GetRows(query schema.RowFilter, table schema.Table, rowLimit int) (rows *sql.Rows, err error) {
 	sql := "select * from " + string(table)
 
 	if len(query) > 0 {
@@ -143,7 +143,7 @@ func (model mssqlModel) GetRows(query schema.RowFilter, table schema.TableName, 
 	return
 }
 
-func (model mssqlModel) Columns(table schema.TableName) (columns []string, err error) {
+func (model mssqlModel) Columns(table schema.Table) (columns []string, err error) {
 	dbc, err := getConnection(model.connectionString)
 	if err != nil {
 		return nil, err

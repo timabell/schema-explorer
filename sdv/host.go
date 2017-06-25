@@ -59,7 +59,7 @@ func handler(resp http.ResponseWriter, req *http.Request) {
 	switch folders[1] {
 	case "tables":
 		// todo: check not missing table name
-		table := schema.TableName(folders[2])
+		table := schema.Table(folders[2])
 		var query = req.URL.Query()
 		var rowLimit int
 		var err error

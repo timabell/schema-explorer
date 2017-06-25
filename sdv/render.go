@@ -22,14 +22,14 @@ type pageTemplateModel struct {
 
 type tablesViewModel struct {
 	LayoutData pageTemplateModel
-	Tables     []schema.TableName
+	Tables     []schema.Table
 }
 
 type cells []template.HTML
 
 type dataViewModel struct {
 	LayoutData pageTemplateModel
-	TableName  schema.TableName
+	TableName  schema.Table
 	Query      string
 	RowLimit   int
 	Cols       []string
@@ -47,7 +47,7 @@ func SetupTemplate() {
 
 }
 
-func showTableList(resp http.ResponseWriter, tables []schema.TableName) {
+func showTableList(resp http.ResponseWriter, tables []schema.Table) {
 	model := tablesViewModel{
 		LayoutData: layoutData,
 		Tables:     tables,
@@ -59,7 +59,7 @@ func showTableList(resp http.ResponseWriter, tables []schema.TableName) {
 	}
 }
 
-func showTable(resp http.ResponseWriter, reader dbReader, table schema.TableName, query schema.RowFilter, rowLimit int) error {
+func showTable(resp http.ResponseWriter, reader dbReader, table schema.Table, query schema.RowFilter, rowLimit int) error {
 	var formattedQuery string
 	if len(query) > 0 {
 		formattedQuery = fmt.Sprintf("%s", query)
@@ -128,7 +128,7 @@ func showTable(resp http.ResponseWriter, reader dbReader, table schema.TableName
 		for colIndex, col := range cols {
 			colData := rowData[colIndex]
 			var valueHTML string
-			ref, refExists := fks[table][schema.ColumnName(col)]
+			ref, refExists := fks[table][schema.Column(col)]
 			if refExists && colData != nil {
 				valueHTML = fmt.Sprintf("<a href='%s?%s=%d' class='fk'>", ref.Table, ref.Col, colData)
 			}
@@ -232,7 +232,7 @@ const tablesHTML = `
 const dataHTML = `
 {{define "data"}}
 {{template "header" .LayoutData}}
-	<h2>Table {{.TableName}}</h2>
+	<h2>Table {{.Table}}</h2>
 	{{ if .Query }}
 		<p class='filtered'>Filtered - {{.Query}}<p>
 	{{end}}
