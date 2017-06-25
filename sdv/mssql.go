@@ -35,3 +35,11 @@ func (model mssqlModel) GetTables() (tables []TableName, err error) {
 	}
 	return tables, nil
 }
+
+func (model mssqlModel) AllFks() (allFks GlobalFkList) {
+	panic("not implemented")
+}
+
+func (model mssqlModel) GetRows(query RowFilter, table TableName, rowLimit int) (rows *sql.Rows, err error) {
+	panic("not implemented")
+}

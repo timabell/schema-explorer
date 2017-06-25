@@ -1,12 +1,5 @@
 package sdv
 
-import (
-	//"database/sql"
-	//"fmt"
-	//"log"
-)
-
-// alias to make it clear when we're dealing with table names
 type TableName string
 
 // alias to make it clear when we're dealing with column names
@@ -30,6 +23,7 @@ type GlobalFkList map[TableName]FkList
 
 
 // filter the fk list down to keys that reference the "child" table
+// todo: not sure this should live here conceptually
 func (child TableName) FindParents(fks GlobalFkList) (parents GlobalFkList) {
 	parents = GlobalFkList{}
 	for srcTable, tableFks := range fks {
@@ -45,33 +39,3 @@ func (child TableName) FindParents(fks GlobalFkList) (parents GlobalFkList) {
 	return
 }
 
-//func AllFks(allFks GlobalFkList) {
-//	tables, err := GetTables()
-//	if err != nil {
-//		fmt.Println("error getting table list while building global fk list", err)
-//		return
-//	}
-//	allFks = GlobalFkList{}
-//	for _, table := range tables {
-//		allFks[table] = fks(dbc, table)
-//	}
-//	return
-//}
-//
-//func fks(dbc *sql.DB, table TableName) (fks FkList) {
-//	rows, err := dbc.Query("PRAGMA foreign_key_list('" + string(table) + "');")
-//	if err != nil {
-//		log.Println("select error", err)
-//		return
-//	}
-//	defer rows.Close()
-//	fks = FkList{}
-//	for rows.Next() {
-//		var id, seq int
-//		var parentTable, from, to, onUpdate, onDelete, match string
-//		rows.Scan(&id, &seq, &parentTable, &from, &to, &onUpdate, &onDelete, &match)
-//		thisRef := Ref{Col: ColumnName(to), Table: TableName(parentTable)}
-//		fks[ColumnName(from)] = thisRef
-//	}
-//	return
-//}

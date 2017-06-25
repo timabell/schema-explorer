@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"time"
 	"strings"
+	"strconv"
 )
 
 var db string
@@ -53,27 +54,26 @@ func handler(resp http.ResponseWriter, req *http.Request) {
 	// todo: proper url routing
 	folders := strings.Split(req.URL.Path, "/")
 	switch folders[1] {
-	// todo
-	//case "tables":
-	//	// todo: check not missing table name
-	//	table := TableName(folders[2])
-	//	var query = req.URL.Query()
-	//	var rowLimit int
-	//	var err error
-	//	// todo: more robust separation of query param keys
-	//	const rowLimitKey = "_rowLimit" // this should be reasonably safe from clashes with column names
-	//	rowLimitString := query.Get(rowLimitKey)
-	//	if rowLimitString != "" {
-	//		rowLimit, err = strconv.Atoi(rowLimitString)
-	//		// exclude from column filters
-	//		query.Del(rowLimitKey)
-	//		if err != nil {
-	//			fmt.Println("error converting rows querystring value to int: ", err)
-	//			return
-	//		}
-	//	}
-	//	var rowFilter = RowFilter(query)
-		//model.showTable(resp, table, rowFilter, rowLimit)
+	case "tables":
+		// todo: check not missing table name
+		table := TableName(folders[2])
+		var query = req.URL.Query()
+		var rowLimit int
+		var err error
+		// todo: more robust separation of query param keys
+		const rowLimitKey = "_rowLimit" // this should be reasonably safe from clashes with column names
+		rowLimitString := query.Get(rowLimitKey)
+		if rowLimitString != "" {
+			rowLimit, err = strconv.Atoi(rowLimitString)
+			// exclude from column filters
+			query.Del(rowLimitKey)
+			if err != nil {
+				fmt.Println("error converting rows querystring value to int: ", err)
+				return
+			}
+		}
+		var rowFilter = RowFilter(query)
+		showTable(resp, model, table, rowFilter, rowLimit)
 	default:
 		tables, err := model.GetTables()
 		if err != nil {
