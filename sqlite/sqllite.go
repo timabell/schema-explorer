@@ -119,3 +119,7 @@ func (model sqliteModel) GetRows(query schema.RowFilter, table schema.TableName,
 	rows, err = dbc.Query(sql)
 	return
 }
+
+func (model sqliteModel) Columns(table schema.TableName) (columns []string, err error) {
+	panic("not implemented")
+}

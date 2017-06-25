@@ -99,27 +99,17 @@ func (model mssqlModel) AllFks() (allFks schema.GlobalFkList, err error) {
 	}
 	defer rows.Close()
 
-	log.Print("reading fk data from result set")
 	allFks = schema.GlobalFkList{}
 	for rows.Next() {
-		log.Print("reading row")
 		var id, seq int
 		var parentTable, parentCol, childTable, childCol string
 		rows.Scan(&id, &seq, &parentTable, &parentCol, &childTable, &childCol)
-		log.Print("scanned...")
-		log.Print("parentTable" + parentTable)
-		log.Print("parentCol" + parentCol)
-		log.Print("childTable" + childTable)
-		log.Print("childtCol" + childCol)
 		table := schema.TableName(parentTable)
 		col := schema.ColumnName(parentCol)
 		if allFks[table] == nil { // todo: probably need to set up map before using
-			log.Print("new table " + table)
 			allFks[table] = schema.FkList{}
 		}
-		log.Print("adding to allfks")
 		allFks[table][col] = schema.Ref{Col: schema.ColumnName(childCol), Table: table}
-		log.Print("done reading row")
 	}
 	return
 }
@@ -153,3 +143,26 @@ func (model mssqlModel) GetRows(query schema.RowFilter, table schema.TableName, 
 	return
 }
 
+func (model mssqlModel) Columns(table schema.TableName) (columns []string, err error) {
+	dbc, err := getConnection(model.connectionString)
+	if err != nil {
+		return nil, err
+	}
+	defer dbc.Close()
+	log.Println("getting cols for table " + table)
+	rows, err := dbc.Query(`select col.name
+                from sys.columns col
+                    inner join sys.tables tbl on tbl.object_id = col.object_id
+                    inner join sys.schemas sch on sch.schema_id = tbl.schema_id
+                where tbl.name = ?`, table)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	for rows.Next(){
+		var column string
+		rows.Scan(&column)
+		columns = append(columns, column)
+	}
+	return
+}

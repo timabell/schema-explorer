@@ -93,16 +93,19 @@ func showTable(resp http.ResponseWriter, reader dbReader, table schema.TableName
 	defer rows.Close()
 
 	log.Println("getting columns...")
+
 	// works on sqlite, fails with azure mssql:
 	//2017/06/25 12:51:35 http: panic serving 127.0.0.1:42410: runtime error: invalid memory address or nil pointer dereference
-	// todo: push col parsing down into custom db reader, provide mssql-proof variant
-	cols, err := rows.Columns()
+	// I'm guessing this is probably a bug in the mssql lib
+	//cols, err := rows.Columns()
+
+	cols, err := reader.Columns(table)
 	if err != nil {
 		log.Println("error getting column names", err)
 		// todo: send 500 error to client
 		return err
 	}
-	log.Println("got columns")
+	log.Println("got columns", cols)
 
 	for _, col := range cols {
 		viewModel.Cols = append(viewModel.Cols, col)
