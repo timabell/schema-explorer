@@ -83,8 +83,8 @@ func handler(resp http.ResponseWriter, req *http.Request) {
 
 		showTableList(resp, tables)
 	}
-	if err != nil {
-		log.Fatal(err) //todo: make non-fatal
-	}
+	//if err != nil {
+	//	log.Fatal(err) //todo: make non-fatal
+	//}
 }
 
