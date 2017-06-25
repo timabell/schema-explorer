@@ -6,6 +6,7 @@ import "database/sql"
 // a thing that holds the currently known data about the connected
 // database but that also knows how to get more information on-demand.
 
+// todo rename to idiomatic DbReader
 type dbInterface interface{
 	GetTables() (tables []TableName, err error)
 	AllFks() (allFks GlobalFkList)

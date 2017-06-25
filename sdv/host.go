@@ -7,6 +7,8 @@ import (
 	"time"
 	"strings"
 	"strconv"
+	"sql-data-viewer/mssql"
+	"sql-data-viewer/sqlite"
 )
 
 var db string
@@ -37,9 +39,9 @@ func handler(resp http.ResponseWriter, req *http.Request) {
 	var model dbInterface
 	switch driver {
 	case "mssql":
-		model = NewMssql(db)
+		model = mssql.NewMssql(db)
 	case "sqlite":
-		model = NewSqlite(db)
+		model = sqlite.NewSqlite(db)
 	}
 
 

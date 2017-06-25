@@ -1,31 +1,33 @@
-package sdv
+package mssql
 
 import (
 	"database/sql"
 	"log"
+	//"github.com/denisenkom/go-mssqldb"
 	"fmt"
 	"strings"
 	"strconv"
+	"sql-data-viewer/sdv"
 )
 
-type sqliteModel struct{
-	path string
+type mssqlModel struct{
+	connectionString string
 }
 
-func NewSqlite(path string) sqliteModel {
-	return sqliteModel{
-		path: path,
+func NewMssql(connectionString string) mssqlModel {
+	return mssqlModel{
+		connectionString: connectionString,
 	}
 }
 
-func (model sqliteModel) GetTables() (tables []TableName, err error) {
-	dbc, err := getConnection(model.path)
+func (model mssqlModel) GetTables() (tables []sdv.TableName, err error) {
+	dbc, err := getConnection(model.connectionString)
 	if err != nil {
 		return
 	}
 	defer dbc.Close()
 
-	rows, err := dbc.Query("SELECT name FROM sqlite_master WHERE type='table';")
+	rows, err := dbc.Query("select sch.name + '.' + tbl.name from sys.tables tbl inner join sys.schemas sch on sch.schema_id = tbl.schema_id order by sch.name, tbl.name;")
 	if err != nil {
 		return nil, err
 	}
@@ -33,29 +35,29 @@ func (model sqliteModel) GetTables() (tables []TableName, err error) {
 	for rows.Next() {
 		var name string
 		rows.Scan(&name)
-		tables = append(tables, TableName(name))
+		tables = append(tables, sdv.TableName(name))
 	}
 	return tables, nil
 }
 
-func getConnection(path string) (dbc *sql.DB, err error) {
-	dbc, err = sql.Open("sqlite3", path)
+func getConnection(connectionString string) (dbc *sql.DB, err error) {
+	dbc, err = sql.Open("mssql", connectionString)
 	if err != nil {
 		log.Println("connection error", err)
 	}
 	return
 }
 
-func (model sqliteModel) AllFks() (allFks GlobalFkList, err error) {
+func (model mssqlModel) AllFks() (allFks sdv.GlobalFkList, err error) {
 	tables, err := model.GetTables()
 	if err != nil {
 		fmt.Println("error getting table list while building global fk list", err)
 		return
 	}
-	allFks = GlobalFkList{}
+	allFks = sdv.GlobalFkList{}
 
 	// todo: share connection with GetTables()
-	dbc, err := getConnection(model.path)
+	dbc, err := getConnection(model.connectionString)
 	if err != nil {
 		// todo: show in UI
 		return
@@ -73,24 +75,24 @@ func (model sqliteModel) AllFks() (allFks GlobalFkList, err error) {
 	return
 }
 
-func fks(dbc *sql.DB, table TableName) (fks FkList, err error) {
+func fks(dbc *sql.DB, table sdv.TableName) (fks sdv.FkList, err error) {
 	rows, err := dbc.Query("PRAGMA foreign_key_list('" + string(table) + "');")
 	if err != nil {
 		return
 	}
 	defer rows.Close()
-	fks = FkList{}
+	fks = sdv.FkList{}
 	for rows.Next() {
 		var id, seq int
 		var parentTable, from, to, onUpdate, onDelete, match string
 		rows.Scan(&id, &seq, &parentTable, &from, &to, &onUpdate, &onDelete, &match)
-		thisRef := Ref{Col: ColumnName(to), Table: TableName(parentTable)}
-		fks[ColumnName(from)] = thisRef
+		thisRef := sdv.Ref{Col: sdv.ColumnName(to), Table: sdv.TableName(parentTable)}
+		fks[sdv.ColumnName(from)] = thisRef
 	}
 	return
 }
 
-func (model sqliteModel) GetRows(query RowFilter, table TableName, rowLimit int) (rows *sql.Rows, err error) {
+func (model mssqlModel) GetRows(query sdv.RowFilter, table sdv.TableName, rowLimit int) (rows *sql.Rows, err error) {
 	sql := "select * from " + string(table)
 
 	if len(query) > 0 {
@@ -108,7 +110,7 @@ func (model sqliteModel) GetRows(query RowFilter, table TableName, rowLimit int)
 
 	log.Println(sql)
 
-	dbc, err := getConnection(model.path)
+	dbc, err := getConnection(model.connectionString)
 	if err != nil {
 		// todo: show in UI
 		return
@@ -118,3 +120,4 @@ func (model sqliteModel) GetRows(query RowFilter, table TableName, rowLimit int)
 	rows, err = dbc.Query(sql)
 	return
 }
+
