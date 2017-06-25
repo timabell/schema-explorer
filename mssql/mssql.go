@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"log"
 	//"github.com/denisenkom/go-mssqldb"
-	"fmt"
 	"strings"
 	"strconv"
 	"sql-data-viewer/schema"
@@ -48,15 +47,9 @@ func getConnection(connectionString string) (dbc *sql.DB, err error) {
 	return
 }
 
+// todo: don't actually need an allfks method for mssql as can filter both incoming and outgoing, rework interface
 func (model mssqlModel) AllFks() (allFks schema.GlobalFkList, err error) {
-	tables, err := model.GetTables()
-	if err != nil {
-		fmt.Println("error getting table list while building global fk list", err)
-		return
-	}
-	allFks = schema.GlobalFkList{}
-
-	// todo: share connection with GetTables()
+	// todo: share connection with other calls to this package
 	dbc, err := getConnection(model.connectionString)
 	if err != nil {
 		// todo: show in UI
@@ -64,30 +57,44 @@ func (model mssqlModel) AllFks() (allFks schema.GlobalFkList, err error) {
 	}
 	defer dbc.Close()
 
-	for _, table := range tables {
-		allFks[table], err = fks(dbc, table)
-		if err != nil {
-			// todo: show in UI
-			fmt.Println("error getting fks for table " + table, err)
-			return
-		}
-	}
-	return
-}
-
-func fks(dbc *sql.DB, table schema.TableName) (fks schema.FkList, err error) {
-	rows, err := dbc.Query("PRAGMA foreign_key_list('" + string(table) + "');")
+	rows, err := dbc.Query(` select
+                    --fk.name,
+                    parent_sch.name + '.' + parent_tbl.name parent_tbl,
+                    parent_col.name parent_col,
+                    child_sch.name + '.' + child_tbl.name child_tbl,
+                    child_col.name child_col
+                from sys.foreign_keys fk
+                    -- key members
+                    inner join sys.foreign_key_columns fkcol on fkcol.constraint_object_id = fk.object_id
+                    -- parent
+                    inner join sys.tables parent_tbl on parent_tbl.object_id = fk.parent_object_id
+                    inner join sys.schemas parent_sch on parent_sch.schema_id = parent_tbl.schema_id
+                    inner join sys.columns parent_col
+                        on parent_col.object_id = parent_tbl.object_id
+                        and parent_col.column_id = fkcol.parent_column_id
+                    -- child
+                    inner join sys.tables child_tbl on child_tbl.object_id = fk.referenced_object_id
+                    inner join sys.schemas child_sch on child_sch.schema_id = child_tbl.schema_id
+                    inner join sys.columns child_col
+                        on child_col.object_id = child_tbl.object_id
+                        and child_col.column_id = fkcol.referenced_column_id
+--                 where parent_sch.name = '{model.Schema}' and parent_tbl.name = '{model.Name}'
+--                     or child_sch.name = '{model.Schema}' and child_tbl.name = '{model.Name}'
+                order by fk.name`)
 	if err != nil {
 		return
 	}
 	defer rows.Close()
-	fks = schema.FkList{}
+
+	allFks = schema.GlobalFkList{}
 	for rows.Next() {
 		var id, seq int
-		var parentTable, from, to, onUpdate, onDelete, match string
-		rows.Scan(&id, &seq, &parentTable, &from, &to, &onUpdate, &onDelete, &match)
-		thisRef := schema.Ref{Col: schema.ColumnName(to), Table: schema.TableName(parentTable)}
-		fks[schema.ColumnName(from)] = thisRef
+		var parentTable, parentCol, childTable, childCol string
+		rows.Scan(&id, &seq, &parentTable, &parentCol, &childTable, &childCol)
+		table := schema.TableName(parentTable)
+		col := schema.ColumnName(parentCol)
+		//if allFks[table] { // todo: probably need to set up map before using
+		allFks[table][col] = schema.Ref{Col: schema.ColumnName(childCol), Table: table}
 	}
 	return
 }
