@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"sql-data-viewer/mssql"
 	"sql-data-viewer/sqlite"
+	"sql-data-viewer/schema"
 )
 
 var db string
@@ -58,7 +59,7 @@ func handler(resp http.ResponseWriter, req *http.Request) {
 	switch folders[1] {
 	case "tables":
 		// todo: check not missing table name
-		table := TableName(folders[2])
+		table := schema.TableName(folders[2])
 		var query = req.URL.Query()
 		var rowLimit int
 		var err error
@@ -74,7 +75,7 @@ func handler(resp http.ResponseWriter, req *http.Request) {
 				return
 			}
 		}
-		var rowFilter = RowFilter(query)
+		var rowFilter = schema.RowFilter(query)
 		showTable(resp, model, table, rowFilter, rowLimit)
 	default:
 		tables, err := model.GetTables()

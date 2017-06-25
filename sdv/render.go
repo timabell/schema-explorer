@@ -9,6 +9,7 @@ import (
 	//"strings"
 	//"strconv"
 	"fmt"
+	"sql-data-viewer/schema"
 )
 
 type pageTemplateModel struct {
@@ -21,14 +22,14 @@ type pageTemplateModel struct {
 
 type tablesViewModel struct {
 	LayoutData pageTemplateModel
-	Tables     []TableName
+	Tables     []schema.TableName
 }
 
 type cells []template.HTML
 
 type dataViewModel struct {
 	LayoutData pageTemplateModel
-	TableName  TableName
+	TableName  schema.TableName
 	Query      string
 	RowLimit   int
 	Cols       []string
@@ -46,7 +47,7 @@ func SetupTemplate() {
 
 }
 
-func showTableList(resp http.ResponseWriter, tables []TableName) {
+func showTableList(resp http.ResponseWriter, tables []schema.TableName) {
 	model := tablesViewModel{
 		LayoutData: layoutData,
 		Tables:     tables,
@@ -58,7 +59,7 @@ func showTableList(resp http.ResponseWriter, tables []TableName) {
 	}
 }
 
-func showTable(resp http.ResponseWriter, model dbInterface, table TableName, query RowFilter, rowLimit int) {
+func showTable(resp http.ResponseWriter, model dbInterface, table schema.TableName, query schema.RowFilter, rowLimit int) {
 	var formattedQuery string
 	if len(query) > 0 {
 		formattedQuery = fmt.Sprintf("%s", query)
@@ -73,7 +74,12 @@ func showTable(resp http.ResponseWriter, model dbInterface, table TableName, que
 		Rows:       []cells{},
 	}
 
-	fks := model.AllFks()
+	fks, err := model.AllFks()
+	if err != nil {
+		log.Println("error getting fks", err)
+		// todo: send 500 error to client
+		return
+	}
 
 	// find all the of the fks that point at this table
 	inwardFks := table.FindParents(fks)
@@ -110,7 +116,7 @@ func showTable(resp http.ResponseWriter, model dbInterface, table TableName, que
 		for colIndex, col := range cols {
 			colData := rowData[colIndex]
 			var valueHTML string
-			ref, refExists := fks[table][ColumnName(col)]
+			ref, refExists := fks[table][schema.ColumnName(col)]
 			if refExists && colData != nil {
 				valueHTML = fmt.Sprintf("<a href='%s?%s=%d' class='fk'>", ref.Table, ref.Col, colData)
 			}

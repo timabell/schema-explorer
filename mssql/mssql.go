@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"strings"
 	"strconv"
-	"sql-data-viewer/sdv"
+	"sql-data-viewer/schema"
 )
 
 type mssqlModel struct{
@@ -20,7 +20,7 @@ func NewMssql(connectionString string) mssqlModel {
 	}
 }
 
-func (model mssqlModel) GetTables() (tables []sdv.TableName, err error) {
+func (model mssqlModel) GetTables() (tables []schema.TableName, err error) {
 	dbc, err := getConnection(model.connectionString)
 	if err != nil {
 		return
@@ -35,7 +35,7 @@ func (model mssqlModel) GetTables() (tables []sdv.TableName, err error) {
 	for rows.Next() {
 		var name string
 		rows.Scan(&name)
-		tables = append(tables, sdv.TableName(name))
+		tables = append(tables, schema.TableName(name))
 	}
 	return tables, nil
 }
@@ -48,13 +48,13 @@ func getConnection(connectionString string) (dbc *sql.DB, err error) {
 	return
 }
 
-func (model mssqlModel) AllFks() (allFks sdv.GlobalFkList, err error) {
+func (model mssqlModel) AllFks() (allFks schema.GlobalFkList, err error) {
 	tables, err := model.GetTables()
 	if err != nil {
 		fmt.Println("error getting table list while building global fk list", err)
 		return
 	}
-	allFks = sdv.GlobalFkList{}
+	allFks = schema.GlobalFkList{}
 
 	// todo: share connection with GetTables()
 	dbc, err := getConnection(model.connectionString)
@@ -75,24 +75,24 @@ func (model mssqlModel) AllFks() (allFks sdv.GlobalFkList, err error) {
 	return
 }
 
-func fks(dbc *sql.DB, table sdv.TableName) (fks sdv.FkList, err error) {
+func fks(dbc *sql.DB, table schema.TableName) (fks schema.FkList, err error) {
 	rows, err := dbc.Query("PRAGMA foreign_key_list('" + string(table) + "');")
 	if err != nil {
 		return
 	}
 	defer rows.Close()
-	fks = sdv.FkList{}
+	fks = schema.FkList{}
 	for rows.Next() {
 		var id, seq int
 		var parentTable, from, to, onUpdate, onDelete, match string
 		rows.Scan(&id, &seq, &parentTable, &from, &to, &onUpdate, &onDelete, &match)
-		thisRef := sdv.Ref{Col: sdv.ColumnName(to), Table: sdv.TableName(parentTable)}
-		fks[sdv.ColumnName(from)] = thisRef
+		thisRef := schema.Ref{Col: schema.ColumnName(to), Table: schema.TableName(parentTable)}
+		fks[schema.ColumnName(from)] = thisRef
 	}
 	return
 }
 
-func (model mssqlModel) GetRows(query sdv.RowFilter, table sdv.TableName, rowLimit int) (rows *sql.Rows, err error) {
+func (model mssqlModel) GetRows(query schema.RowFilter, table schema.TableName, rowLimit int) (rows *sql.Rows, err error) {
 	sql := "select * from " + string(table)
 
 	if len(query) > 0 {

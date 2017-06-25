@@ -1,4 +1,4 @@
-package sdv
+package schema
 
 type TableName string
 

@@ -1,6 +1,9 @@
 package sdv
 
-import "database/sql"
+import (
+	"database/sql"
+	"sql-data-viewer/schema"
+)
 
 // This a kind of "active model",
 // a thing that holds the currently known data about the connected
@@ -8,7 +11,7 @@ import "database/sql"
 
 // todo rename to idiomatic DbReader
 type dbInterface interface{
-	GetTables() (tables []TableName, err error)
-	AllFks() (allFks GlobalFkList)
-	GetRows(query RowFilter, table TableName, rowLimit int) (rows *sql.Rows, err error)
+	GetTables() (tables []schema.TableName, err error)
+	AllFks() (allFks schema.GlobalFkList, err error)
+	GetRows(query schema.RowFilter, table schema.TableName, rowLimit int) (rows *sql.Rows, err error)
 }
