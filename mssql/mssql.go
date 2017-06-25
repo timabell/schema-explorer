@@ -26,15 +26,16 @@ func (model mssqlModel) GetTables() (tables []schema.Table, err error) {
 	}
 	defer dbc.Close()
 
-	rows, err := dbc.Query("select sch.name + '.' + tbl.name from sys.tables tbl inner join sys.schemas sch on sch.schema_id = tbl.schema_id order by sch.name, tbl.name;")
+	rows, err := dbc.Query("select sch.name, tbl.name from sys.tables tbl inner join sys.schemas sch on sch.schema_id = tbl.schema_id order by sch.name, tbl.name;")
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 	for rows.Next() {
+		var schemaName string
 		var name string
-		rows.Scan(&name)
-		tables = append(tables, schema.Table(name))
+		rows.Scan(&schemaName, &name)
+		tables = append(tables, schema.Table{Schema:schemaName, Name: name})
 	}
 	return tables, nil
 }
@@ -73,9 +74,11 @@ func (model mssqlModel) AllFks() (allFks schema.GlobalFkList, err error) {
 
 	rows, err := dbc.Query(` select
                     --fk.name,
-                    parent_sch.name + '.' + parent_tbl.name parent_tbl,
+                    parent_sch.name parent_sch,
+                    parent_tbl.name parent_tbl,
                     parent_col.name parent_col,
-                    child_sch.name + '.' + child_tbl.name child_tbl,
+                    child_sch.name child_sch,
+                    child_tbl.name child_tbl,
                     child_col.name child_col
                 from sys.foreign_keys fk
                     -- key members
@@ -102,9 +105,9 @@ func (model mssqlModel) AllFks() (allFks schema.GlobalFkList, err error) {
 	allFks = schema.GlobalFkList{}
 	for rows.Next() {
 		var id, seq int
-		var parentTable, parentCol, childTable, childCol string
-		rows.Scan(&id, &seq, &parentTable, &parentCol, &childTable, &childCol)
-		table := schema.Table(parentTable)
+		var parentSchema, parentTable, parentCol, childSchema, childTable, childCol string
+		rows.Scan(&id, &seq, &parentSchema, &parentTable, &parentCol, &childSchema, &childTable, &childCol)
+		table := schema.Table{Schema: parentSchema, Name:parentTable}
 		col := schema.Column(parentCol)
 		if allFks[table] == nil { // todo: probably need to set up map before using
 			allFks[table] = schema.FkList{}
@@ -115,7 +118,7 @@ func (model mssqlModel) AllFks() (allFks schema.GlobalFkList, err error) {
 }
 
 func (model mssqlModel) GetRows(query schema.RowFilter, table schema.Table, rowLimit int) (rows *sql.Rows, err error) {
-	sql := "select * from " + string(table)
+	sql := "select * from " + table.String()
 
 	if len(query) > 0 {
 		sql = sql + " where "
@@ -149,7 +152,7 @@ func (model mssqlModel) Columns(table schema.Table) (columns []string, err error
 		return nil, err
 	}
 	defer dbc.Close()
-	log.Println("getting cols for table " + table)
+	log.Println("getting cols for table " + table.String())
 	rows, err := dbc.Query(`select col.name
                 from sys.columns col
                     inner join sys.tables tbl on tbl.object_id = col.object_id

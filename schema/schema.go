@@ -1,6 +1,16 @@
 package schema
 
-type Table string
+type Table struct {
+	Schema string
+	Name string
+}
+
+func (table Table) String() string{
+	if table.Schema == "" {
+		return table.Name
+	}
+	return table.Schema + "." + table.Name
+}
 
 // alias to make it clear when we're dealing with column names
 type Column string
