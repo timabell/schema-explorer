@@ -37,12 +37,12 @@ func handler(resp http.ResponseWriter, req *http.Request) {
 	Licensing()
 	log.Printf("req: %s\n", req.URL)
 
-	var model dbInterface
+	var reader dbReader
 	switch driver {
 	case "mssql":
-		model = mssql.NewMssql(db)
+		reader = mssql.NewMssql(db)
 	case "sqlite":
-		model = sqlite.NewSqlite(db)
+		reader = sqlite.NewSqlite(db)
 	}
 
 
@@ -76,9 +76,9 @@ func handler(resp http.ResponseWriter, req *http.Request) {
 			}
 		}
 		var rowFilter = schema.RowFilter(query)
-		showTable(resp, model, table, rowFilter, rowLimit)
+		showTable(resp, reader, table, rowFilter, rowLimit)
 	default:
-		tables, err := model.GetTables()
+		tables, err := reader.GetTables()
 		if err != nil {
 			fmt.Println("error getting table list", err)
 			return

@@ -59,7 +59,7 @@ func showTableList(resp http.ResponseWriter, tables []schema.TableName) {
 	}
 }
 
-func showTable(resp http.ResponseWriter, model dbInterface, table schema.TableName, query schema.RowFilter, rowLimit int) {
+func showTable(resp http.ResponseWriter, reader dbReader, table schema.TableName, query schema.RowFilter, rowLimit int) {
 	var formattedQuery string
 	if len(query) > 0 {
 		formattedQuery = fmt.Sprintf("%s", query)
@@ -74,7 +74,7 @@ func showTable(resp http.ResponseWriter, model dbInterface, table schema.TableNa
 		Rows:       []cells{},
 	}
 
-	fks, err := model.AllFks()
+	fks, err := reader.AllFks()
 	if err != nil {
 		log.Println("error getting fks", err)
 		// todo: send 500 error to client
@@ -85,7 +85,7 @@ func showTable(resp http.ResponseWriter, model dbInterface, table schema.TableNa
 	inwardFks := table.FindParents(fks)
 	fmt.Println("found: ", inwardFks)
 
-	rows, err := model.GetRows(query, table, rowLimit)
+	rows, err := reader.GetRows(query, table, rowLimit)
 	defer rows.Close()
 
 	cols, err := rows.Columns()
