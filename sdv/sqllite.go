@@ -21,10 +21,10 @@ func NewSqlite(path string) sqliteModel {
 func (model sqliteModel) GetTables() (tables []TableName, err error) {
 	dbc, err := getConnection(model.path)
 	if err != nil {
-		// todo: show in UI
 		return
 	}
 	defer dbc.Close()
+
 	rows, err := dbc.Query("SELECT name FROM sqlite_master WHERE type='table';")
 	if err != nil {
 		return nil, err
@@ -37,6 +37,7 @@ func (model sqliteModel) GetTables() (tables []TableName, err error) {
 	}
 	return tables, nil
 }
+
 func getConnection(path string) (dbc *sql.DB, err error) {
 	dbc, err = sql.Open("sqlite3", path)
 	if err != nil {
@@ -45,7 +46,7 @@ func getConnection(path string) (dbc *sql.DB, err error) {
 	return
 }
 
-func (model sqliteModel) AllFks() (allFks GlobalFkList) {
+func (model sqliteModel) AllFks() (allFks GlobalFkList, err error) {
 	tables, err := model.GetTables()
 	if err != nil {
 		fmt.Println("error getting table list while building global fk list", err)
@@ -62,15 +63,19 @@ func (model sqliteModel) AllFks() (allFks GlobalFkList) {
 	defer dbc.Close()
 
 	for _, table := range tables {
-		allFks[table] = fks(dbc, table)
+		allFks[table], err = fks(dbc, table)
+		if err != nil {
+			// todo: show in UI
+			fmt.Println("error getting fks for table " + table, err)
+			return
+		}
 	}
 	return
 }
 
-func fks(dbc *sql.DB, table TableName) (fks FkList) {
+func fks(dbc *sql.DB, table TableName) (fks FkList, err error) {
 	rows, err := dbc.Query("PRAGMA foreign_key_list('" + string(table) + "');")
 	if err != nil {
-		log.Println("select error", err)
 		return
 	}
 	defer rows.Close()
@@ -111,9 +116,5 @@ func (model sqliteModel) GetRows(query RowFilter, table TableName, rowLimit int)
 	defer dbc.Close()
 
 	rows, err = dbc.Query(sql)
-	if err != nil {
-		// todo: show in UI
-		log.Println("select error", err)
-	}
 	return
 }
