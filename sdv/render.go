@@ -59,7 +59,7 @@ func showTableList(resp http.ResponseWriter, tables []schema.TableName) {
 	}
 }
 
-func showTable(resp http.ResponseWriter, reader dbReader, table schema.TableName, query schema.RowFilter, rowLimit int) {
+func showTable(resp http.ResponseWriter, reader dbReader, table schema.TableName, query schema.RowFilter, rowLimit int) error {
 	var formattedQuery string
 	if len(query) > 0 {
 		formattedQuery = fmt.Sprintf("%s", query)
@@ -74,26 +74,35 @@ func showTable(resp http.ResponseWriter, reader dbReader, table schema.TableName
 		Rows:       []cells{},
 	}
 
+	log.Println("getting fks")
 	fks, err := reader.AllFks()
 	if err != nil {
 		log.Println("error getting fks", err)
 		// todo: send 500 error to client
-		return
+		return err
 	}
+	log.Println("got fks")
 
+	log.Println("finding parents")
 	// find all the of the fks that point at this table
 	inwardFks := table.FindParents(fks)
 	fmt.Println("found: ", inwardFks)
 
+	log.Println("getting data...")
 	rows, err := reader.GetRows(query, table, rowLimit)
 	defer rows.Close()
 
+	log.Println("getting columns...")
+	// works on sqlite, fails with azure mssql:
+	//2017/06/25 12:51:35 http: panic serving 127.0.0.1:42410: runtime error: invalid memory address or nil pointer dereference
+	// todo: push col parsing down into custom db reader, provide mssql-proof variant
 	cols, err := rows.Columns()
 	if err != nil {
 		log.Println("error getting column names", err)
 		// todo: send 500 error to client
-		return
+		return err
 	}
+	log.Println("got columns")
 
 	for _, col := range cols {
 		viewModel.Cols = append(viewModel.Cols, col)
@@ -111,7 +120,7 @@ func showTable(resp http.ResponseWriter, reader dbReader, table schema.TableName
 		err := rows.Scan(rowDataPointers...)
 		if err != nil {
 			log.Println("error reading row data", err)
-			return
+			return err
 		}
 		for colIndex, col := range cols {
 			colData := rowData[colIndex]
@@ -158,6 +167,7 @@ func showTable(resp http.ResponseWriter, reader dbReader, table schema.TableName
 	if err != nil {
 		log.Print("template exexution error", err)
 	}
+	return err
 }
 
 func indexOf(slice []string, value string) (index int) {

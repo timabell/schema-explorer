@@ -71,7 +71,6 @@ func (model mssqlModel) AllFks() (allFks schema.GlobalFkList, err error) {
 	}
 	defer dbc.Close()
 
-
 	rows, err := dbc.Query(` select
                     --fk.name,
                     parent_sch.name + '.' + parent_tbl.name parent_tbl,
@@ -95,20 +94,32 @@ func (model mssqlModel) AllFks() (allFks schema.GlobalFkList, err error) {
                         and child_col.column_id = fkcol.referenced_column_id
                 order by fk.name`)
 	if err != nil {
-		log.Fatal("doh", err)
+		log.Fatal("error running query to find fks ", err)
 		return
 	}
 	defer rows.Close()
 
+	log.Print("reading fk data from result set")
 	allFks = schema.GlobalFkList{}
 	for rows.Next() {
+		log.Print("reading row")
 		var id, seq int
 		var parentTable, parentCol, childTable, childCol string
 		rows.Scan(&id, &seq, &parentTable, &parentCol, &childTable, &childCol)
+		log.Print("scanned...")
+		log.Print("parentTable" + parentTable)
+		log.Print("parentCol" + parentCol)
+		log.Print("childTable" + childTable)
+		log.Print("childtCol" + childCol)
 		table := schema.TableName(parentTable)
 		col := schema.ColumnName(parentCol)
-		//if allFks[table] { // todo: probably need to set up map before using
+		if allFks[table] == nil { // todo: probably need to set up map before using
+			log.Print("new table " + table)
+			allFks[table] = schema.FkList{}
+		}
+		log.Print("adding to allfks")
 		allFks[table][col] = schema.Ref{Col: schema.ColumnName(childCol), Table: table}
+		log.Print("done reading row")
 	}
 	return
 }

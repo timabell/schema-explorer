@@ -76,7 +76,11 @@ func handler(resp http.ResponseWriter, req *http.Request) {
 			}
 		}
 		var rowFilter = schema.RowFilter(query)
-		showTable(resp, reader, table, rowFilter, rowLimit)
+		err = showTable(resp, reader, table, rowFilter, rowLimit)
+		if err != nil {
+			fmt.Println("error converting rows querystring value to int: ", err)
+			return
+		}
 	default:
 		tables, err := reader.GetTables()
 		if err != nil {
@@ -86,8 +90,5 @@ func handler(resp http.ResponseWriter, req *http.Request) {
 
 		showTableList(resp, tables)
 	}
-	//if err != nil {
-	//	log.Fatal(err) //todo: make non-fatal
-	//}
 }
 
