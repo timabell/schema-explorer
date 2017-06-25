@@ -44,7 +44,21 @@ func getConnection(connectionString string) (dbc *sql.DB, err error) {
 	if err != nil {
 		log.Println("connection error", err)
 	}
+	showVersion(dbc)
 	return
+}
+
+func showVersion(dbc *sql.DB) {
+	rows, err := dbc.Query("select @@version")
+	if err != nil {
+		log.Fatal("wat ", err)
+		return
+	}
+	defer rows.Close()
+	rows.Next()
+	var serverVersion string
+	rows.Scan(&serverVersion)
+	log.Print("Connected to " + serverVersion)
 }
 
 // todo: don't actually need an allfks method for mssql as can filter both incoming and outgoing, rework interface
@@ -56,6 +70,7 @@ func (model mssqlModel) AllFks() (allFks schema.GlobalFkList, err error) {
 		return
 	}
 	defer dbc.Close()
+
 
 	rows, err := dbc.Query(` select
                     --fk.name,
@@ -78,10 +93,9 @@ func (model mssqlModel) AllFks() (allFks schema.GlobalFkList, err error) {
                     inner join sys.columns child_col
                         on child_col.object_id = child_tbl.object_id
                         and child_col.column_id = fkcol.referenced_column_id
---                 where parent_sch.name = '{model.Schema}' and parent_tbl.name = '{model.Name}'
---                     or child_sch.name = '{model.Schema}' and child_tbl.name = '{model.Name}'
                 order by fk.name`)
 	if err != nil {
+		log.Fatal("doh", err)
 		return
 	}
 	defer rows.Close()
