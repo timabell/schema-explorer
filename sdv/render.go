@@ -88,16 +88,8 @@ func showTable(resp http.ResponseWriter, reader dbReader, table schema.Table, qu
 	inwardFks := table.FindParents(fks)
 	fmt.Println("found: ", inwardFks)
 
-	log.Println("getting data...")
-	rows, err := reader.GetRows(query, table, rowLimit)
-	defer rows.Close()
-
 	log.Println("getting columns...")
 
-	// works on sqlite, fails with azure mssql:
-	//2017/06/25 12:51:35 http: panic serving 127.0.0.1:42410: runtime error: invalid memory address or nil pointer dereference
-	// I'm guessing this is probably a bug in the mssql lib
-	//cols, err := rows.Columns()
 
 	cols, err := reader.Columns(table)
 	if err != nil {
@@ -108,8 +100,21 @@ func showTable(resp http.ResponseWriter, reader dbReader, table schema.Table, qu
 	log.Println("got columns", cols)
 
 	for _, col := range cols {
+		log.Println("col ", col)
 		viewModel.Cols = append(viewModel.Cols, col)
 	}
+
+	log.Println("getting data...", query, table, rowLimit)
+	rows, err := reader.GetRows(query, table, rowLimit)
+	if rows == nil{
+		panic("GetRows() returned nil")
+	}
+	defer rows.Close()
+
+	// works on sqlite, fails with azure mssql:
+	//2017/06/25 12:51:35 http: panic serving 127.0.0.1:42410: runtime error: invalid memory address or nil pointer dereference
+	// I'm guessing this is probably a bug in the mssql lib
+	//cols, err := rows.Columns()
 
 	// http://stackoverflow.com/a/23507765/10245 - getting ad-hoc column data
 	rowData := make([]interface{}, len(cols))
@@ -165,11 +170,13 @@ func showTable(resp http.ResponseWriter, reader dbReader, table schema.Table, qu
 		row = append(row, template.HTML(parentHTML))
 		viewModel.Rows = append(viewModel.Rows, row)
 	}
+	log.Println("5...")
 
 	err = tmpl.ExecuteTemplate(resp, "data", viewModel)
 	if err != nil {
 		log.Print("template exexution error", err)
 	}
+	log.Println("6...")
 	return err
 }
 
