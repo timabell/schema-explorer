@@ -161,27 +161,3 @@ func (model mssqlModel) GetRows(query schema.RowFilter, table schema.Table, rowL
 	}
 	return
 }
-
-func (model mssqlModel) Columns(table schema.Table) (columns []string, err error) {
-	dbc, err := getConnection(model.connectionString)
-	if err != nil {
-		return nil, err
-	}
-	defer dbc.Close()
-	log.Println("getting cols for table " + table.String())
-	rows, err := dbc.Query(`select col.name
-                from sys.columns col
-                    inner join sys.tables tbl on tbl.object_id = col.object_id
-                    inner join sys.schemas sch on sch.schema_id = tbl.schema_id
-                where sch.name = ? and tbl.name = ?`, table.Schema, table.Name)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	for rows.Next() {
-		var column string
-		rows.Scan(&column)
-		columns = append(columns, column)
-	}
-	return
-}
