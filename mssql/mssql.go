@@ -46,7 +46,7 @@ func getConnection(connectionString string) (dbc *sql.DB, err error) {
 	if err != nil {
 		log.Println("connection error", err)
 	}
-	//showVersion(dbc)
+	showVersion(dbc)
 	log.Println(dbc)
 	return
 }
@@ -129,30 +129,33 @@ func (model mssqlModel) AllFks() (allFks schema.GlobalFkList, err error) {
 }
 
 func (model mssqlModel) GetRows(query schema.RowFilter, table schema.Table, rowLimit int) (rows *sql.Rows, err error) {
-	sql := "select * from " + table.String()
+	sqlText := "select"
+
+	if rowLimit > 0 {
+		sqlText = sqlText + " top " + strconv.Itoa(rowLimit)
+	}
+
+	sqlText = sqlText + " * from " + table.String()
 
 	if len(query) > 0 {
-		sql = sql + " where "
+		sqlText = sqlText + " where "
 		clauses := make([]string, 0, len(query))
 		for k, v := range query {
 			clauses = append(clauses, k+" = "+v[0])
 		}
-		sql = sql + strings.Join(clauses, " and ")
-	}
-
-	if rowLimit > 0 {
-		sql = sql + " limit " + strconv.Itoa(rowLimit)
+		sqlText = sqlText + strings.Join(clauses, " and ")
 	}
 
 	dbc, err := getConnection(model.connectionString)
-	if rows == nil {
+	if dbc == nil {
 		panic("getConnection() returned nil")
 	}
 	defer dbc.Close()
 
-	log.Println(sql)
-	rows, err = dbc.Query(sql)
+	log.Println(sqlText)
+	rows, err = dbc.Query(sqlText)
 	if rows == nil {
+		log.Println(err)
 		panic("Query returned nil for rows")
 	}
 	return
