@@ -90,7 +90,6 @@ func showTable(resp http.ResponseWriter, reader dbReader, table schema.Table, qu
 
 	log.Println("getting columns...")
 
-
 	cols, err := reader.Columns(table)
 	if err != nil {
 		log.Println("error getting column names", err)
@@ -106,7 +105,7 @@ func showTable(resp http.ResponseWriter, reader dbReader, table schema.Table, qu
 
 	log.Println("getting data...", query, table, rowLimit)
 	rows, err := reader.GetRows(query, table, rowLimit)
-	if rows == nil{
+	if rows == nil {
 		panic("GetRows() returned nil")
 	}
 	defer rows.Close()

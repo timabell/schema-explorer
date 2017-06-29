@@ -12,15 +12,14 @@ defined in the database's schema.
 package main
 
 import (
+	_ "github.com/denisenkom/go-mssqldb"
 	_ "github.com/mattn/go-sqlite3"
 	"log"
 	"os"
-	"strconv"
 	"sql-data-viewer/sdv"
-	_ "github.com/denisenkom/go-mssqldb"
+	"strconv"
 	//"database/sql"
 )
-
 
 func main() {
 	// todo: cleanup arg handling
@@ -50,13 +49,11 @@ func main() {
 	log.Printf("## This pre-release software will expire on: %s, contact sdv@timwise.co.uk for a license. ##", sdv.Expiry)
 	sdv.Licensing()
 
-
 	// todo: cleanup way db info is passed to server & handler
 	sdv.RunServer(driver, db, port)
 }
 
-func Usage(){
+func Usage() {
 	log.Print("Usage: sdv mssql \"connectiongstring\" [webserverport]")
 	log.Print("Usage: sdv sqlite \"path\" [webserverport]")
 }
-

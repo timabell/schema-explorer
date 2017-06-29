@@ -4,12 +4,12 @@ import (
 	"database/sql"
 	"log"
 	//"github.com/denisenkom/go-mssqldb"
-	"strings"
-	"strconv"
 	"sql-data-viewer/schema"
+	"strconv"
+	"strings"
 )
 
-type mssqlModel struct{
+type mssqlModel struct {
 	connectionString string
 }
 
@@ -35,7 +35,7 @@ func (model mssqlModel) GetTables() (tables []schema.Table, err error) {
 		var schemaName string
 		var name string
 		rows.Scan(&schemaName, &name)
-		tables = append(tables, schema.Table{Schema:schemaName, Name: name})
+		tables = append(tables, schema.Table{Schema: schemaName, Name: name})
 	}
 	return tables, nil
 }
@@ -117,7 +117,7 @@ func (model mssqlModel) AllFks() (allFks schema.GlobalFkList, err error) {
 		var id, seq int
 		var parentSchema, parentTable, parentCol, childSchema, childTable, childCol string
 		rows.Scan(&id, &seq, &parentSchema, &parentTable, &parentCol, &childSchema, &childTable, &childCol)
-		table := schema.Table{Schema: parentSchema, Name:parentTable}
+		table := schema.Table{Schema: parentSchema, Name: parentTable}
 		col := schema.Column(parentCol)
 		if allFks[table] == nil { // todo: probably need to set up map before using
 			allFks[table] = schema.FkList{}
@@ -144,16 +144,15 @@ func (model mssqlModel) GetRows(query schema.RowFilter, table schema.Table, rowL
 		sql = sql + " limit " + strconv.Itoa(rowLimit)
 	}
 
-
 	dbc, err := getConnection(model.connectionString)
-	if rows == nil{
+	if rows == nil {
 		panic("getConnection() returned nil")
 	}
 	defer dbc.Close()
 
 	log.Println(sql)
 	rows, err = dbc.Query(sql)
-	if rows == nil{
+	if rows == nil {
 		panic("Query returned nil for rows")
 	}
 	return
@@ -175,7 +174,7 @@ func (model mssqlModel) Columns(table schema.Table) (columns []string, err error
 		return nil, err
 	}
 	defer rows.Close()
-	for rows.Next(){
+	for rows.Next() {
 		var column string
 		rows.Scan(&column)
 		columns = append(columns, column)

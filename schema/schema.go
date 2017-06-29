@@ -2,10 +2,10 @@ package schema
 
 type Table struct {
 	Schema string
-	Name string
+	Name   string
 }
 
-func (table Table) String() string{
+func (table Table) String() string {
 	if table.Schema == "" {
 		return table.Name
 	}
@@ -31,7 +31,6 @@ type FkList map[Column]Ref
 // for each table in the database, the list of fks defined on that table
 type GlobalFkList map[Table]FkList
 
-
 // filter the fk list down to keys that reference the "child" table
 // todo: not sure this should live here conceptually
 func (child Table) FindParents(fks GlobalFkList) (parents GlobalFkList) {
@@ -48,4 +47,3 @@ func (child Table) FindParents(fks GlobalFkList) (parents GlobalFkList) {
 	}
 	return
 }
-

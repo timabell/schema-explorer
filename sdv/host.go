@@ -4,18 +4,18 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"time"
-	"strings"
-	"strconv"
 	"sql-data-viewer/mssql"
-	"sql-data-viewer/sqlite"
 	"sql-data-viewer/schema"
+	"sql-data-viewer/sqlite"
+	"strconv"
+	"strings"
+	"time"
 )
 
 var db string
 var driver string
 
-func RunServer(driverInfo string, dbConn string, port int){
+func RunServer(driverInfo string, dbConn string, port int) {
 	db = dbConn
 	driver = driverInfo
 
@@ -45,7 +45,6 @@ func handler(resp http.ResponseWriter, req *http.Request) {
 		reader = sqlite.NewSqlite(db)
 	}
 
-
 	layoutData = pageTemplateModel{
 		Db:        db,
 		Title:     "Sql Data Viewer",
@@ -59,7 +58,7 @@ func handler(resp http.ResponseWriter, req *http.Request) {
 	switch folders[1] {
 	case "tables":
 		// todo: check not missing table name
-		table := schema.Table{Schema:"", Name: folders[2]}
+		table := schema.Table{Schema: "", Name: folders[2]}
 		var query = req.URL.Query()
 		var rowLimit int
 		var err error
@@ -91,4 +90,3 @@ func handler(resp http.ResponseWriter, req *http.Request) {
 		showTableList(resp, tables)
 	}
 }
-

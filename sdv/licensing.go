@@ -1,9 +1,9 @@
 package sdv
 
 import (
-	"time"
-	"log"
 	"fmt"
+	"log"
+	"time"
 )
 
 // roughly 3 months from when this is released into the wild
@@ -16,6 +16,6 @@ func Licensing() {
 	}
 }
 
-func CopyrightText() (string) {
+func CopyrightText() string {
 	return fmt.Sprintf("Sql Data Viewer v%s; Copyright 2015-%d Tim Abell <sdv@timwise.co.uk>", Version, CopyrightYear)
 }

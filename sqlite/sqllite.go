@@ -2,14 +2,14 @@ package sqlite
 
 import (
 	"database/sql"
-	"log"
 	"fmt"
-	"strings"
-	"strconv"
+	"log"
 	"sql-data-viewer/schema"
+	"strconv"
+	"strings"
 )
 
-type sqliteModel struct{
+type sqliteModel struct {
 	path string
 }
 
@@ -67,7 +67,7 @@ func (model sqliteModel) AllFks() (allFks schema.GlobalFkList, err error) {
 		allFks[table], err = fks(dbc, table)
 		if err != nil {
 			// todo: show in UI
-			fmt.Println("error getting fks for table " + table.String(), err)
+			fmt.Println("error getting fks for table "+table.String(), err)
 			return
 		}
 	}
