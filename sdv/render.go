@@ -29,7 +29,7 @@ type cells []template.HTML
 
 type dataViewModel struct {
 	LayoutData pageTemplateModel
-	TableName  schema.Table
+	Table      schema.Table
 	Query      string
 	RowLimit   int
 	Cols       []string
@@ -67,7 +67,7 @@ func showTable(resp http.ResponseWriter, reader dbReader, table schema.Table, qu
 
 	viewModel := dataViewModel{
 		LayoutData: layoutData,
-		TableName:  table,
+		Table:      table,
 		Query:      formattedQuery,
 		RowLimit:   rowLimit,
 		Cols:       []string{},
@@ -173,13 +173,11 @@ func showTable(resp http.ResponseWriter, reader dbReader, table schema.Table, qu
 		row = append(row, template.HTML(parentHTML))
 		viewModel.Rows = append(viewModel.Rows, row)
 	}
-	log.Println("5...")
-
 	err = tmpl.ExecuteTemplate(resp, "data", viewModel)
 	if err != nil {
-		log.Print("template exexution error", err)
+		log.Print("template execution error", err)
+		panic(err)
 	}
-	log.Println("6...")
 	return err
 }
 
@@ -242,7 +240,7 @@ const tablesHTML = `
 const dataHTML = `
 {{define "data"}}
 {{template "header" .LayoutData}}
-	<h2>Table {{.Table}}</h2>
+	<h2>Table {{.Table.Name}}</h2>
 	{{ if .Query }}
 		<p class='filtered'>Filtered - {{.Query}}<p>
 	{{end}}
