@@ -148,6 +148,7 @@ func (model mssqlModel) GetRows(query schema.RowFilter, table schema.Table, rowL
 
 	dbc, err := getConnection(model.connectionString)
 	if dbc == nil {
+		log.Println(err)
 		panic("getConnection() returned nil")
 	}
 	defer dbc.Close()
