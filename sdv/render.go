@@ -90,18 +90,18 @@ func showTable(resp http.ResponseWriter, reader dbReader, table schema.Table, qu
 
 	log.Println("getting columns...")
 
-	cols, err := reader.Columns(table)
-	if err != nil {
-		log.Println("error getting column names", err)
-		// todo: send 500 error to client
-		return err
-	}
-	log.Println("got columns", cols)
+	//cols, err := reader.Columns(table)
+	//if err != nil {
+	//	log.Println("error getting column names", err)
+	//	// todo: send 500 error to client
+	//	return err
+	//}
+	//log.Println("got columns", cols)
 
-	for _, col := range cols {
-		log.Println("col ", col)
-		viewModel.Cols = append(viewModel.Cols, col)
-	}
+	//for _, col := range cols {
+	//	log.Println("col ", col)
+	//	viewModel.Cols = append(viewModel.Cols, col)
+	//}
 
 	log.Println("getting data...", query, table, rowLimit)
 	rows, err := reader.GetRows(query, table, rowLimit)
@@ -113,7 +113,11 @@ func showTable(resp http.ResponseWriter, reader dbReader, table schema.Table, qu
 	// works on sqlite, fails with azure mssql:
 	//2017/06/25 12:51:35 http: panic serving 127.0.0.1:42410: runtime error: invalid memory address or nil pointer dereference
 	// I'm guessing this is probably a bug in the mssql lib
-	//cols, err := rows.Columns()
+	cols, err := rows.Columns()
+	for _, col := range cols {
+		log.Println("col ", col)
+		viewModel.Cols = append(viewModel.Cols, col)
+	}
 
 	// http://stackoverflow.com/a/23507765/10245 - getting ad-hoc column data
 	rowData := make([]interface{}, len(cols))
