@@ -214,7 +214,7 @@ const dataHTML = `
 {{template "header" .LayoutData}}
 	<h2>Table {{.Table.Name}}</h2>
 	{{ if .Query }}
-		<p class='filtered'>Filtered - {{.Query}}<p>
+		<p class='filtered'>Filtered - {{.Query}} &nbsp; &nbsp; <a href="?_rowLimit={{.RowLimit}}">Clear filter</a><p>
 	{{end}}
 	{{ if .RowLimit }}
 		<p class='filtered'>First {{.RowLimit}} rows<p>
