@@ -35,12 +35,17 @@ func main() {
 	db := os.Args[2]
 
 	port := 8080
+	listenOn := "localhost" // secure by default
 	if len(os.Args) > 3 {
 		portString := os.Args[3]
 		var err error
 		port, err = strconv.Atoi(portString)
 		if err != nil {
 			log.Fatal("invalid port ", portString)
+		}
+
+		if len(os.Args) > 4 {
+			listenOn = os.Args[4]
 		}
 	}
 
@@ -49,7 +54,7 @@ func main() {
 	sdv.Licensing()
 
 	// todo: cleanup way db info is passed to server & handler
-	sdv.RunServer(driver, db, port)
+	sdv.RunServer(driver, db, port, listenOn)
 }
 
 func Usage() {

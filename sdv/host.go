@@ -15,7 +15,7 @@ import (
 var db string
 var driver string
 
-func RunServer(driverInfo string, dbConn string, port int) {
+func RunServer(driverInfo string, dbConn string, port int, listenOn string) {
 	db = dbConn
 	driver = driverInfo
 
@@ -24,15 +24,15 @@ func RunServer(driverInfo string, dbConn string, port int) {
 	reader := getDbReader()
 	reader.CheckConnection()
 
-	serve(handler, port)
+	serve(handler, port, listenOn)
 }
 
-func serve(handler func(http.ResponseWriter, *http.Request), port int) {
+func serve(handler func(http.ResponseWriter, *http.Request), port int, listenOn string) {
 	// todo: use multiple handlers properly
 	http.HandleFunc("/", handler)
-	listenOn := fmt.Sprintf("localhost:%d", port)
-	log.Printf("Starting server on http://%s/ - Press Ctrl-C to kill server.\n", listenOn)
-	log.Fatal(http.ListenAndServe(listenOn, nil))
+	listenOnHostPort := fmt.Sprintf("%s:%d", listenOn, port) // e.g. localhost:8080 or 0.0.0.0:80
+	log.Printf("Starting server on http://%s/ - Press Ctrl-C to kill server.\n", listenOnHostPort)
+	log.Fatal(http.ListenAndServe(listenOnHostPort, nil))
 	log.Panic("http.ListenAndServe didn't block")
 }
 
