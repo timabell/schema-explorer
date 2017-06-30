@@ -182,7 +182,6 @@ const headerHTML = `
 </head>
 <body>
 <h1>Sql Data Viewer</h1>
-<p id='connected'>Connected to <span class='config-value'>{{.Db}}</span></p>
 <nav><a href='/'>Table list</a></nav>
 {{end}}
 `
