@@ -117,15 +117,16 @@ func (model mssqlModel) AllFks() (allFks schema.GlobalFkList, err error) {
 
 	allFks = schema.GlobalFkList{}
 	for rows.Next() {
-		var name, parentSchema, parentTable, parentCol, childSchema, childTable, childCol string
-		rows.Scan(&name, &parentSchema, &parentTable, &parentCol, &childSchema, &childTable, &childCol)
-		table := schema.Table{Schema: parentSchema, Name: parentTable}
+		var name, parentSchema, parentTableName, parentCol, childSchema, childTableName, childCol string
+		rows.Scan(&name, &parentSchema, &parentTableName, &parentCol, &childSchema, &childTableName, &childCol)
+		parentTable := schema.Table{Schema: parentSchema, Name: parentTableName}
+		childTable := schema.Table{Schema: childSchema, Name: childTableName}
 		col := schema.Column(parentCol)
-		if allFks[table] == nil { // todo: probably need to set up map before using
-			allFks[table] = schema.FkList{}
+		if allFks[parentTable.String()] == nil {
+			allFks[parentTable.String()] = schema.FkList{}
 		}
 		// todo: support compound foreign keys (i.e. those with 2+ columns involved
-		allFks[table][col] = schema.Ref{Col: schema.Column(childCol), Table: table}
+		allFks[parentTable.String()][col] = schema.Ref{Col: schema.Column(childCol), Table: childTable}
 	}
 	return
 }

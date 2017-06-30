@@ -75,7 +75,7 @@ func (model sqliteModel) AllFks() (allFks schema.GlobalFkList, err error) {
 	defer dbc.Close()
 
 	for _, table := range tables {
-		allFks[table], err = fks(dbc, table)
+		allFks[table.String()], err = fks(dbc, table)
 		if err != nil {
 			// todo: show in UI
 			fmt.Println("error getting fks for table "+table.String(), err)

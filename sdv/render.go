@@ -76,10 +76,11 @@ func showTable(resp http.ResponseWriter, reader dbReader, table schema.Table, qu
 		// todo: send 500 error to client
 		return err
 	}
+	fmt.Println("fks: ", fks)
 
 	// find all the of the fks that point at this table
 	inwardFks := table.FindParents(fks)
-	fmt.Println("found: ", inwardFks)
+	fmt.Println("inward fks: ", inwardFks)
 
 	rows, err := reader.GetRows(query, table, rowLimit)
 	if rows == nil {
@@ -109,7 +110,7 @@ func showTable(resp http.ResponseWriter, reader dbReader, table schema.Table, qu
 		for colIndex, col := range cols {
 			colData := rowData[colIndex]
 			var valueHTML string
-			ref, refExists := fks[table][schema.Column(col)]
+			ref, refExists := fks[table.String()][schema.Column(col)]
 			if refExists && colData != nil {
 				valueHTML = fmt.Sprintf("<a href='%s?%s=%d' class='fk'>", ref.Table, ref.Col, colData)
 			}
