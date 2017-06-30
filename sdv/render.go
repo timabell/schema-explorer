@@ -73,14 +73,12 @@ func showTable(resp http.ResponseWriter, reader dbReader, table schema.Table, qu
 	fks, err := reader.AllFks()
 	if err != nil {
 		log.Println("error getting fks", err)
+		panic("error getting fks")
 		// todo: send 500 error to client
 		return err
 	}
-	fmt.Println("fks: ", fks)
 
-	// find all the of the fks that point at this table
 	inwardFks := table.FindParents(fks)
-	fmt.Println("inward fks: ", inwardFks)
 
 	rows, err := reader.GetRows(query, table, rowLimit)
 	if rows == nil {

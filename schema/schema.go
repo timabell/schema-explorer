@@ -1,7 +1,5 @@
 package schema
 
-import "log"
-
 type Table struct {
 	Schema string
 	Name   string
@@ -36,15 +34,11 @@ type GlobalFkList map[string]FkList
 // filter the fk list down to keys that reference the "child" table
 // todo: not sure this should live here conceptually
 func (child Table) FindParents(fks GlobalFkList) (parents GlobalFkList) {
-	log.Println("looking for fks to ", child)
 	parents = GlobalFkList{}
 	for srcTable, tableFks := range fks {
-		log.Println("reading fk ", srcTable, tableFks)
 		newFkList := FkList{}
 		for srcCol, ref := range tableFks {
-			log.Println("reading tablefk ", srcCol, ref)
 			if ref.Table.String() == child.String() {
-				log.Println("match")
 				// match; copy into new list
 				newFkList[srcCol] = ref
 				parents[srcTable] = newFkList
