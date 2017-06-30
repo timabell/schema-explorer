@@ -21,6 +21,9 @@ func RunServer(driverInfo string, dbConn string, port int) {
 
 	SetupTemplate()
 
+	reader := getDbReader()
+	reader.CheckConnection()
+
 	serve(handler, port)
 }
 
@@ -37,13 +40,7 @@ func handler(resp http.ResponseWriter, req *http.Request) {
 	Licensing()
 	log.Printf("req: %s\n", req.URL)
 
-	var reader dbReader
-	switch driver {
-	case "mssql":
-		reader = mssql.NewMssql(db)
-	case "sqlite":
-		reader = sqlite.NewSqlite(db)
-	}
+	reader := getDbReader()
 
 	layoutData = pageTemplateModel{
 		Db:        db,
@@ -89,4 +86,14 @@ func handler(resp http.ResponseWriter, req *http.Request) {
 
 		showTableList(resp, tables)
 	}
+}
+func getDbReader() dbReader {
+	var reader dbReader
+	switch driver {
+	case "mssql":
+		reader = mssql.NewMssql(db)
+	case "sqlite":
+		reader = sqlite.NewSqlite(db)
+	}
+	return reader
 }

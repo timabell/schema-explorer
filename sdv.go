@@ -18,7 +18,6 @@ import (
 	"os"
 	"sql-data-viewer/sdv"
 	"strconv"
-	//"database/sql"
 )
 
 func main() {

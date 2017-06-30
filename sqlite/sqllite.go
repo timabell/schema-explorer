@@ -47,6 +47,17 @@ func getConnection(path string) (dbc *sql.DB, err error) {
 	return
 }
 
+func (model sqliteModel) CheckConnection() (err error) {
+	dbc, err := getConnection(model.path)
+	if dbc == nil {
+		log.Println(err)
+		panic("getConnection() returned nil")
+	}
+	defer dbc.Close()
+	// todo: make an actual call
+	return
+}
+
 func (model sqliteModel) AllFks() (allFks schema.GlobalFkList, err error) {
 	tables, err := model.GetTables()
 	if err != nil {
@@ -107,15 +118,22 @@ func (model sqliteModel) GetRows(query schema.RowFilter, table schema.Table, row
 		sql = sql + " limit " + strconv.Itoa(rowLimit)
 	}
 
-	log.Println(sql)
-
 	dbc, err := getConnection(model.path)
 	if err != nil {
+		log.Println(err)
+		panic("GetRows to get connection")
 		// todo: show in UI
 		return
 	}
 	defer dbc.Close()
 
 	rows, err = dbc.Query(sql)
+	if err != nil {
+		log.Println(sql)
+		log.Println(err)
+		panic("GetRows failed to get query")
+		// todo: show in UI
+		return
+	}
 	return
 }

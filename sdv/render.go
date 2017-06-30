@@ -1,14 +1,10 @@
 package sdv
 
 import (
-	"html/template"
-	"net/http"
-	//"database/sql"
-	//"fmt"
-	"log"
-	//"strings"
-	//"strconv"
 	"fmt"
+	"html/template"
+	"log"
+	"net/http"
 	"sql-data-viewer/schema"
 )
 
@@ -74,23 +70,17 @@ func showTable(resp http.ResponseWriter, reader dbReader, table schema.Table, qu
 		Rows:       []cells{},
 	}
 
-	log.Println("getting fks")
 	fks, err := reader.AllFks()
 	if err != nil {
 		log.Println("error getting fks", err)
 		// todo: send 500 error to client
 		return err
 	}
-	log.Println("got fks")
 
-	log.Println("finding parents")
 	// find all the of the fks that point at this table
 	inwardFks := table.FindParents(fks)
 	fmt.Println("found: ", inwardFks)
 
-	log.Println("getting columns...")
-
-	log.Println("getting data...", query, table, rowLimit)
 	rows, err := reader.GetRows(query, table, rowLimit)
 	if rows == nil {
 		panic("GetRows() returned nil")
@@ -99,7 +89,6 @@ func showTable(resp http.ResponseWriter, reader dbReader, table schema.Table, qu
 
 	cols, err := rows.Columns()
 	for _, col := range cols {
-		log.Println("col ", col)
 		viewModel.Cols = append(viewModel.Cols, col)
 	}
 

@@ -3,7 +3,6 @@ package mssql
 import (
 	"database/sql"
 	"log"
-	//"github.com/denisenkom/go-mssqldb"
 	"sql-data-viewer/schema"
 	"strconv"
 	"strings"
@@ -41,13 +40,21 @@ func (model mssqlModel) GetTables() (tables []schema.Table, err error) {
 }
 
 func getConnection(connectionString string) (dbc *sql.DB, err error) {
-	log.Println("Connecting to ", connectionString)
 	dbc, err = sql.Open("mssql", connectionString)
 	if err != nil {
 		log.Println("connection error", err)
 	}
+	return
+}
+
+func (model mssqlModel) CheckConnection() (err error) {
+	dbc, err := getConnection(model.connectionString)
+	if dbc == nil {
+		log.Println(err)
+		panic("getConnection() returned nil")
+	}
+	defer dbc.Close()
 	showVersion(dbc)
-	log.Println(dbc)
 	return
 }
 
@@ -61,7 +68,9 @@ func showVersion(dbc *sql.DB) {
 	rows.Next()
 	var serverVersion string
 	rows.Scan(&serverVersion)
-	log.Print("Connected to " + serverVersion)
+	serverVersion = strings.Replace(serverVersion, "\n", " ", -1)
+	serverVersion = strings.Replace(serverVersion, "\t", " ", -1)
+	log.Print("Successfully connected to MSSQL. @@version: " + serverVersion)
 }
 
 // todo: don't actually need an allfks method for mssql as can filter both incoming and outgoing, rework interface
@@ -74,31 +83,27 @@ func (model mssqlModel) AllFks() (allFks schema.GlobalFkList, err error) {
 	}
 	defer dbc.Close()
 
-	// todo: why is it failing on this ? can't handle these columns for some reason.
-	// err just says connection reset
-	// works in SQuirreL
-	//parent_sch.name parent_sch_name,
-	//parent_tbl.name parent_tbl_name,
-	log.Println("query setup for fks")
-	rows, err := dbc.Query(`select fk.name,
-	               parent_col.name parent_col_name,
-	               child_sch.name child_sch_name,
-	               child_tbl.name child_tbl_name,
-	               child_col.name child_col_name
-	           from sys.foreign_keys fk
-	               inner join sys.foreign_key_columns fkcol on fkcol.constraint_object_id = fk.object_id
-	               inner join sys.tables parent_tbl on parent_tbl.object_id = fk.parent_object_id
-	               inner join sys.schemas parent_sch on parent_sch.schema_id = parent_tbl.schema_id
-	               inner join sys.columns parent_col
-	                   on parent_col.object_id = parent_tbl.object_id
-	                   and parent_col.column_id = fkcol.parent_column_id
-	               inner join sys.tables child_tbl on child_tbl.object_id = fk.referenced_object_id
-	               inner join sys.schemas child_sch on child_sch.schema_id = child_tbl.schema_id
-	               inner join sys.columns child_col
-	                   on child_col.object_id = child_tbl.object_id
-	                   and child_col.column_id = fkcol.referenced_column_id
-	           order by fk.name`)
-	log.Println("query setup done for fks")
+	rows, err := dbc.Query(`
+		select fk.name,
+			parent_sch.name parent_sch_name,
+			parent_tbl.name parent_tbl_name,
+			parent_col.name parent_col_name,
+			child_sch.name child_sch_name,
+			child_tbl.name child_tbl_name,
+			child_col.name child_col_name
+		from sys.foreign_keys fk
+			inner join sys.foreign_key_columns fkcol on fkcol.constraint_object_id = fk.object_id
+			inner join sys.tables parent_tbl on parent_tbl.object_id = fk.parent_object_id
+			inner join sys.schemas parent_sch on parent_sch.schema_id = parent_tbl.schema_id
+			inner join sys.columns parent_col
+				on parent_col.object_id = parent_tbl.object_id
+				and parent_col.column_id = fkcol.parent_column_id
+			inner join sys.tables child_tbl on child_tbl.object_id = fk.referenced_object_id
+			inner join sys.schemas child_sch on child_sch.schema_id = child_tbl.schema_id
+			inner join sys.columns child_col
+				on child_col.object_id = child_tbl.object_id
+				and child_col.column_id = fkcol.referenced_column_id
+		order by fk.name`)
 
 	if err != nil {
 		log.Fatal("error running query to find fks: ", err)
@@ -111,20 +116,17 @@ func (model mssqlModel) AllFks() (allFks schema.GlobalFkList, err error) {
 	defer rows.Close()
 
 	allFks = schema.GlobalFkList{}
-	log.Println("about to process fk rows	")
 	for rows.Next() {
-		log.Println("processing fk row")
-		var id, seq int
-		var parentSchema, parentTable, parentCol, childSchema, childTable, childCol string
-		rows.Scan(&id, &seq, &parentSchema, &parentTable, &parentCol, &childSchema, &childTable, &childCol)
+		var name, parentSchema, parentTable, parentCol, childSchema, childTable, childCol string
+		rows.Scan(&name, &parentSchema, &parentTable, &parentCol, &childSchema, &childTable, &childCol)
 		table := schema.Table{Schema: parentSchema, Name: parentTable}
 		col := schema.Column(parentCol)
 		if allFks[table] == nil { // todo: probably need to set up map before using
 			allFks[table] = schema.FkList{}
 		}
+		// todo: support compound foreign keys (i.e. those with 2+ columns involved
 		allFks[table][col] = schema.Ref{Col: schema.Column(childCol), Table: table}
 	}
-	log.Println("allfks done")
 	return
 }
 
@@ -153,9 +155,9 @@ func (model mssqlModel) GetRows(query schema.RowFilter, table schema.Table, rowL
 	}
 	defer dbc.Close()
 
-	log.Println(sqlText)
 	rows, err = dbc.Query(sqlText)
 	if rows == nil {
+		log.Println(sqlText)
 		log.Println(err)
 		panic("Query returned nil for rows")
 	}
