@@ -38,7 +38,6 @@ func serve(handler func(http.ResponseWriter, *http.Request), port int) {
 
 func handler(resp http.ResponseWriter, req *http.Request) {
 	Licensing()
-	log.Printf("req: %s\n", req.URL)
 
 	reader := getDbReader()
 
