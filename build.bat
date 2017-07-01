@@ -1,2 +1,1 @@
-go build sdv.go
-move sdv.exe sdv-win-x64.exe
+go build -o bin/sdv-win-x64 sdv.go
