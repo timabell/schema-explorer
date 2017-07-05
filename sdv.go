@@ -12,7 +12,7 @@ defined in the database's schema.
 package main
 
 import (
-	_ "github.com/denisenkom/go-mssqldb"
+	_ "github.com/simnalamburt/go-mssqldb"
 	_ "github.com/mattn/go-sqlite3"
 	"log"
 	"os"
