@@ -98,51 +98,13 @@ func showTable(resp http.ResponseWriter, reader dbReader, table schema.Table, qu
 		rowDataPointers[i] = &rowData[i]
 	}
 	for rows.Next() {
-		row := cells{}
 
 		err := rows.Scan(rowDataPointers...)
 		if err != nil {
 			log.Println("error reading row data", err)
 			return err
 		}
-		for colIndex, col := range cols {
-			colData := rowData[colIndex]
-			var valueHTML string
-			ref, refExists := fks[table.String()][schema.Column(col)]
-			if refExists && colData != nil {
-				valueHTML = fmt.Sprintf("<a href='%s?%s=%d' class='fk'>", ref.Table, ref.Col, colData)
-			}
-			switch colData.(type) {
-			case int64:
-				valueHTML = valueHTML + template.HTMLEscapeString(fmt.Sprintf("%d", colData))
-			case float64:
-				valueHTML = valueHTML + template.HTMLEscapeString(fmt.Sprintf("%f", colData))
-			case nil:
-				valueHTML = valueHTML + "<span class='null'>[null]</span>"
-			default:
-				valueHTML = valueHTML + template.HTMLEscapeString(fmt.Sprintf("%s", colData))
-			}
-			if refExists && colData != nil {
-				valueHTML = valueHTML + "</a>"
-			}
-			row = append(row, template.HTML(valueHTML))
-		}
-		parentHTML := ""
-		// todo: factor out row limit, move to a cookie perhaps
-		// todo: stable sort order http://stackoverflow.com/questions/23330781/sort-golang-map-values-by-keys
-		// todo: pre-calculate fk info so this isn't repeated for every row
-		for parentTable, parentFks := range inwardFks {
-			for parentCol, ref := range parentFks {
-				parentHTML = parentHTML + fmt.Sprintf(
-					"<a href='%s?%s=%d&_rowLimit=100' class='parentFk'>%s.%s</a>&nbsp;",
-					template.URLQueryEscaper(parentTable),
-					template.URLQueryEscaper(parentCol),
-					rowData[indexOf(cols, string(ref.Col))],
-					template.HTMLEscaper(parentTable),
-					template.HTMLEscaper(parentCol))
-			}
-		}
-		row = append(row, template.HTML(parentHTML))
+		row := buildRow(cols, rowData, fks, table, inwardFks)
 		viewModel.Rows = append(viewModel.Rows, row)
 	}
 	err = tmpl.ExecuteTemplate(resp, "data", viewModel)
@@ -151,6 +113,91 @@ func showTable(resp http.ResponseWriter, reader dbReader, table schema.Table, qu
 		panic(err)
 	}
 	return err
+}
+
+func buildRow(cols []string, rowData []interface{}, fks schema.GlobalFkList, table schema.Table, inwardFks schema.GlobalFkList) cells {
+	row := cells{}
+	for colIndex, col := range cols {
+		colData := rowData[colIndex]
+		valueHTML := buildCell(fks, table, col, colData)
+		row = append(row, template.HTML(valueHTML))
+	}
+	parentHTML := buildInwardCell(inwardFks, rowData, cols)
+	row = append(row, template.HTML(parentHTML))
+	return row
+}
+
+func buildInwardCell(inwardFks schema.GlobalFkList, rowData []interface{}, cols []string) string {
+	// todo: stable sort order http://stackoverflow.com/questions/23330781/sort-golang-map-values-by-keys
+	// todo: pre-calculate fk info so this isn't repeated for every row
+	parentHTML := ""
+	for parentTable, parentFks := range inwardFks {
+		for parentCol, ref := range parentFks {
+			parentHTML = parentHTML + buildInwardLink(parentTable, parentCol, rowData, cols, ref)
+		}
+	}
+	return parentHTML
+}
+
+func buildInwardLink(parentTable string, parentCol schema.Column, rowData []interface{}, cols []string, ref schema.Ref) string {
+	linkHTML := fmt.Sprintf(
+		"<a href='%s?%s=",
+		template.URLQueryEscaper(parentTable),
+		template.URLQueryEscaper(parentCol))
+	// todo: handle non-string primary key
+	// todo: handle compound primary key
+	colData := rowData[indexOf(cols, string(ref.Col))]
+	switch colData.(type) {
+	case int64:
+		// todo: url-escape as well
+		linkHTML = linkHTML + template.HTMLEscapeString(fmt.Sprintf("%d", colData))
+	case string:
+		// todo: sql-quotes here are a hack pending switching to parameterized sql
+		linkHTML = linkHTML + "%27" + template.HTMLEscapeString(fmt.Sprintf("%s", colData)) + "%27"
+	default:
+		linkHTML = linkHTML + template.HTMLEscapeString(fmt.Sprintf("%v", colData))
+	}
+	linkHTML = linkHTML + fmt.Sprintf(
+		// todo: factor out row limit, move to a cookie perhaps
+		"&_rowLimit=100' class='parentFk'>%s.%s</a>&nbsp;",
+		template.HTMLEscaper(parentTable),
+		template.HTMLEscaper(parentCol))
+	return linkHTML
+}
+
+func buildCell(fks schema.GlobalFkList, table schema.Table, col string, colData interface{}) string {
+	var valueHTML string
+	ref, refExists := fks[table.String()][schema.Column(col)]
+	if refExists && colData != nil {
+		valueHTML = fmt.Sprintf("<a href='%s?%s=", ref.Table, ref.Col)
+		switch colData.(type) {
+		case int64:
+			// todo: url-escape as well
+			valueHTML = valueHTML + template.HTMLEscapeString(fmt.Sprintf("%d", colData))
+		case string:
+			// todo: sql-quotes here are a hack pending switching to parameterized sql
+			valueHTML = valueHTML + "%27" + template.HTMLEscapeString(fmt.Sprintf("%s", colData)) + "%27"
+		default:
+			valueHTML = valueHTML + template.HTMLEscapeString(fmt.Sprintf("%v", colData))
+		}
+		valueHTML = valueHTML + "' class='fk'>"
+	}
+	switch colData.(type) {
+	case nil:
+		valueHTML = valueHTML + "<span class='null'>[null]</span>"
+	case int64:
+		valueHTML = valueHTML + template.HTMLEscapeString(fmt.Sprintf("%d", colData))
+	case float64:
+		valueHTML = valueHTML + template.HTMLEscapeString(fmt.Sprintf("%f", colData))
+	case string:
+		valueHTML = valueHTML + template.HTMLEscapeString(fmt.Sprintf("%s", colData))
+	default:
+		valueHTML = valueHTML + template.HTMLEscapeString(fmt.Sprintf("%v", colData))
+	}
+	if refExists && colData != nil {
+		valueHTML = valueHTML + "</a>"
+	}
+	return valueHTML
 }
 
 func indexOf(slice []string, value string) (index int) {
