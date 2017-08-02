@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"sql-data-viewer/schema"
+	"reflect"
 )
 
 type pageTemplateModel struct {
@@ -28,7 +29,7 @@ type dataViewModel struct {
 	Table      schema.Table
 	Query      string
 	RowLimit   int
-	Cols       []string
+	Cols       []schema.Column
 	Rows       []cells
 }
 
@@ -66,7 +67,7 @@ func showTable(resp http.ResponseWriter, reader dbReader, table schema.Table, qu
 		Table:      table,
 		Query:      formattedQuery,
 		RowLimit:   rowLimit,
-		Cols:       []string{},
+		Cols:       []schema.Column{},
 		Rows:       []cells{},
 	}
 
@@ -86,10 +87,8 @@ func showTable(resp http.ResponseWriter, reader dbReader, table schema.Table, qu
 	}
 	defer rows.Close()
 
-	cols, err := rows.Columns()
-	for _, col := range cols {
-		viewModel.Cols = append(viewModel.Cols, col)
-	}
+	cols := reader.GetColumns(table)
+	viewModel.Cols = cols
 
 	// http://stackoverflow.com/a/23507765/10245 - getting ad-hoc column data
 	rowData := make([]interface{}, len(cols))
@@ -115,7 +114,7 @@ func showTable(resp http.ResponseWriter, reader dbReader, table schema.Table, qu
 	return err
 }
 
-func buildRow(cols []string, rowData []interface{}, fks schema.GlobalFkList, table schema.Table, inwardFks schema.GlobalFkList) cells {
+func buildRow(cols []schema.Column, rowData []interface{}, fks schema.GlobalFkList, table schema.Table, inwardFks schema.GlobalFkList) cells {
 	row := cells{}
 	for colIndex, col := range cols {
 		colData := rowData[colIndex]
@@ -127,7 +126,7 @@ func buildRow(cols []string, rowData []interface{}, fks schema.GlobalFkList, tab
 	return row
 }
 
-func buildInwardCell(inwardFks schema.GlobalFkList, rowData []interface{}, cols []string) string {
+func buildInwardCell(inwardFks schema.GlobalFkList, rowData []interface{}, cols []schema.Column) string {
 	// todo: stable sort order http://stackoverflow.com/questions/23330781/sort-golang-map-values-by-keys
 	// todo: pre-calculate fk info so this isn't repeated for every row
 	parentHTML := ""
@@ -139,14 +138,14 @@ func buildInwardCell(inwardFks schema.GlobalFkList, rowData []interface{}, cols 
 	return parentHTML
 }
 
-func buildInwardLink(parentTable string, parentCol schema.Column, rowData []interface{}, cols []string, ref schema.Ref) string {
+func buildInwardLink(parentTable string, parentCol schema.Column, rowData []interface{}, cols []schema.Column, ref schema.Ref) string {
 	linkHTML := fmt.Sprintf(
 		"<a href='%s?%s=",
 		template.URLQueryEscaper(parentTable),
 		template.URLQueryEscaper(parentCol))
 	// todo: handle non-string primary key
 	// todo: handle compound primary key
-	colData := rowData[indexOf(cols, string(ref.Col))]
+	colData := rowData[indexOfCol(cols, string(ref.Col.Name))]
 	switch colData.(type) {
 	case int64:
 		// todo: url-escape as well
@@ -165,9 +164,9 @@ func buildInwardLink(parentTable string, parentCol schema.Column, rowData []inte
 	return linkHTML
 }
 
-func buildCell(fks schema.GlobalFkList, table schema.Table, col string, colData interface{}) string {
+func buildCell(fks schema.GlobalFkList, table schema.Table, col schema.Column, colData interface{}) string {
 	var valueHTML string
-	ref, refExists := fks[table.String()][schema.Column(col)]
+	ref, refExists := fks[table.String()][col]
 	if refExists && colData != nil {
 		valueHTML = fmt.Sprintf("<a href='%s?%s=", ref.Table, ref.Col)
 		switch colData.(type) {
@@ -182,6 +181,8 @@ func buildCell(fks schema.GlobalFkList, table schema.Table, col string, colData 
 		}
 		valueHTML = valueHTML + "' class='fk'>"
 	}
+	log.Println(reflect.TypeOf(colData))
+	log.Println(colData)
 	switch colData.(type) {
 	case nil:
 		valueHTML = valueHTML + "<span class='null'>[null]</span>"
@@ -200,14 +201,14 @@ func buildCell(fks schema.GlobalFkList, table schema.Table, col string, colData 
 	return valueHTML
 }
 
-func indexOf(slice []string, value string) (index int) {
-	var curValue string
-	for index, curValue = range slice {
-		if curValue == value {
+func indexOfCol(cols []schema.Column, name string) (index int) {
+	var curValue schema.Column
+	for index, curValue = range cols {
+		if curValue.Name == name {
 			return
 		}
 	}
-	log.Panic(value, " not found in slice")
+	log.Panic(name, " not found in column list")
 	return
 }
 

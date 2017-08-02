@@ -13,7 +13,10 @@ func (table Table) String() string {
 }
 
 // alias to make it clear when we're dealing with column names
-type Column string
+type Column struct {
+	Name string
+	Type string
+}
 
 // filtering of results with column name / value(s) pairs,
 // matches type of url.Values so can pass straight through

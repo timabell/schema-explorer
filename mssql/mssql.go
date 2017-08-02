@@ -121,12 +121,12 @@ func (model mssqlModel) AllFks() (allFks schema.GlobalFkList, err error) {
 		rows.Scan(&name, &parentSchema, &parentTableName, &parentCol, &childSchema, &childTableName, &childCol)
 		parentTable := schema.Table{Schema: parentSchema, Name: parentTableName}
 		childTable := schema.Table{Schema: childSchema, Name: childTableName}
-		col := schema.Column(parentCol)
+		col := schema.Column{parentCol, ""}
 		if allFks[parentTable.String()] == nil {
 			allFks[parentTable.String()] = schema.FkList{}
 		}
 		// todo: support compound foreign keys (i.e. those with 2+ columns involved
-		allFks[parentTable.String()][col] = schema.Ref{Col: schema.Column(childCol), Table: childTable}
+		allFks[parentTable.String()][col] = schema.Ref{Col: schema.Column{childCol, ""}, Table: childTable}
 	}
 	return
 }
@@ -164,4 +164,8 @@ func (model mssqlModel) GetRows(query schema.RowFilter, table schema.Table, rowL
 		panic("Query returned nil for rows")
 	}
 	return
+}
+
+func (model mssqlModel) GetColumns(table schema.Table) ([]schema.Column){
+	panic("not implemented")
 }

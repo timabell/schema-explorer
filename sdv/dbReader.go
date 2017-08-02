@@ -10,4 +10,5 @@ type dbReader interface {
 	GetTables() (tables []schema.Table, err error)
 	AllFks() (allFks schema.GlobalFkList, err error)
 	GetRows(query schema.RowFilter, table schema.Table, rowLimit int) (rows *sql.Rows, err error)
+	GetColumns(table schema.Table) ([]schema.Column)
 }
