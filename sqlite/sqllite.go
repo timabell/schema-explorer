@@ -138,6 +138,29 @@ func (model sqliteModel) GetRows(query schema.RowFilter, table schema.Table, row
 	return
 }
 
-func (model sqliteModel) GetColumns(table schema.Table) ([]schema.Column){
-	panic("not implemented")
+func (model sqliteModel) GetColumns(table schema.Table) (cols []schema.Column, err error){
+	dbc, err := getConnection(model.path)
+	if err != nil {
+		log.Println(err)
+		panic("GetColumns to get connection")
+		// todo: show in UI
+		return
+	}
+	defer dbc.Close()
+	rows, err := dbc.Query("PRAGMA table_info('" + table.String() + "');")
+	if err != nil {
+		return
+	}
+	defer rows.Close()
+	cols = []schema.Column{}
+	for rows.Next() {
+		var cid int
+		var name, typeName string
+		var notNull, pk bool
+		var defaultValue interface{}
+		rows.Scan(&cid, &name, &typeName, &notNull, &defaultValue, &pk)
+		thisCol := schema.Column{name, typeName}
+		cols = append(cols, thisCol)
+	}
+	return
 }

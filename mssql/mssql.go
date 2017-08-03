@@ -166,6 +166,6 @@ func (model mssqlModel) GetRows(query schema.RowFilter, table schema.Table, rowL
 	return
 }
 
-func (model mssqlModel) GetColumns(table schema.Table) ([]schema.Column){
+func (model mssqlModel) GetColumns(table schema.Table) (cols []schema.Column, err error){
 	panic("not implemented")
 }

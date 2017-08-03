@@ -87,7 +87,10 @@ func showTable(resp http.ResponseWriter, reader dbReader, table schema.Table, qu
 	}
 	defer rows.Close()
 
-	cols := reader.GetColumns(table)
+	cols, err := reader.GetColumns(table)
+	if err != nil{
+		panic(err)
+	}
 	viewModel.Cols = cols
 
 	// http://stackoverflow.com/a/23507765/10245 - getting ad-hoc column data
