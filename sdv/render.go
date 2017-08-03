@@ -6,7 +6,7 @@ import (
 	"log"
 	"net/http"
 	"sql-data-viewer/schema"
-	"reflect"
+	"strings"
 )
 
 type pageTemplateModel struct {
@@ -172,11 +172,11 @@ func buildCell(fks schema.GlobalFkList, table schema.Table, col schema.Column, c
 	ref, refExists := fks[table.String()][col]
 	if refExists && colData != nil {
 		valueHTML = fmt.Sprintf("<a href='%s?%s=", ref.Table, ref.Col)
-		switch colData.(type) {
-		case int64:
+		switch {
+		case col.Type == "integer":
 			// todo: url-escape as well
 			valueHTML = valueHTML + template.HTMLEscapeString(fmt.Sprintf("%d", colData))
-		case string:
+		case strings.Contains(col.Type,"varchar"):
 			// todo: sql-quotes here are a hack pending switching to parameterized sql
 			valueHTML = valueHTML + "%27" + template.HTMLEscapeString(fmt.Sprintf("%s", colData)) + "%27"
 		default:
@@ -184,17 +184,21 @@ func buildCell(fks schema.GlobalFkList, table schema.Table, col schema.Column, c
 		}
 		valueHTML = valueHTML + "' class='fk'>"
 	}
-	log.Println(reflect.TypeOf(colData))
-	log.Println(colData)
-	switch colData.(type) {
-	case nil:
+	log.Println(col.Type, colData)
+	switch {
+	case colData == nil:
 		valueHTML = valueHTML + "<span class='null'>[null]</span>"
-	case int64:
+	case col.Type == "integer":
 		valueHTML = valueHTML + template.HTMLEscapeString(fmt.Sprintf("%d", colData))
-	case float64:
+	case col.Type == "float":
 		valueHTML = valueHTML + template.HTMLEscapeString(fmt.Sprintf("%f", colData))
-	case string:
+	case strings.Contains(col.Type,"varchar"):
 		valueHTML = valueHTML + template.HTMLEscapeString(fmt.Sprintf("%s", colData))
+	case strings.Contains(col.Type,"TEXT"):
+		// https://stackoverflow.com/a/18615786/10245
+		bytes := colData.([]uint8)
+		log.Println(bytes)
+		valueHTML = valueHTML + template.HTMLEscapeString(fmt.Sprintf("%s", string(bytes)))
 	default:
 		valueHTML = valueHTML + template.HTMLEscapeString(fmt.Sprintf("%v", colData))
 	}
@@ -272,7 +276,7 @@ const dataHTML = `
 	<table border=1>
 		<tr>
 		{{ range .Cols }}
-			<th>{{.}}</th>
+			<th title='type: {{.Type}}'>{{.Name}}</th>
 		{{end}}
 		<th class='references'>referenced by</th>
 		</tr>
