@@ -3,7 +3,7 @@ package mssql
 import (
 	"database/sql"
 	"log"
-	"sql-data-viewer/schema"
+	"bitbucket.org/timabell/sql-data-viewer/schema"
 	"strconv"
 	"strings"
 )

@@ -5,7 +5,7 @@ import (
 	"html/template"
 	"log"
 	"net/http"
-	"sql-data-viewer/schema"
+	"bitbucket.org/timabell/sql-data-viewer/schema"
 	"strings"
 )
 

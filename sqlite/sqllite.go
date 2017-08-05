@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
-	"sql-data-viewer/schema"
+	"bitbucket.org/timabell/sql-data-viewer/schema"
 	"strconv"
 	"strings"
 )

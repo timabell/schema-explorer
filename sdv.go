@@ -16,7 +16,7 @@ import (
 	_ "github.com/simnalamburt/go-mssqldb"
 	"log"
 	"os"
-	"sql-data-viewer/sdv"
+	"bitbucket.org/timabell/sql-data-viewer/sdv"
 	"strconv"
 )
 
