@@ -15,46 +15,25 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 	_ "github.com/simnalamburt/go-mssqldb"
 	"log"
-	"os"
 	"bitbucket.org/timabell/sql-data-viewer/sdv"
-	"strconv"
+	"flag"
 )
 
 func main() {
-	// todo: cleanup arg handling
-	if len(os.Args) <= 1 {
-		Usage()
-		log.Fatal("missing argument: driver (mssql or sqlite).")
-	}
-	driver := os.Args[1]
-
-	if len(os.Args) <= 2 {
-		Usage()
-		log.Fatal("missing argument: connection string / filename")
-	}
-	db := os.Args[2]
-
-	port := 8080
-	listenOn := "localhost" // secure by default
-	if len(os.Args) > 3 {
-		portString := os.Args[3]
-		var err error
-		port, err = strconv.Atoi(portString)
-		if err != nil {
-			log.Fatal("invalid port ", portString)
-		}
-
-		if len(os.Args) > 4 {
-			listenOn = os.Args[4]
-		}
-	}
+	var (
+		driver = flag.String("driver", "", "Driver to use (mssql or sqlite)")
+		db = flag.String("db", "", "connection string for mssql / filename for sqlite")
+		port = flag.Int("port", 8080, "port to listen on")
+		listenOn = flag.String("listenOn", "localhost", "address to listen on") // secure by default, only listen for local connections
+	)
+	flag.Parse()
 
 	log.Print(sdv.CopyrightText())
 	log.Printf("## This pre-release software will expire on: %s, contact sdv@timwise.co.uk for a license. ##", sdv.Expiry)
 	sdv.Licensing()
 
 	// todo: cleanup way db info is passed to server & handler
-	sdv.RunServer(driver, db, port, listenOn)
+	sdv.RunServer(*driver, *db, *port, *listenOn)
 }
 
 func Usage() {

@@ -4,9 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"bitbucket.org/timabell/sql-data-viewer/mssql"
 	"bitbucket.org/timabell/sql-data-viewer/schema"
-	"bitbucket.org/timabell/sql-data-viewer/sqlite"
 	"strconv"
 	"strings"
 	"time"
@@ -22,7 +20,11 @@ func RunServer(driverInfo string, dbConn string, port int, listenOn string) {
 	SetupTemplate()
 
 	reader := getDbReader()
-	reader.CheckConnection()
+	err := reader.CheckConnection()
+	if err != nil {
+		log.Println(err)
+		panic("connection check failed")
+	}
 
 	serve(handler, port, listenOn)
 }
@@ -85,14 +87,4 @@ func handler(resp http.ResponseWriter, req *http.Request) {
 
 		showTableList(resp, tables)
 	}
-}
-func getDbReader() dbReader {
-	var reader dbReader
-	switch driver {
-	case "mssql":
-		reader = mssql.NewMssql(db)
-	case "sqlite":
-		reader = sqlite.NewSqlite(db)
-	}
-	return reader
 }
