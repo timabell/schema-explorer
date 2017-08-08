@@ -17,6 +17,7 @@ import (
 	"log"
 	"bitbucket.org/timabell/sql-data-viewer/sdv"
 	"flag"
+	"os"
 )
 
 func main() {
@@ -27,6 +28,12 @@ func main() {
 		listenOn = flag.String("listenOn", "localhost", "address to listen on") // secure by default, only listen for local connections
 	)
 	flag.Parse()
+	if *driver == "" {
+		log.Println("Driver argument required.")
+		flag.Usage()
+		Usage()
+		os.Exit(1)
+	}
 
 	log.Print(sdv.CopyrightText())
 	log.Printf("## This pre-release software will expire on: %s, contact sdv@timwise.co.uk for a license. ##", sdv.Expiry)
@@ -37,6 +44,6 @@ func main() {
 }
 
 func Usage() {
-	log.Print("Usage: sdv mssql \"connectiongstring\" [webserverport]")
-	log.Print("Usage: sdv sqlite \"path\" [webserverport]")
+	log.Print("Run with Sql Server: ./sql-data-viewer -driver mssql -db \"connectiongstring\"")
+	log.Print("Run with sqlite: ./sql-data-viewer -driver sqlite -db \"path\"")
 }

@@ -5,7 +5,7 @@ import (
 	"bitbucket.org/timabell/sql-data-viewer/mssql"
 )
 
-func getDbReader() dbReader {
+func getDbReader(driver string, db string) dbReader {
 	var reader dbReader
 	switch driver {
 	case "mssql":

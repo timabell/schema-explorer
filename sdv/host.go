@@ -19,7 +19,7 @@ func RunServer(driverInfo string, dbConn string, port int, listenOn string) {
 
 	SetupTemplate()
 
-	reader := getDbReader()
+	reader := getDbReader(driver, db)
 	err := reader.CheckConnection()
 	if err != nil {
 		log.Println(err)
@@ -41,7 +41,7 @@ func serve(handler func(http.ResponseWriter, *http.Request), port int, listenOn 
 func handler(resp http.ResponseWriter, req *http.Request) {
 	Licensing()
 
-	reader := getDbReader()
+	reader := getDbReader(driver, db)
 
 	layoutData = pageTemplateModel{
 		Db:        db,
