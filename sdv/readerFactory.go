@@ -12,6 +12,10 @@ func getDbReader() dbReader {
 		reader = mssql.NewMssql(db)
 	case "sqlite":
 		reader = sqlite.NewSqlite(db)
+	case "":
+		panic("Driver choice missing")
+	default:
+		panic("Unsupported driver choice " + driver)
 	}
 	return reader
 }
