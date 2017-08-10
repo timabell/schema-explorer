@@ -1,0 +1,10 @@
+sdv:
+  image: timabell/sdv
+  environment:
+    sdvDriver: sqlite
+    sdvDb: /data/Chinook_Sqlite_AutoIncrementPKs.sqlite
+  ports:
+    - "8085:8080"
+  volumes:
+    - /home/tim/Documents/projects/sql-data-viewer:/data
+# docker run -p 8085:8080 --env sdvDriver=sqlite --env sdvDb=/data/Chinook_Sqlite_AutoIncrementPKs.sqlite -v /home/tim/Documents/projects/sql-data-viewer:/data timabell/sdv
