@@ -54,7 +54,14 @@ func (model sqliteModel) CheckConnection() (err error) {
 		panic("getConnection() returned nil")
 	}
 	defer dbc.Close()
-	// todo: make an actual call
+	tables, err := model.GetTables()
+	if err != nil{
+		panic(err)
+	}
+	if len(tables) == 0{
+		// https://stackoverflow.com/q/45777113/10245
+		panic("No tables found. (Sqlite will create an empty db if the specified file doesn't exist).")
+	}
 	return
 }
 
