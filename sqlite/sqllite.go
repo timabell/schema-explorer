@@ -62,6 +62,7 @@ func (model sqliteModel) CheckConnection() (err error) {
 		// https://stackoverflow.com/q/45777113/10245
 		panic("No tables found. (Sqlite will create an empty db if the specified file doesn't exist).")
 	}
+	log.Println("Connected.", len(tables), "tables found")
 	return
 }
 
