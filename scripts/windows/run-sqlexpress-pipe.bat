@@ -6,4 +6,4 @@ rem  https://technet.microsoft.com/en-us/library/ms189307(v=sql.105).aspx
 rem  https://github.com/denisenkom/go-mssqldb/pull/250
 
 .@echo on
-sql-data-viewer.exe mssql "server=np:\\.\pipe\MSSQL$SQLEXPRESS\sql\query;database=master"
+sql-data-viewer.exe -driver mssql -db "server=np:\\.\pipe\MSSQL$SQLEXPRESS\sql\query;database=master"

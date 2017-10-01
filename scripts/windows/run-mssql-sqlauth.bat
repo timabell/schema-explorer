@@ -1,2 +1,2 @@
-sql-data-viewer.exe mssql "server=sdv-adventureworks.database.windows.net;user id=sdvRO;password=Startups 4 the rest of us;database=AdventureWorksLT" 8080 localhost
+sql-data-viewer.exe -driver mssql -db "server=sdv-adventureworks.database.windows.net;user id=sdvRO;password=Startups 4 the rest of us;database=AdventureWorksLT" -port 8080
 pause
