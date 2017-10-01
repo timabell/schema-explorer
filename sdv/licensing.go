@@ -7,7 +7,7 @@ import (
 )
 
 // roughly 3 months from when this is released into the wild
-var Expiry = time.Date(2017, time.October, 1, 0, 0, 0, 0, time.UTC)
+var Expiry = time.Date(2018, time.January, 1, 0, 0, 0, 0, time.UTC)
 var CopyrightYear = 2017
 
 func Licensing() {
