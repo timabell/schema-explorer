@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/sh -
 
 echo "=================="
 echo "sqlite"
@@ -14,4 +14,4 @@ echo "mssql"
 echo "=================="
 
 
-go test ./... -driver mssql -db "server=sdv-adventureworks.database.windows.net;user id=sdvRO;password=Startups 4 the rest of us;database=AdventureWorksLT" -test.v
+go test ./... -driver mssql -db "server=sdv-regression-test.database.windows.net;user id=sdvRO;password=Startups 4 the rest of us;database=sdv-regression-test" -test.v
