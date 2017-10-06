@@ -5,6 +5,7 @@ import (
 	_ "github.com/simnalamburt/go-mssqldb"
 	"testing"
 	"flag"
+	"fmt"
 )
 
 var testDb string
@@ -29,5 +30,18 @@ func Test_CheckConnection(t *testing.T) {
 	err := reader.CheckConnection()
 	if err != nil {
 		t.Error(err)
+	}
+}
+
+func Test_GetTables(t *testing.T) {
+	reader := getDbReader(testDbDriver, testDb)
+	err := reader.CheckConnection()
+	if err != nil {
+		panic(err)
+	}
+	tables, err := reader.GetTables()
+	expectedCount := 1
+	if len(tables) != expectedCount {
+		t.Error(fmt.Sprintf("Expected %d tables, found %d", expectedCount, len(tables)))
 	}
 }
