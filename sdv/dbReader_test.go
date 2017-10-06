@@ -35,11 +35,10 @@ func Test_CheckConnection(t *testing.T) {
 
 func Test_GetTables(t *testing.T) {
 	reader := getDbReader(testDbDriver, testDb)
-	err := reader.CheckConnection()
-	if err != nil {
-		panic(err)
-	}
 	tables, err := reader.GetTables()
+	if err != nil {
+		t.Error(err)
+	}
 	expectedCount := 1
 	if len(tables) != expectedCount {
 		t.Error(fmt.Sprintf("Expected %d tables, found %d", expectedCount, len(tables)))
