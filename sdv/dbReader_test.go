@@ -43,4 +43,9 @@ func Test_GetTables(t *testing.T) {
 	if len(tables) != expectedCount {
 		t.Error(fmt.Sprintf("Expected %d tables, found %d", expectedCount, len(tables)))
 	}
+	table := tables[0]
+	expectedName := "foo"
+	if (table.Name != expectedName) {
+		t.Error(fmt.Sprintf("Expected table '%s' found '%s'", expectedName, table.Name))
+	}
 }
