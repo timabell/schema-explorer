@@ -1,17 +1,18 @@
 package sdv
 
 import (
-	_ "github.com/mattn/go-sqlite3"
-	_ "github.com/simnalamburt/go-mssqldb"
-	"testing"
 	"flag"
 	"fmt"
+	"testing"
+
+	_ "github.com/mattn/go-sqlite3"
+	_ "github.com/simnalamburt/go-mssqldb"
 )
 
 var testDb string
 var testDbDriver string
 
-func init(){
+func init() {
 	flag.StringVar(&testDbDriver, "driver", "", "Driver to use (mssql or sqlite)")
 	flag.StringVar(&testDb, "db", "", "connection string for mssql / filename for sqlite")
 	flag.Parse()
@@ -45,7 +46,7 @@ func Test_GetTables(t *testing.T) {
 	}
 	table := tables[0]
 	expectedName := "foo"
-	if (table.Name != expectedName) {
+	if table.Name != expectedName {
 		t.Error(fmt.Sprintf("Expected table '%s' found '%s'", expectedName, table.Name))
 	}
 }

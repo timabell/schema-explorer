@@ -1,11 +1,11 @@
 package sdv
 
 import (
+	"bitbucket.org/timabell/sql-data-viewer/schema"
 	"fmt"
 	"html/template"
 	"log"
 	"net/http"
-	"bitbucket.org/timabell/sql-data-viewer/schema"
 	"strings"
 )
 
@@ -88,7 +88,7 @@ func showTable(resp http.ResponseWriter, reader dbReader, table schema.Table, qu
 	defer rows.Close()
 
 	cols, err := reader.GetColumns(table)
-	if err != nil{
+	if err != nil {
 		panic(err)
 	}
 	viewModel.Cols = cols
@@ -176,7 +176,7 @@ func buildCell(fks schema.GlobalFkList, table schema.Table, col schema.Column, c
 		case col.Type == "integer":
 			// todo: url-escape as well
 			valueHTML = valueHTML + template.HTMLEscapeString(fmt.Sprintf("%d", colData))
-		case strings.Contains(col.Type,"varchar"):
+		case strings.Contains(col.Type, "varchar"):
 			// todo: sql-quotes here are a hack pending switching to parameterized sql
 			valueHTML = valueHTML + "%27" + template.HTMLEscapeString(fmt.Sprintf("%s", colData)) + "%27"
 		default:
@@ -192,9 +192,9 @@ func buildCell(fks schema.GlobalFkList, table schema.Table, col schema.Column, c
 		valueHTML = valueHTML + template.HTMLEscapeString(fmt.Sprintf("%d", colData))
 	case col.Type == "float":
 		valueHTML = valueHTML + template.HTMLEscapeString(fmt.Sprintf("%f", colData))
-	case strings.Contains(col.Type,"varchar"):
+	case strings.Contains(col.Type, "varchar"):
 		valueHTML = valueHTML + template.HTMLEscapeString(fmt.Sprintf("%s", colData))
-	case strings.Contains(col.Type,"TEXT"):
+	case strings.Contains(col.Type, "TEXT"):
 		// https://stackoverflow.com/a/18615786/10245
 		bytes := colData.([]uint8)
 		log.Println(bytes)

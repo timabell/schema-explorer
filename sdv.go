@@ -12,19 +12,19 @@ defined in the database's schema.
 package main
 
 import (
+	"bitbucket.org/timabell/sql-data-viewer/sdv"
+	"flag"
 	_ "github.com/mattn/go-sqlite3"
 	_ "github.com/simnalamburt/go-mssqldb"
 	"log"
-	"bitbucket.org/timabell/sql-data-viewer/sdv"
-	"flag"
 	"os"
 )
 
 func main() {
 	var (
-		driver = flag.String("driver", "", "Driver to use (mssql or sqlite)")
-		db = flag.String("db", "", "connection string for mssql / filename for sqlite")
-		port = flag.Int("port", 8080, "port to listen on")
+		driver   = flag.String("driver", "", "Driver to use (mssql or sqlite)")
+		db       = flag.String("db", "", "connection string for mssql / filename for sqlite")
+		port     = flag.Int("port", 8080, "port to listen on")
 		listenOn = flag.String("listenOn", "localhost", "address to listen on") // secure by default, only listen for local connections
 	)
 	flag.Parse()

@@ -1,10 +1,10 @@
 package sqlite
 
 import (
+	"bitbucket.org/timabell/sql-data-viewer/schema"
 	"database/sql"
 	"fmt"
 	"log"
-	"bitbucket.org/timabell/sql-data-viewer/schema"
 	"strconv"
 	"strings"
 )
@@ -55,10 +55,10 @@ func (model sqliteModel) CheckConnection() (err error) {
 	}
 	defer dbc.Close()
 	tables, err := model.GetTables()
-	if err != nil{
+	if err != nil {
 		panic(err)
 	}
-	if len(tables) == 0{
+	if len(tables) == 0 {
 		// https://stackoverflow.com/q/45777113/10245
 		panic("No tables found. (Sqlite will create an empty db if the specified file doesn't exist).")
 	}
@@ -146,7 +146,7 @@ func (model sqliteModel) GetRows(query schema.RowFilter, table schema.Table, row
 	return
 }
 
-func (model sqliteModel) GetColumns(table schema.Table) (cols []schema.Column, err error){
+func (model sqliteModel) GetColumns(table schema.Table) (cols []schema.Column, err error) {
 	dbc, err := getConnection(model.path)
 	if err != nil {
 		log.Println(err)

@@ -1,8 +1,8 @@
 package sdv
 
 import (
-	"database/sql"
 	"bitbucket.org/timabell/sql-data-viewer/schema"
+	"database/sql"
 )
 
 type dbReader interface {

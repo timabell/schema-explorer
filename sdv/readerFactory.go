@@ -1,8 +1,8 @@
 package sdv
 
 import (
-	"bitbucket.org/timabell/sql-data-viewer/sqlite"
 	"bitbucket.org/timabell/sql-data-viewer/mssql"
+	"bitbucket.org/timabell/sql-data-viewer/sqlite"
 )
 
 func getDbReader(driver string, db string) dbReader {

@@ -1,10 +1,10 @@
 package sdv
 
 import (
+	"bitbucket.org/timabell/sql-data-viewer/schema"
 	"fmt"
 	"log"
 	"net/http"
-	"bitbucket.org/timabell/sql-data-viewer/schema"
 	"strconv"
 	"strings"
 	"time"
