@@ -2,7 +2,6 @@ package sdv
 
 import (
 	"flag"
-	"fmt"
 	"testing"
 
 	"bitbucket.org/timabell/sql-data-viewer/schema"
@@ -31,7 +30,7 @@ func Test_CheckConnection(t *testing.T) {
 	reader := getDbReader(testDbDriver, testDb)
 	err := reader.CheckConnection()
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 }
 
@@ -39,16 +38,16 @@ func Test_GetTables(t *testing.T) {
 	reader := getDbReader(testDbDriver, testDb)
 	tables, err := reader.GetTables()
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	expectedCount := 1
 	if len(tables) != expectedCount {
-		t.Error(fmt.Sprintf("Expected %d tables, found %d", expectedCount, len(tables)))
+		t.Fatalf("Expected %d tables, found %d", expectedCount, len(tables))
 	}
 	table := tables[0]
 	expectedName := "foo"
 	if table.Name != expectedName {
-		t.Error(fmt.Sprintf("Expected table '%s' found '%s'", expectedName, table.Name))
+		t.Fatal("Expected table '%s' found '%s'", expectedName, table.Name)
 	}
 }
 
@@ -57,15 +56,48 @@ func Test_GetColumns(t *testing.T) {
 	table := schema.Table{Name: "foo"}
 	columns, err := reader.GetColumns(table)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	expectedCount := 2
 	if len(columns) != expectedCount {
-		t.Error(fmt.Sprintf("Expected %d columns, found %d", expectedCount, len(columns)))
+		t.Fatal("Expected %d columns, found %d", expectedCount, len(columns))
 	}
 	col0 := columns[0]
 	expectedName := "id"
 	if col0.Name != expectedName {
-		t.Error(fmt.Sprintf("Expected column '%s' found '%s'", expectedName, col0))
+		t.Fatal("Expected column '%s' found '%s'", expectedName, col0)
+	}
+}
+
+func Test_GetRows(t *testing.T) {
+	reader := getDbReader(testDbDriver, testDb)
+	// todo: move up a level of abstraction and test the interpretation of the row data
+	rows, err := reader.GetRows(nil, schema.Table{Name: "foo"}, 1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer rows.Close()
+	cols := 2
+	rowData := make([]interface{}, cols)
+	rowDataPointers := make([]interface{}, cols)
+	for i := 0; i < cols; i++ {
+		rowDataPointers[i] = &rowData[i]
+	}
+	if !rows.Next() {
+		t.Fatal("no rows")
+	}
+	err = rows.Scan(rowDataPointers...)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var expectedId int64 = 1
+	expectedName := "raaa"
+	actualId := rowData[0]
+	actualNmae := rowData[1]
+	if actualId != expectedId {
+		t.Errorf("Row 1 col 1 expected %d got %d", expectedId, actualId)
+	}
+	if actualNmae != expectedName {
+		t.Error("Row 1 col 2 table foo, incorrect data; expected:", expectedName, "actual:", actualNmae)
 	}
 }

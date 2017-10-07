@@ -100,7 +100,6 @@ func showTable(resp http.ResponseWriter, reader dbReader, table schema.Table, qu
 		rowDataPointers[i] = &rowData[i]
 	}
 	for rows.Next() {
-
 		err := rows.Scan(rowDataPointers...)
 		if err != nil {
 			log.Println("error reading row data", err)
