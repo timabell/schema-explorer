@@ -191,9 +191,11 @@ func buildCell(fks schema.GlobalFkList, table schema.Table, col schema.Column, c
 		valueHTML = valueHTML + template.HTMLEscapeString(fmt.Sprintf("%d", colData))
 	case col.Type == "float":
 		valueHTML = valueHTML + template.HTMLEscapeString(fmt.Sprintf("%f", colData))
+	case col.Type == "text": // sqlite
+		fallthrough
 	case strings.Contains(col.Type, "varchar"):
 		valueHTML = valueHTML + template.HTMLEscapeString(fmt.Sprintf("%s", colData))
-	case strings.Contains(col.Type, "TEXT"):
+	case strings.Contains(col.Type, "TEXT"): // mssql
 		// https://stackoverflow.com/a/18615786/10245
 		bytes := colData.([]uint8)
 		log.Println(bytes)
