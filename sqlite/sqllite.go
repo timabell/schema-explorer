@@ -155,7 +155,7 @@ func (model sqliteModel) GetColumns(table schema.Table) (cols []schema.Column, e
 		return
 	}
 	defer dbc.Close()
-	rows, err := dbc.Query("PRAGMA table_info('" + table.String() + "');")
+	rows, err := dbc.Query("PRAGMA table_info('" + table.Name + "');")
 	if err != nil {
 		return
 	}

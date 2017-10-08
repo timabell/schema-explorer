@@ -8,10 +8,10 @@ end
 
 create table foo (
 	id integer primary key,
-	name varchar(max)
+	name varchar(max),
 	colour nvarchar(123)
 );
-insert into foo (id, name) values
+insert into foo (id, name, colour) values
 	(1, 'raaa', 'blue')
 ;
 select * from foo;

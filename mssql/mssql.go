@@ -167,5 +167,31 @@ func (model mssqlModel) GetRows(query schema.RowFilter, table schema.Table, rowL
 }
 
 func (model mssqlModel) GetColumns(table schema.Table) (cols []schema.Column, err error) {
-	panic("not implemented")
+	dbc, err := getConnection(model.connectionString)
+	if dbc == nil {
+		log.Println(err)
+		panic("getConnection() returned nil")
+	}
+	defer dbc.Close()
+
+	// todo: parameterise
+	sqlText := `select c.name from sys.columns c
+	inner join sys.tables t on t.object_id = c.object_id
+	inner join sys.schemas s on s.schema_id = t.schema_id
+	where s.name = '` + table.Schema + `' and t.name = '` + table.Name + `'
+order by c.column_id`
+
+	rows, err := dbc.Query(sqlText)
+	defer rows.Close()
+	cols = []schema.Column{}
+	for rows.Next() {
+		var cid int
+		var name, typeName string
+		var notNull, pk bool
+		var defaultValue interface{}
+		rows.Scan(&cid, &name, &typeName, &notNull, &defaultValue, &pk)
+		thisCol := schema.Column{name, typeName}
+		cols = append(cols, thisCol)
+	}
+	return
 }

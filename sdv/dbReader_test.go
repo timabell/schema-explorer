@@ -47,25 +47,25 @@ func Test_GetTables(t *testing.T) {
 	table := tables[0]
 	expectedName := "foo"
 	if table.Name != expectedName {
-		t.Fatal("Expected table '%s' found '%s'", expectedName, table.Name)
+		t.Fatalf("Expected table '%s' found '%s'", expectedName, table.Name)
 	}
 }
 
 func Test_GetColumns(t *testing.T) {
 	reader := getDbReader(testDbDriver, testDb)
-	table := schema.Table{Name: "foo"}
+	table := schema.Table{Schema: "dbo",Name: "foo"}
 	columns, err := reader.GetColumns(table)
 	if err != nil {
 		t.Fatal(err)
 	}
-	expectedCount := 2
+	expectedCount := 3
 	if len(columns) != expectedCount {
-		t.Fatal("Expected %d columns, found %d", expectedCount, len(columns))
+		t.Fatalf("Expected %d columns, found %d", expectedCount, len(columns))
 	}
 	col0 := columns[0]
 	expectedName := "id"
 	if col0.Name != expectedName {
-		t.Fatal("Expected column '%s' found '%s'", expectedName, col0)
+		t.Fatalf("Expected column '%s' found '%s'", expectedName, col0)
 	}
 }
 
