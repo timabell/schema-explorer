@@ -77,7 +77,7 @@ func Test_GetRows(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer rows.Close()
-	cols := 2
+	cols := 3
 	rowData := make([]interface{}, cols)
 	rowDataPointers := make([]interface{}, cols)
 	for i := 0; i < cols; i++ {
@@ -92,12 +92,17 @@ func Test_GetRows(t *testing.T) {
 	}
 	var expectedId int64 = 1
 	expectedName := "raaa"
+	expectedColour := "blue"
 	actualId := rowData[0]
-	actualNmae := rowData[1]
+	actualName := rowData[1]
+	actualColour := rowData[2]
 	if actualId != expectedId {
-		t.Errorf("Row 1 col 1 expected %d got %d", expectedId, actualId)
+		t.Errorf("Row 1 col id expected %d got %d", expectedId, actualId)
 	}
-	if actualNmae != expectedName {
-		t.Error("Row 1 col 2 table foo, incorrect data; expected:", expectedName, "actual:", actualNmae)
+	if actualName != expectedName {
+		t.Error("Row 1 col name table foo, incorrect data; expected:", expectedName, "actual:", actualName)
+	}
+	if actualColour != expectedColour {
+		t.Error("Row 1 col colour table foo, incorrect data; expected:", expectedColour, "actual:", actualColour)
 	}
 }

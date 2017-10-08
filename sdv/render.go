@@ -183,7 +183,6 @@ func buildCell(fks schema.GlobalFkList, table schema.Table, col schema.Column, c
 		}
 		valueHTML = valueHTML + "' class='fk'>"
 	}
-	log.Println(col.Type, colData)
 	switch {
 	case colData == nil:
 		valueHTML = valueHTML + "<span class='null'>[null]</span>"
@@ -193,12 +192,11 @@ func buildCell(fks schema.GlobalFkList, table schema.Table, col schema.Column, c
 		valueHTML = valueHTML + template.HTMLEscapeString(fmt.Sprintf("%f", colData))
 	case col.Type == "text": // sqlite
 		fallthrough
-	case strings.Contains(col.Type, "varchar"):
+	case strings.Contains(strings.ToLower(col.Type), "varchar"): // sqlite is [N]VARCHAR sqlserver is [n]varchar
 		valueHTML = valueHTML + template.HTMLEscapeString(fmt.Sprintf("%s", colData))
 	case strings.Contains(col.Type, "TEXT"): // mssql
 		// https://stackoverflow.com/a/18615786/10245
 		bytes := colData.([]uint8)
-		log.Println(bytes)
 		valueHTML = valueHTML + template.HTMLEscapeString(fmt.Sprintf("%s", string(bytes)))
 	default:
 		valueHTML = valueHTML + template.HTMLEscapeString(fmt.Sprintf("%v", colData))

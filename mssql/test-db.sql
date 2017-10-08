@@ -9,9 +9,9 @@ end
 create table foo (
 	id integer primary key,
 	name varchar(max)
+	colour nvarchar(123)
 );
 insert into foo (id, name) values
-	(1, 'raaa'),
-	(2, 'meow')
+	(1, 'raaa', 'blue')
 ;
 select * from foo;

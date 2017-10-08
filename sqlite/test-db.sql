@@ -3,10 +3,10 @@
 
 create table foo (
 	id integer primary key,
-	name text
+	name text,
+  colour nvarchar(123)
 );
-insert into foo (id, name) values
-	(1, "raaa"),
-	(2, "meow")
+insert into foo (id, name, colour) values
+	(1, "raaa", "blue")
 ;
 select * from foo;
