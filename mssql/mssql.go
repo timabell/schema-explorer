@@ -21,7 +21,7 @@ func NewMssql(connectionString string) mssqlModel {
 func (model mssqlModel) GetTables() (tables []schema.Table, err error) {
 	dbc, err := getConnection(model.connectionString)
 	if err != nil {
-		return
+		return nil, err
 	}
 	defer dbc.Close()
 
@@ -175,7 +175,7 @@ func (model mssqlModel) GetColumns(table schema.Table) (cols []schema.Column, er
 	defer dbc.Close()
 
 	// todo: parameterise
-	sqlText := `select c.name from sys.columns c
+	sqlText := `select c.name, type_name(c.system_type_id) from sys.columns c
 	inner join sys.tables t on t.object_id = c.object_id
 	inner join sys.schemas s on s.schema_id = t.schema_id
 	where s.name = '` + table.Schema + `' and t.name = '` + table.Name + `'
@@ -185,12 +185,9 @@ order by c.column_id`
 	defer rows.Close()
 	cols = []schema.Column{}
 	for rows.Next() {
-		var cid int
 		var name, typeName string
-		var notNull, pk bool
-		var defaultValue interface{}
-		rows.Scan(&cid, &name, &typeName, &notNull, &defaultValue, &pk)
-		thisCol := schema.Column{name, typeName}
+		rows.Scan(&name, &typeName)
+		thisCol := schema.Column{Name: name, Type: typeName}
 		cols = append(cols, thisCol)
 	}
 	return
