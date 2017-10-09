@@ -121,12 +121,11 @@ func (model mssqlModel) AllFks() (allFks schema.GlobalFkList, err error) {
 		rows.Scan(&name, &parentSchema, &parentTableName, &parentCol, &childSchema, &childTableName, &childCol)
 		parentTable := schema.Table{Schema: parentSchema, Name: parentTableName}
 		childTable := schema.Table{Schema: childSchema, Name: childTableName}
-		col := schema.Column{parentCol, ""}
 		if allFks[parentTable.String()] == nil {
 			allFks[parentTable.String()] = schema.FkList{}
 		}
 		// todo: support compound foreign keys (i.e. those with 2+ columns involved
-		allFks[parentTable.String()][col] = schema.Ref{Col: schema.Column{childCol, ""}, Table: childTable}
+		allFks[parentTable.String()][parentCol] = schema.Ref{Col: childCol, Table: childTable}
 	}
 	return
 }

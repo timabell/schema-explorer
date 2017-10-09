@@ -139,14 +139,14 @@ func buildInwardCell(inwardFks schema.GlobalFkList, rowData []interface{}, cols 
 	return parentHTML
 }
 
-func buildInwardLink(parentTable string, parentCol schema.Column, rowData []interface{}, cols []schema.Column, ref schema.Ref) string {
+func buildInwardLink(parentTable string, parentCol string, rowData []interface{}, cols []schema.Column, ref schema.Ref) string {
 	linkHTML := fmt.Sprintf(
 		"<a href='%s?%s=",
 		template.URLQueryEscaper(parentTable),
 		template.URLQueryEscaper(parentCol))
 	// todo: handle non-string primary key
 	// todo: handle compound primary key
-	colData := rowData[indexOfCol(cols, string(ref.Col.Name))]
+	colData := rowData[indexOfCol(cols, string(ref.Col))]
 	switch colData.(type) {
 	case int64:
 		// todo: url-escape as well
@@ -167,7 +167,7 @@ func buildInwardLink(parentTable string, parentCol schema.Column, rowData []inte
 
 func buildCell(fks schema.GlobalFkList, table schema.Table, col schema.Column, colData interface{}) string {
 	var valueHTML string
-	ref, refExists := fks[table.String()][col]
+	ref, refExists := fks[table.String()][col.Name]
 	if refExists && colData != nil {
 		valueHTML = fmt.Sprintf("<a href='%s?%s=", ref.Table, ref.Col)
 		switch {

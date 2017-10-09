@@ -25,11 +25,11 @@ type RowFilter map[string][]string
 // reference to a field in another table, part of a foreign key
 type Ref struct {
 	Table Table  // target table for the fk
-	Col   Column // target col for the fk
+	Col   string // target col for the fk
 }
 
 // list of foreign keys, the column in the current table that the fk is defined on
-type FkList map[Column]Ref
+type FkList map[string]Ref
 
 // for each table in the database, the list of fks defined on that table
 type GlobalFkList map[string]FkList

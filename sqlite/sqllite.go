@@ -104,8 +104,8 @@ func fks(dbc *sql.DB, table schema.Table) (fks schema.FkList, err error) {
 		var id, seq int
 		var parentTable, from, to, onUpdate, onDelete, match string
 		rows.Scan(&id, &seq, &parentTable, &from, &to, &onUpdate, &onDelete, &match)
-		thisRef := schema.Ref{Col: schema.Column{to, ""}, Table: schema.Table{Schema: "", Name: parentTable}}
-		fks[schema.Column{from, ""}] = thisRef
+		thisRef := schema.Ref{Col: to, Table: schema.Table{Schema: "", Name: parentTable}}
+		fks[from] = thisRef
 	}
 	return
 }
