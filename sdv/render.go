@@ -41,7 +41,6 @@ func SetupTemplate() {
 	tmpl = template.Must(tmpl.Parse(footerHTML))
 	tmpl = template.Must(tmpl.Parse(tablesHTML))
 	tmpl = template.Must(tmpl.Parse(dataHTML))
-
 }
 
 func showTableList(resp http.ResponseWriter, tables []schema.Table) {

@@ -56,7 +56,7 @@ func handler(resp http.ResponseWriter, req *http.Request) {
 	switch folders[1] {
 	case "tables":
 		// todo: check not missing table name
-		table := schema.Table{Schema: "", Name: folders[2]}
+		table := parseTableName(folders[2])
 		var query = req.URL.Query()
 		var rowLimit int
 		var err error
@@ -87,4 +87,15 @@ func handler(resp http.ResponseWriter, req *http.Request) {
 
 		showTableList(resp, tables)
 	}
+}
+
+// Split dot-separated name into schema + table name
+func parseTableName(tableFullname string) (table schema.Table) {
+	if strings.Contains(tableFullname, ".") {
+		splitName := strings.SplitN(tableFullname, ".", 2)
+		table = schema.Table{Schema: splitName[0], Name: splitName[1]}
+	} else {
+		table = schema.Table{Schema: "", Name: tableFullname}
+	}
+	return
 }
