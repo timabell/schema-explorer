@@ -92,18 +92,12 @@ func showTable(resp http.ResponseWriter, reader dbReader, table schema.Table, qu
 	}
 	viewModel.Cols = cols
 
-	// http://stackoverflow.com/a/23507765/10245 - getting ad-hoc column data
-	rowData := make([]interface{}, len(cols))
-	rowDataPointers := make([]interface{}, len(cols))
-	for i := 0; i < len(cols); i++ {
-		rowDataPointers[i] = &rowData[i]
+	rowsData, err := GetAllData(cols, rows)
+	if err != nil {
+		return err
 	}
-	for rows.Next() {
-		err := rows.Scan(rowDataPointers...)
-		if err != nil {
-			log.Println("error reading row data", err)
-			return err
-		}
+
+	for _,rowData := range rowsData {
 		row := buildRow(cols, rowData, fks, table, inwardFks)
 		viewModel.Rows = append(viewModel.Rows, row)
 	}
@@ -115,11 +109,11 @@ func showTable(resp http.ResponseWriter, reader dbReader, table schema.Table, qu
 	return err
 }
 
-func buildRow(cols []schema.Column, rowData []interface{}, fks schema.GlobalFkList, table schema.Table, inwardFks schema.GlobalFkList) cells {
+func buildRow(cols []schema.Column, rowData RowData, fks schema.GlobalFkList, table schema.Table, inwardFks schema.GlobalFkList) cells {
 	row := cells{}
 	for colIndex, col := range cols {
-		colData := rowData[colIndex]
-		valueHTML := buildCell(fks, table, col, colData)
+		cellData := rowData[colIndex]
+		valueHTML := buildCell(fks, table, col, cellData)
 		row = append(row, template.HTML(valueHTML))
 	}
 	parentHTML := buildInwardCell(inwardFks, rowData, cols)
@@ -139,7 +133,7 @@ func buildInwardCell(inwardFks schema.GlobalFkList, rowData []interface{}, cols 
 	return parentHTML
 }
 
-func buildInwardLink(parentTable string, parentCol string, rowData []interface{}, cols []schema.Column, ref schema.Ref) string {
+func buildInwardLink(parentTable string, parentCol string, rowData RowData, cols []schema.Column, ref schema.Ref) string {
 	linkHTML := fmt.Sprintf(
 		"<a href='%s?%s=",
 		template.URLQueryEscaper(parentTable),
@@ -165,42 +159,27 @@ func buildInwardLink(parentTable string, parentCol string, rowData []interface{}
 	return linkHTML
 }
 
-func buildCell(fks schema.GlobalFkList, table schema.Table, col schema.Column, colData interface{}) string {
+func buildCell(fks schema.GlobalFkList, table schema.Table, col schema.Column, cellData interface{}) string {
+	if cellData == nil{
+		return "<span class='null'>[null]</span>"
+	}
 	var valueHTML string
-	ref, refExists := fks[table.String()][col.Name]
-	if refExists && colData != nil {
+	ref, hasFk := fks[table.String()][col.Name]
+	stringValue := *DbValueToString(cellData, col.Type)
+	if hasFk {
 		valueHTML = fmt.Sprintf("<a href='%s?%s=", ref.Table, ref.Col)
+		// todo: url-escape as well as htmlencode
 		switch {
-		case col.Type == "integer":
-			// todo: url-escape as well
-			valueHTML = valueHTML + template.HTMLEscapeString(fmt.Sprintf("%d", colData))
 		case strings.Contains(col.Type, "varchar"):
 			// todo: sql-quotes here are a hack pending switching to parameterized sql
-			valueHTML = valueHTML + "%27" + template.HTMLEscapeString(fmt.Sprintf("%s", colData)) + "%27"
+			valueHTML = valueHTML + "%27" + template.HTMLEscapeString(stringValue) + "%27"
 		default:
-			valueHTML = valueHTML + template.HTMLEscapeString(fmt.Sprintf("%v", colData))
+			valueHTML = valueHTML + template.HTMLEscapeString(stringValue)
 		}
 		valueHTML = valueHTML + "' class='fk'>"
 	}
-	switch {
-	case colData == nil:
-		valueHTML = valueHTML + "<span class='null'>[null]</span>"
-	case col.Type == "integer":
-		valueHTML = valueHTML + template.HTMLEscapeString(fmt.Sprintf("%d", colData))
-	case col.Type == "float":
-		valueHTML = valueHTML + template.HTMLEscapeString(fmt.Sprintf("%f", colData))
-	case col.Type == "text": // sqlite
-		fallthrough
-	case strings.Contains(strings.ToLower(col.Type), "varchar"): // sqlite is [N]VARCHAR sqlserver is [n]varchar
-		valueHTML = valueHTML + template.HTMLEscapeString(fmt.Sprintf("%s", colData))
-	case strings.Contains(col.Type, "TEXT"): // mssql
-		// https://stackoverflow.com/a/18615786/10245
-		bytes := colData.([]uint8)
-		valueHTML = valueHTML + template.HTMLEscapeString(fmt.Sprintf("%s", string(bytes)))
-	default:
-		valueHTML = valueHTML + template.HTMLEscapeString(fmt.Sprintf("%v", colData))
-	}
-	if refExists && colData != nil {
+	valueHTML = valueHTML + template.HTMLEscapeString(stringValue)
+	if hasFk {
 		valueHTML = valueHTML + "</a>"
 	}
 	return valueHTML

@@ -106,3 +106,10 @@ func Test_GetRows(t *testing.T) {
 		t.Error("Row 1 col colour table foo, incorrect data; expected:", expectedColour, "actual:", actualColour)
 	}
 }
+
+func Test_DataTypes(t *testing.T){
+	// todo: test reads correctly from db
+}
+func Test_TypeConversion(t *testing.T){
+	// todo: test converts correctly to string
+}
