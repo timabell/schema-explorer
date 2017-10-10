@@ -1,5 +1,7 @@
 package sqlite
 
+// Sqlite doesn't support schema so table.schema is ignored throughout
+
 import (
 	"bitbucket.org/timabell/sql-data-viewer/schema"
 	"database/sql"
@@ -34,7 +36,7 @@ func (model sqliteModel) GetTables() (tables []schema.Table, err error) {
 	for rows.Next() {
 		var name string
 		rows.Scan(&name)
-		tables = append(tables, schema.Table{Schema: "", Name: name})
+		tables = append(tables, schema.Table{Name: name})
 	}
 	return tables, nil
 }
@@ -86,7 +88,7 @@ func (model sqliteModel) AllFks() (allFks schema.GlobalFkList, err error) {
 		allFks[table.String()], err = fks(dbc, table)
 		if err != nil {
 			// todo: show in UI
-			fmt.Println("error getting fks for table "+table.String(), err)
+			fmt.Println("error getting fks for table "+table.Name, err)
 			return
 		}
 	}
@@ -94,7 +96,7 @@ func (model sqliteModel) AllFks() (allFks schema.GlobalFkList, err error) {
 }
 
 func fks(dbc *sql.DB, table schema.Table) (fks schema.FkList, err error) {
-	rows, err := dbc.Query("PRAGMA foreign_key_list('" + table.String() + "');")
+	rows, err := dbc.Query("PRAGMA foreign_key_list('" + table.Name + "');")
 	if err != nil {
 		return
 	}
@@ -104,14 +106,14 @@ func fks(dbc *sql.DB, table schema.Table) (fks schema.FkList, err error) {
 		var id, seq int
 		var parentTable, from, to, onUpdate, onDelete, match string
 		rows.Scan(&id, &seq, &parentTable, &from, &to, &onUpdate, &onDelete, &match)
-		thisRef := schema.Ref{Col: to, Table: schema.Table{Schema: "", Name: parentTable}}
+		thisRef := schema.Ref{Col: to, Table: schema.Table{Name: parentTable}}
 		fks[from] = thisRef
 	}
 	return
 }
 
 func (model sqliteModel) GetSqlRows(query schema.RowFilter, table schema.Table, rowLimit int) (rows *sql.Rows, err error) {
-	sql := "select * from " + table.String()
+	sql := "select * from " + table.Name
 
 	if len(query) > 0 {
 		sql = sql + " where "
