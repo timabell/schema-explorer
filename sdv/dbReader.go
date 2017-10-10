@@ -19,11 +19,11 @@ type dbReader interface {
 // Single row of data
 type RowData []interface{}
 
-func GetAllData(cols []schema.Column, rows *sql.Rows) (rowsData []RowData, err error) {
+func GetAllData(colCount int, rows *sql.Rows) (rowsData []RowData, err error) {
 	// http://stackoverflow.com/a/23507765/10245 - getting ad-hoc column data
-	singleRow := make([]interface{}, len(cols))
-	rowDataPointers := make([]interface{}, len(cols))
-	for i := 0; i < len(cols); i++ {
+	singleRow := make([]interface{}, colCount)
+	rowDataPointers := make([]interface{}, colCount)
+	for i := 0; i < colCount; i++ {
 		rowDataPointers[i] = &singleRow[i]
 	}
 	for rows.Next() {

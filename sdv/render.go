@@ -92,7 +92,7 @@ func showTable(resp http.ResponseWriter, reader dbReader, table schema.Table, qu
 	}
 	viewModel.Cols = cols
 
-	rowsData, err := GetAllData(cols, rows)
+	rowsData, err := GetAllData(len(cols), rows)
 	if err != nil {
 		return err
 	}
@@ -106,7 +106,7 @@ func showTable(resp http.ResponseWriter, reader dbReader, table schema.Table, qu
 		log.Print("template execution error", err)
 		panic(err)
 	}
-	return err
+	return nil
 }
 
 func buildRow(cols []schema.Column, rowData RowData, fks schema.GlobalFkList, table schema.Table, inwardFks schema.GlobalFkList) cells {
