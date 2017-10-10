@@ -130,7 +130,7 @@ func (model mssqlModel) AllFks() (allFks schema.GlobalFkList, err error) {
 	return
 }
 
-func (model mssqlModel) GetRows(query schema.RowFilter, table schema.Table, rowLimit int) (rows *sql.Rows, err error) {
+func (model mssqlModel) GetSqlRows(query schema.RowFilter, table schema.Table, rowLimit int) (rows *sql.Rows, err error) {
 	// todo: sql parameters instead of string concatenation
 	sqlText := "select"
 

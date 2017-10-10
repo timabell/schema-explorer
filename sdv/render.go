@@ -80,9 +80,9 @@ func showTable(resp http.ResponseWriter, reader dbReader, table schema.Table, qu
 
 	inwardFks := table.FindParents(fks)
 
-	rows, err := reader.GetRows(query, table, rowLimit)
+	rows, err := reader.GetSqlRows(query, table, rowLimit)
 	if rows == nil {
-		panic("GetRows() returned nil")
+		panic("GetSqlRows() returned nil")
 	}
 	defer rows.Close()
 

@@ -110,7 +110,7 @@ func fks(dbc *sql.DB, table schema.Table) (fks schema.FkList, err error) {
 	return
 }
 
-func (model sqliteModel) GetRows(query schema.RowFilter, table schema.Table, rowLimit int) (rows *sql.Rows, err error) {
+func (model sqliteModel) GetSqlRows(query schema.RowFilter, table schema.Table, rowLimit int) (rows *sql.Rows, err error) {
 	sql := "select * from " + table.String()
 
 	if len(query) > 0 {

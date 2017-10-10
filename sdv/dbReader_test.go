@@ -72,7 +72,7 @@ func Test_GetColumns(t *testing.T) {
 func Test_GetRows(t *testing.T) {
 	reader := getDbReader(testDbDriver, testDb)
 	// todo: move up a level of abstraction and test the interpretation of the row data
-	rows, err := reader.GetRows(nil, schema.Table{Name: "foo"}, 1)
+	rows, err := reader.GetSqlRows(nil, schema.Table{Name: "foo"}, 1)
 	if err != nil {
 		t.Fatal(err)
 	}
