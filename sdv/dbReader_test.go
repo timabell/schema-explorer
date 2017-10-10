@@ -53,7 +53,7 @@ func Test_GetTables(t *testing.T) {
 
 func Test_GetColumns(t *testing.T) {
 	reader := getDbReader(testDbDriver, testDb)
-	table := schema.Table{Schema: "dbo",Name: "foo"}
+	table := schema.Table{Schema: "dbo", Name: "foo"}
 	columns, err := reader.GetColumns(table)
 	if err != nil {
 		t.Fatal(err)
@@ -71,45 +71,40 @@ func Test_GetColumns(t *testing.T) {
 
 func Test_GetRows(t *testing.T) {
 	reader := getDbReader(testDbDriver, testDb)
-	// todo: move up a level of abstraction and test the interpretation of the row data
-	rows, err := reader.GetSqlRows(nil, schema.Table{Name: "foo"}, 1)
+	rowCount := 1
+	table := schema.Table{Schema: "dbo", Name: "foo"}
+	columns, err := reader.GetColumns(table)
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer rows.Close()
-	cols := 3
-	rowData := make([]interface{}, cols)
-	rowDataPointers := make([]interface{}, cols)
-	for i := 0; i < cols; i++ {
-		rowDataPointers[i] = &rowData[i]
+	rows, err := GetRows(reader, nil, table, len(columns), rowCount+1)
+	if len(rows) != rowCount {
+		t.Errorf("Expected %d rows got %d", rowCount, len(rows))
 	}
-	if !rows.Next() {
-		t.Fatal("no rows")
-	}
-	err = rows.Scan(rowDataPointers...)
 	if err != nil {
 		t.Fatal(err)
 	}
-	var expectedId int64 = 1
+	rowData := rows[0]
+	expectedId := "1"
 	expectedName := "raaa"
 	expectedColour := "blue"
-	actualId := rowData[0]
-	actualName := rowData[1]
-	actualColour := rowData[2]
-	if actualId != expectedId {
+	actualId := DbValueToString(rowData[0], columns[0].Type)
+	actualName := DbValueToString(rowData[1], columns[1].Type)
+	actualColour := DbValueToString(rowData[2], columns[2].Type)
+	if *actualId != expectedId {
 		t.Errorf("Row 1 col id expected %d got %d", expectedId, actualId)
 	}
-	if actualName != expectedName {
+	if *actualName != expectedName {
 		t.Error("Row 1 col name table foo, incorrect data; expected:", expectedName, "actual:", actualName)
 	}
-	if actualColour != expectedColour {
+	if *actualColour != expectedColour {
 		t.Error("Row 1 col colour table foo, incorrect data; expected:", expectedColour, "actual:", actualColour)
 	}
 }
 
-func Test_DataTypes(t *testing.T){
+func Test_DataTypes(t *testing.T) {
 	// todo: test reads correctly from db
 }
-func Test_TypeConversion(t *testing.T){
+func Test_TypeConversion(t *testing.T) {
 	// todo: test converts correctly to string
 }
