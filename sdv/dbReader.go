@@ -19,6 +19,20 @@ type dbReader interface {
 // Single row of data
 type RowData []interface{}
 
+func GetRows(reader dbReader, query schema.RowFilter, table schema.Table, colCount int, rowLimit int) (rowsData []RowData, err error) {
+	rows, err := reader.GetSqlRows(query, table, rowLimit)
+	if rows == nil {
+		panic("GetSqlRows() returned nil")
+	}
+	defer rows.Close()
+
+	rowsData, err = GetAllData(colCount, rows)
+	if err != nil {
+		return nil, err
+	}
+	return
+}
+
 func GetAllData(colCount int, rows *sql.Rows) (rowsData []RowData, err error) {
 	// http://stackoverflow.com/a/23507765/10245 - getting ad-hoc column data
 	singleRow := make([]interface{}, colCount)

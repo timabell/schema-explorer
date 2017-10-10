@@ -80,19 +80,13 @@ func showTable(resp http.ResponseWriter, reader dbReader, table schema.Table, qu
 
 	inwardFks := table.FindParents(fks)
 
-	rows, err := reader.GetSqlRows(query, table, rowLimit)
-	if rows == nil {
-		panic("GetSqlRows() returned nil")
-	}
-	defer rows.Close()
-
 	cols, err := reader.GetColumns(table)
 	if err != nil {
 		panic(err)
 	}
 	viewModel.Cols = cols
 
-	rowsData, err := GetAllData(len(cols), rows)
+	rowsData, err := GetRows(reader, query, table, len(cols), rowLimit)
 	if err != nil {
 		return err
 	}
