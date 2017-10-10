@@ -97,7 +97,7 @@ func showTable(resp http.ResponseWriter, reader dbReader, table schema.Table, qu
 		return err
 	}
 
-	for _,rowData := range rowsData {
+	for _, rowData := range rowsData {
 		row := buildRow(cols, rowData, fks, table, inwardFks)
 		viewModel.Rows = append(viewModel.Rows, row)
 	}
@@ -160,7 +160,7 @@ func buildInwardLink(parentTable string, parentCol string, rowData RowData, cols
 }
 
 func buildCell(fks schema.GlobalFkList, table schema.Table, col schema.Column, cellData interface{}) string {
-	if cellData == nil{
+	if cellData == nil {
 		return "<span class='null'>[null]</span>"
 	}
 	var valueHTML string
