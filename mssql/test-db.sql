@@ -1,17 +1,17 @@
 -- mssql example db for regression tests
 -- schema must match test code's expectations
 
-if object_id('foo', 'U') is not null
+if object_id('DataTypeTest', 'U') is not null
 begin
-	drop table foo;
+	drop table DataTypeTest;
 end
 
-create table foo (
-	id integer primary key,
-	name varchar(max),
-	colour nvarchar(123)
+create table DataTypeTest (
+	intpk integer primary key,
+	varcharmax varchar(max),
+	nvarchar nvarchar(123)
 );
-insert into foo (id, name, colour) values
-	(1, 'raaa', 'blue')
+insert into DataTypeTest (id, name, colour) values
+	(1, 'this is a ''text'' field', 'blue')
 ;
-select * from foo;
+select * from DataTypeTest;
