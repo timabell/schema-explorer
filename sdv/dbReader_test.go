@@ -69,6 +69,16 @@ func Test_GetColumns(t *testing.T) {
 	}
 }
 
+var testCases = []struct {
+	row      int
+	col      int
+	expected string
+}{
+	{0, 0, "1"},
+	{0, 1, "raaa"},
+	{0, 2, "blue"},
+}
+
 func Test_GetRows(t *testing.T) {
 	reader := getDbReader(testDbDriver, testDb)
 	rowCount := 1
@@ -84,21 +94,13 @@ func Test_GetRows(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	rowData := rows[0]
-	expectedId := "1"
-	expectedName := "raaa"
-	expectedColour := "blue"
-	actualId := DbValueToString(rowData[0], columns[0].Type)
-	actualName := DbValueToString(rowData[1], columns[1].Type)
-	actualColour := DbValueToString(rowData[2], columns[2].Type)
-	if *actualId != expectedId {
-		t.Errorf("Row 1 col id expected %d got %d", expectedId, actualId)
-	}
-	if *actualName != expectedName {
-		t.Error("Row 1 col name table foo, incorrect data; expected:", expectedName, "actual:", actualName)
-	}
-	if *actualColour != expectedColour {
-		t.Error("Row 1 col colour table foo, incorrect data; expected:", expectedColour, "actual:", actualColour)
+	for _, testCase := range testCases {
+		t.Log(testCase)
+		actual := DbValueToString(rows[testCase.row][testCase.col], columns[testCase.col].Type)
+		if *actual != testCase.expected {
+			t.Error("Row %d col %d name table foo, incorrect data; expected:", testCase.expected, "actual:", *actual)
+		}
+
 	}
 }
 
