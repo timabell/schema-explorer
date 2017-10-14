@@ -34,21 +34,29 @@ func GetRows(reader dbReader, query schema.RowFilter, table schema.Table, colCou
 }
 
 func GetAllData(colCount int, rows *sql.Rows) (rowsData []RowData, err error) {
+	for rows.Next() {
+		row, err := GetRow(colCount, rows)
+		if err != nil {
+			return nil, err
+		}
+		rowsData = append(rowsData, row)
+	}
+	return
+}
+
+func GetRow(colCount int, rows *sql.Rows) (rowsData RowData, err error) {
 	// http://stackoverflow.com/a/23507765/10245 - getting ad-hoc column data
 	singleRow := make([]interface{}, colCount)
 	rowDataPointers := make([]interface{}, colCount)
 	for i := 0; i < colCount; i++ {
 		rowDataPointers[i] = &singleRow[i]
 	}
-	for rows.Next() {
-		err := rows.Scan(rowDataPointers...)
-		if err != nil {
-			log.Println("error reading row data", err)
-			return nil, err
-		}
-		rowsData = append(rowsData, singleRow)
+	err = rows.Scan(rowDataPointers...)
+	if err != nil {
+		log.Println("error reading row data", err)
+		return nil, err
 	}
-	return
+	return singleRow, err
 }
 
 func DbValueToString(colData interface{}, dataType string) *string {

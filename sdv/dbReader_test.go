@@ -29,6 +29,7 @@ import (
 	"bitbucket.org/timabell/sql-data-viewer/schema"
 	_ "github.com/mattn/go-sqlite3"
 	_ "github.com/simnalamburt/go-mssqldb"
+	"strings"
 )
 
 var testDb string
@@ -73,38 +74,50 @@ func Test_GetTables(t *testing.T) {
 	}
 }
 
+type testCase struct {
+	colName        string
+	row            int
+	expectedType   string
+	expectedString string
+}
+
+var tests = []testCase{
+	testCase{colName: "field_INT", row: 0, expectedType: "INT", expectedString: "20"},
+	testCase{colName: "field_INT", row: 1, expectedType: "INT", expectedString: "-33"},
+}
+
 // [row][col]
-var expectedStrings = [][]string {
+var expectedStrings = [][]string{
 	{
-"10", //intpk
-"20", //field_INT
-"30", //field_INTEGER
-"50", //field_TINYINT
-"60", //field_SMALLINT
-"70", //field_MEDIUMINT
-"80", //field_BIGINT
-"90", //field_UNSIGNED
-"100", //field_INT2
-"110", //field_INT8
-"field_CHARACTER", //field_CHARACTER
-"field_VARCHAR", //field_VARCHAR
-"field_VARYING", //field_VARYING
-"field_NCHAR", //field_NCHAR
-"field_NATIVE", //field_NATIVE
-"field_NVARCHAR", //field_NVARCHAR
-"field_TEXT", //field_TEXT
-"field_CLOB", //field_CLOB
-"field_BLOB", //field_BLOB
-"field_REAL", //field_REAL
-"field_DOUBLE", //field_DOUBLE
-"field_DOUBLEPRECISION", //field_DOUBLEPRECISION
-"field_FLOAT", //field_FLOAT
-"field_NUMERIC", //field_NUMERIC
-"field_DECIMAL", //field_DECIMAL
-"true", //field_BOOLEAN
-"field_DATE", //field_DATE
-"field_DATETIME", //field_DATETIME
- 	},
+		"10",                    //intpk
+		"20",                    //field_INT
+		"30",                    //field_INTEGER
+		"50",                    //field_TINYINT
+		"60",                    //field_SMALLINT
+		"70",                    //field_MEDIUMINT
+		"80",                    //field_BIGINT
+		"90",                    //field_UNSIGNED
+		"100",                   //field_INT2
+		"110",                   //field_INT8
+		"field_CHARACTER",       //field_CHARACTER
+		"field_VARCHAR",         //field_VARCHAR
+		"field_VARYING",         //field_VARYING
+		"field_NCHAR",           //field_NCHAR
+		"field_NATIVE",          //field_NATIVE
+		"field_NVARCHAR",        //field_NVARCHAR
+		"field_TEXT",            //field_TEXT
+		"field_CLOB",            //field_CLOB
+		"field_BLOB",            //field_BLOB
+		"field_REAL",            //field_REAL
+		"field_DOUBLE",          //field_DOUBLE
+		"field_DOUBLEPRECISION", //field_DOUBLEPRECISION
+		"field_FLOAT",           //field_FLOAT
+		"field_NUMERIC",         //field_NUMERIC
+		"field_DECIMAL",         //field_DECIMAL
+		"true",                  //field_BOOLEAN
+		"field_DATE",            //field_DATE
+		"field_DATETIME",        //field_DATETIME
+	},
 }
 
 func Test_GetRows(t *testing.T) {
@@ -114,23 +127,49 @@ func Test_GetRows(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	rowCount := len(expectedStrings)
-	rows, err := GetRows(reader, nil, table, len(columns), rowCount+1)
-	if len(rows) != rowCount {
-		t.Errorf("Expected %d rows got %d", rowCount, len(rows))
-	}
+	rows, err := GetRows(reader, nil, table, len(columns), 999)
 	if err != nil {
 		t.Fatal(err)
 	}
-	for r, row := range expectedStrings {
-		for c, expected := range row{
-			t.Logf("%d,%d: %s", r, c, expected)
-			actual := DbValueToString(rows[r][c], columns[c].Type)
-			if *actual != expected {
-				t.Errorf("Row %d col %d name table DataTypeTest, incorrect data; expected: '%s' actual: '%s'", r, c, expected, *actual)
-			}
+	found, countIndex := findCol(columns, "colCount")
+	if !found {
+		t.Fatal("colCount column missing")
+	}
+	expectedColCount := int(rows[0][countIndex].(int64))
+	if len(columns) != expectedColCount {
+		t.Errorf("Expected %#v columns, found %#v", expectedColCount, len(columns))
+	}
+
+	for _, test := range tests {
+		t.Logf("%+v", test)
+		if test.row+1 > len(rows) {
+			t.Errorf("Not enough rows. %+v", test)
+			continue
+		}
+		found, columnIndex := findCol(columns, test.colName)
+		if !found {
+			t.Logf("Skipped test for non-existent column %+v", test)
+			continue
+		}
+
+		actualType := columns[columnIndex].Type
+		if !strings.EqualFold(actualType, test.expectedType) {
+			t.Errorf("Incorrect column type %s %+v", actualType, test)
+		}
+		actualString := DbValueToString(rows[test.row][columnIndex], actualType)
+		if *actualString != test.expectedString {
+			t.Errorf("Incorrect string '%s' %+v", *actualString, test)
 		}
 	}
+}
+
+func findCol(columns []schema.Column, columnName string) (found bool, index int) {
+	for index, col := range columns {
+		if col.Name == columnName {
+			return true, index
+		}
+	}
+	return false, 0
 }
 
 func Test_DataTypes(t *testing.T) {

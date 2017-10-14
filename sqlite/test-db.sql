@@ -5,6 +5,7 @@ drop table if exists DataTypeTest;
 
 create table DataTypeTest (
 	intpk integer primary key,
+	colCount int,
 	field_INT INT,
 	field_INTEGER INTEGER,
 	field_TINYINT TINYINT,
@@ -36,6 +37,7 @@ create table DataTypeTest (
 
 insert into DataTypeTest(
 	intpk,
+	colCount,
 	-- https://www.sqlite.org/datatype3.html#affinity_name_examples
 	field_INT,
 	field_INTEGER,
@@ -66,7 +68,38 @@ insert into DataTypeTest(
 	field_DATETIME
 )values(
 	10, --intpk
+	29, --colCount
 	20, --INT
+	30, --INTEGER
+	50, --TINYINT
+	60, --SMALLINT
+	70, --MEDIUMINT
+	80, --BIGINT
+	90, --UNSIGNED
+	100, --INT2
+	110, --INT8
+	'field_CHARACTER', --CHARACTER
+	'field_VARCHAR', --VARCHAR
+	'field_VARYING', --VARYING
+	'field_NCHAR', --NCHAR
+	'field_NATIVE', --NATIVE
+	'field_NVARCHAR', --NVARCHAR
+	'field_TEXT', --TEXT
+	'field_CLOB', --CLOB
+	'field_BLOB', --BLOB
+	'field_REAL', --REAL
+	'field_DOUBLE', --DOUBLE
+	'field_DOUBLEPRECISION', --DOUBLE PRECISION
+	'field_FLOAT', --FLOAT
+	'field_NUMERIC', --NUMERIC
+	'field_DECIMAL', --DECIMAL
+	1, --BOOLEAN
+	'field_DATE', --DATE
+	'field_DATETIME' --DATETIME'
+),(
+	11, --intpk
+	0, --colCount
+	-33, --INT
 	30, --INTEGER
 	50, --TINYINT
 	60, --SMALLINT
