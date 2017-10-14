@@ -11,7 +11,8 @@ create table DataTypeTest (
 	colCount integer,
 	field_INT int,
 	field_varcharmax varchar(max),
-	field_nvarchar nvarchar(123)
+	field_nvarchar nvarchar(123),
+	field_uniqueidentifier UNIQUEIDENTIFIER
 );
 
 delete DataTypeTest;
@@ -20,19 +21,22 @@ insert into DataTypeTest (
 	colCount,
 	field_INT,
 	field_varcharmax,
-	field_nvarchar
+	field_nvarchar,
+	field_uniqueidentifier
 ) values (
 	10, --intpk
-	5, --colCount
+	6, --colCount
 	20, --field_INT
 	'this is a ''text'' field',
-	'blue'
+	'blue',
+	'b7a16c7a-a718-4ed8-97cb-20ccbadcc339'
 ),(
 	11, --intpk
 	0, --colCount
 	-33, --field_INT
 	'this is a ''text'' field',
-	'blue'
+	'blue',
+	'b470fa05-2111-46f9-9c97-f103b594c5f0'
 )
 ;
 select * from DataTypeTest;

@@ -82,42 +82,9 @@ type testCase struct {
 }
 
 var tests = []testCase{
-	testCase{colName: "field_INT", row: 0, expectedType: "INT", expectedString: "20"},
-	testCase{colName: "field_INT", row: 1, expectedType: "INT", expectedString: "-33"},
-}
-
-// [row][col]
-var expectedStrings = [][]string{
-	{
-		"10",                    //intpk
-		"20",                    //field_INT
-		"30",                    //field_INTEGER
-		"50",                    //field_TINYINT
-		"60",                    //field_SMALLINT
-		"70",                    //field_MEDIUMINT
-		"80",                    //field_BIGINT
-		"90",                    //field_UNSIGNED
-		"100",                   //field_INT2
-		"110",                   //field_INT8
-		"field_CHARACTER",       //field_CHARACTER
-		"field_VARCHAR",         //field_VARCHAR
-		"field_VARYING",         //field_VARYING
-		"field_NCHAR",           //field_NCHAR
-		"field_NATIVE",          //field_NATIVE
-		"field_NVARCHAR",        //field_NVARCHAR
-		"field_TEXT",            //field_TEXT
-		"field_CLOB",            //field_CLOB
-		"field_BLOB",            //field_BLOB
-		"field_REAL",            //field_REAL
-		"field_DOUBLE",          //field_DOUBLE
-		"field_DOUBLEPRECISION", //field_DOUBLEPRECISION
-		"field_FLOAT",           //field_FLOAT
-		"field_NUMERIC",         //field_NUMERIC
-		"field_DECIMAL",         //field_DECIMAL
-		"true",                  //field_BOOLEAN
-		"field_DATE",            //field_DATE
-		"field_DATETIME",        //field_DATETIME
-	},
+	{colName: "field_INT", row: 0, expectedType: "int", expectedString: "20"},
+	{colName: "field_INT", row: 1, expectedType: "int", expectedString: "-33"},
+	{colName: "field_uniqueidentifier", row: 0, expectedType: "uniqueidentifier", expectedString: "b7a16c7a-a718-4ed8-97cb-20ccbadcc339"},
 }
 
 func Test_GetRows(t *testing.T) {
@@ -141,7 +108,7 @@ func Test_GetRows(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		t.Logf("%+v", test)
+		//t.Logf("%+v", test)
 		if test.row+1 > len(rows) {
 			t.Errorf("Not enough rows. %+v", test)
 			continue
@@ -170,11 +137,4 @@ func findCol(columns []schema.Column, columnName string) (found bool, index int)
 		}
 	}
 	return false, 0
-}
-
-func Test_DataTypes(t *testing.T) {
-	// todo: test reads correctly from db
-}
-func Test_TypeConversion(t *testing.T) {
-	// todo: test converts correctly to string
 }
