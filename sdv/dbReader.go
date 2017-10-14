@@ -61,6 +61,7 @@ func GetRow(colCount int, rows *sql.Rows) (rowsData RowData, err error) {
 
 func DbValueToString(colData interface{}, dataType string) *string {
 	var stringValue string
+	uuidLen := 16
 	switch {
 	case colData == nil:
 		return nil
@@ -68,6 +69,13 @@ func DbValueToString(colData interface{}, dataType string) *string {
 		stringValue = fmt.Sprintf("%d", colData)
 	case dataType == "float":
 		stringValue = fmt.Sprintf("%f", colData)
+	case dataType == "uniqueidentifier": // mssql guid
+		bytes := colData.([]byte)
+		if len(bytes) != uuidLen {
+			panic(fmt.Sprintf("Unexpected byte-count for uniqueidentifier, expected %d, got %d. Value: %+v", uuidLen, len(bytes), colData))
+		}
+		stringValue = fmt.Sprintf("%x%x%x%x-%x%x-%x%x-%x%x-%x%x%x%x%x%x",
+			bytes[3], bytes[2], bytes[1], bytes[0], bytes[5], bytes[4], bytes[7], bytes[6], bytes[8], bytes[9], bytes[10], bytes[11], bytes[12], bytes[13], bytes[14], bytes[15])
 	case dataType == "text": // sqlite
 		fallthrough
 	case strings.Contains(strings.ToLower(dataType), "varchar"): // sqlite is [N]VARCHAR sqlserver is [n]varchar
