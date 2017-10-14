@@ -1,5 +1,27 @@
 package sdv
 
+/*
+Tests multiple rdbms implementations by way of test.sh shell script that repeatedly runs the same
+tests for each supported rdbms.
+Relies on matching sql files having been run to set up each test database.
+
+The tests are testing pulling data from a real database (integration testing) because
+the layer between the code and the database is the most fragile.
+The tests do not cover the UI layer beyond translation of data from the database into
+strings for display.
+
+In order to test different databases where they support an overlapping but not identical
+set of data types the following strategy is used:
+
+Every supported db system gets a table with a column for each data type that is supported by
+that rdbms, named to match, then the test code tests the conversion to string for each
+available data type. This allows data types that are common to be tested with a single test
+but still support data types that are unique to a particular rdbms.
+
+The expected number of cols is included in an extra column so we can double-check that we
+aren't silently missing any of the supported data types.
+*/
+
 import (
 	"flag"
 	"testing"
