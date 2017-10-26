@@ -28,7 +28,7 @@ func (model sqliteModel) GetTables() (tables []schema.Table, err error) {
 	}
 	defer dbc.Close()
 
-	rows, err := dbc.Query("SELECT name FROM sqlite_master WHERE type='table';")
+	rows, err := dbc.Query("SELECT name FROM sqlite_master WHERE type='table' AND name not like 'sqlite_%';")
 	if err != nil {
 		return nil, err
 	}
