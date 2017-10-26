@@ -6,6 +6,7 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"sort"
 	"strings"
 )
 
@@ -116,13 +117,18 @@ func buildRow(cols []schema.Column, rowData RowData, fks schema.GlobalFkList, ta
 }
 
 func buildInwardCell(inwardFks schema.GlobalFkList, rowData []interface{}, cols []schema.Column) string {
-	// todo: stable sort order http://stackoverflow.com/questions/23330781/sort-golang-map-values-by-keys
 	// todo: pre-calculate fk info so this isn't repeated for every row
+	// stable sort order http://stackoverflow.com/questions/23330781/sort-golang-map-values-by-keys
+	tables := make([]string, 0)
+	for key, _ := range inwardFks {
+		tables = append(tables, key)
+	}
+	sort.Strings(tables)
 	parentHTML := ""
-	for parentTable, parentFks := range inwardFks {
-		parentHTML = parentHTML + template.HTMLEscapeString(parentTable) + ":&nbsp;"
-		for parentCol, ref := range parentFks {
-			parentHTML = parentHTML + buildInwardLink(parentTable, parentCol, rowData, cols, ref)
+	for _, table := range tables {
+		parentHTML = parentHTML + template.HTMLEscapeString(table) + ":&nbsp;"
+		for parentCol, ref := range inwardFks[table] {
+			parentHTML = parentHTML + buildInwardLink(table, parentCol, rowData, cols, ref)
 		}
 		parentHTML = parentHTML + " "
 	}
