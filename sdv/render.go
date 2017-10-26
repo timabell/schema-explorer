@@ -120,9 +120,11 @@ func buildInwardCell(inwardFks schema.GlobalFkList, rowData []interface{}, cols 
 	// todo: pre-calculate fk info so this isn't repeated for every row
 	parentHTML := ""
 	for parentTable, parentFks := range inwardFks {
+		parentHTML = parentHTML + template.HTMLEscapeString(parentTable) + ":&nbsp;"
 		for parentCol, ref := range parentFks {
 			parentHTML = parentHTML + buildInwardLink(parentTable, parentCol, rowData, cols, ref)
 		}
+		parentHTML = parentHTML + " "
 	}
 	return parentHTML
 }
@@ -147,8 +149,7 @@ func buildInwardLink(parentTable string, parentCol string, rowData RowData, cols
 	}
 	linkHTML = linkHTML + fmt.Sprintf(
 		// todo: factor out row limit, move to a cookie perhaps
-		"&_rowLimit=100' class='parentFk'>%s.%s</a>&nbsp;",
-		template.HTMLEscaper(parentTable),
+		"&_rowLimit=100' class='parentFk'>%s</a>&nbsp;",
 		template.HTMLEscaper(parentCol))
 	return linkHTML
 }
