@@ -1,3 +1,3 @@
 package sdv
 
-const Version = "0.5"
+const Version = "0.6"
