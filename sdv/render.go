@@ -127,8 +127,13 @@ func buildInwardCell(inwardFks schema.GlobalFkList, rowData []interface{}, cols 
 	parentHTML := ""
 	for _, table := range tables {
 		parentHTML = parentHTML + template.HTMLEscapeString(table) + ":&nbsp;"
-		for parentCol, ref := range inwardFks[table] {
-			parentHTML = parentHTML + buildInwardLink(table, parentCol, rowData, cols, ref)
+		parentCols := make([]string, 0)
+		for colKey, _ := range inwardFks[table] {
+			parentCols = append(parentCols, colKey)
+		}
+		sort.Strings(parentCols)
+		for _, parentCol := range parentCols {
+			parentHTML = parentHTML + buildInwardLink(table, parentCol, rowData, cols, inwardFks[table][parentCol])
 		}
 		parentHTML = parentHTML + " "
 	}
