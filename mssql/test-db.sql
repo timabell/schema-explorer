@@ -11,6 +11,8 @@ create table DataTypeTest (
 	colCount integer,
 	field_INT int,
 	field_money MONEY,
+	field_numeric numeric(18,7),
+	field_decimal decimal(18,7),
 	field_varcharmax varchar(max),
 	field_nvarchar nvarchar(123),
 	field_uniqueidentifier UNIQUEIDENTIFIER
@@ -22,14 +24,18 @@ insert into DataTypeTest (
 	colCount,
 	field_INT,
 	field_money,
+	field_numeric,
+	field_decimal,
 	field_varcharmax,
 	field_nvarchar,
 	field_uniqueidentifier
 ) values (
 	10, --intpk
-	7, --colCount
+	9, --colCount
 	20, --field_INT
 	1234.567, --field_money,
+	987.1234500, --field_numeric,
+	666.1234500, --field_decimal,
 	'this is a ''text'' field',
 	'blue',
 	'b7a16c7a-a718-4ed8-97cb-20ccbadcc339'
@@ -38,6 +44,8 @@ insert into DataTypeTest (
 	0, --colCount
 	-33, --field_INT
 	null, --field_money,
+	null, --field_numeric,
+	null, --field_decimal,
 	'this is a ''text'' field',
 	'blue',
 	'b470fa05-2111-46f9-9c97-f103b594c5f0'
