@@ -25,10 +25,15 @@ type tablesViewModel struct {
 
 type cells []template.HTML
 
+type FieldFilter struct {
+	Field  string
+	Values []string
+}
+
 type dataViewModel struct {
 	LayoutData pageTemplateModel
 	Table      schema.Table
-	Query      string
+	Query      []FieldFilter
 	RowLimit   int
 	Cols       []schema.Column
 	Rows       []cells
@@ -57,15 +62,22 @@ func showTableList(resp http.ResponseWriter, tables []schema.Table) {
 }
 
 func showTable(resp http.ResponseWriter, reader dbReader, table schema.Table, query schema.RowFilter, rowLimit int) error {
-	var formattedQuery string
+	fieldFilter := make([]FieldFilter, 0)
 	if len(query) > 0 {
-		formattedQuery = fmt.Sprintf("%s", query)
+		fieldKeys := make([]string, 0)
+		for field, _ := range query {
+			fieldKeys = append(fieldKeys, field)
+		}
+		sort.Strings(fieldKeys)
+		for _, field := range fieldKeys {
+			fieldFilter = append(fieldFilter, FieldFilter{Field: field, Values: query[field]})
+		}
 	}
 
 	viewModel := dataViewModel{
 		LayoutData: layoutData,
 		Table:      table,
-		Query:      formattedQuery,
+		Query:      fieldFilter,
 		RowLimit:   rowLimit,
 		Cols:       []schema.Column{},
 		Rows:       []cells{},
@@ -216,6 +228,10 @@ const headerHTML = `
 		footer { color: #666; text-align: right; font-size: smaller; }
 		footer a { color: #66c; }
 		th.references { font-style: italic }
+		table {border: 1px solid #666; border-collapse: collapse; margin: 0.5em 0;}
+		th {background: #eee; text-align: left;}
+		th, td{padding: 0.2em; border: 1px solid #666;}
+		.filters thead th {background: #ccc;}
 	</style>
 </head>
 <body>
@@ -251,7 +267,36 @@ const dataHTML = `
 {{template "header" .LayoutData}}
 	<h2>Table {{.Table.Name}}</h2>
 	{{ if .Query }}
-		<p class='filtered'>Filtered - {{.Query}} &nbsp; &nbsp; <a href="?_rowLimit={{.RowLimit}}">Clear filter</a><p>
+		<table class='filters'>
+			<thead>
+				<tr>
+					<th colspan="2">
+						Records filtered to:
+					</th>
+				</tr>
+			</thead>
+			<tbody>
+				{{ range .Query }}
+					<tr>
+						<th>
+							{{.Field}}
+						</th>
+						<td>
+							{{ range .Values }}
+								{{.}}
+							{{end}}
+						</td>
+					</tr>
+				{{end}}
+			</tbody>
+			<tfoot>
+				<tr>
+					<td colspan="2">
+						<a href="?_rowLimit={{.RowLimit}}">Clear</a>
+					</td>
+				</tr>
+			<t/foot>
+		</table>
 	{{end}}
 	{{ if .RowLimit }}
 		<p class='filtered'>First {{.RowLimit}} rows<p>
