@@ -84,6 +84,7 @@ type testCase struct {
 var tests = []testCase{
 	{colName: "field_INT", row: 0, expectedType: "int", expectedString: "20"},
 	{colName: "field_INT", row: 1, expectedType: "int", expectedString: "-33"},
+	{colName: "field_money", row: 0, expectedType: "money", expectedString: "1234.5670"},
 	{colName: "field_uniqueidentifier", row: 0, expectedType: "uniqueidentifier", expectedString: "b7a16c7a-a718-4ed8-97cb-20ccbadcc339"},
 }
 
