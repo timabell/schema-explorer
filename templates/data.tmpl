@@ -1,0 +1,55 @@
+{{define "data"}}
+{{template "header" .LayoutData}}
+<h2>Table {{.Table.Name}}</h2>
+{{ if .Query }}
+<table class='filters'>
+    <thead>
+    <tr>
+        <th colspan="2">
+            Records filtered to:
+        </th>
+    </tr>
+    </thead>
+    <tbody>
+    {{ range .Query }}
+    <tr>
+        <th>
+            {{.Field}}
+        </th>
+        <td>
+            {{ range .Values }}
+            {{.}}
+            {{end}}
+        </td>
+    </tr>
+    {{end}}
+    </tbody>
+    <tfoot>
+    <tr>
+        <td colspan="2">
+            <a href="?_rowLimit={{.RowLimit}}">Clear</a>
+        </td>
+    </tr>
+    <t/foot>
+</table>
+{{end}}
+{{ if .RowLimit }}
+<p class='filtered'>First {{.RowLimit}} rows<p>
+    {{end}}
+<table border=1>
+    <tr>
+        {{ range .Cols }}
+        <th title='type: {{.Type}}'>{{.Name}}</th>
+        {{end}}
+        <th class='references'>referenced by</th>
+    </tr>
+    {{ range .Rows }}
+    <tr>
+        {{ range . }}
+        <td>{{.}}</td>
+        {{end}}
+    </tr>
+    {{end}}
+</table>
+{{template "footer" .LayoutData}}
+{{end}}

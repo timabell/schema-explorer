@@ -1,0 +1,24 @@
+{{define "header"}}
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+    <title>{{.Title}}</title>
+    <style type='text/css'>
+        body { background-color: #f9fff9; margin: 1em; }
+        .null { color: #999; }
+        #connected { font-style: italic; }
+        .config-value { background-color: #eee; }
+        footer { color: #666; text-align: right; font-size: smaller; }
+        footer a { color: #66c; }
+        th.references { font-style: italic }
+        table {border: 1px solid #666; border-collapse: collapse; margin: 0.5em 0;}
+        th {background: #eee; text-align: left;}
+        th, td{padding: 0.2em; border: 1px solid #666;}
+        .filters thead th {background: #ccc;}
+    </style>
+</head>
+<body>
+<h1>Sql Data Viewer</h1>
+<nav><a href='/'>Table list</a></nav>
+{{end}}
+
