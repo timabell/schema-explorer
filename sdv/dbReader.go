@@ -90,6 +90,8 @@ func DbValueToString(colData interface{}, dataType string) *string {
 		// https://stackoverflow.com/a/18615786/10245
 		bytes := colData.([]uint8)
 		stringValue = fmt.Sprintf("%s", bytes)
+	case dataType == "varbinary": // mssql varbinary
+		stringValue = "[binary]"
 	default:
 		stringValue = fmt.Sprintf("%v", colData)
 	}
