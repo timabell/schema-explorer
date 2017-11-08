@@ -6,7 +6,7 @@ type aboutType struct {
 
 var About = aboutType{
 	ProductName: "Sql Data Viewer",
-	Version:     "0.8",
+	Version:     "0.9",
 	Website:     "https://sqldataviewer.com/",
 	Email:       "sdv@timwise.co.uk",
 }
