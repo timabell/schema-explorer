@@ -13,7 +13,7 @@ import (
 type pageTemplateModel struct {
 	Title     string
 	Db        string
-	Version   string
+	About     aboutType
 	Copyright string
 	Timestamp string
 }

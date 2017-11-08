@@ -7,7 +7,7 @@ import (
 )
 
 // roughly 3 months from when this is released into the wild
-var Expiry = time.Date(2018, time.January, 1, 0, 0, 0, 0, time.UTC)
+var Expiry = time.Date(2018, time.February, 1, 0, 0, 0, 0, time.UTC)
 var CopyrightYear = 2017
 
 func Licensing() {
@@ -17,5 +17,5 @@ func Licensing() {
 }
 
 func CopyrightText() string {
-	return fmt.Sprintf("Sql Data Viewer v%s; Copyright 2015-%d Tim Abell <sdv@timwise.co.uk>", Version, CopyrightYear)
+	return fmt.Sprintf("Copyright 2015-%d Tim Abell", CopyrightYear)
 }

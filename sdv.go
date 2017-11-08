@@ -35,8 +35,10 @@ func main() {
 		os.Exit(1)
 	}
 
-	log.Print(sdv.CopyrightText())
-	log.Printf("## This pre-release software will expire on: %s, contact sdv@timwise.co.uk for a license. ##", sdv.Expiry)
+	log.Printf("%s Viewer v%s, %s", sdv.About.ProductName, sdv.About.Version, sdv.CopyrightText())
+	log.Print(sdv.About.Website)
+	log.Printf("Feeback/support/contact: <%s>", sdv.About.Email)
+	log.Printf("## This pre-release software will expire on: %s, contact %s for a license. ##", sdv.Expiry, sdv.About.Email)
 	sdv.Licensing()
 
 	// todo: cleanup way db info is passed to server & handler
