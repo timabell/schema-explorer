@@ -1,11 +1,42 @@
-body { background-color: #f9fff9; margin: 1em; }
-.null { color: #999; }
-#connected { font-style: italic; }
-.config-value { background-color: #eee; }
-footer { color: #666; text-align: right; font-size: smaller; }
-footer a { color: #66c; }
-th.references { font-style: italic }
-table {border: 1px solid #666; border-collapse: collapse; margin: 0.5em 0;}
-th {background: #eee; text-align: left;}
-th, td{padding: 0.2em; border: 1px solid #666;}
-.filters thead th {background: #ccc;}
+body {
+    background-color: #f9fff9;
+    margin: 1em;
+}
+
+footer {
+    color: #666;
+    text-align: right;
+    font-size: smaller;
+}
+
+footer a {
+    color: #66c;
+}
+
+table {
+    border: 1px solid #666;
+    border-collapse: collapse;
+    margin: 0.5em 0;
+}
+
+th.references {
+    font-style: italic
+}
+
+th {
+    background: #eee;
+    text-align: left;
+}
+
+th, td {
+    padding: 0.2em;
+    border: 1px solid #666;
+}
+
+.filters thead th {
+    background: #ccc;
+}
+
+.null {
+    color: #999;
+}
