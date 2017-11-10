@@ -30,7 +30,6 @@ func RunServer(driverInfo string, dbConn string, port int, listenOn string) {
 }
 
 func serve(handler func(http.ResponseWriter, *http.Request), port int, listenOn string) {
-	// todo: use multiple handlers properly
 	http.HandleFunc("/", handler)
 	http.Handle("/static/", http.FileServer(http.Dir("")))
 	listenOnHostPort := fmt.Sprintf("%s:%d", listenOn, port) // e.g. localhost:8080 or 0.0.0.0:80
