@@ -5,6 +5,7 @@ import (
 	_ "github.com/awalterschulze/gographviz"
 	"io/ioutil"
 	"log"
+	"os/exec"
 )
 
 func DrawIt() {
@@ -16,15 +17,27 @@ func DrawIt() {
 	}
 	graph.AddNode("G", "a", nil)
 	graph.AddNode("G", "b", nil)
+	graph.AddNode("G", "c", nil)
 	graph.AddEdge("a", "b", true, nil)
+	graph.AddEdge("a", "c", true, nil)
 	output := graph.String()
-	WriteIt(output)
+	dotFilename := "thing.dot"
+	WriteIt(output, dotFilename)
+	RenderIt(dotFilename)
 }
 
-func WriteIt(graphDot string) {
+func WriteIt(graphDot string, tempFile string) {
 	bytes := []byte(graphDot)
-	err := ioutil.WriteFile("thing.dot", bytes, 0644)
+	err := ioutil.WriteFile(tempFile, bytes, 0644)
 	if err != nil {
+		panic(err)
+	}
+}
+
+func RenderIt(inputDotFile string) {
+	out, err := exec.Command("/usr/bin/dot", inputDotFile, "-Tsvg", "-O").Output()
+	if err != nil {
+		log.Println(out)
 		panic(err)
 	}
 }
