@@ -20,7 +20,7 @@ func DrawIt(reader dbReader) {
 		panic(err)
 	}
 	for _, table := range tables {
-		graph.AddNode("G", table.String(), nil)
+		graph.AddNode("G", "\""+table.String()+"\"", nil)
 	}
 	//graph.AddEdge("a", "c", true, nil)
 	output := graph.String()
