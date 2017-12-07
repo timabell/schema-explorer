@@ -27,7 +27,7 @@ func RunServer(driverInfo string, dbConn string, port int, listenOn string) {
 	}
 
 	// todo: wip
-	DrawIt()
+	DrawIt(reader)
 
 	serve(handler, port, listenOn)
 }

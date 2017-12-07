@@ -8,18 +8,21 @@ import (
 	"os/exec"
 )
 
-func DrawIt() {
+func DrawIt(reader dbReader) {
 	log.Println("do the graph thing")
 	graphAst, _ := gographviz.ParseString(`digraph G {}`)
 	graph := gographviz.NewGraph()
 	if err := gographviz.Analyse(graphAst, graph); err != nil {
 		panic(err)
 	}
-	graph.AddNode("G", "a", nil)
-	graph.AddNode("G", "b", nil)
-	graph.AddNode("G", "c", nil)
-	graph.AddEdge("a", "b", true, nil)
-	graph.AddEdge("a", "c", true, nil)
+	tables, err := reader.GetTables()
+	if err != nil {
+		panic(err)
+	}
+	for _, table := range tables {
+		graph.AddNode("G", table.String(), nil)
+	}
+	//graph.AddEdge("a", "c", true, nil)
 	output := graph.String()
 	dotFilename := "thing.dot"
 	WriteIt(output, dotFilename)
