@@ -49,9 +49,9 @@ func WriteIt(graphDot string, tempFile string) {
 }
 
 func RenderIt(inputDotFile string) {
-	out, err := exec.Command("/usr/bin/dot", inputDotFile, "-Tsvg", "-O").Output()
+	out, err := exec.Command("dot", inputDotFile, "-Tsvg", "-O").Output()
 	if err != nil {
-		log.Println(out)
+		log.Println(string(out))
 		panic(err)
 	}
 }
