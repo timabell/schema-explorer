@@ -9,7 +9,7 @@ import (
 )
 
 func DrawIt(reader dbReader) {
-	log.Println("do the graph thing")
+	log.Println("Generating diagrams...")
 	graphAst, _ := gographviz.ParseString(`digraph G {}`)
 	graph := gographviz.NewGraph()
 	if err := gographviz.Analyse(graphAst, graph); err != nil {
@@ -22,7 +22,18 @@ func DrawIt(reader dbReader) {
 	for _, table := range tables {
 		graph.AddNode("G", "\""+table.String()+"\"", nil)
 	}
-	//graph.AddEdge("a", "c", true, nil)
+	allKeys, err := reader.AllFks()
+	if err != nil {
+		panic(err)
+	}
+	for table, keys := range allKeys {
+		quotedTable := "\"" + table + "\""
+		// todo: per field refs, the below is currently aggregated to table level
+		for _, ref := range keys {
+			quotedReferencedTable := "\"" + ref.Table.String() + "\""
+			graph.AddEdge(quotedTable, quotedReferencedTable, true, nil)
+		}
+	}
 	output := graph.String()
 	dotFilename := "thing.dot"
 	WriteIt(output, dotFilename)
