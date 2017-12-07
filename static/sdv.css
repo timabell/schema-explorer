@@ -40,3 +40,7 @@ th, td {
 .null {
     color: #999;
 }
+
+#table-diagram img{
+    width: 100%;
+}

@@ -5,5 +5,10 @@
     <tr><td><a href='tables/{{.}}?_rowLimit=100'>{{.}}</a></td></tr>
     {{end}}
 </table>
+<div id="table-diagram">
+    <a href="static/cache/diagrams/tables.dot.svg">
+        <img src="static/cache/diagrams/tables.dot.svg" alt="diagram of table relationships"/>
+    </a>
+</div>
 {{template "footer" .LayoutData}}
 {{end}}

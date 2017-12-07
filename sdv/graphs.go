@@ -35,7 +35,7 @@ func DrawIt(reader dbReader) {
 		}
 	}
 	output := graph.String()
-	dotFilename := "thing.dot"
+	dotFilename := "static/cache/diagrams/tables.dot"
 	WriteIt(output, dotFilename)
 	RenderIt(dotFilename)
 }
