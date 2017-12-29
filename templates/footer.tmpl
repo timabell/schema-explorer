@@ -1,14 +1,10 @@
 {{define "footer"}}
+<h2>Generation info</h2>
 <footer>
-    <p>
-        Generated {{.Timestamp}}
-    </p>
-    <a href="{{.About.Website}}">{{.About.ProductName}}</a> v{{.About.Version}}, {{.Copyright}}
-    <br/>
-    Feedback/support/contact: <a href="mailto:{{.About.Email}}">{{.About.Email}}</a>
-    <br/>
-    Like it? Share it: <a href="https://twitter.com/intent/tweet?text=Sql%20Data%20Viewer%20https%3A%2F%2Fsqldataviewer.com%2F%20by%20%40tim_abell%20is%20great!%20You%20should%20try%20it%20too%20%3A-)" target="_blank">Tweet</a>
-    <br/>
+    <p>Generated {{.Timestamp}}</p>
+    <p><a href="{{.About.Website}}" target="_blank">{{.About.ProductName}}</a> v{{.About.Version}}, {{.Copyright}}</p>
+    <p>Feedback/support/contact: <a href="mailto:{{.About.Email}}">{{.About.Email}}</a></p>
+    <p>Like it? Share the love with a  <a href="https://twitter.com/intent/tweet?text=Sql%20Schema%20Explorer%20http%3A%2F%2Fschemaexplorer.io%2F%20by%20%40tim_abell%20is%20great!%20You%20should%20try%20it%20too%20%3A-)" target="_blank">tweet</a>!</p>
 </footer>
 </body>
 </html>

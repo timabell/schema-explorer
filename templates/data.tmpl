@@ -1,6 +1,9 @@
 {{define "data"}}
 {{template "header" .LayoutData}}
-<h2>Table {{.Table.Name}}</h2>
+<nav>
+    <p> <a href='/'>&lt;&lt; Table list</a> </p>
+</nav>
+<h2>Table: {{.Table.Name}}</h2>
 {{ if .Query }}
 <table class='filters'>
     <thead>

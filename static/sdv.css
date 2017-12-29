@@ -1,22 +1,30 @@
-body {
-    background-color: #f9fff9;
-    margin: 1em;
-}
-
-footer {
-    color: #666;
-    text-align: right;
-    font-size: smaller;
-}
-
-footer a {
-    color: #66c;
+*{font-family: Arial;color:#333;}
+body{background-color: #f8f8f8;}
+li{margin: 1em;}
+h1{margin-top: 1em;}
+.encore{font-size: 60%;}
+h1 a{text-decoration: none;color:#333;}
+a{color:#338;}
+a:hover{text-decoration: underline;color:#33f;}
+a:visited{color:#333;}
+h1,h2,h3,p{padding-left: 16px;}
+table{margin-left: 16px;}
+h2{
+  background-color: #333;
+  color: #f8f8f8;
+  padding-top: 0.5em;
+  padding-bottom: 0.5em;
+  margin-top: 1.5em;
+  margin-bottom: 1.5em;
 }
 
 table {
     border: 1px solid #666;
     border-collapse: collapse;
-    margin: 0.5em 0;
+}
+
+table.tableList, table.tableList td {
+    border-style: none;
 }
 
 th.references {
@@ -31,6 +39,10 @@ th {
 th, td {
     padding: 0.2em;
     border: 1px solid #666;
+}
+
+.filters {
+    margin-bottom: 1em;
 }
 
 .filters thead th {
