@@ -1,21 +1,17 @@
 *{font-family: Arial;color:#333;}
-body{background-color: #f8f8f8;}
-li{margin: 1em;}
-h1{margin-top: 1em;}
+body{background-color: #f8f8f8;margin: 16px 32px;}
+li{margin-bottom: 1em;}
+h1{margin-top: 32px;}
 .encore{font-size: 60%;}
 h1 a{text-decoration: none;color:#333;}
 a{color:#338;}
 a:hover{text-decoration: underline;color:#33f;}
 a:visited{color:#333;}
-h1,h2,h3,p{padding-left: 16px;}
-table{margin-left: 16px;}
 h2{
   background-color: #333;
   color: #f8f8f8;
-  padding-top: 0.5em;
-  padding-bottom: 0.5em;
-  margin-top: 1.5em;
-  margin-bottom: 1.5em;
+  padding: 0.5em 16px;
+  margin: 1.5em -16px;
 }
 
 table {
@@ -25,6 +21,7 @@ table {
 
 table.tableList, table.tableList td {
     border-style: none;
+    padding-left: 0;
 }
 
 th.references {
@@ -51,4 +48,9 @@ th, td {
 
 .null {
     color: #999;
+}
+
+#table-diagram img{
+    max-width: 100%;
+    margin: 1em 0;
 }
