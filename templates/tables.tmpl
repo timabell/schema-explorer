@@ -6,9 +6,14 @@
     <tr><td><a href='tables/{{.}}?_rowLimit=100'>{{.}}</a></td></tr>
     {{end}}
 </table>
+<h2>Relationship diagram</h2>
 <div id="table-diagram">
-    <a href="static/cache/diagrams/tables.dot.svg">
+    <a href="static/cache/diagrams/tables.dot.svg" target="_blank">
         <img src="static/cache/diagrams/tables.dot.svg" alt="diagram of table relationships"/>
+    </a>
+    <br/>
+    <a href="static/cache/diagrams/tables.dot.svg" target="_blank">
+        Open in new window
     </a>
 </div>
 {{template "footer" .LayoutData}}
