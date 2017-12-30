@@ -5,8 +5,8 @@ type aboutType struct {
 }
 
 var About = aboutType{
-	ProductName: "Sql Data Viewer",
+	ProductName: "Sql Schema Explorer",
 	Version:     "0.9",
-	Website:     "https://sqldataviewer.com/",
-	Email:       "sdv@timwise.co.uk",
+	Website:     "http://schemaexplorer.io/",
+	Email:       "sse@timwise.co.uk",
 }

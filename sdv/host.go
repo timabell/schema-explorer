@@ -12,10 +12,12 @@ import (
 
 var db string
 var driver string
+var liveTemplates bool
 
-func RunServer(driverInfo string, dbConn string, port int, listenOn string) {
+func RunServer(driverInfo string, dbConn string, port int, listenOn string, live bool) {
 	db = dbConn
 	driver = driverInfo
+	liveTemplates = live
 
 	SetupTemplate()
 
@@ -43,6 +45,10 @@ func serve(handler func(http.ResponseWriter, *http.Request), port int, listenOn 
 
 func handler(resp http.ResponseWriter, req *http.Request) {
 	Licensing()
+
+	if liveTemplates {
+		SetupTemplate()
+	}
 
 	reader := getDbReader(driver, db)
 

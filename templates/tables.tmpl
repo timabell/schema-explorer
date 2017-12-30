@@ -1,6 +1,7 @@
 {{define "tables"}}
 {{template "header" .LayoutData}}
-<table border=1>
+<h2>Tables</h2>
+<table border=1 class="tableList">
     {{range .Tables}}
     <tr><td><a href='tables/{{.}}?_rowLimit=100'>{{.}}</a></td></tr>
     {{end}}
