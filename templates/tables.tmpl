@@ -8,13 +8,45 @@
 </table>
 <h2>Relationship diagram</h2>
 <div id="table-diagram">
-    <a href="static/cache/diagrams/tables.dot.svg" target="_blank">
-        <img src="static/cache/diagrams/tables.dot.svg" alt="diagram of table relationships"/>
-    </a>
-    <br/>
-    <a href="static/cache/diagrams/tables.dot.svg" target="_blank">
-        Open in new window
-    </a>
 </div>
+<script>
+    $(document).ready(function() {
+        // http://js.cytoscape.org/#getting-started
+        var cy = cytoscape({
+            container: $('#table-diagram'),
+            elements: [
+                {data: {id: 'a'}},
+                {data: {id: 'b'}},
+                {data: {id: 'ab', source: 'a', target: 'b'}}
+            ],
+
+            style: [ // the stylesheet for the graph
+                {
+                    selector: 'node',
+                    style: {
+                        'background-color': '#666',
+                        'label': 'data(id)'
+                    }
+                },
+
+                {
+                    selector: 'edge',
+                    style: {
+                        'width': 3,
+                        'line-color': '#ccc',
+                        'target-arrow-color': '#ccc',
+                        'target-arrow-shape': 'triangle'
+                    }
+                }
+            ],
+
+            layout: {
+                name: 'grid',
+                rows: 1
+            }
+
+        });
+    });
+</script>
 {{template "footer" .LayoutData}}
 {{end}}

@@ -28,9 +28,6 @@ func RunServer(driverInfo string, dbConn string, port int, listenOn string, live
 		panic("connection check failed")
 	}
 
-	// todo: wip
-	DrawIt(reader)
-
 	serve(handler, port, listenOn)
 }
 
