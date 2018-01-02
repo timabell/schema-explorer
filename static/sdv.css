@@ -51,7 +51,6 @@ th, td {
 }
 
 #table-diagram {
-    width: 100%;
-    height: 50em;
+    height: 30em;
     margin: 1em 0;
 }
