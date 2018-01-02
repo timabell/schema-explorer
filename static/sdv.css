@@ -53,4 +53,6 @@ th, td {
 #table-diagram {
     height: 30em;
     margin: 1em 0;
+    border: 1px solid #333;
+    padding: 1em;
 }

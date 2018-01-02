@@ -25,7 +25,8 @@ type tablesViewModel struct {
 }
 
 type diagramViewModel struct {
-	Tables     []schema.Table
+	Tables []string
+	//Tables     []schema.Table // todo: use proper type
 	TableLinks []fkViewModel
 }
 
@@ -48,6 +49,7 @@ type dataViewModel struct {
 	RowLimit   int
 	Cols       []schema.Column
 	Rows       []cells
+	Diagram    diagramViewModel
 }
 
 var templates *template.Template
@@ -65,10 +67,14 @@ func showTableList(resp http.ResponseWriter, tables []schema.Table, fks schema.G
 			tableLinks = append(tableLinks, fkViewModel{Source: table, Destination: ref.Table.String()})
 		}
 	}
+	tableList := []string{}
+	for _, table := range tables {
+		tableList = append(tableList, table.String())
+	}
 	model := tablesViewModel{
 		LayoutData: layoutData,
 		Tables:     tables,
-		Diagram:    diagramViewModel{Tables: tables, TableLinks: tableLinks},
+		Diagram:    diagramViewModel{Tables: tableList, TableLinks: tableLinks},
 	}
 
 	err := templates.ExecuteTemplate(resp, "tables", model)
@@ -90,15 +96,6 @@ func showTable(resp http.ResponseWriter, reader dbReader, table schema.Table, qu
 		}
 	}
 
-	viewModel := dataViewModel{
-		LayoutData: layoutData,
-		Table:      table,
-		Query:      fieldFilter,
-		RowLimit:   rowLimit,
-		Cols:       []schema.Column{},
-		Rows:       []cells{},
-	}
-
 	fks, err := reader.AllFks()
 	if err != nil {
 		log.Println("error getting fks", err)
@@ -113,22 +110,58 @@ func showTable(resp http.ResponseWriter, reader dbReader, table schema.Table, qu
 	if err != nil {
 		panic(err)
 	}
-	viewModel.Cols = cols
 
 	rowsData, err := GetRows(reader, query, table, len(cols), rowLimit)
 	if err != nil {
 		return err
 	}
 
+	rows := []cells{}
 	for _, rowData := range rowsData {
 		row := buildRow(cols, rowData, fks, table, inwardFks)
-		viewModel.Rows = append(viewModel.Rows, row)
+		rows = append(rows, row)
 	}
+
+	//diagramTables:=[]schema.Table{table}
+	diagramTables := []string{table.String()}
+	for srcTable, tableFks := range fks {
+		if srcTable == table.String() {
+			for _, ref := range tableFks {
+				diagramTables = append(diagramTables, ref.Table.String())
+			}
+		}
+	}
+	tableLinks := []fkViewModel{}
+	for srcTable, tableFks := range fks {
+		if srcTable == table.String() {
+			for _, ref := range tableFks {
+				tableLinks = append(tableLinks, fkViewModel{Source: srcTable, Destination: ref.Table.String()})
+			}
+		}
+	}
+	for srcTable, inwardFk := range inwardFks {
+		diagramTables = append(diagramTables, srcTable)
+		for _, ref := range inwardFk {
+			tableLinks = append(tableLinks, fkViewModel{Source: srcTable, Destination: ref.Table.String()})
+		}
+	}
+
+	viewModel := dataViewModel{
+		LayoutData: layoutData,
+		Table:      table,
+		Query:      fieldFilter,
+		RowLimit:   rowLimit,
+		Cols:       cols,
+		Rows:       rows,
+		Diagram:    diagramViewModel{Tables: diagramTables, TableLinks: tableLinks},
+	}
+
 	err = templates.ExecuteTemplate(resp, "data", viewModel)
 	if err != nil {
 		log.Print("template execution error", err)
 		panic(err)
 	}
+
 	return nil
 }
 

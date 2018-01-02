@@ -4,6 +4,8 @@
     <p> <a href='/'>&lt;&lt; Table list</a> </p>
 </nav>
 <h2>Table: {{.Table.Name}}</h2>
+{{template "diagram" .Diagram}}
+<h2>Data</h2>
 {{ if .Query }}
 <table class='filters'>
     <thead>
