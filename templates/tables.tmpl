@@ -9,6 +9,8 @@
 <h2 id="diagram">Relationship diagram</h2>
 <div id="table-diagram">
 </div>
+<script src="/static/vendor/cytoscape-dagre/dagre.min.js"></script>
+<script src="/static/vendor/cytoscape-dagre/cytoscape-dagre.js"></script>
 <script>
     $(document).ready(function() {
         // http://js.cytoscape.org/#getting-started
@@ -23,7 +25,7 @@
                 {{end}}
             ],
             layout: {
-                name: 'circle'
+                name: 'dagre'
             },
             style: [
                 {
