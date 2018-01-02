@@ -18,6 +18,9 @@
                 {{range .Tables}}
                     {data: {id: '{{.}}'}},
                 {{end}}
+                {{range .TableLinks}}
+                    {data: {source: '{{.Source}}', target: '{{.Destination}}'}},
+                {{end}}
                 // {data: {id: 'ab', source: 'a', target: 'b'}}
             ],
 
