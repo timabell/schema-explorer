@@ -21,11 +21,16 @@ type pageTemplateModel struct {
 type tablesViewModel struct {
 	LayoutData pageTemplateModel
 	Tables     []schema.Table
-	TableLinks        []fkViewModel
+	Diagram    diagramViewModel
+}
+
+type diagramViewModel struct {
+	Tables     []schema.Table
+	TableLinks []fkViewModel
 }
 
 type fkViewModel struct {
-	Source string
+	Source      string
 	Destination string
 }
 
@@ -57,13 +62,13 @@ func showTableList(resp http.ResponseWriter, tables []schema.Table, fks schema.G
 	for table, keys := range fks {
 		// todo: per field refs, the below is currently aggregated to table level
 		for _, ref := range keys {
-			tableLinks = append(tableLinks, fkViewModel{Source:table, Destination:ref.Table.String()})
+			tableLinks = append(tableLinks, fkViewModel{Source: table, Destination: ref.Table.String()})
 		}
 	}
 	model := tablesViewModel{
 		LayoutData: layoutData,
 		Tables:     tables,
-		TableLinks: tableLinks,
+		Diagram:    diagramViewModel{Tables: tables, TableLinks: tableLinks},
 	}
 
 	err := templates.ExecuteTemplate(resp, "tables", model)
