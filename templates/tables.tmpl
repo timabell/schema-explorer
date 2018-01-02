@@ -15,9 +15,10 @@
         var cy = cytoscape({
             container: $('#table-diagram'),
             elements: [
-                {data: {id: 'a'}},
-                {data: {id: 'b'}},
-                {data: {id: 'ab', source: 'a', target: 'b'}}
+                {{range .Tables}}
+                    {data: {id: '{{.}}'}},
+                {{end}}
+                // {data: {id: 'ab', source: 'a', target: 'b'}}
             ],
 
             style: [ // the stylesheet for the graph

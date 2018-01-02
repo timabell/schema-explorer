@@ -21,6 +21,7 @@ type pageTemplateModel struct {
 type tablesViewModel struct {
 	LayoutData pageTemplateModel
 	Tables     []schema.Table
+	Fks        schema.GlobalFkList
 }
 
 type cells []template.HTML
@@ -46,10 +47,11 @@ func SetupTemplate() {
 	templates = template.Must(template.ParseGlob("templates/*.tmpl"))
 }
 
-func showTableList(resp http.ResponseWriter, tables []schema.Table) {
+func showTableList(resp http.ResponseWriter, tables []schema.Table, fks schema.GlobalFkList) {
 	model := tablesViewModel{
 		LayoutData: layoutData,
 		Tables:     tables,
+		Fks:        fks,
 	}
 
 	err := templates.ExecuteTemplate(resp, "tables", model)

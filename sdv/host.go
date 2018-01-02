@@ -91,7 +91,11 @@ func handler(resp http.ResponseWriter, req *http.Request) {
 			return
 		}
 
-		showTableList(resp, tables)
+		allKeys, err := reader.AllFks()
+		if err != nil {
+			panic(err)
+		}
+		showTableList(resp, tables, allKeys)
 	}
 }
 
