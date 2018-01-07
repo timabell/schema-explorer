@@ -3,9 +3,16 @@
 <div id="table-diagram">
 </div>
 <script>
+    var cy;
+    function fitDiagram(){
+        // based on https://stackoverflow.com/a/27449713/10245
+        var boundingBox = cy.elements().boundingBox();
+        // console.log('diagram resized', boundingBox);
+        $('#table-diagram').css('height', boundingBox.h);
+    }
     $(document).ready(function() {
         // http://js.cytoscape.org/#getting-started
-        var cy = cytoscape({
+        cy = cytoscape({
             container: $('#table-diagram'),
             elements: [
             {{range .Tables}}
@@ -53,6 +60,9 @@
                 }
             ]
 
+        });
+        cy.ready(function(){
+            fitDiagram();
         });
     });
 </script>

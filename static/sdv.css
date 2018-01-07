@@ -51,7 +51,7 @@ th, td {
 }
 
 #table-diagram {
-    height: 30em;
+    height: 5em; /* initial height, will be altered in js when diagram rendered */
     margin: 1em 0;
     border: 1px solid #333;
     padding: 1em;
