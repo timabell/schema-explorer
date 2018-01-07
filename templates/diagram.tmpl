@@ -64,6 +64,9 @@
         cy.ready(function(){
             fitDiagram();
         });
+        cy.on('tap','node',function(e){
+            window.location = '/tables/' + e.target.data().id + '?_rowLimit=100';
+        })
     });
 </script>
 {{end}}
