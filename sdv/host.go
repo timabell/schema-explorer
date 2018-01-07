@@ -54,6 +54,7 @@ func handler(resp http.ResponseWriter, req *http.Request) {
 		Title:     "Sql Data Viewer",
 		About:     About,
 		Copyright: CopyrightText(),
+		LicenseText: LicenseText(),
 		Timestamp: time.Now().String(),
 	}
 

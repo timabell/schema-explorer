@@ -15,6 +15,7 @@ type pageTemplateModel struct {
 	Db        string
 	About     aboutType
 	Copyright string
+	LicenseText string
 	Timestamp string
 }
 
