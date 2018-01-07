@@ -64,7 +64,7 @@ func handler(resp http.ResponseWriter, req *http.Request) {
 
 	layoutData = pageTemplateModel{
 		Db:        db,
-		Title:     "Sql Data Viewer",
+		Title:     About.ProductName,
 		About:     About,
 		Copyright: CopyrightText(),
 		LicenseText: LicenseText(),
