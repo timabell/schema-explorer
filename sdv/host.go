@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"net/http/httputil"
 )
 
 var db string
@@ -32,12 +33,24 @@ func RunServer(driverInfo string, dbConn string, port int, listenOn string, live
 }
 
 func serve(handler func(http.ResponseWriter, *http.Request), port int, listenOn string) {
-	http.HandleFunc("/", handler)
+	http.HandleFunc("/", loggingHandler(handler))
 	http.Handle("/static/", http.FileServer(http.Dir("")))
 	listenOnHostPort := fmt.Sprintf("%s:%d", listenOn, port) // e.g. localhost:8080 or 0.0.0.0:80
 	log.Printf("Starting server on http://%s/ - Press Ctrl-C to kill server.\n", listenOnHostPort)
 	log.Fatal(http.ListenAndServe(listenOnHostPort, nil))
 	log.Panic("http.ListenAndServe didn't block")
+}
+
+func loggingHandler(nextHandler func(w http.ResponseWriter, r *http.Request)) (func(w http.ResponseWriter, r *http.Request)){
+	return func(w http.ResponseWriter, r *http.Request){
+		dump, err := httputil.DumpRequest(r, false)
+		if err!=nil{
+			log.Println("couldn't dump request")
+			panic(err)
+		}
+		log.Printf("Request from '%v'\n%s", r.RemoteAddr, dump)
+		nextHandler(w,r)
+	}
 }
 
 func handler(resp http.ResponseWriter, req *http.Request) {
