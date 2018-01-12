@@ -127,4 +127,5 @@ insert into DataTypeTest(
 	'field_DATE', --DATE
 	'field_DATETIME' --DATETIME'
 );
-select * from DataTypeTest;
+
+-- select * from DataTypeTest;

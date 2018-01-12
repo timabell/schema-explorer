@@ -4,6 +4,7 @@ echo "=================="
 echo "sqlite"
 echo "=================="
 
+(cd sqlite/ && ./setup.sh)
 
 # relative path hack with pwd, otherwise not resolved.
 # create db first with sqlite/setup.sh
