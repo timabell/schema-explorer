@@ -1,4 +1,5 @@
 #!/bin/sh -v
+./test.sh
 ./package.sh
 
 # for manual downloads from https://blog.timwise.co.uk/sdv/sdv-download/
