@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"net/http/httputil"
 	"strconv"
 	"strings"
 	"time"
-	"net/http/httputil"
 )
 
 var db string
@@ -41,15 +41,15 @@ func serve(handler func(http.ResponseWriter, *http.Request), port int, listenOn 
 	log.Panic("http.ListenAndServe didn't block")
 }
 
-func loggingHandler(nextHandler func(w http.ResponseWriter, r *http.Request)) (func(w http.ResponseWriter, r *http.Request)){
-	return func(w http.ResponseWriter, r *http.Request){
+func loggingHandler(nextHandler func(w http.ResponseWriter, r *http.Request)) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
 		dump, err := httputil.DumpRequest(r, false)
-		if err!=nil{
+		if err != nil {
 			log.Println("couldn't dump request")
 			panic(err)
 		}
 		log.Printf("Request from '%v'\n%s", r.RemoteAddr, dump)
-		nextHandler(w,r)
+		nextHandler(w, r)
 	}
 }
 
@@ -63,12 +63,12 @@ func handler(resp http.ResponseWriter, req *http.Request) {
 	reader := getDbReader(driver, db)
 
 	layoutData = pageTemplateModel{
-		Db:        db,
-		Title:     About.ProductName,
-		About:     About,
-		Copyright: CopyrightText(),
+		Db:          db,
+		Title:       About.ProductName,
+		About:       About,
+		Copyright:   CopyrightText(),
 		LicenseText: LicenseText(),
-		Timestamp: time.Now().String(),
+		Timestamp:   time.Now().String(),
 	}
 
 	// todo: proper url routing

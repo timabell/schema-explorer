@@ -11,12 +11,12 @@ import (
 )
 
 type pageTemplateModel struct {
-	Title     string
-	Db        string
-	About     aboutType
-	Copyright string
+	Title       string
+	Db          string
+	About       aboutType
+	Copyright   string
 	LicenseText string
-	Timestamp string
+	Timestamp   string
 }
 
 type tablesViewModel struct {
