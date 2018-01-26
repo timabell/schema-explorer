@@ -4,6 +4,19 @@
 </nav>
 <h2>Table: {{.Table.Name}}</h2>
 {{template "_diagram" .Diagram}}
+<h2>Columns</h2>
+    <table>
+        <tr>
+            <th>Name</th>
+            <th>Type</th>
+        </tr>
+        {{ range .Cols }}
+        <tr>
+            <td>{{.Name}}</td>
+            <td>{{.Type}}</td>
+        </tr>
+        {{end}}
+    </table>
 <h2>Data</h2>
 {{ if .Query }}
 <table class='filters'>
