@@ -157,7 +157,7 @@ func showTable(resp http.ResponseWriter, reader dbReader, table schema.Table, qu
 		Diagram:    diagramViewModel{Tables: diagramTables, TableLinks: tableLinks},
 	}
 
-	err = templates.ExecuteTemplate(resp, "data", viewModel)
+	err = templates.ExecuteTemplate(resp, "table", viewModel)
 	if err != nil {
 		log.Print("template execution error", err)
 		panic(err)
