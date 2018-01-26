@@ -53,11 +53,23 @@ type dataViewModel struct {
 	Diagram    diagramViewModel
 }
 
-var templates *template.Template
+var tablesTemplate *template.Template
+var tableTemplate *template.Template
 var layoutData pageTemplateModel
 
 func SetupTemplate() {
-	templates = template.Must(template.ParseGlob("templates/*.tmpl"))
+	templates, err := template.Must(template.ParseGlob("templates/layout.tmpl")).ParseGlob("templates/_*.tmpl")
+	if err != nil {
+		log.Fatal(err)
+	}
+	tablesTemplate, err = template.Must(templates.Clone()).ParseGlob("templates/tables.tmpl")
+	if err != nil {
+		log.Fatal(err)
+	}
+	tableTemplate, err = template.Must(templates.Clone()).ParseGlob("templates/table.tmpl")
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func showTableList(resp http.ResponseWriter, tables []schema.Table, fks schema.GlobalFkList) {
@@ -78,7 +90,7 @@ func showTableList(resp http.ResponseWriter, tables []schema.Table, fks schema.G
 		Diagram:    diagramViewModel{Tables: tableList, TableLinks: tableLinks},
 	}
 
-	err := templates.ExecuteTemplate(resp, "tables", model)
+	err := tablesTemplate.ExecuteTemplate(resp, "layout", model)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -157,7 +169,7 @@ func showTable(resp http.ResponseWriter, reader dbReader, table schema.Table, qu
 		Diagram:    diagramViewModel{Tables: diagramTables, TableLinks: tableLinks},
 	}
 
-	err = templates.ExecuteTemplate(resp, "table", viewModel)
+	err = tableTemplate.ExecuteTemplate(resp, "layout", viewModel)
 	if err != nil {
 		log.Print("template execution error", err)
 		panic(err)

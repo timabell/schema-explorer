@@ -1,11 +1,9 @@
-{{define "tables"}}
-{{template "header" .LayoutData}}
+{{define "content"}}
 <h2>Tables</h2>
 <table border=1 class="tableList">
     {{range .Tables}}
     <tr><td><a href='tables/{{.}}?_rowLimit=100'>{{.}}</a></td></tr>
     {{end}}
 </table>
-{{template "diagram" .Diagram}}
-{{template "footer" .LayoutData}}
+{{template "_diagram" .Diagram}}
 {{end}}

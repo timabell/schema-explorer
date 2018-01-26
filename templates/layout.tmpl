@@ -1,0 +1,34 @@
+{{define "layout"}}
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{.LayoutData.Title}}</title>
+    <link rel="stylesheet" type="text/css" href="/static/sdv.css"/>
+    <script src="/static/vendor/jquery/jquery-3.2.1.slim.min.js" type="application/javascript"></script>
+    <script src="/static/vendor/cytoscape/cytoscape-3.2.7.min.js" type="application/javascript"></script>
+    <script src="/static/vendor/cytoscape-dagre/dagre.min.js"></script>
+    <script src="/static/vendor/cytoscape-dagre/cytoscape-dagre.js"></script>
+</head>
+<body>
+    <h1>SQL Schema Explorer <span class="encore">by Tim Abell - <a href="http://schemaexplorer.io/" target="_blank">schemaexplorer.io</a></span></h1>
+{{block "content" .}}
+    **template content block not defined**
+{{end}}
+<h2>Generation info</h2>
+<footer>
+    <p>Generated {{.LayoutData.Timestamp}}</p>
+    <p><a href="{{.LayoutData.About.Website}}" target="_blank">{{.LayoutData.About.ProductName}}</a> v{{.LayoutData.About.Version}}, {{.LayoutData.Copyright}}</p>
+    <p>Feedback/support/contact: <a href="mailto:{{.LayoutData.About.Email}}">{{.LayoutData.About.Email}}</a></p>
+    <p>Like it? Share the love with a  <a href="https://twitter.com/intent/tweet?text=Sql%20Schema%20Explorer%20http%3A%2F%2Fschemaexplorer.io%2F%20by%20%40tim_abell%20is%20great!%20You%20should%20try%20it%20too%20%3A-)" target="_blank">tweet</a>!</p>
+    <p><a href="/static/license.html">License</a>.{{.LayoutData.LicenseText}}</p>
+    <p>
+        <a href="http://jquery.com/">jQuery</a> redistributed under <a href="https://jquery.org/license/">MIT license</a>.<br/>
+        <a href="http://js.cytoscape.org/">Cytoscape.js</a> redistributed under <a href="https://github.com/cytoscape/cytoscape.js/blob/master/LICENSE">MIT license</a>.<br/>
+        <a href="https://github.com/dagrejs/dagre">Dagre layout</a> for cytoscape under <a href="https://github.com/dagrejs/dagre/blob/master/LICENSE">MIT license</a>.<br/>
+        Many thanks to those on whose broad shoulders we stand.</p>
+</footer>
+</body>
+</html>
+{{end}}

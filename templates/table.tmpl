@@ -1,10 +1,9 @@
-{{define "table"}}
-{{template "header" .LayoutData}}
+{{define "content"}}
 <nav>
     <p> <a href='/'>&lt;&lt; Table list</a> </p>
 </nav>
 <h2>Table: {{.Table.Name}}</h2>
-{{template "diagram" .Diagram}}
+{{template "_diagram" .Diagram}}
 <h2>Data</h2>
 {{ if .Query }}
 <table class='filters'>
@@ -56,5 +55,4 @@
     </tr>
     {{end}}
 </table>
-{{template "footer" .LayoutData}}
 {{end}}
