@@ -75,8 +75,11 @@ func handler(resp http.ResponseWriter, req *http.Request) {
 	folders := strings.Split(req.URL.Path, "/")
 	switch folders[1] {
 	case "tables":
-		// todo: check not missing table name
 		table := parseTableName(folders[2])
+		if table.Name == "" { // google bot strips paths it seems, was causing a crash
+			http.Redirect(resp, req, "/", http.StatusFound)
+			return
+		}
 		var query = req.URL.Query()
 		var rowLimit int
 		var err error
