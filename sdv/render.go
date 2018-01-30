@@ -21,7 +21,7 @@ type pageTemplateModel struct {
 
 type tablesViewModel struct {
 	LayoutData pageTemplateModel
-	Tables     []schema.Table
+	Database   schema.Database
 	Diagram    diagramViewModel
 }
 
@@ -82,7 +82,7 @@ func showTableList(resp http.ResponseWriter, database schema.Database) {
 
 	model := tablesViewModel{
 		LayoutData: layoutData,
-		Tables:     database.Tables,
+		Database:   database,
 		Diagram:    diagramViewModel{Tables: database.Tables, TableLinks: tableLinks},
 	}
 

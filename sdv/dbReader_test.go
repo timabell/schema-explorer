@@ -63,16 +63,27 @@ func Test_ReadSchema(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Logf("%#v", database)
-	expectedCount := 1
+	//t.Logf("%#v", database)
+
+	checkTableCount(database, t)
+	checkFkCount(database, t)
+
+}
+
+func checkTableCount(database schema.Database, t *testing.T) {
+	expectedCount := 3
 	tableCount := len(database.Tables)
 	if tableCount != expectedCount {
 		t.Fatalf("Expected %d tables, found %d", expectedCount, tableCount)
 	}
-	table := database.Tables[0]
-	expectedName := "DataTypeTest"
-	if table.Name != expectedName {
-		t.Fatalf("Expected table '%s' found '%s'", expectedName, table.Name)
+}
+
+func checkFkCount(database schema.Database, t *testing.T) {
+	expectedCount := 1
+	t.Logf("%+v", database.Fks[0])
+	fkCount := len(database.Fks)
+	if fkCount != expectedCount {
+		t.Fatalf("Expected %d fks across whole db, found %d", expectedCount, fkCount)
 	}
 }
 

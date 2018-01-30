@@ -1,9 +1,42 @@
 {{define "content"}}
 <h2>Tables</h2>
-<table border=1 class="tableList">
-    {{range .Tables}}
+<table class="tableList">
+{{range .Database.Tables}}
     <tr><td><a href='tables/{{.}}?_rowLimit=100'>{{.}}</a></td></tr>
+{{end}}
+</table>
+<h2>Foreign Keys</h2>
+<table>
+    <thead>
+    <tr>
+        <th colspan="2">From</th>
+        <th colspan="2">To (Primary Key)</th>
+    </tr>
+    <tr>
+        <th>Table</th>
+        <th>Column</th>
+        <th>Table</th>
+        <th>Column</th>
+    </tr>
+    </thead>
+    <tbody>
+    {{range .Database.Fks}}
+    <tr>
+        <td>{{.SourceTable}}</td>
+        <td>
+        {{range .SourceColumns}}
+            {{.Name}}
+        {{end}}
+        </td>
+        <td>{{.DestinationTable}}</td>
+        <td>
+        {{range .DestinationColumns}}
+            {{.Name}}
+        {{end}}
+        </td>
+    </tr>
     {{end}}
+    </tbody>
 </table>
 {{template "_diagram" .Diagram}}
 {{end}}

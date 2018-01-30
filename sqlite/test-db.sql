@@ -129,3 +129,14 @@ insert into DataTypeTest(
 );
 
 -- select * from DataTypeTest;
+
+create table person (
+	personId int PRIMARY KEY,
+	personName nvarchar(50)
+);
+
+create table pet (
+	petId int PRIMARY KEY,
+	ownerId int references person(personId),
+	petName nvarchar(50)
+);
