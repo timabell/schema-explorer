@@ -72,13 +72,9 @@ func SetupTemplate() {
 
 func showTableList(resp http.ResponseWriter, database schema.Database) {
 	var tableLinks []fkViewModel
-	// todo: fix
-	//for _, fk := range database.Fks {
-	//	// todo: per field refs, the below is currently aggregated to table level
-	//	for _, ref := range keys {
-	//		tableLinks = append(tableLinks, fkViewModel{Source: table, Destination: ref.Table})
-	//	}
-	//}
+	for _, fk := range database.Fks {
+		tableLinks = append(tableLinks, fkViewModel{Source: fk.SourceTable, Destination: fk.DestinationTable})
+	}
 
 	model := tablesViewModel{
 		LayoutData: layoutData,
