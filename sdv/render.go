@@ -26,14 +26,13 @@ type tablesViewModel struct {
 }
 
 type diagramViewModel struct {
-	Tables []string
-	//Tables     []schema.Table // todo: use proper type
+	Tables     []schema.Table
 	TableLinks []fkViewModel
 }
 
 type fkViewModel struct {
-	Source      string
-	Destination string
+	Source      schema.Table
+	Destination schema.Table
 }
 
 type cells []template.HTML
@@ -48,7 +47,6 @@ type dataViewModel struct {
 	Table      schema.Table
 	Query      []FieldFilter
 	RowLimit   int
-	Cols       []schema.Column
 	Rows       []cells
 	Diagram    diagramViewModel
 }
@@ -72,22 +70,20 @@ func SetupTemplate() {
 	}
 }
 
-func showTableList(resp http.ResponseWriter, tables []schema.Table, fks schema.GlobalFkList) {
+func showTableList(resp http.ResponseWriter, database schema.Database) {
 	var tableLinks []fkViewModel
-	for table, keys := range fks {
-		// todo: per field refs, the below is currently aggregated to table level
-		for _, ref := range keys {
-			tableLinks = append(tableLinks, fkViewModel{Source: table, Destination: ref.Table.String()})
-		}
-	}
-	tableList := []string{}
-	for _, table := range tables {
-		tableList = append(tableList, table.String())
-	}
+	// todo: fix
+	//for _, fk := range database.Fks {
+	//	// todo: per field refs, the below is currently aggregated to table level
+	//	for _, ref := range keys {
+	//		tableLinks = append(tableLinks, fkViewModel{Source: table, Destination: ref.Table})
+	//	}
+	//}
+
 	model := tablesViewModel{
 		LayoutData: layoutData,
-		Tables:     tables,
-		Diagram:    diagramViewModel{Tables: tableList, TableLinks: tableLinks},
+		Tables:     database.Tables,
+		Diagram:    diagramViewModel{Tables: database.Tables, TableLinks: tableLinks},
 	}
 
 	err := tablesTemplate.ExecuteTemplate(resp, "layout", model)
@@ -109,64 +105,42 @@ func showTable(resp http.ResponseWriter, reader dbReader, table schema.Table, qu
 		}
 	}
 
-	fks, err := reader.AllFks()
-	if err != nil {
-		log.Println("error getting fks", err)
-		panic("error getting fks")
-		// todo: send 500 error to client
-		return err
-	}
-
-	inwardFks := table.FindParents(fks)
-
-	cols, err := reader.GetColumns(table)
-	if err != nil {
-		panic(err)
-	}
-
-	rowsData, err := GetRows(reader, query, table, len(cols), rowLimit)
+	rowsData, err := GetRows(reader, query, table, rowLimit)
 	if err != nil {
 		return err
 	}
 
 	rows := []cells{}
 	for _, rowData := range rowsData {
-		row := buildRow(cols, rowData, fks, table, inwardFks)
+		row := buildRow(rowData, table)
 		rows = append(rows, row)
 	}
 
-	//diagramTables:=[]schema.Table{table}
-	diagramTables := []string{table.String()}
-	for srcTable, tableFks := range fks {
-		if srcTable == table.String() {
-			for _, ref := range tableFks {
-				diagramTables = append(diagramTables, ref.Table.String())
-			}
-		}
-	}
-	tableLinks := []fkViewModel{}
-	for srcTable, tableFks := range fks {
-		if srcTable == table.String() {
-			for _, ref := range tableFks {
-				tableLinks = append(tableLinks, fkViewModel{Source: srcTable, Destination: ref.Table.String()})
-			}
-		}
-	}
-	for srcTable, inwardFk := range inwardFks {
-		diagramTables = append(diagramTables, srcTable)
-		for _, ref := range inwardFk {
-			tableLinks = append(tableLinks, fkViewModel{Source: srcTable, Destination: ref.Table.String()})
-		}
-	}
+	//diagramTables := []schema.Table{table}
+	//// outbound
+	//for _, tableFks := range table.Fks {
+	//	if diagramTables
+	//	diagramTables = append(diagramTables, tableFks.DestinationTable)
+	//}
+	//tableLinks := []fkViewModel{}
+	//for _, inboundFks := range table.InboundFks {
+	//	tableLinks = append(tableLinks, fkViewModel{Source: inboundFks.SourceTable, Destination: inboundFks.DestinationTable})
+	//}
+	//// inbound
+	//for srcTable, inwardFk := range inwardFks {
+	//	diagramTables = append(diagramTables, srcTable)
+	//	for _, ref := range inwardFk {
+	//		tableLinks = append(tableLinks, fkViewModel{Source: srcTable, Destination: ref.Table})
+	//	}
+	//}
 
 	viewModel := dataViewModel{
 		LayoutData: layoutData,
 		Table:      table,
 		Query:      fieldFilter,
 		RowLimit:   rowLimit,
-		Cols:       cols,
 		Rows:       rows,
-		Diagram:    diagramViewModel{Tables: diagramTables, TableLinks: tableLinks},
+		//Diagram:    diagramViewModel{Tables: diagramTables, TableLinks: tableLinks},
 	}
 
 	err = tableTemplate.ExecuteTemplate(resp, "layout", viewModel)
@@ -178,76 +152,78 @@ func showTable(resp http.ResponseWriter, reader dbReader, table schema.Table, qu
 	return nil
 }
 
-func buildRow(cols []schema.Column, rowData RowData, fks schema.GlobalFkList, table schema.Table, inwardFks schema.GlobalFkList) cells {
+func buildRow(rowData RowData, table schema.Table) cells {
 	row := cells{}
-	for colIndex, col := range cols {
+	for colIndex, col := range table.Columns {
 		cellData := rowData[colIndex]
-		valueHTML := buildCell(fks, table, col, cellData)
+		valueHTML := buildCell(col, cellData)
 		row = append(row, template.HTML(valueHTML))
 	}
-	parentHTML := buildInwardCell(inwardFks, rowData, cols)
+	parentHTML := buildInwardCell(table.InboundFks, rowData, table.Columns)
 	row = append(row, template.HTML(parentHTML))
 	return row
 }
 
-func buildInwardCell(inwardFks schema.GlobalFkList, rowData []interface{}, cols []schema.Column) string {
-	// todo: pre-calculate fk info so this isn't repeated for every row
+func buildInwardCell(inboundFks []schema.Fk, rowData []interface{}, cols []schema.Column) string {
+	// todo: post-refactor fixup
+	// todo: performance - pre-calculate fk info so this isn't repeated for every row
 	// stable sort order http://stackoverflow.com/questions/23330781/sort-golang-map-values-by-keys
-	tables := make([]string, 0)
-	for key, _ := range inwardFks {
-		tables = append(tables, key)
-	}
-	sort.Strings(tables)
+	//tables := make([]schema.Table, 0)
+	//for _, fk := range inboundFks {
+	//	tables = append(tables, fk.SourceTable)
+	//}
+	//sort.Strings(tables)
 	parentHTML := ""
-	for _, table := range tables {
-		parentHTML = parentHTML + template.HTMLEscapeString(table) + ":&nbsp;"
-		parentCols := make([]string, 0)
-		for colKey, _ := range inwardFks[table] {
-			parentCols = append(parentCols, colKey)
-		}
-		sort.Strings(parentCols)
-		for _, parentCol := range parentCols {
-			parentHTML = parentHTML + buildInwardLink(table, parentCol, rowData, cols, inwardFks[table][parentCol])
-		}
-		parentHTML = parentHTML + " "
-	}
+	//for _, fk := range inboundFks {
+	//	parentHTML = parentHTML + template.HTMLEscapeString(fk.SourceTable.String()) + ":&nbsp;"
+	//	parentCols := make([]string, 0)
+	//	for colKey, _ := range inwardFks[table] {
+	//		parentCols = append(parentCols, colKey)
+	//	}
+	//	sort.Strings(parentCols)
+	//	for _, parentCol := range parentCols {
+	//		parentHTML = parentHTML + buildInwardLink(table, parentCol, rowData, cols, inwardFks[table][parentCol])
+	//	}
+	//	parentHTML = parentHTML + " "
+	//}
 	return parentHTML
 }
 
-func buildInwardLink(parentTable string, parentCol string, rowData RowData, cols []schema.Column, ref schema.Ref) string {
-	linkHTML := fmt.Sprintf(
-		"<a href='%s?%s=",
-		template.URLQueryEscaper(parentTable),
-		template.URLQueryEscaper(parentCol))
-	// todo: handle non-string primary key
-	// todo: handle compound primary key
-	colData := rowData[indexOfCol(cols, string(ref.Col))]
-	switch colData.(type) {
-	case int64:
-		// todo: url-escape as well
-		linkHTML = linkHTML + template.HTMLEscapeString(fmt.Sprintf("%d", colData))
-	case string:
-		// todo: sql-quotes here are a hack pending switching to parameterized sql
-		linkHTML = linkHTML + "%27" + template.HTMLEscapeString(fmt.Sprintf("%s", colData)) + "%27"
-	default:
-		linkHTML = linkHTML + template.HTMLEscapeString(fmt.Sprintf("%v", colData))
-	}
-	linkHTML = linkHTML + fmt.Sprintf(
-		// todo: factor out row limit, move to a cookie perhaps
-		"&_rowLimit=100' class='parentFk'>%s</a>&nbsp;",
-		template.HTMLEscaper(parentCol))
-	return linkHTML
-}
+//func buildInwardLink(parentTable string, parentCol string, rowData RowData, cols []schema.Column, ref schema.Ref) string {
+//	linkHTML := fmt.Sprintf(
+//		"<a href='%s?%s=",
+//		template.URLQueryEscaper(parentTable),
+//		template.URLQueryEscaper(parentCol))
+//	// todo: handle non-string primary key
+//	// todo: handle compound primary key
+//	colData := rowData[indexOfCol(cols, string(ref.Col))]
+//	switch colData.(type) {
+//	case int64:
+//		// todo: url-escape as well
+//		linkHTML = linkHTML + template.HTMLEscapeString(fmt.Sprintf("%d", colData))
+//	case string:
+//		// todo: sql-quotes here are a hack pending switching to parameterized sql
+//		linkHTML = linkHTML + "%27" + template.HTMLEscapeString(fmt.Sprintf("%s", colData)) + "%27"
+//	default:
+//		linkHTML = linkHTML + template.HTMLEscapeString(fmt.Sprintf("%v", colData))
+//	}
+//	linkHTML = linkHTML + fmt.Sprintf(
+//		// todo: factor out row limit, move to a cookie perhaps
+//		"&_rowLimit=100' class='parentFk'>%s</a>&nbsp;",
+//		template.HTMLEscaper(parentCol))
+//	return linkHTML
+//}
 
-func buildCell(fks schema.GlobalFkList, table schema.Table, col schema.Column, cellData interface{}) string {
+func buildCell(col schema.Column, cellData interface{}) string {
 	if cellData == nil {
 		return "<span class='null'>[null]</span>"
 	}
 	var valueHTML string
-	ref, hasFk := fks[table.String()][col.Name]
+	hasFk := col.Fk != nil
 	stringValue := *DbValueToString(cellData, col.Type)
 	if hasFk {
-		valueHTML = fmt.Sprintf("<a href='%s?%s=", ref.Table, ref.Col)
+		// todo: compound-fk support
+		valueHTML = fmt.Sprintf("<a href='%s?%s=", col.Fk.DestinationTable, col.Fk.DestinationColumns[0].Name)
 		// todo: url-escape as well as htmlencode
 		switch {
 		case strings.Contains(col.Type, "varchar"):

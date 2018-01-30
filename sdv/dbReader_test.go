@@ -57,17 +57,19 @@ func Test_CheckConnection(t *testing.T) {
 	}
 }
 
-func Test_GetTables(t *testing.T) {
+func Test_ReadSchema(t *testing.T) {
 	reader := getDbReader(testDbDriver, testDb)
-	tables, err := reader.GetTables()
+	database, err := reader.ReadSchema()
 	if err != nil {
 		t.Fatal(err)
 	}
+	t.Logf("%#v", database)
 	expectedCount := 1
-	if len(tables) != expectedCount {
-		t.Fatalf("Expected %d tables, found %d", expectedCount, len(tables))
+	tableCount := len(database.Tables)
+	if tableCount != expectedCount {
+		t.Fatalf("Expected %d tables, found %d", expectedCount, tableCount)
 	}
-	table := tables[0]
+	table := database.Tables[0]
 	expectedName := "DataTypeTest"
 	if table.Name != expectedName {
 		t.Fatalf("Expected table '%s' found '%s'", expectedName, table.Name)
@@ -92,22 +94,38 @@ var tests = []testCase{
 
 func Test_GetRows(t *testing.T) {
 	reader := getDbReader(testDbDriver, testDb)
-	table := schema.Table{Schema: "dbo", Name: "DataTypeTest"}
-	columns, err := reader.GetColumns(table)
+	database, err := reader.ReadSchema()
 	if err != nil {
 		t.Fatal(err)
 	}
-	rows, err := GetRows(reader, nil, table, len(columns), 999)
+	//t.Logf("%#v", database)
+
+	// find the test table
+	var schemaName string
+	if database.Supports.Schema {
+		schemaName = "dbo"
+	}
+	tableToFind := schema.Table{Schema: schemaName, Name: "DataTypeTest"}
+	table := database.FindTable(tableToFind)
+	if table == nil {
+		t.Fatal(tableToFind.String() + " table missing")
+	}
+
+	// read the data from it
+	rows, err := GetRows(reader, nil, *table, 999)
 	if err != nil {
 		t.Fatal(err)
 	}
-	found, countIndex := findCol(columns, "colCount")
+
+	// check the column count is as expected
+	found, countIndex := table.FindCol("colCount")
 	if !found {
-		t.Fatal("colCount column missing")
+		t.Fatal("colCount column missing from " + table.String())
 	}
 	expectedColCount := int(rows[0][countIndex].(int64))
-	if len(columns) != expectedColCount {
-		t.Errorf("Expected %#v columns, found %#v", expectedColCount, len(columns))
+	actualColCount := len(table.Columns)
+	if actualColCount != expectedColCount {
+		t.Errorf("Expected %#v columns, found %#v", expectedColCount, actualColCount)
 	}
 
 	for _, test := range tests {
@@ -116,13 +134,13 @@ func Test_GetRows(t *testing.T) {
 			t.Errorf("Not enough rows. %+v", test)
 			continue
 		}
-		found, columnIndex := findCol(columns, test.colName)
+		found, columnIndex := table.FindCol(test.colName)
 		if !found {
 			t.Logf("Skipped test for non-existent column %+v", test)
 			continue
 		}
 
-		actualType := columns[columnIndex].Type
+		actualType := table.Columns[columnIndex].Type
 		if !strings.EqualFold(actualType, test.expectedType) {
 			t.Errorf("Incorrect column type %s %+v", actualType, test)
 		}
@@ -131,13 +149,4 @@ func Test_GetRows(t *testing.T) {
 			t.Errorf("Incorrect string '%s' %+v", *actualString, test)
 		}
 	}
-}
-
-func findCol(columns []schema.Column, columnName string) (found bool, index int) {
-	for index, col := range columns {
-		if col.Name == columnName {
-			return true, index
-		}
-	}
-	return false, 0
 }

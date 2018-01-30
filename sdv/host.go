@@ -71,15 +71,23 @@ func handler(resp http.ResponseWriter, req *http.Request) {
 		Timestamp:   time.Now().String(),
 	}
 
+	database, err := reader.ReadSchema()
+	if err != nil {
+		fmt.Println("Error reading schema", err)
+		// todo: send 500 error to client
+		return
+	}
+
 	// todo: proper url routing
 	folders := strings.Split(req.URL.Path, "/")
 	switch folders[1] {
 	case "tables":
-		table := parseTableName(folders[2])
-		if table.Name == "" { // google bot strips paths it seems, was causing a crash
+		requestedTable := parseTableName(folders[2])
+		if requestedTable.Name == "" { // google bot strips paths it seems, was causing a crash
 			http.Redirect(resp, req, "/", http.StatusFound)
 			return
 		}
+		table := database.FindTable(requestedTable)
 		var query = req.URL.Query()
 		var rowLimit int
 		var err error
@@ -96,23 +104,13 @@ func handler(resp http.ResponseWriter, req *http.Request) {
 			}
 		}
 		var rowFilter = schema.RowFilter(query)
-		err = showTable(resp, reader, table, rowFilter, rowLimit)
+		err = showTable(resp, reader, *table, rowFilter, rowLimit)
 		if err != nil {
 			fmt.Println("error converting rows querystring value to int: ", err)
 			return
 		}
 	default:
-		tables, err := reader.GetTables()
-		if err != nil {
-			fmt.Println("error getting table list", err)
-			return
-		}
-
-		allKeys, err := reader.AllFks()
-		if err != nil {
-			panic(err)
-		}
-		showTableList(resp, tables, allKeys)
+		showTableList(resp, database)
 	}
 }
 

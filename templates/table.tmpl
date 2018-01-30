@@ -10,7 +10,7 @@
             <th>Name</th>
             <th>Type</th>
         </tr>
-        {{ range .Cols }}
+        {{ range .Table.Columns }}
         <tr>
             <td>{{.Name}}</td>
             <td>{{.Type}}</td>
@@ -55,7 +55,7 @@
     {{end}}
 <table border=1>
     <tr>
-        {{ range .Cols }}
+        {{ range .Table.Columns }}
         <th title='type: {{.Type}}'>{{.Name}}</th>
         {{end}}
         <th class='references'>referenced by</th>

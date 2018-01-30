@@ -10,23 +10,21 @@ import (
 
 type dbReader interface {
 	CheckConnection() (err error)
-	GetTables() (tables []schema.Table, err error)
-	AllFks() (allFks schema.GlobalFkList, err error)
+	ReadSchema() (database schema.Database, err error)
 	GetSqlRows(query schema.RowFilter, table schema.Table, rowLimit int) (rows *sql.Rows, err error)
-	GetColumns(table schema.Table) (cols []schema.Column, err error)
 }
 
 // Single row of data
 type RowData []interface{}
 
-func GetRows(reader dbReader, query schema.RowFilter, table schema.Table, colCount int, rowLimit int) (rowsData []RowData, err error) {
+func GetRows(reader dbReader, query schema.RowFilter, table schema.Table, rowLimit int) (rowsData []RowData, err error) {
 	rows, err := reader.GetSqlRows(query, table, rowLimit)
 	if rows == nil {
 		panic("GetSqlRows() returned nil")
 	}
 	defer rows.Close()
 
-	rowsData, err = GetAllData(colCount, rows)
+	rowsData, err = GetAllData(len(table.Columns), rows)
 	if err != nil {
 		return nil, err
 	}

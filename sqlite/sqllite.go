@@ -21,7 +21,34 @@ func NewSqlite(path string) sqliteModel {
 	}
 }
 
-func (model sqliteModel) GetTables() (tables []schema.Table, err error) {
+func (model sqliteModel) ReadSchema() (database schema.Database, err error) {
+	dbc, err := getConnection(model.path)
+	if err != nil {
+		return
+	}
+	defer dbc.Close()
+
+	database = schema.Database{Supports: schema.SupportedFeatures{Schema: false}}
+
+	database.Tables, err = model.getTables()
+	if err != nil {
+		return
+	}
+
+	for tableIndex, table := range database.Tables {
+		var cols []schema.Column
+		cols, err = model.getColumns(table)
+		if err != nil {
+			return
+		}
+		database.Tables[tableIndex].Columns = append(table.Columns, cols...)
+	}
+
+	database.Fks, err = model.allFks()
+	return
+}
+
+func (model sqliteModel) getTables() (tables []schema.Table, err error) {
 	dbc, err := getConnection(model.path)
 	if err != nil {
 		return
@@ -56,7 +83,7 @@ func (model sqliteModel) CheckConnection() (err error) {
 		panic("getConnection() returned nil")
 	}
 	defer dbc.Close()
-	tables, err := model.GetTables()
+	tables, err := model.getTables()
 	if err != nil {
 		panic(err)
 	}
@@ -68,15 +95,16 @@ func (model sqliteModel) CheckConnection() (err error) {
 	return
 }
 
-func (model sqliteModel) AllFks() (allFks schema.GlobalFkList, err error) {
-	tables, err := model.GetTables()
+func (model sqliteModel) allFks() (allFks []schema.Fk, err error) {
+	tables, err := model.getTables()
 	if err != nil {
 		fmt.Println("error getting table list while building global fk list", err)
 		return
 	}
-	allFks = schema.GlobalFkList{}
 
-	// todo: share connection with GetTables()
+	allFks = []schema.Fk{}
+
+	// todo: share connection with getTables()
 	dbc, err := getConnection(model.path)
 	if err != nil {
 		// todo: show in UI
@@ -85,29 +113,33 @@ func (model sqliteModel) AllFks() (allFks schema.GlobalFkList, err error) {
 	defer dbc.Close()
 
 	for _, table := range tables {
-		allFks[table.String()], err = fks(dbc, table)
+		var tableFks []schema.Fk
+		tableFks, err = fks(dbc, table)
 		if err != nil {
 			// todo: show in UI
 			fmt.Println("error getting fks for table "+table.Name, err)
 			return
 		}
+		allFks = append(allFks, tableFks...)
 	}
 	return
 }
 
-func fks(dbc *sql.DB, table schema.Table) (fks schema.FkList, err error) {
+func fks(dbc *sql.DB, table schema.Table) (fks []schema.Fk, err error) {
 	rows, err := dbc.Query("PRAGMA foreign_key_list('" + table.Name + "');")
 	if err != nil {
 		return
 	}
 	defer rows.Close()
-	fks = schema.FkList{}
+	fks = []schema.Fk{}
 	for rows.Next() {
 		var id, seq int
 		var parentTable, from, to, onUpdate, onDelete, match string
 		rows.Scan(&id, &seq, &parentTable, &from, &to, &onUpdate, &onDelete, &match)
-		thisRef := schema.Ref{Col: to, Table: schema.Table{Name: parentTable}}
-		fks[from] = thisRef
+		sourceColumn := schema.Column{Name: from}
+		destinationColumn := schema.Column{Name: to}
+		fk := schema.NewFk(table, sourceColumn, schema.Table{Name: parentTable}, destinationColumn)
+		fks = append(fks, fk)
 	}
 	return
 }
@@ -148,11 +180,11 @@ func (model sqliteModel) GetSqlRows(query schema.RowFilter, table schema.Table, 
 	return
 }
 
-func (model sqliteModel) GetColumns(table schema.Table) (cols []schema.Column, err error) {
+func (model sqliteModel) getColumns(table schema.Table) (cols []schema.Column, err error) {
 	dbc, err := getConnection(model.path)
 	if err != nil {
 		log.Println(err)
-		panic("GetColumns to get connection")
+		panic("getColumns to get connection")
 		// todo: show in UI
 		return
 	}
@@ -169,7 +201,7 @@ func (model sqliteModel) GetColumns(table schema.Table) (cols []schema.Column, e
 		var notNull, pk bool
 		var defaultValue interface{}
 		rows.Scan(&cid, &name, &typeName, &notNull, &defaultValue, &pk)
-		thisCol := schema.Column{name, typeName}
+		thisCol := schema.Column{Name: name, Type: typeName}
 		cols = append(cols, thisCol)
 	}
 	return

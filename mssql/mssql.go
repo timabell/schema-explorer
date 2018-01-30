@@ -18,7 +18,31 @@ func NewMssql(connectionString string) mssqlModel {
 	}
 }
 
-func (model mssqlModel) GetTables() (tables []schema.Table, err error) {
+func (model mssqlModel) ReadSchema() (database schema.Database, err error) {
+	database = schema.Database{Supports: schema.SupportedFeatures{Schema: true}}
+
+	database.Tables, err = model.getTables()
+	if err != nil {
+		return
+	}
+
+	for tableIndex, table := range database.Tables {
+		var cols []schema.Column
+		cols, err = model.getColumns(table)
+		if err != nil {
+			return
+		}
+		database.Tables[tableIndex].Columns = append(table.Columns, cols...)
+	}
+
+	database.Fks, err = model.allFks()
+	if err != nil {
+		return
+	}
+	return
+}
+
+func (model mssqlModel) getTables() (tables []schema.Table, err error) {
 	dbc, err := getConnection(model.connectionString)
 	if err != nil {
 		return nil, err
@@ -74,7 +98,7 @@ func showVersion(dbc *sql.DB) {
 }
 
 // todo: don't actually need an allfks method for mssql as can filter both incoming and outgoing, rework interface
-func (model mssqlModel) AllFks() (allFks schema.GlobalFkList, err error) {
+func (model mssqlModel) allFks() (allFks []schema.Fk, err error) {
 	// todo: share connection with other calls to this package
 	dbc, err := getConnection(model.connectionString)
 	if err != nil {
@@ -115,17 +139,16 @@ func (model mssqlModel) AllFks() (allFks schema.GlobalFkList, err error) {
 	}
 	defer rows.Close()
 
-	allFks = schema.GlobalFkList{}
+	allFks = []schema.Fk{}
+
 	for rows.Next() {
 		var name, parentSchema, parentTableName, parentCol, childSchema, childTableName, childCol string
 		rows.Scan(&name, &parentSchema, &parentTableName, &parentCol, &childSchema, &childTableName, &childCol)
 		parentTable := schema.Table{Schema: parentSchema, Name: parentTableName}
 		childTable := schema.Table{Schema: childSchema, Name: childTableName}
-		if allFks[parentTable.String()] == nil {
-			allFks[parentTable.String()] = schema.FkList{}
-		}
 		// todo: support compound foreign keys (i.e. those with 2+ columns involved
-		allFks[parentTable.String()][parentCol] = schema.Ref{Col: childCol, Table: childTable}
+		fk := schema.NewFk(parentTable, schema.Column{Name: parentCol}, childTable, schema.Column{Name: childCol})
+		allFks = append(allFks, fk)
 	}
 	return
 }
@@ -165,7 +188,7 @@ func (model mssqlModel) GetSqlRows(query schema.RowFilter, table schema.Table, r
 	return
 }
 
-func (model mssqlModel) GetColumns(table schema.Table) (cols []schema.Column, err error) {
+func (model mssqlModel) getColumns(table schema.Table) (cols []schema.Column, err error) {
 	dbc, err := getConnection(model.connectionString)
 	if dbc == nil {
 		log.Println(err)
