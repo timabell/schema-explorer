@@ -87,7 +87,7 @@ func handler(resp http.ResponseWriter, req *http.Request) {
 			http.Redirect(resp, req, "/", http.StatusFound)
 			return
 		}
-		table := database.FindTable(requestedTable)
+		table := database.FindTable(&requestedTable)
 		var query = req.URL.Query()
 		var rowLimit int
 		var err error
@@ -104,7 +104,7 @@ func handler(resp http.ResponseWriter, req *http.Request) {
 			}
 		}
 		var rowFilter = schema.RowFilter(query)
-		err = showTable(resp, reader, *table, rowFilter, rowLimit)
+		err = showTable(resp, reader, table, rowFilter, rowLimit)
 		if err != nil {
 			fmt.Println("error converting rows querystring value to int: ", err)
 			return

@@ -27,7 +27,7 @@ func (model mssqlModel) ReadSchema() (database schema.Database, err error) {
 	}
 
 	for tableIndex, table := range database.Tables {
-		var cols []schema.Column
+		var cols []*schema.Column
 		cols, err = model.getColumns(table)
 		if err != nil {
 			return
@@ -42,7 +42,7 @@ func (model mssqlModel) ReadSchema() (database schema.Database, err error) {
 	return
 }
 
-func (model mssqlModel) getTables() (tables []schema.Table, err error) {
+func (model mssqlModel) getTables() (tables []*schema.Table, err error) {
 	dbc, err := getConnection(model.connectionString)
 	if err != nil {
 		return nil, err
@@ -58,7 +58,7 @@ func (model mssqlModel) getTables() (tables []schema.Table, err error) {
 		var schemaName string
 		var name string
 		rows.Scan(&schemaName, &name)
-		tables = append(tables, schema.Table{Schema: schemaName, Name: name})
+		tables = append(tables, &schema.Table{Schema: schemaName, Name: name})
 	}
 	return tables, nil
 }
@@ -98,7 +98,7 @@ func showVersion(dbc *sql.DB) {
 }
 
 // todo: don't actually need an allfks method for mssql as can filter both incoming and outgoing, rework interface
-func (model mssqlModel) allFks() (allFks []schema.Fk, err error) {
+func (model mssqlModel) allFks() (allFks []*schema.Fk, err error) {
 	// todo: share connection with other calls to this package
 	dbc, err := getConnection(model.connectionString)
 	if err != nil {
@@ -139,7 +139,7 @@ func (model mssqlModel) allFks() (allFks []schema.Fk, err error) {
 	}
 	defer rows.Close()
 
-	allFks = []schema.Fk{}
+	allFks = []*schema.Fk{}
 
 	for rows.Next() {
 		var name, parentSchema, parentTableName, parentCol, childSchema, childTableName, childCol string
@@ -147,13 +147,13 @@ func (model mssqlModel) allFks() (allFks []schema.Fk, err error) {
 		parentTable := schema.Table{Schema: parentSchema, Name: parentTableName}
 		childTable := schema.Table{Schema: childSchema, Name: childTableName}
 		// todo: support compound foreign keys (i.e. those with 2+ columns involved
-		fk := schema.NewFk(parentTable, schema.Column{Name: parentCol}, childTable, schema.Column{Name: childCol})
+		fk := schema.NewFk(&parentTable, &schema.Column{Name: parentCol}, &childTable, &schema.Column{Name: childCol})
 		allFks = append(allFks, fk)
 	}
 	return
 }
 
-func (model mssqlModel) GetSqlRows(query schema.RowFilter, table schema.Table, rowLimit int) (rows *sql.Rows, err error) {
+func (model mssqlModel) GetSqlRows(query schema.RowFilter, table *schema.Table, rowLimit int) (rows *sql.Rows, err error) {
 	// todo: sql parameters instead of string concatenation
 	sqlText := "select"
 
@@ -188,7 +188,7 @@ func (model mssqlModel) GetSqlRows(query schema.RowFilter, table schema.Table, r
 	return
 }
 
-func (model mssqlModel) getColumns(table schema.Table) (cols []schema.Column, err error) {
+func (model mssqlModel) getColumns(table *schema.Table) (cols []*schema.Column, err error) {
 	dbc, err := getConnection(model.connectionString)
 	if dbc == nil {
 		log.Println(err)
@@ -205,12 +205,12 @@ order by c.column_id`
 
 	rows, err := dbc.Query(sqlText)
 	defer rows.Close()
-	cols = []schema.Column{}
+	cols = []*schema.Column{}
 	for rows.Next() {
 		var name, typeName string
 		rows.Scan(&name, &typeName)
 		thisCol := schema.Column{Name: name, Type: typeName}
-		cols = append(cols, thisCol)
+		cols = append(cols, &thisCol)
 	}
 	return
 }

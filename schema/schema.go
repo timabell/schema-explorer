@@ -5,17 +5,17 @@ type SupportedFeatures struct {
 }
 
 type Database struct {
-	Tables   []Table
-	Fks      []Fk
+	Tables   []*Table
+	Fks      []*Fk
 	Supports SupportedFeatures
 }
 
 type Table struct {
 	Schema     string
 	Name       string
-	Columns    []Column
-	Fks        []Fk
-	InboundFks []Fk
+	Columns    []*Column
+	Fks        []*Fk
+	InboundFks []*Fk
 }
 
 type Column struct {
@@ -24,11 +24,12 @@ type Column struct {
 	Fk   *Fk
 }
 
+// todo: convert to pointers to tables & columns for memory efficiency
 type Fk struct {
-	SourceTable        Table
-	SourceColumns      []Column
-	DestinationTable   Table
-	DestinationColumns []Column
+	SourceTable        *Table
+	SourceColumns      []*Column
+	DestinationTable   *Table
+	DestinationColumns []*Column
 }
 
 // filtering of results with column name / value(s) pairs,
@@ -36,8 +37,8 @@ type Fk struct {
 type RowFilter map[string][]string
 
 // Simplified fk constructor for single-column foreign keys
-func NewFk(sourceTable Table, sourceColumn Column, destinationTable Table, destinationColumn Column) Fk {
-	return Fk{SourceTable: sourceTable, SourceColumns: []Column{sourceColumn}, DestinationTable: destinationTable, DestinationColumns: []Column{destinationColumn}}
+func NewFk(sourceTable *Table, sourceColumn *Column, destinationTable *Table, destinationColumn *Column) *Fk {
+	return &Fk{SourceTable: sourceTable, SourceColumns: []*Column{sourceColumn}, DestinationTable: destinationTable, DestinationColumns: []*Column{destinationColumn}}
 }
 
 func (table Table) String() string {
@@ -66,10 +67,10 @@ func (table Table) String() string {
 
 // returns nil if not found.
 // searches on schema+name
-func (database Database) FindTable(tableToFind Table) (table *Table) {
+func (database Database) FindTable(tableToFind *Table) (table *Table) {
 	for _, table := range database.Tables {
 		if table.Schema == tableToFind.Schema && table.Name == tableToFind.Name {
-			return &table
+			return table
 		}
 	}
 	return nil

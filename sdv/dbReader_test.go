@@ -65,25 +65,29 @@ func Test_ReadSchema(t *testing.T) {
 	}
 	//t.Logf("%#v", database)
 
-	checkTableCount(database, t)
 	checkFkCount(database, t)
-
-}
-
-func checkTableCount(database schema.Database, t *testing.T) {
-	expectedCount := 3
-	tableCount := len(database.Tables)
-	if tableCount != expectedCount {
-		t.Fatalf("Expected %d tables, found %d", expectedCount, tableCount)
-	}
+	checkTableFkCounts(database, t)
 }
 
 func checkFkCount(database schema.Database, t *testing.T) {
 	expectedCount := 1
-	t.Logf("%+v", database.Fks[0])
 	fkCount := len(database.Fks)
 	if fkCount != expectedCount {
 		t.Fatalf("Expected %d fks across whole db, found %d", expectedCount, fkCount)
+	}
+}
+
+func checkTableFkCounts(database schema.Database, t *testing.T) {
+	checkTableFkCount("person", database, t)
+	checkTableFkCount("pet", database, t)
+}
+
+func checkTableFkCount(tableName string, database schema.Database, t *testing.T) {
+	expectedCount := 1
+	table := findTable(tableName, database, t)
+	fkCount := len(table.Fks)
+	if fkCount != expectedCount {
+		t.Fatalf("Expected %d fks in table %s, found %d", expectedCount, table, fkCount)
 	}
 }
 
@@ -111,16 +115,7 @@ func Test_GetRows(t *testing.T) {
 	}
 	//t.Logf("%#v", database)
 
-	// find the test table
-	var schemaName string
-	if database.Supports.Schema {
-		schemaName = "dbo"
-	}
-	tableToFind := schema.Table{Schema: schemaName, Name: "DataTypeTest"}
-	table := database.FindTable(tableToFind)
-	if table == nil {
-		t.Fatal(tableToFind.String() + " table missing")
-	}
+	table := findTable("DataTypeTest", database, t)
 
 	// read the data from it
 	rows, err := GetRows(reader, nil, *table, 999)
@@ -160,4 +155,18 @@ func Test_GetRows(t *testing.T) {
 			t.Errorf("Incorrect string '%s' %+v", *actualString, test)
 		}
 	}
+}
+
+// find a table. Automatically adds dbo for schema if supported
+func findTable(tableName string, database schema.Database, t *testing.T) *schema.Table {
+	var schemaName string
+	if database.Supports.Schema {
+		schemaName = "dbo"
+	}
+	tableToFind := schema.Table{Schema: schemaName, Name: tableName}
+	table := database.FindTable(tableToFind)
+	if table == nil {
+		t.Fatal(tableToFind.String() + " table missing")
+	}
+	return table
 }

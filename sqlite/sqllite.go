@@ -36,7 +36,7 @@ func (model sqliteModel) ReadSchema() (database schema.Database, err error) {
 	}
 
 	for tableIndex, table := range database.Tables {
-		var cols []schema.Column
+		var cols []*schema.Column
 		cols, err = model.getColumns(table)
 		if err != nil {
 			return
@@ -45,10 +45,25 @@ func (model sqliteModel) ReadSchema() (database schema.Database, err error) {
 	}
 
 	database.Fks, err = model.allFks()
+
+	for _, fk := range database.Fks{
+		source := database.FindTable(fk.SourceTable)
+		if source == nil {
+			err = fmt.Errorf("failed to find source table for fk %s", fk)
+		}
+		source.Fks = append(source.Fks, fk)
+		log.Printf("%#v", source.Fks)
+		destination := database.FindTable(fk.DestinationTable)
+		if destination == nil {
+			err = fmt.Errorf("failed to find destination table for fk %s", fk)
+		}
+		destination.InboundFks = append(destination.InboundFks, fk)
+		log.Printf("%#v", destination.InboundFks)
+	}
 	return
 }
 
-func (model sqliteModel) getTables() (tables []schema.Table, err error) {
+func (model sqliteModel) getTables() (tables []*schema.Table, err error) {
 	dbc, err := getConnection(model.path)
 	if err != nil {
 		return
@@ -63,7 +78,7 @@ func (model sqliteModel) getTables() (tables []schema.Table, err error) {
 	for rows.Next() {
 		var name string
 		rows.Scan(&name)
-		tables = append(tables, schema.Table{Name: name})
+		tables = append(tables, &schema.Table{Name: name})
 	}
 	return tables, nil
 }
@@ -95,14 +110,14 @@ func (model sqliteModel) CheckConnection() (err error) {
 	return
 }
 
-func (model sqliteModel) allFks() (allFks []schema.Fk, err error) {
+func (model sqliteModel) allFks() (allFks []*schema.Fk, err error) {
 	tables, err := model.getTables()
 	if err != nil {
 		fmt.Println("error getting table list while building global fk list", err)
 		return
 	}
 
-	allFks = []schema.Fk{}
+	allFks = []*schema.Fk{}
 
 	// todo: share connection with getTables()
 	dbc, err := getConnection(model.path)
@@ -113,7 +128,7 @@ func (model sqliteModel) allFks() (allFks []schema.Fk, err error) {
 	defer dbc.Close()
 
 	for _, table := range tables {
-		var tableFks []schema.Fk
+		var tableFks []*schema.Fk
 		tableFks, err = fks(dbc, table)
 		if err != nil {
 			// todo: show in UI
@@ -125,26 +140,26 @@ func (model sqliteModel) allFks() (allFks []schema.Fk, err error) {
 	return
 }
 
-func fks(dbc *sql.DB, table schema.Table) (fks []schema.Fk, err error) {
+func fks(dbc *sql.DB, table *schema.Table) (fks []*schema.Fk, err error) {
 	rows, err := dbc.Query("PRAGMA foreign_key_list('" + table.Name + "');")
 	if err != nil {
 		return
 	}
 	defer rows.Close()
-	fks = []schema.Fk{}
+	fks = []*schema.Fk{}
 	for rows.Next() {
 		var id, seq int
 		var parentTable, from, to, onUpdate, onDelete, match string
 		rows.Scan(&id, &seq, &parentTable, &from, &to, &onUpdate, &onDelete, &match)
 		sourceColumn := schema.Column{Name: from}
 		destinationColumn := schema.Column{Name: to}
-		fk := schema.NewFk(table, sourceColumn, schema.Table{Name: parentTable}, destinationColumn)
+		fk := schema.NewFk(table, &sourceColumn, &schema.Table{Name: parentTable}, &destinationColumn)
 		fks = append(fks, fk)
 	}
 	return
 }
 
-func (model sqliteModel) GetSqlRows(query schema.RowFilter, table schema.Table, rowLimit int) (rows *sql.Rows, err error) {
+func (model sqliteModel) GetSqlRows(query schema.RowFilter, table *schema.Table, rowLimit int) (rows *sql.Rows, err error) {
 	sql := "select * from " + table.Name
 
 	if len(query) > 0 {
@@ -180,7 +195,7 @@ func (model sqliteModel) GetSqlRows(query schema.RowFilter, table schema.Table, 
 	return
 }
 
-func (model sqliteModel) getColumns(table schema.Table) (cols []schema.Column, err error) {
+func (model sqliteModel) getColumns(table *schema.Table) (cols []*schema.Column, err error) {
 	dbc, err := getConnection(model.path)
 	if err != nil {
 		log.Println(err)
@@ -194,7 +209,7 @@ func (model sqliteModel) getColumns(table schema.Table) (cols []schema.Column, e
 		return
 	}
 	defer rows.Close()
-	cols = []schema.Column{}
+	cols = []*schema.Column{}
 	for rows.Next() {
 		var cid int
 		var name, typeName string
@@ -202,7 +217,7 @@ func (model sqliteModel) getColumns(table schema.Table) (cols []schema.Column, e
 		var defaultValue interface{}
 		rows.Scan(&cid, &name, &typeName, &notNull, &defaultValue, &pk)
 		thisCol := schema.Column{Name: name, Type: typeName}
-		cols = append(cols, thisCol)
+		cols = append(cols, &thisCol)
 	}
 	return
 }

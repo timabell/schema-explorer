@@ -26,7 +26,7 @@ type tablesViewModel struct {
 }
 
 type diagramViewModel struct {
-	Tables     []schema.Table
+	Tables     []*schema.Table
 	TableLinks []fkViewModel
 }
 
@@ -73,7 +73,7 @@ func SetupTemplate() {
 func showTableList(resp http.ResponseWriter, database schema.Database) {
 	var tableLinks []fkViewModel
 	for _, fk := range database.Fks {
-		tableLinks = append(tableLinks, fkViewModel{Source: fk.SourceTable, Destination: fk.DestinationTable})
+		tableLinks = append(tableLinks, fkViewModel{Source: *fk.SourceTable, Destination: *fk.DestinationTable})
 	}
 
 	model := tablesViewModel{
@@ -88,7 +88,7 @@ func showTableList(resp http.ResponseWriter, database schema.Database) {
 	}
 }
 
-func showTable(resp http.ResponseWriter, reader dbReader, table schema.Table, query schema.RowFilter, rowLimit int) error {
+func showTable(resp http.ResponseWriter, reader dbReader, table *schema.Table, query schema.RowFilter, rowLimit int) error {
 	fieldFilter := make([]FieldFilter, 0)
 	if len(query) > 0 {
 		fieldKeys := make([]string, 0)
@@ -112,16 +112,15 @@ func showTable(resp http.ResponseWriter, reader dbReader, table schema.Table, qu
 		rows = append(rows, row)
 	}
 
-	//diagramTables := []schema.Table{table}
-	//// outbound
-	//for _, tableFks := range table.Fks {
-	//	if diagramTables
-	//	diagramTables = append(diagramTables, tableFks.DestinationTable)
-	//}
-	//tableLinks := []fkViewModel{}
-	//for _, inboundFks := range table.InboundFks {
-	//	tableLinks = append(tableLinks, fkViewModel{Source: inboundFks.SourceTable, Destination: inboundFks.DestinationTable})
-	//}
+	diagramTables := []*schema.Table{table}
+	// outbound
+	for _, tableFks := range table.Fks {
+		diagramTables = append(diagramTables, tableFks.DestinationTable)
+	}
+	var tableLinks []fkViewModel
+	for _, inboundFks := range table.InboundFks {
+		tableLinks = append(tableLinks, fkViewModel{Source: *inboundFks.SourceTable, Destination: *inboundFks.DestinationTable})
+	}
 	//// inbound
 	//for srcTable, inwardFk := range inwardFks {
 	//	diagramTables = append(diagramTables, srcTable)
@@ -132,12 +131,13 @@ func showTable(resp http.ResponseWriter, reader dbReader, table schema.Table, qu
 
 	viewModel := dataViewModel{
 		LayoutData: layoutData,
-		Table:      table,
+		Table:      *table,
 		Query:      fieldFilter,
 		RowLimit:   rowLimit,
 		Rows:       rows,
-		//Diagram:    diagramViewModel{Tables: diagramTables, TableLinks: tableLinks},
+		Diagram:    diagramViewModel{Tables: diagramTables, TableLinks: tableLinks},
 	}
+	log.Print(viewModel.Diagram)
 
 	err = tableTemplate.ExecuteTemplate(resp, "layout", viewModel)
 	if err != nil {
@@ -148,7 +148,7 @@ func showTable(resp http.ResponseWriter, reader dbReader, table schema.Table, qu
 	return nil
 }
 
-func buildRow(rowData RowData, table schema.Table) cells {
+func buildRow(rowData RowData, table *schema.Table) cells {
 	row := cells{}
 	for colIndex, col := range table.Columns {
 		cellData := rowData[colIndex]
@@ -160,7 +160,7 @@ func buildRow(rowData RowData, table schema.Table) cells {
 	return row
 }
 
-func buildInwardCell(inboundFks []schema.Fk, rowData []interface{}, cols []schema.Column) string {
+func buildInwardCell(inboundFks []*schema.Fk, rowData []interface{}, cols []*schema.Column) string {
 	// todo: post-refactor fixup
 	// todo: performance - pre-calculate fk info so this isn't repeated for every row
 	// stable sort order http://stackoverflow.com/questions/23330781/sort-golang-map-values-by-keys
@@ -210,7 +210,7 @@ func buildInwardCell(inboundFks []schema.Fk, rowData []interface{}, cols []schem
 //	return linkHTML
 //}
 
-func buildCell(col schema.Column, cellData interface{}) string {
+func buildCell(col *schema.Column, cellData interface{}) string {
 	if cellData == nil {
 		return "<span class='null'>[null]</span>"
 	}
