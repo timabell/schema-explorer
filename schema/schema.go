@@ -1,5 +1,10 @@
 package schema
 
+import (
+	"fmt"
+	"strings"
+)
+
 type SupportedFeatures struct {
 	Schema bool
 }
@@ -46,6 +51,22 @@ func (table Table) String() string {
 		return table.Name
 	}
 	return table.Schema + "." + table.Name
+}
+
+func columnsString(columns []*Column) string {
+	var columnNames []string
+	for _, col := range columns {
+		columnNames = append(columnNames, col.Name)
+	}
+	return strings.Join(columnNames, ",")
+}
+
+func (column Column) String() string {
+	return column.Name
+}
+
+func (fk Fk) String() string {
+	return fmt.Sprintf("%s(%s) => %s(%s)", fk.SourceTable, columnsString(fk.SourceColumns), fk.DestinationTable, columnsString(fk.DestinationColumns))
 }
 
 // filter the fk list down to keys that reference the "child" table

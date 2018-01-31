@@ -63,7 +63,6 @@ func Test_ReadSchema(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	//t.Logf("%#v", database)
 
 	checkFkCount(database, t)
 	checkTableFkCounts(database, t)
@@ -113,12 +112,11 @@ func Test_GetRows(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	//t.Logf("%#v", database)
 
 	table := findTable("DataTypeTest", database, t)
 
 	// read the data from it
-	rows, err := GetRows(reader, nil, *table, 999)
+	rows, err := GetRows(reader, nil, table, 999)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -135,7 +133,6 @@ func Test_GetRows(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		//t.Logf("%+v", test)
 		if test.row+1 > len(rows) {
 			t.Errorf("Not enough rows. %+v", test)
 			continue
@@ -164,7 +161,7 @@ func findTable(tableName string, database schema.Database, t *testing.T) *schema
 		schemaName = "dbo"
 	}
 	tableToFind := schema.Table{Schema: schemaName, Name: tableName}
-	table := database.FindTable(tableToFind)
+	table := database.FindTable(&tableToFind)
 	if table == nil {
 		t.Fatal(tableToFind.String() + " table missing")
 	}

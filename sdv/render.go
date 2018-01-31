@@ -113,21 +113,15 @@ func showTable(resp http.ResponseWriter, reader dbReader, table *schema.Table, q
 	}
 
 	diagramTables := []*schema.Table{table}
-	// outbound
+	var tableLinks []fkViewModel
 	for _, tableFks := range table.Fks {
 		diagramTables = append(diagramTables, tableFks.DestinationTable)
+		tableLinks = append(tableLinks, fkViewModel{Source: *tableFks.SourceTable, Destination: *tableFks.DestinationTable})
 	}
-	var tableLinks []fkViewModel
 	for _, inboundFks := range table.InboundFks {
+		diagramTables = append(diagramTables, inboundFks.SourceTable)
 		tableLinks = append(tableLinks, fkViewModel{Source: *inboundFks.SourceTable, Destination: *inboundFks.DestinationTable})
 	}
-	//// inbound
-	//for srcTable, inwardFk := range inwardFks {
-	//	diagramTables = append(diagramTables, srcTable)
-	//	for _, ref := range inwardFk {
-	//		tableLinks = append(tableLinks, fkViewModel{Source: srcTable, Destination: ref.Table})
-	//	}
-	//}
 
 	viewModel := dataViewModel{
 		LayoutData: layoutData,
@@ -137,7 +131,6 @@ func showTable(resp http.ResponseWriter, reader dbReader, table *schema.Table, q
 		Rows:       rows,
 		Diagram:    diagramViewModel{Tables: diagramTables, TableLinks: tableLinks},
 	}
-	log.Print(viewModel.Diagram)
 
 	err = tableTemplate.ExecuteTemplate(resp, "layout", viewModel)
 	if err != nil {

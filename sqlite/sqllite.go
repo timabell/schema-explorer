@@ -46,19 +46,17 @@ func (model sqliteModel) ReadSchema() (database schema.Database, err error) {
 
 	database.Fks, err = model.allFks()
 
-	for _, fk := range database.Fks{
+	for _, fk := range database.Fks {
 		source := database.FindTable(fk.SourceTable)
 		if source == nil {
 			err = fmt.Errorf("failed to find source table for fk %s", fk)
 		}
 		source.Fks = append(source.Fks, fk)
-		log.Printf("%#v", source.Fks)
 		destination := database.FindTable(fk.DestinationTable)
 		if destination == nil {
 			err = fmt.Errorf("failed to find destination table for fk %s", fk)
 		}
 		destination.InboundFks = append(destination.InboundFks, fk)
-		log.Printf("%#v", destination.InboundFks)
 	}
 	return
 }
