@@ -65,7 +65,24 @@ func Test_ReadSchema(t *testing.T) {
 	}
 
 	checkFkCount(database, t)
-	checkTableFkCounts(database, t)
+	checkTableFkCount(database, t)
+	checkInboundTableFkCount(database, t)
+	checkColumnFkCount(database, t)
+}
+
+func checkColumnFkCount(database schema.Database, t *testing.T) {
+	table := findTable("pet", database, t)
+	_, col := table.FindColumn("ownerId")
+	if col == nil {
+		t.Log(schema.TableDebug(*table))
+		t.Fatal("Column ownderId not found while checking col fk count")
+	}
+	if col.Fk == nil {
+		t.Log(schema.TableDebug(*table))
+		t.Logf("%#v", col)
+		t.Log(col.Fk)
+		t.Errorf("Fk entry missing from column %s.%s", table, col)
+	}
 }
 
 func checkFkCount(database schema.Database, t *testing.T) {
@@ -76,14 +93,17 @@ func checkFkCount(database schema.Database, t *testing.T) {
 	}
 }
 
-func checkTableFkCounts(database schema.Database, t *testing.T) {
-	checkTableFkCount("person", database, t)
-	checkTableFkCount("pet", database, t)
-}
-
-func checkTableFkCount(tableName string, database schema.Database, t *testing.T) {
+func checkInboundTableFkCount(database schema.Database, t *testing.T) {
 	expectedCount := 1
-	table := findTable(tableName, database, t)
+	table := findTable("person", database, t)
+	fkCount := len(table.InboundFks)
+	if fkCount != expectedCount {
+		t.Fatalf("Expected %d inboundFks in table %s, found %d", expectedCount, table, fkCount)
+	}
+}
+func checkTableFkCount(database schema.Database, t *testing.T) {
+	expectedCount := 1
+	table := findTable("pet", database, t)
 	fkCount := len(table.Fks)
 	if fkCount != expectedCount {
 		t.Fatalf("Expected %d fks in table %s, found %d", expectedCount, table, fkCount)
@@ -122,8 +142,8 @@ func Test_GetRows(t *testing.T) {
 	}
 
 	// check the column count is as expected
-	found, countIndex := table.FindCol("colCount")
-	if !found {
+	countIndex, column := table.FindColumn("colCount")
+	if column == nil {
 		t.Fatal("colCount column missing from " + table.String())
 	}
 	expectedColCount := int(rows[0][countIndex].(int64))
@@ -137,8 +157,8 @@ func Test_GetRows(t *testing.T) {
 			t.Errorf("Not enough rows. %+v", test)
 			continue
 		}
-		found, columnIndex := table.FindCol(test.colName)
-		if !found {
+		columnIndex, column := table.FindColumn(test.colName)
+		if column == nil {
 			t.Logf("Skipped test for non-existent column %+v", test)
 			continue
 		}

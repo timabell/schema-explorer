@@ -53,6 +53,10 @@ func (table Table) String() string {
 	return table.Schema + "." + table.Name
 }
 
+func TableDebug(table Table) string {
+	return fmt.Sprintf("%s: | cols: %s | fks: %s | inboundFks: %s", table.String(), table.Columns, table.Fks, table.InboundFks)
+}
+
 func columnsString(columns []*Column) string {
 	var columnNames []string
 	for _, col := range columns {
@@ -97,11 +101,11 @@ func (database Database) FindTable(tableToFind *Table) (table *Table) {
 	return nil
 }
 
-func (table Table) FindCol(columnName string) (found bool, index int) {
+func (table Table) FindColumn(columnName string) (index int, column *Column) {
 	for index, col := range table.Columns {
 		if col.Name == columnName {
-			return true, index
+			return index, col
 		}
 	}
-	return false, 0
+	return -1, nil
 }
