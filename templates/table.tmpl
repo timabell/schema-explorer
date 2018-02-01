@@ -17,6 +17,69 @@
         </tr>
         {{end}}
     </table>
+<h2>Foreign Keys</h2>
+<h3>Outbound</h3>
+<table>
+    <thead>
+    <tr>
+        <th></th>
+        <th colspan="2">To (Primary Key)</th>
+    </tr>
+    <tr>
+        <th>Column</th>
+        <th>Table</th>
+        <th>Column</th>
+    </tr>
+    </thead>
+    <tbody>
+    {{range .Table.Fks}}
+    <tr>
+        <td>
+        {{range .SourceColumns}}
+            {{.Name}}
+        {{end}}
+        </td>
+        <td>{{.DestinationTable}}</td>
+        <td>
+        {{range .DestinationColumns}}
+            {{.Name}}
+        {{end}}
+        </td>
+    </tr>
+    {{end}}
+    </tbody>
+</table>
+<h3>Inbound</h3>
+<table>
+    <thead>
+    <tr>
+        <th colspan="2">From</th>
+        <th>To (Primary Key)</th>
+    </tr>
+    <tr>
+        <th>Table</th>
+        <th>Column</th>
+        <th>Column</th>
+    </tr>
+    </thead>
+    <tbody>
+    {{range .Table.InboundFks}}
+    <tr>
+        <td>{{.SourceTable}}</td>
+        <td>
+        {{range .SourceColumns}}
+            {{.Name}}
+        {{end}}
+        </td>
+        <td>
+        {{range .DestinationColumns}}
+            {{.Name}}
+        {{end}}
+        </td>
+    </tr>
+    {{end}}
+    </tbody>
+</table>
 <h2>Data</h2>
 {{ if .Query }}
 <table class='filters'>

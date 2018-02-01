@@ -86,7 +86,7 @@ func checkColumnFkCount(database schema.Database, t *testing.T) {
 }
 
 func checkFkCount(database schema.Database, t *testing.T) {
-	expectedCount := 1
+	expectedCount := 4
 	fkCount := len(database.Fks)
 	if fkCount != expectedCount {
 		t.Fatalf("Expected %d fks across whole db, found %d", expectedCount, fkCount)
@@ -94,7 +94,7 @@ func checkFkCount(database schema.Database, t *testing.T) {
 }
 
 func checkInboundTableFkCount(database schema.Database, t *testing.T) {
-	expectedCount := 1
+	expectedCount := 2
 	table := findTable("person", database, t)
 	fkCount := len(table.InboundFks)
 	if fkCount != expectedCount {
@@ -102,7 +102,7 @@ func checkInboundTableFkCount(database schema.Database, t *testing.T) {
 	}
 }
 func checkTableFkCount(database schema.Database, t *testing.T) {
-	expectedCount := 1
+	expectedCount := 2
 	table := findTable("pet", database, t)
 	fkCount := len(table.Fks)
 	if fkCount != expectedCount {

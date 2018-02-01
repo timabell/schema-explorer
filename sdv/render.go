@@ -153,38 +153,41 @@ func buildRow(rowData RowData, table *schema.Table) cells {
 	return row
 }
 
+// Groups fks by source table, adds table name for each followed by links for each inbound fk for that table
 func buildInwardCell(inboundFks []*schema.Fk, rowData []interface{}, cols []*schema.Column) string {
-	// todo: post-refactor fixup
 	// todo: performance - pre-calculate fk info so this isn't repeated for every row
-	// stable sort order http://stackoverflow.com/questions/23330781/sort-golang-map-values-by-keys
-	//tables := make([]schema.Table, 0)
+	// todo: stable sort order http://stackoverflow.com/questions/23330781/sort-golang-map-values-by-keys
+	// todo: use schema types
+	log.Print(inboundFks)
+	//tables := make([]string, 0)
 	//for _, fk := range inboundFks {
-	//	tables = append(tables, fk.SourceTable)
+	//	tables = append(tables, fk.SourceTable.Name)
 	//}
 	//sort.Strings(tables)
-	parentHTML := ""
+	//parentHTML := ""
 	//for _, fk := range inboundFks {
 	//	parentHTML = parentHTML + template.HTMLEscapeString(fk.SourceTable.String()) + ":&nbsp;"
 	//	parentCols := make([]string, 0)
-	//	for colKey, _ := range inwardFks[table] {
+	//	for colKey, _ := range inboundFks{
 	//		parentCols = append(parentCols, colKey)
 	//	}
 	//	sort.Strings(parentCols)
 	//	for _, parentCol := range parentCols {
-	//		parentHTML = parentHTML + buildInwardLink(table, parentCol, rowData, cols, inwardFks[table][parentCol])
+	//		parentHTML = parentHTML + buildInwardLink(*fk, rowData, table.co)
 	//	}
 	//	parentHTML = parentHTML + " "
 	//}
-	return parentHTML
+	//return parentHTML
+	return ""
 }
 
-//func buildInwardLink(parentTable string, parentCol string, rowData RowData, cols []schema.Column, ref schema.Ref) string {
-//	linkHTML := fmt.Sprintf(
-//		"<a href='%s?%s=",
-//		template.URLQueryEscaper(parentTable),
-//		template.URLQueryEscaper(parentCol))
+//func buildInwardLink(fk schema.Fk, rowData RowData, cols []schema.Column) string {
 //	// todo: handle non-string primary key
 //	// todo: handle compound primary key
+//	linkHTML := fmt.Sprintf(
+//		"<a href='%s?%s=",
+//		template.URLQueryEscaper(fk.SourceTable),
+//		template.URLQueryEscaper(fk.SourceColumns))
 //	colData := rowData[indexOfCol(cols, string(ref.Col))]
 //	switch colData.(type) {
 //	case int64:
@@ -228,15 +231,4 @@ func buildCell(col *schema.Column, cellData interface{}) string {
 		valueHTML = valueHTML + "</a>"
 	}
 	return valueHTML
-}
-
-func indexOfCol(cols []schema.Column, name string) (index int) {
-	var curValue schema.Column
-	for index, curValue = range cols {
-		if curValue.Name == name {
-			return
-		}
-	}
-	log.Panic(name, " not found in column list")
-	return
 }
