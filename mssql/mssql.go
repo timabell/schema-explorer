@@ -19,35 +19,39 @@ func NewMssql(connectionString string) mssqlModel {
 }
 
 func (model mssqlModel) ReadSchema() (database schema.Database, err error) {
+	dbc, err := getConnection(model.connectionString)
+	if err != nil {
+		return
+	}
+	defer dbc.Close()
+
 	database = schema.Database{Supports: schema.SupportedFeatures{Schema: true}}
 
-	database.Tables, err = model.getTables()
+	database.Tables, err = model.getTables(dbc)
 	if err != nil {
 		return
 	}
 
+	// columns
 	for tableIndex, table := range database.Tables {
 		var cols []*schema.Column
-		cols, err = model.getColumns(table)
+		cols, err = model.getColumns(dbc, table)
 		if err != nil {
 			return
 		}
 		database.Tables[tableIndex].Columns = append(table.Columns, cols...)
 	}
 
-	database.Fks, err = model.allFks()
+	database.Fks, err = model.allFks(dbc, database)
 	if err != nil {
 		return
 	}
+
+	//log.Print(database.DebugString())
 	return
 }
 
-func (model mssqlModel) getTables() (tables []*schema.Table, err error) {
-	dbc, err := getConnection(model.connectionString)
-	if err != nil {
-		return nil, err
-	}
-	defer dbc.Close()
+func (model mssqlModel) getTables(dbc *sql.DB) (tables []*schema.Table, err error) {
 
 	rows, err := dbc.Query("select sch.name, tbl.name from sys.tables tbl inner join sys.schemas sch on sch.schema_id = tbl.schema_id order by sch.name, tbl.name;")
 	if err != nil {
@@ -98,15 +102,7 @@ func showVersion(dbc *sql.DB) {
 }
 
 // todo: don't actually need an allfks method for mssql as can filter both incoming and outgoing, rework interface
-func (model mssqlModel) allFks() (allFks []*schema.Fk, err error) {
-	// todo: share connection with other calls to this package
-	dbc, err := getConnection(model.connectionString)
-	if err != nil {
-		log.Println("get connection failed", err)
-		return
-	}
-	defer dbc.Close()
-
+func (model mssqlModel) allFks(dbc *sql.DB, database schema.Database) (allFks []*schema.Fk, err error) {
 	rows, err := dbc.Query(`
 		select fk.name,
 			parent_sch.name parent_sch_name,
@@ -142,12 +138,17 @@ func (model mssqlModel) allFks() (allFks []*schema.Fk, err error) {
 	allFks = []*schema.Fk{}
 
 	for rows.Next() {
-		var name, parentSchema, parentTableName, parentCol, childSchema, childTableName, childCol string
-		rows.Scan(&name, &parentSchema, &parentTableName, &parentCol, &childSchema, &childTableName, &childCol)
-		parentTable := schema.Table{Schema: parentSchema, Name: parentTableName}
-		childTable := schema.Table{Schema: childSchema, Name: childTableName}
+		var name, sourceSchema, sourceTableName, sourceColumnName, destinationSchema, destinationTableName, destinationColumnName string
+		rows.Scan(&name, &sourceSchema, &sourceTableName, &sourceColumnName, &destinationSchema, &destinationTableName, &destinationColumnName)
 		// todo: support compound foreign keys (i.e. those with 2+ columns involved
-		fk := schema.NewFk(&parentTable, &schema.Column{Name: parentCol}, &childTable, &schema.Column{Name: childCol})
+		sourceTable := database.FindTable(&schema.Table{Schema: sourceSchema, Name: sourceTableName})
+		_, sourceColumn := sourceTable.FindColumn(sourceColumnName)
+		destinationTable := database.FindTable(&schema.Table{Schema: destinationSchema, Name: destinationTableName})
+		_, destinationColumn := destinationTable.FindColumn(destinationColumnName)
+		fk := schema.NewFk(sourceTable, sourceColumn, destinationTable, destinationColumn)
+		sourceTable.Fks = append(sourceTable.Fks, fk)
+		sourceColumn.Fk = fk
+		destinationTable.InboundFks = append(destinationTable.InboundFks, fk)
 		allFks = append(allFks, fk)
 	}
 	return
@@ -188,14 +189,7 @@ func (model mssqlModel) GetSqlRows(query schema.RowFilter, table *schema.Table, 
 	return
 }
 
-func (model mssqlModel) getColumns(table *schema.Table) (cols []*schema.Column, err error) {
-	dbc, err := getConnection(model.connectionString)
-	if dbc == nil {
-		log.Println(err)
-		panic("getConnection() returned nil")
-	}
-	defer dbc.Close()
-
+func (model mssqlModel) getColumns(dbc *sql.DB, table *schema.Table) (cols []*schema.Column, err error) {
 	// todo: parameterise
 	sqlText := `select c.name, type_name(c.system_type_id) from sys.columns c
 	inner join sys.tables t on t.object_id = c.object_id
