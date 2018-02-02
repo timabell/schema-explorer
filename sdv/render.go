@@ -155,56 +155,84 @@ func buildRow(rowData RowData, table *schema.Table) cells {
 
 // Groups fks by source table, adds table name for each followed by links for each inbound fk for that table
 func buildInwardCell(inboundFks []*schema.Fk, rowData []interface{}, cols []*schema.Column) string {
-	// todo: performance - pre-calculate fk info so this isn't repeated for every row
-	// todo: stable sort order http://stackoverflow.com/questions/23330781/sort-golang-map-values-by-keys
-	// todo: use schema types
-	log.Print(inboundFks)
-	//tables := make([]string, 0)
+	// group fks by table
+	groupedFks := groupFksByTable(inboundFks)
+
+	//inboundTables := make([]*schema.Table, 0)
 	//for _, fk := range inboundFks {
-	//	tables = append(tables, fk.SourceTable.Name)
+	//	inboundTables = append(inboundTables, fk.SourceTable)
 	//}
-	//sort.Strings(tables)
-	//parentHTML := ""
-	//for _, fk := range inboundFks {
-	//	parentHTML = parentHTML + template.HTMLEscapeString(fk.SourceTable.String()) + ":&nbsp;"
-	//	parentCols := make([]string, 0)
-	//	for colKey, _ := range inboundFks{
-	//		parentCols = append(parentCols, colKey)
-	//	}
-	//	sort.Strings(parentCols)
-	//	for _, parentCol := range parentCols {
-	//		parentHTML = parentHTML + buildInwardLink(*fk, rowData, table.co)
-	//	}
-	//	parentHTML = parentHTML + " "
-	//}
-	//return parentHTML
-	return ""
+	//sort.Slice(inboundTables, func(i, j int) bool {
+	//	return inboundTables[i].Name < inboundTables[j].Name
+	//})
+	parentHTML := ""
+	for table, fks := range groupedFks {
+		parentHTML = parentHTML + template.HTMLEscapeString(table.String()) + ":&nbsp;"
+		for _, fk := range fks {
+			//parentHTML = parentHTML + template.HTMLEscapeString(fk.String())
+			parentHTML = parentHTML + buildInwardLink(fk, rowData)
+		}
+		//	parentCols := make([]string, 0)
+		//	for colKey, _ := range inboundFks{
+		//		parentCols = append(parentCols, colKey)
+		//	}
+		//	sort.Strings(parentCols)
+		//	for _, parentCol := range parentCols {
+		//		parentHTML = parentHTML + buildInwardLink(*fk, rowData, table.co)
+		//	}
+		parentHTML = parentHTML + " "
+	}
+	return parentHTML
 }
 
-//func buildInwardLink(fk schema.Fk, rowData RowData, cols []schema.Column) string {
-//	// todo: handle non-string primary key
-//	// todo: handle compound primary key
-//	linkHTML := fmt.Sprintf(
-//		"<a href='%s?%s=",
-//		template.URLQueryEscaper(fk.SourceTable),
-//		template.URLQueryEscaper(fk.SourceColumns))
-//	colData := rowData[indexOfCol(cols, string(ref.Col))]
-//	switch colData.(type) {
-//	case int64:
-//		// todo: url-escape as well
-//		linkHTML = linkHTML + template.HTMLEscapeString(fmt.Sprintf("%d", colData))
-//	case string:
-//		// todo: sql-quotes here are a hack pending switching to parameterized sql
-//		linkHTML = linkHTML + "%27" + template.HTMLEscapeString(fmt.Sprintf("%s", colData)) + "%27"
-//	default:
-//		linkHTML = linkHTML + template.HTMLEscapeString(fmt.Sprintf("%v", colData))
-//	}
-//	linkHTML = linkHTML + fmt.Sprintf(
-//		// todo: factor out row limit, move to a cookie perhaps
-//		"&_rowLimit=100' class='parentFk'>%s</a>&nbsp;",
-//		template.HTMLEscaper(parentCol))
-//	return linkHTML
-//}
+type groupedFkMap map[*schema.Table][]*schema.Fk
+
+func groupFksByTable(inboundFks []*schema.Fk) groupedFkMap {
+	var groupedFks = make(map[*schema.Table][]*schema.Fk, 0)
+	for _, fk := range inboundFks {
+		if _, exists := groupedFks[fk.SourceTable]; !exists {
+			groupedFks[fk.SourceTable] = make([]*schema.Fk, 0)
+		}
+		groupedFks[fk.SourceTable] = append(groupedFks[fk.SourceTable], fk)
+	}
+	return groupedFks
+}
+
+func buildInwardLink(fk *schema.Fk, rowData RowData) string {
+	// todo: handle non-string primary key
+	columnsString := schema.ColumnsString(fk.SourceColumns)
+	linkHTML := fmt.Sprintf(
+		"<a href='%s?%s=",
+		template.URLQueryEscaper(fk.SourceTable),
+		template.URLQueryEscaper(fk.SourceColumns))
+	// todo: handle compound keys
+	if len(fk.DestinationColumns) > 1 {
+		log.Print("unsupported: compound key. " + fk.String())
+		return ""
+	}
+	destinationColumnIndex, _ := fk.DestinationTable.FindColumn(fk.DestinationColumns[0].Name)
+	if destinationColumnIndex < 0 {
+		log.Print(fk)
+		log.Printf("%#v", fk.DestinationTable)
+		log.Panic("Destination column not found in referenced table")
+	}
+	colData := rowData[destinationColumnIndex]
+	switch colData.(type) {
+	case int64:
+		// todo: url-escape as well
+		linkHTML = linkHTML + template.HTMLEscapeString(fmt.Sprintf("%d", colData))
+	case string:
+		// todo: sql-quotes here are a hack pending switching to parameterized sql
+		linkHTML = linkHTML + "%27" + template.HTMLEscapeString(fmt.Sprintf("%s", colData)) + "%27"
+	default:
+		linkHTML = linkHTML + template.HTMLEscapeString(fmt.Sprintf("%v", colData))
+	}
+	linkHTML = linkHTML + fmt.Sprintf(
+		// todo: factor out row limit, move to a cookie perhaps
+		"&_rowLimit=100' class='parentFk'>%s</a>&nbsp;",
+		template.HTMLEscaper(columnsString))
+	return linkHTML
+}
 
 func buildCell(col *schema.Column, cellData interface{}) string {
 	if cellData == nil {

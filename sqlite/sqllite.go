@@ -30,53 +30,47 @@ func (model sqliteModel) ReadSchema() (database schema.Database, err error) {
 
 	database = schema.Database{Supports: schema.SupportedFeatures{Schema: false}}
 
-	database.Tables, err = model.getTables()
+	// load table list
+	database.Tables, err = model.getTables(dbc)
 	if err != nil {
 		return
 	}
 
-	for tableIndex, table := range database.Tables {
+	// add table columns
+	for _, table := range database.Tables {
 		var cols []*schema.Column
-		cols, err = model.getColumns(table)
+		cols, err = model.getColumns(dbc, table)
 		if err != nil {
 			return
 		}
-		database.Tables[tableIndex].Columns = append(table.Columns, cols...)
+		table.Columns = append(table.Columns, cols...)
 	}
 
-	database.Fks, err = model.allFks()
+	// fks
+	for _, table := range database.Tables {
+		var fks []*schema.Fk
+		fks, err = getFks(dbc, table, database)
+		if err != nil {
+			return
+		}
+		table.Fks = fks
+		database.Fks = append(database.Fks, fks...)
+	}
 
+	// hook-up inbound fks
 	for _, fk := range database.Fks {
-		source := database.FindTable(fk.SourceTable)
-		if source == nil {
-			err = fmt.Errorf("failed to find source table for fk %s", fk)
-		}
-		source.Fks = append(source.Fks, fk)
-		for _, fkCol := range fk.SourceColumns {
-			_, col := source.FindColumn(fkCol.Name)
-			if col == nil {
-				err = fmt.Errorf("couldn't find source column while hooking up fks to cols - %s", fk)
-				return
-			}
-			col.Fk = fk
-		}
-
 		destination := database.FindTable(fk.DestinationTable)
 		if destination == nil {
 			err = fmt.Errorf("failed to find destination table for fk %s", fk)
 		}
 		destination.InboundFks = append(destination.InboundFks, fk)
 	}
+	//log.Print(database.DebugString())
 	return
 }
 
-func (model sqliteModel) getTables() (tables []*schema.Table, err error) {
-	dbc, err := getConnection(model.path)
-	if err != nil {
-		return
-	}
-	defer dbc.Close()
-
+func (model sqliteModel) getTables(dbc *sql.DB) (tables []*schema.Table, err error) {
+	// todo: parameterise
 	rows, err := dbc.Query("SELECT name FROM sqlite_master WHERE type='table' AND name not like 'sqlite_%';")
 	if err != nil {
 		return nil, err
@@ -105,7 +99,7 @@ func (model sqliteModel) CheckConnection() (err error) {
 		panic("getConnection() returned nil")
 	}
 	defer dbc.Close()
-	tables, err := model.getTables()
+	tables, err := model.getTables(dbc)
 	if err != nil {
 		panic(err)
 	}
@@ -117,38 +111,9 @@ func (model sqliteModel) CheckConnection() (err error) {
 	return
 }
 
-func (model sqliteModel) allFks() (allFks []*schema.Fk, err error) {
-	tables, err := model.getTables()
-	if err != nil {
-		fmt.Println("error getting table list while building global fk list", err)
-		return
-	}
-
-	allFks = []*schema.Fk{}
-
-	// todo: share connection with getTables()
-	dbc, err := getConnection(model.path)
-	if err != nil {
-		// todo: show in UI
-		return
-	}
-	defer dbc.Close()
-
-	for _, table := range tables {
-		var tableFks []*schema.Fk
-		tableFks, err = fks(dbc, table)
-		if err != nil {
-			// todo: show in UI
-			fmt.Println("error getting fks for table "+table.Name, err)
-			return
-		}
-		allFks = append(allFks, tableFks...)
-	}
-	return
-}
-
-func fks(dbc *sql.DB, table *schema.Table) (fks []*schema.Fk, err error) {
-	rows, err := dbc.Query("PRAGMA foreign_key_list('" + table.Name + "');")
+func getFks(dbc *sql.DB, sourceTable *schema.Table, database schema.Database) (fks []*schema.Fk, err error) {
+	// todo: parameterise
+	rows, err := dbc.Query("PRAGMA foreign_key_list('" + sourceTable.Name + "');")
 	if err != nil {
 		return
 	}
@@ -156,17 +121,21 @@ func fks(dbc *sql.DB, table *schema.Table) (fks []*schema.Fk, err error) {
 	fks = []*schema.Fk{}
 	for rows.Next() {
 		var id, seq int
-		var parentTable, from, to, onUpdate, onDelete, match string
-		rows.Scan(&id, &seq, &parentTable, &from, &to, &onUpdate, &onDelete, &match)
-		sourceColumn := schema.Column{Name: from}
-		destinationColumn := schema.Column{Name: to}
-		fk := schema.NewFk(table, &sourceColumn, &schema.Table{Name: parentTable}, &destinationColumn)
+		var destinationTableName, sourceColumnName, destinationColumnName, onUpdate, onDelete, match string
+		rows.Scan(&id, &seq, &destinationTableName, &sourceColumnName, &destinationColumnName, &onUpdate, &onDelete, &match)
+		_, sourceColumn := sourceTable.FindColumn(sourceColumnName)
+		destinationTable := database.FindTable(&schema.Table{Name: destinationTableName})
+		_, destinationColumn := destinationTable.FindColumn(destinationColumnName)
+		fk := schema.NewFk(sourceTable, sourceColumn, destinationTable, destinationColumn)
+		sourceColumn.Fk = fk
 		fks = append(fks, fk)
 	}
 	return
 }
 
 func (model sqliteModel) GetSqlRows(query schema.RowFilter, table *schema.Table, rowLimit int) (rows *sql.Rows, err error) {
+	// todo: parameterise where possible
+	// todo: whitelist-sanitize unparameterizable parts
 	sql := "select * from " + table.Name
 
 	if len(query) > 0 {
@@ -184,33 +153,22 @@ func (model sqliteModel) GetSqlRows(query schema.RowFilter, table *schema.Table,
 
 	dbc, err := getConnection(model.path)
 	if err != nil {
-		log.Println(err)
-		panic("GetRows to get connection")
-		// todo: show in UI
+		log.Print("GetRows failed to get connection")
 		return
 	}
 	defer dbc.Close()
 
 	rows, err = dbc.Query(sql)
 	if err != nil {
+		log.Print("GetRows failed to get query")
 		log.Println(sql)
 		log.Println(err)
-		panic("GetRows failed to get query")
-		// todo: show in UI
-		return
 	}
 	return
 }
 
-func (model sqliteModel) getColumns(table *schema.Table) (cols []*schema.Column, err error) {
-	dbc, err := getConnection(model.path)
-	if err != nil {
-		log.Println(err)
-		panic("getColumns to get connection")
-		// todo: show in UI
-		return
-	}
-	defer dbc.Close()
+func (model sqliteModel) getColumns(dbc *sql.DB, table *schema.Table) (cols []*schema.Column, err error) {
+	// todo: parameterise
 	rows, err := dbc.Query("PRAGMA table_info('" + table.Name + "');")
 	if err != nil {
 		return

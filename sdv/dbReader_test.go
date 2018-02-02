@@ -65,7 +65,7 @@ func Test_ReadSchema(t *testing.T) {
 	}
 
 	checkFkCount(database, t)
-	checkTableFkCount(database, t)
+	checkTableFks(database, t)
 	checkInboundTableFkCount(database, t)
 	checkColumnFkCount(database, t)
 }
@@ -94,20 +94,26 @@ func checkFkCount(database schema.Database, t *testing.T) {
 }
 
 func checkInboundTableFkCount(database schema.Database, t *testing.T) {
-	expectedCount := 2
+	expectedInboundCount := 2
 	table := findTable("person", database, t)
 	fkCount := len(table.InboundFks)
-	if fkCount != expectedCount {
-		t.Fatalf("Expected %d inboundFks in table %s, found %d", expectedCount, table, fkCount)
+	if fkCount != expectedInboundCount {
+		t.Fatalf("Expected %d inboundFks in table %s, found %d", expectedInboundCount, table, fkCount)
 	}
 }
-func checkTableFkCount(database schema.Database, t *testing.T) {
-	expectedCount := 2
+
+func checkTableFks(database schema.Database, t *testing.T) {
+	expectedFkCount := 2
 	table := findTable("pet", database, t)
 	fkCount := len(table.Fks)
-	if fkCount != expectedCount {
-		t.Fatalf("Expected %d fks in table %s, found %d", expectedCount, table, fkCount)
+	if fkCount != expectedFkCount {
+		t.Fatalf("Expected %d fks in table %s, found %d", expectedFkCount, table, fkCount)
 	}
+	t.Log(table.Fks[0])
+	t.Log(table.Fks[0].SourceTable)
+	t.Log(table.Fks[0].SourceTable.Columns)
+	t.Log(table.Fks[0].DestinationTable)
+	t.Log(table.Fks[0].DestinationTable.Columns)
 }
 
 type testCase struct {

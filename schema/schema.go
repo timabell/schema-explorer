@@ -1,6 +1,7 @@
 package schema
 
 import (
+	"bytes"
 	"fmt"
 	"strings"
 )
@@ -57,7 +58,7 @@ func TableDebug(table Table) string {
 	return fmt.Sprintf("%s: | cols: %s | fks: %s | inboundFks: %s", table.String(), table.Columns, table.Fks, table.InboundFks)
 }
 
-func columnsString(columns []*Column) string {
+func ColumnsString(columns []*Column) string {
 	var columnNames []string
 	for _, col := range columns {
 		columnNames = append(columnNames, col.Name)
@@ -70,7 +71,7 @@ func (column Column) String() string {
 }
 
 func (fk Fk) String() string {
-	return fmt.Sprintf("%s(%s) => %s(%s)", fk.SourceTable, columnsString(fk.SourceColumns), fk.DestinationTable, columnsString(fk.DestinationColumns))
+	return fmt.Sprintf("%s(%s) => %s(%s)", fk.SourceTable, ColumnsString(fk.SourceColumns), fk.DestinationTable, ColumnsString(fk.DestinationColumns))
 }
 
 // filter the fk list down to keys that reference the "child" table
@@ -108,4 +109,128 @@ func (table Table) FindColumn(columnName string) (index int, column *Column) {
 		}
 	}
 	return -1, nil
+}
+
+func (database Database) DebugString() string {
+	var buffer bytes.Buffer
+	buffer.WriteString("database debug dump:\n")
+	buffer.WriteString("tables:\n")
+	for _, table := range database.Tables {
+		buffer.WriteString("- ")
+		buffer.WriteString(table.String())
+		buffer.WriteString(" ")
+		buffer.WriteString(fmt.Sprintf("%p", table))
+		buffer.WriteString("\n")
+		for _, col := range table.Columns {
+			buffer.WriteString("  - '")
+			buffer.WriteString(col.Name)
+			buffer.WriteString("'\t")
+			buffer.WriteString(col.Type)
+			buffer.WriteString("\t")
+			buffer.WriteString(fmt.Sprintf("%p", col))
+			buffer.WriteString("\n")
+			if col.Fk != nil {
+				buffer.WriteString("    - ")
+				buffer.WriteString(col.Fk.String())
+				buffer.WriteString(" ")
+				buffer.WriteString(fmt.Sprintf("%p", col.Fk))
+				buffer.WriteString("\n")
+			}
+		}
+		for _, fk := range table.Fks {
+			buffer.WriteString("  - ")
+			buffer.WriteString(fk.String())
+			buffer.WriteString(" ")
+			buffer.WriteString(fmt.Sprintf("%p", fk))
+			buffer.WriteString("\n")
+			buffer.WriteString("    - ")
+			buffer.WriteString(fk.SourceTable.String())
+			buffer.WriteString("\t")
+			buffer.WriteString(fmt.Sprintf("%p", fk.SourceTable))
+			buffer.WriteString("\n")
+			for _, col := range fk.SourceColumns {
+				buffer.WriteString("        - '")
+				buffer.WriteString(col.Name)
+				buffer.WriteString("\t")
+				buffer.WriteString(fmt.Sprintf("%p", col))
+				buffer.WriteString("\n")
+			}
+			buffer.WriteString("    - ")
+			buffer.WriteString(fk.DestinationTable.String())
+			buffer.WriteString("\t")
+			buffer.WriteString(fmt.Sprintf("%p", fk.DestinationTable))
+			buffer.WriteString("\n")
+			for _, col := range fk.DestinationColumns {
+				buffer.WriteString("        - '")
+				buffer.WriteString(col.Name)
+				buffer.WriteString("\t")
+				buffer.WriteString(fmt.Sprintf("%p", col))
+				buffer.WriteString("\n")
+			}
+		}
+		for _, fk := range table.InboundFks {
+			buffer.WriteString("  - ")
+			buffer.WriteString(fk.String())
+			buffer.WriteString(" ")
+			buffer.WriteString(fmt.Sprintf("%p", fk))
+			buffer.WriteString("\n")
+			buffer.WriteString("    - ")
+			buffer.WriteString(fk.SourceTable.String())
+			buffer.WriteString("\t")
+			buffer.WriteString(fmt.Sprintf("%p", fk.SourceTable))
+			buffer.WriteString("\n")
+			for _, col := range fk.SourceColumns {
+				buffer.WriteString("        - '")
+				buffer.WriteString(col.Name)
+				buffer.WriteString("\t")
+				buffer.WriteString(fmt.Sprintf("%p", col))
+				buffer.WriteString("\n")
+			}
+			buffer.WriteString("    - ")
+			buffer.WriteString(fk.DestinationTable.String())
+			buffer.WriteString("\t")
+			buffer.WriteString(fmt.Sprintf("%p", fk.DestinationTable))
+			buffer.WriteString("\n")
+			for _, col := range fk.DestinationColumns {
+				buffer.WriteString("        - '")
+				buffer.WriteString(col.Name)
+				buffer.WriteString("\t")
+				buffer.WriteString(fmt.Sprintf("%p", col))
+				buffer.WriteString("\n")
+			}
+		}
+	}
+	buffer.WriteString("fks:\n")
+	for _, fk := range database.Fks {
+		buffer.WriteString("- ")
+		buffer.WriteString(fk.String())
+		buffer.WriteString(" ")
+		buffer.WriteString(fmt.Sprintf("%p", fk))
+		buffer.WriteString("\n")
+		buffer.WriteString("  - ")
+		buffer.WriteString(fk.SourceTable.String())
+		buffer.WriteString("\t")
+		buffer.WriteString(fmt.Sprintf("%p", fk.SourceTable))
+		buffer.WriteString("\n")
+		for _, col := range fk.SourceColumns {
+			buffer.WriteString("      - '")
+			buffer.WriteString(col.Name)
+			buffer.WriteString("\t")
+			buffer.WriteString(fmt.Sprintf("%p", col))
+			buffer.WriteString("\n")
+		}
+		buffer.WriteString("  - ")
+		buffer.WriteString(fk.DestinationTable.String())
+		buffer.WriteString("\t")
+		buffer.WriteString(fmt.Sprintf("%p", fk.DestinationTable))
+		buffer.WriteString("\n")
+		for _, col := range fk.DestinationColumns {
+			buffer.WriteString("      - '")
+			buffer.WriteString(col.Name)
+			buffer.WriteString("\t")
+			buffer.WriteString(fmt.Sprintf("%p", col))
+			buffer.WriteString("\n")
+		}
+	}
+	return buffer.String()
 }
