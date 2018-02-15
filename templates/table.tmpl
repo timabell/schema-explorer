@@ -80,7 +80,7 @@
     {{end}}
     </tbody>
 </table>
-<h2>Data</h2>
+<h2 id="data">Data</h2>
 {{ if .Query }}
 <table class='filters'>
     <thead>
@@ -107,7 +107,7 @@
     <tfoot>
     <tr>
         <td colspan="2">
-            <a href="?_rowLimit={{.RowLimit}}">Clear</a>
+            <a href="?_rowLimit={{.RowLimit}}#data">Clear</a>
         </td>
     </tr>
     </tfoot>

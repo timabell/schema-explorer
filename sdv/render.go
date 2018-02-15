@@ -229,7 +229,7 @@ func buildInwardLink(fk *schema.Fk, rowData RowData) string {
 	}
 	linkHTML = linkHTML + fmt.Sprintf(
 		// todo: factor out row limit, move to a cookie perhaps
-		"&_rowLimit=100' class='parentFk'>%s</a>&nbsp;",
+		"&_rowLimit=100#data' class='parentFk'>%s</a>&nbsp;",
 		template.HTMLEscaper(columnsString))
 	return linkHTML
 }
@@ -252,7 +252,7 @@ func buildCell(col *schema.Column, cellData interface{}) string {
 		default:
 			valueHTML = valueHTML + template.HTMLEscapeString(stringValue)
 		}
-		valueHTML = valueHTML + "' class='fk'>"
+		valueHTML = valueHTML + "#data' class='fk'>"
 	}
 	valueHTML = valueHTML + template.HTMLEscapeString(stringValue)
 	if hasFk {
