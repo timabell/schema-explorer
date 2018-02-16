@@ -1,9 +1,8 @@
 *{font-family: Arial;color:#333;}
 body{background-color: #f8f8f8;margin: 16px 32px;}
 li{margin-bottom: 1em;}
-h1{margin-top: 32px;}
+h1{margin: -11px 0px -5px -24px;/* adjust for unwanted padding in svg */}
 .encore{font-size: 60%;}
-h1 a{text-decoration: none;color:#333;}
 a{color:#338;}
 a:hover{text-decoration: underline;color:#33f;}
 a:visited{color:#333;}
