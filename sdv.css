@@ -55,3 +55,14 @@ th, td {
     border: 1px solid #333;
     padding: 1em;
 }
+
+a.button {
+  padding: 1em;
+  background-color: #4CAF50;
+  color: #fff;
+  font-weight: bold;
+  margin: 1em 0;
+  text-decoration: none;
+  display: inline-block;
+  white-space: nowrap;
+}
