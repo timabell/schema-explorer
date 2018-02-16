@@ -6,8 +6,8 @@ import (
 	"time"
 )
 
-// roughly 3 months from when this is released into the wild
-var Expiry = time.Date(2018, time.March, 1, 0, 0, 0, 0, time.UTC)
+// at least 6 months from when this is released into the wild
+var Expiry = time.Date(2018, time.November, 1, 0, 0, 0, 0, time.UTC)
 var CopyrightYear = 2018
 
 func Licensing() {
