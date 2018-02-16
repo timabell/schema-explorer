@@ -132,6 +132,8 @@ func showTable(resp http.ResponseWriter, reader dbReader, table *schema.Table, q
 		Diagram:    diagramViewModel{Tables: diagramTables, TableLinks: tableLinks},
 	}
 
+	viewModel.LayoutData.Title = fmt.Sprintf("%s | %s", table.String(), viewModel.LayoutData.Title)
+
 	err = tableTemplate.ExecuteTemplate(resp, "layout", viewModel)
 	if err != nil {
 		log.Print("template execution error", err)
