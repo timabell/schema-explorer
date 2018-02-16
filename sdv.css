@@ -1,7 +1,10 @@
 *{font-family: Arial;color:#333;}
 body{background-color: #f8f8f8;margin: 16px 32px;}
-li{margin-bottom: 1em;}
-h1 img{max-width: 100%;max-height: 20em;}
+h1 img{
+max-width: 100%;max-height: 20em;
+margin: 0 auto;
+  display: block;
+}
 .encore{font-size: 60%;}
 a{color:#338;}
 a:hover{text-decoration: underline;color:#33f;}
@@ -60,9 +63,15 @@ a.button {
   padding: 1em;
   background-color: #4CAF50;
   color: #fff;
-  font-weight: bold;
-  margin: 1em 0;
   text-decoration: none;
-  display: inline-block;
+  font-weight: bold;
+  display: block;
+  width: 13em;
+  margin: 1em auto;
   white-space: nowrap;
+  text-align: center;
+}
+#container{
+  max-width: 58em;
+  margin: 0 auto;
 }
