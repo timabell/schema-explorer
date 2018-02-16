@@ -254,7 +254,7 @@ func buildCell(col *schema.Column, cellData interface{}) string {
 		default:
 			valueHTML = valueHTML + template.HTMLEscapeString(stringValue)
 		}
-		valueHTML = valueHTML + "#data' class='fk'>"
+		valueHTML = valueHTML + "&_rowLimit=100#data' class='fk'>"
 	}
 	valueHTML = valueHTML + template.HTMLEscapeString(stringValue)
 	if hasFk {
