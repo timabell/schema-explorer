@@ -27,13 +27,13 @@ type Table struct {
 type TableList []*Table
 
 // implement sort.Interface for list of tables https://stackoverflow.com/a/19948360/10245
-func(tables TableList) Len() int {
+func (tables TableList) Len() int {
 	return len(tables)
 }
-func(tables TableList) Swap(i, j int) {
+func (tables TableList) Swap(i, j int) {
 	tables[i], tables[j] = tables[j], tables[i]
 }
-func(tables TableList) Less(i, j int) bool {
+func (tables TableList) Less(i, j int) bool {
 	return tables[i].String() < tables[j].String()
 }
 

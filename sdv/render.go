@@ -60,8 +60,9 @@ var layoutData pageTemplateModel
 var funcMap = template.FuncMap{
 	"minus": minus,
 }
-func minus(x, y int) int{
-	return x-y
+
+func minus(x, y int) int {
+	return x - y
 }
 
 func SetupTemplate() {
