@@ -157,31 +157,25 @@ func buildRow(rowData RowData, table *schema.Table) cells {
 
 // Groups fks by source table, adds table name for each followed by links for each inbound fk for that table
 func buildInwardCell(inboundFks []*schema.Fk, rowData []interface{}, cols []*schema.Column) string {
-	// group fks by table
 	groupedFks := groupFksByTable(inboundFks)
 
-	//inboundTables := make([]*schema.Table, 0)
-	//for _, fk := range inboundFks {
-	//	inboundTables = append(inboundTables, fk.SourceTable)
-	//}
-	//sort.Slice(inboundTables, func(i, j int) bool {
-	//	return inboundTables[i].Name < inboundTables[j].Name
-	//})
+	// note.... for table, fks := range groupedFks { ... is an unstable sort, don't do it this way! https://stackoverflow.com/a/23332089/10245
+	// stable sort:
+	// get list of tables in map
+	var keys schema.TableList
+	for table, _ := range groupedFks {
+		keys = append(keys, table)
+	}
+	// sort list of tables (requires TableList to implement sort interface)
+	sort.Sort(keys)
+	// iterate through sorted list of keys, using that to find entry in map
 	parentHTML := ""
-	for table, fks := range groupedFks {
+	for _, table := range keys {
+		fks := groupedFks[table]
 		parentHTML = parentHTML + template.HTMLEscapeString(table.String()) + ":&nbsp;"
 		for _, fk := range fks {
-			//parentHTML = parentHTML + template.HTMLEscapeString(fk.String())
 			parentHTML = parentHTML + buildInwardLink(fk, rowData)
 		}
-		//	parentCols := make([]string, 0)
-		//	for colKey, _ := range inboundFks{
-		//		parentCols = append(parentCols, colKey)
-		//	}
-		//	sort.Strings(parentCols)
-		//	for _, parentCol := range parentCols {
-		//		parentHTML = parentHTML + buildInwardLink(*fk, rowData, table.co)
-		//	}
 		parentHTML = parentHTML + " "
 	}
 	return parentHTML
