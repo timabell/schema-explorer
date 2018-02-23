@@ -39,7 +39,7 @@
             {{.Name}}
         {{end}}
         </td>
-        <td>{{.DestinationTable}}</td>
+        <td><a href="{{.DestinationTable}}?_rowLimit=100">{{.DestinationTable}}</a></td>
         <td>
         {{range .DestinationColumns}}
             {{.Name}}
@@ -65,7 +65,7 @@
     <tbody>
     {{range .Table.InboundFks}}
     <tr>
-        <td>{{.SourceTable}}</td>
+        <td><a href="{{.SourceTable}}?_rowLimit=100">{{.SourceTable}}</a></td>
         <td>
         {{range .SourceColumns}}
             {{.Name}}

@@ -22,13 +22,13 @@
     <tbody>
     {{range .Database.Fks}}
     <tr>
-        <td>{{.SourceTable}}</td>
+        <td><a href="tables/{{.SourceTable}}?_rowLimit=100">{{.SourceTable}}</a></td>
         <td>
         {{range .SourceColumns}}
             {{.Name}}
         {{end}}
         </td>
-        <td>{{.DestinationTable}}</td>
+        <td><a href="tables/{{.DestinationTable}}?_rowLimit=100">{{.DestinationTable}}</a></td>
         <td>
         {{range .DestinationColumns}}
             {{.Name}}
