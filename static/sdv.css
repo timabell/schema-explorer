@@ -55,3 +55,7 @@ th, td {
     border: 1px solid #333;
     padding: 1em;
 }
+.hint{
+    color: #666;
+    font-size: smaller;
+}
