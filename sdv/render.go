@@ -196,7 +196,6 @@ func groupFksByTable(inboundFks []*schema.Fk) groupedFkMap {
 
 func buildInwardLink(fk *schema.Fk, rowData RowData) string {
 	// todo: handle non-string primary key
-	columnsString := schema.ColumnsString(fk.SourceColumns)
 	linkHTML := fmt.Sprintf(
 		"<a href='%s?%s=",
 		template.URLQueryEscaper(fk.SourceTable),
@@ -226,7 +225,7 @@ func buildInwardLink(fk *schema.Fk, rowData RowData) string {
 	linkHTML = linkHTML + fmt.Sprintf(
 		// todo: factor out row limit, move to a cookie perhaps
 		"&_rowLimit=100#data' class='parentFk'>%s</a>&nbsp;",
-		template.HTMLEscaper(columnsString))
+		template.HTMLEscaper(fk.SourceColumns.String()))
 	return linkHTML
 }
 

@@ -19,7 +19,7 @@ type Database struct {
 type Table struct {
 	Schema     string
 	Name       string
-	Columns    []*Column
+	Columns    ColumnList
 	Fks        []*Fk
 	InboundFks []*Fk
 }
@@ -37,6 +37,8 @@ func(tables TableList) Less(i, j int) bool {
 	return tables[i].String() < tables[j].String()
 }
 
+type ColumnList []*Column
+
 type Column struct {
 	Name string
 	Type string
@@ -46,9 +48,9 @@ type Column struct {
 // todo: convert to pointers to tables & columns for memory efficiency
 type Fk struct {
 	SourceTable        *Table
-	SourceColumns      []*Column
+	SourceColumns      ColumnList
 	DestinationTable   *Table
-	DestinationColumns []*Column
+	DestinationColumns ColumnList
 }
 
 // filtering of results with column name / value(s) pairs,
@@ -57,7 +59,7 @@ type RowFilter map[string][]string
 
 // Simplified fk constructor for single-column foreign keys
 func NewFk(sourceTable *Table, sourceColumn *Column, destinationTable *Table, destinationColumn *Column) *Fk {
-	return &Fk{SourceTable: sourceTable, SourceColumns: []*Column{sourceColumn}, DestinationTable: destinationTable, DestinationColumns: []*Column{destinationColumn}}
+	return &Fk{SourceTable: sourceTable, SourceColumns: ColumnList{sourceColumn}, DestinationTable: destinationTable, DestinationColumns: ColumnList{destinationColumn}}
 }
 
 func (table Table) String() string {
@@ -71,7 +73,7 @@ func TableDebug(table Table) string {
 	return fmt.Sprintf("%s: | cols: %s | fks: %s | inboundFks: %s", table.String(), table.Columns, table.Fks, table.InboundFks)
 }
 
-func ColumnsString(columns []*Column) string {
+func (columns ColumnList) String() string {
 	var columnNames []string
 	for _, col := range columns {
 		columnNames = append(columnNames, col.Name)
@@ -84,7 +86,7 @@ func (column Column) String() string {
 }
 
 func (fk Fk) String() string {
-	return fmt.Sprintf("%s(%s) => %s(%s)", fk.SourceTable, ColumnsString(fk.SourceColumns), fk.DestinationTable, ColumnsString(fk.DestinationColumns))
+	return fmt.Sprintf("%s(%s) => %s(%s)", fk.SourceTable, fk.SourceColumns.String(), fk.DestinationTable, fk.DestinationColumns.String())
 }
 
 // filter the fk list down to keys that reference the "child" table

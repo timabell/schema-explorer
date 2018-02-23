@@ -32,11 +32,18 @@
         <tr>
             <th>Name</th>
             <th>Type</th>
+            <th>Foreign Key</th>
         </tr>
         {{ range .Table.Columns }}
         <tr>
             <td>{{.Name}}</td>
             <td>{{.Type}}</td>
+            <td>
+            {{if .Fk}}
+                <a href="{{.Fk.DestinationTable}}?_rowLimit=100">{{.Fk.DestinationTable}}</a>
+                ({{.Fk.DestinationColumns}})
+            {{end}}
+            </td>
         </tr>
         {{end}}
     </table>
