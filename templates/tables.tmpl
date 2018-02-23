@@ -1,9 +1,16 @@
 {{define "content"}}
 <h2>Tables</h2>
 <table class="tableList">
+    <thead>
+    <tr>
+        <th>Name</th>
+    </tr>
+    </thead>
+    <tbody>
 {{range .Database.Tables}}
-    <tr><td><a href='tables/{{.}}?_rowLimit=100'>{{.}}</a></td></tr>
+        <tr><td><a href='tables/{{.}}?_rowLimit=100'>{{.}}</a></td></tr>
 {{end}}
+    </tbody>
 </table>
 <h2>Foreign Keys</h2>
 <table>
