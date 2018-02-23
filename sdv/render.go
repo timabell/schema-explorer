@@ -55,8 +55,17 @@ var tablesTemplate *template.Template
 var tableTemplate *template.Template
 var layoutData pageTemplateModel
 
+// Make minus available in templates to be able to convert len to slice index
+// https://stackoverflow.com/a/24838050/10245
+var funcMap = template.FuncMap{
+	"minus": minus,
+}
+func minus(x, y int) int{
+	return x-y
+}
+
 func SetupTemplate() {
-	templates, err := template.Must(template.ParseGlob("templates/layout.tmpl")).ParseGlob("templates/_*.tmpl")
+	templates, err := template.Must(template.New("").Funcs(funcMap).ParseGlob("templates/layout.tmpl")).ParseGlob("templates/_*.tmpl")
 	if err != nil {
 		log.Fatal(err)
 	}

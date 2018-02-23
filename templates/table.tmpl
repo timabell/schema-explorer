@@ -152,6 +152,25 @@
     <p class='filtered'>First {{.RowLimit}} rows<p>
 {{end}}
 
+{{ range .Rows }}
+    {{$val := .}}
+    {{$refsLen := len .}}
+    {{$refsIndex := minus $refsLen 1}}
+    <table border=1>
+        {{ range $i, $col :=  $.Table.Columns }}
+            <tr>
+                <th title='type: {{.Type}}'>{{.Name}}</th>
+                <td>{{index $val $i}}</td>
+            </tr>
+        {{end}}
+        <tr>
+            <th class='references'>referenced by</th>
+            <td>{{index $val $refsIndex}}</td>
+        </tr>
+    </table>
+        <br/>
+{{end}}
+
 <table border=1>
     <tr>
         {{ range .Table.Columns }}
