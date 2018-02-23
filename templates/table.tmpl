@@ -152,38 +152,47 @@
     <p class='filtered'>First {{.RowLimit}} rows<p>
 {{end}}
 
-{{ range .Rows }}
-    {{$val := .}}
-    {{$refsLen := len .}}
-    {{$refsIndex := minus $refsLen 1}}
-    <table border=1>
-        {{ range $i, $col :=  $.Table.Columns }}
+{{if .CardView}}
+    <p>
+        <a href="?_rowLimit=100&_cardView=false#data">Switch to table view</a>
+    </p>
+    {{ range .Rows }}
+        {{$val := .}}
+        {{$refsLen := len .}}
+        {{$refsIndex := minus $refsLen 1}}
+        <table border=1>
+            {{ range $i, $col :=  $.Table.Columns }}
+                <tr>
+                    <th title='type: {{.Type}}'>{{.Name}}</th>
+                    <td>{{index $val $i}}</td>
+                </tr>
+            {{end}}
             <tr>
+                <th class='references'>referenced by</th>
+                <td>{{index $val $refsIndex}}</td>
+            </tr>
+        </table>
+            <br/>
+    {{end}}
+{{else}}
+    <p>
+        <a href="?_rowLimit=100&_cardView=true#data">Switch to card view</a>
+    </p>
+    <table border=1>
+        <tr>
+            {{ range .Table.Columns }}
                 <th title='type: {{.Type}}'>{{.Name}}</th>
-                <td>{{index $val $i}}</td>
+            {{end}}
+            <th class='references'>referenced by</th>
+        </tr>
+        {{ range .Rows }}
+            <tr>
+                {{ range . }}
+                <td>{{.}}</td>
+                {{end}}
             </tr>
         {{end}}
-        <tr>
-            <th class='references'>referenced by</th>
-            <td>{{index $val $refsIndex}}</td>
-        </tr>
     </table>
-        <br/>
 {{end}}
 
-<table border=1>
-    <tr>
-        {{ range .Table.Columns }}
-            <th title='type: {{.Type}}'>{{.Name}}</th>
-        {{end}}
-        <th class='references'>referenced by</th>
-    </tr>
-    {{ range .Rows }}
-        <tr>
-            {{ range . }}
-            <td>{{.}}</td>
-            {{end}}
-        </tr>
-    {{end}}
-</table>
 {{end}}

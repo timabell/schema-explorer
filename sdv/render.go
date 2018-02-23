@@ -49,6 +49,7 @@ type dataViewModel struct {
 	RowLimit   int
 	Rows       []cells
 	Diagram    diagramViewModel
+	CardView   bool
 }
 
 var tablesTemplate *template.Template
@@ -98,7 +99,7 @@ func showTableList(resp http.ResponseWriter, database schema.Database) {
 	}
 }
 
-func showTable(resp http.ResponseWriter, reader dbReader, table *schema.Table, query schema.RowFilter, rowLimit int) error {
+func showTable(resp http.ResponseWriter, reader dbReader, table *schema.Table, query schema.RowFilter, rowLimit int, cardView bool) error {
 	fieldFilter := make([]FieldFilter, 0)
 	if len(query) > 0 {
 		fieldKeys := make([]string, 0)
@@ -140,6 +141,7 @@ func showTable(resp http.ResponseWriter, reader dbReader, table *schema.Table, q
 		RowLimit:   rowLimit,
 		Rows:       rows,
 		Diagram:    diagramViewModel{Tables: diagramTables, TableLinks: tableLinks},
+		CardView:   cardView,
 	}
 
 	viewModel.LayoutData.Title = fmt.Sprintf("%s | %s", table.String(), viewModel.LayoutData.Title)

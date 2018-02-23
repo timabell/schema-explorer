@@ -90,6 +90,7 @@ func handler(resp http.ResponseWriter, req *http.Request) {
 		table := database.FindTable(&requestedTable)
 		var query = req.URL.Query()
 		var rowLimit int
+		var cardView bool
 		var err error
 		// todo: more robust separation of query param keys
 		const rowLimitKey = "_rowLimit" // this should be reasonably safe from clashes with column names
@@ -103,8 +104,14 @@ func handler(resp http.ResponseWriter, req *http.Request) {
 				return
 			}
 		}
+		cardViewKey := "_cardView"
+		cardViewString := query.Get(cardViewKey)
+		if cardViewString != "" {
+			cardView = cardViewString == "true"
+			query.Del(cardViewKey)
+		}
 		var rowFilter = schema.RowFilter(query)
-		err = showTable(resp, reader, table, rowFilter, rowLimit)
+		err = showTable(resp, reader, table, rowFilter, rowLimit, cardView)
 		if err != nil {
 			fmt.Println("error converting rows querystring value to int: ", err)
 			return
