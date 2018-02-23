@@ -42,10 +42,21 @@ type FieldFilter struct {
 	Values []string
 }
 
+type FieldFilterList []FieldFilter
+
+func (filterList FieldFilterList) AsQueryString() template.URL {
+	var parts []string
+	for _, part := range filterList {
+		// todo: support multiple values correctly
+		parts = append(parts, fmt.Sprintf("%s=%s", part.Field, strings.Join(part.Values, ",")))
+	}
+	return template.URL(strings.Join(parts, "&"))
+}
+
 type dataViewModel struct {
 	LayoutData pageTemplateModel
 	Table      schema.Table
-	Query      []FieldFilter
+	Query      FieldFilterList
 	RowLimit   int
 	Rows       []cells
 	Diagram    diagramViewModel
@@ -100,7 +111,7 @@ func showTableList(resp http.ResponseWriter, database schema.Database) {
 }
 
 func showTable(resp http.ResponseWriter, reader dbReader, table *schema.Table, query schema.RowFilter, rowLimit int, cardView bool) error {
-	fieldFilter := make([]FieldFilter, 0)
+	fieldFilter := make(FieldFilterList, 0)
 	if len(query) > 0 {
 		fieldKeys := make([]string, 0)
 		for field, _ := range query {
