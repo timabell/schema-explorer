@@ -1,4 +1,8 @@
-*{font-family: Arial;color:#333;}
+* {
+  font-family: Arial;
+  color:#333;
+  line-height: 1.5em;
+}
 body{background-color: #f8f8f8;margin: 16px 32px;}
 h1 img{
 max-width: 100%;max-height: 12em;
@@ -90,4 +94,5 @@ a.button {
   width: 8em;
   text-align: center;
   vertical-align: middle;
+  line-height: 2em;
 }
