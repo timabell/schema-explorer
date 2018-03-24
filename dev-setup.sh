@@ -2,8 +2,6 @@
 
 # This is more a reminder of the steps than something intended to be run automatically
 
-# Manually Download & run https://www.jetbrains.com/go/
-
 # Install https://github.com/moovweb/gvm
 
 sudo apt-get install curl git mercurial make binutils bison gcc build-essential
@@ -16,3 +14,11 @@ gvm use go1.4
 export GOROOT_BOOTSTRAP=$GOROOT
 gvm install go1.9.4
 gvm use go1.9.4 --default
+
+# Manually Download & run https://www.jetbrains.com/go/
+
+# manually set goroot & gopath in goland
+echo $GOROOT
+# /home/tim/.gvm/gos/go1.9.4
+echo $GOPATH
+# /home/tim/.gvm/pkgsets/go1.9.4/global:/home/tim/repo/go
