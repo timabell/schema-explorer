@@ -71,12 +71,9 @@ func addDescriptions(dbc *sql.DB, database schema.Database) error {
 	for rows.Next() {
 		var tableName, colName, description *string
 		rows.Scan(&tableName, &colName, &description)
-		log.Printf("%s.%#v - %#v", tableName, colName, description)
 		// todo: support non-dbo schema for descriptions
 		table := database.FindTable(&schema.Table{Schema: "dbo", Name: *tableName})
 		if colName == nil {
-			log.Print("processing table descr")
-			log.Print(description)
 			table.Description = *description
 			continue
 		}
