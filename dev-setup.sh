@@ -34,3 +34,12 @@ echo $GOPATH
 
 # run this from project root
 go get
+
+# ================
+
+# for windows build
+
+# don't know why this isn't fetched with go-get
+go get gopkg.in/natefinch/npipe.v2
+
+sudo apt install gcc-mingw-w64-x86-64

@@ -4,11 +4,15 @@
     <thead>
     <tr>
         <th>Name</th>
+        <th>Description</th>
     </tr>
     </thead>
     <tbody>
 {{range .Database.Tables}}
-        <tr><td><a href='tables/{{.}}?_rowLimit=100'>{{.}}</a></td></tr>
+        <tr>
+            <td><a href='tables/{{.}}?_rowLimit=100'>{{.}}</a></td>
+            <td>{{.Description}}</td>
+        </tr>
 {{end}}
     </tbody>
 </table>

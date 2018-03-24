@@ -68,8 +68,10 @@ func Test_ReadSchema(t *testing.T) {
 	checkTableFks(database, t)
 	checkInboundTableFkCount(database, t)
 	checkColumnFkCount(database, t)
+	if database.Supports.Descriptions {
+		checkDescriptions(database, t)
+	}
 }
-
 func checkColumnFkCount(database schema.Database, t *testing.T) {
 	table := findTable("pet", database, t)
 	_, col := table.FindColumn("ownerId")
@@ -114,6 +116,15 @@ func checkTableFks(database schema.Database, t *testing.T) {
 	t.Log(table.Fks[0].SourceTable.Columns)
 	t.Log(table.Fks[0].DestinationTable)
 	t.Log(table.Fks[0].DestinationTable.Columns)
+}
+
+func checkDescriptions(database schema.Database, t *testing.T) {
+	tableName := "person"
+	table := findTable(tableName, database, t)
+	expectedDescription := "somebody to love"
+	if table.Description != expectedDescription {
+		t.Fatalf("Expected description for table '%s' of '%s', got '%s'", tableName, expectedDescription, table.Description)
+	}
 }
 
 type testCase struct {

@@ -7,21 +7,24 @@ import (
 )
 
 type SupportedFeatures struct {
-	Schema bool
+	Schema       bool
+	Descriptions bool
 }
 
 type Database struct {
-	Tables   []*Table
-	Fks      []*Fk
-	Supports SupportedFeatures
+	Tables      []*Table
+	Fks         []*Fk
+	Supports    SupportedFeatures
+	Description string
 }
 
 type Table struct {
-	Schema     string
-	Name       string
-	Columns    ColumnList
-	Fks        []*Fk
-	InboundFks []*Fk
+	Schema      string
+	Name        string
+	Columns     ColumnList
+	Fks         []*Fk
+	InboundFks  []*Fk
+	Description string
 }
 
 type TableList []*Table
@@ -40,9 +43,10 @@ func (tables TableList) Less(i, j int) bool {
 type ColumnList []*Column
 
 type Column struct {
-	Name string
-	Type string
-	Fk   *Fk
+	Name        string
+	Type        string
+	Fk          *Fk
+	Description string
 }
 
 // todo: convert to pointers to tables & columns for memory efficiency
@@ -135,6 +139,8 @@ func (database Database) DebugString() string {
 		buffer.WriteString(table.String())
 		buffer.WriteString(" ")
 		buffer.WriteString(fmt.Sprintf("%p", table))
+		buffer.WriteString(" - ")
+		buffer.WriteString(table.Description)
 		buffer.WriteString("\n")
 		for _, col := range table.Columns {
 			buffer.WriteString("  - '")
@@ -143,7 +149,9 @@ func (database Database) DebugString() string {
 			buffer.WriteString(col.Type)
 			buffer.WriteString("\t")
 			buffer.WriteString(fmt.Sprintf("%p", col))
-			buffer.WriteString("\n")
+			buffer.WriteString("\t\"")
+			buffer.WriteString(col.Description)
+			buffer.WriteString("\"\n")
 			if col.Fk != nil {
 				buffer.WriteString("    - ")
 				buffer.WriteString(col.Fk.String())
