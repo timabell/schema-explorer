@@ -13,12 +13,13 @@ import (
 
 var db string
 var driver string
-var liveTemplates bool
+var cachingEnabled bool
+var database schema.Database
 
 func RunServer(driverInfo string, dbConn string, port int, listenOn string, live bool) {
 	db = dbConn
 	driver = driverInfo
-	liveTemplates = live
+	cachingEnabled = !live
 
 	SetupTemplate()
 
@@ -27,6 +28,14 @@ func RunServer(driverInfo string, dbConn string, port int, listenOn string, live
 	if err != nil {
 		log.Println(err)
 		panic("connection check failed")
+	}
+
+	log.Print("Reading schema, this may take a while...")
+	database, err = reader.ReadSchema()
+	if err != nil {
+		fmt.Println("Error reading schema", err)
+		// todo: send 500 error to client
+		return
 	}
 
 	serve(handler, port, listenOn)
@@ -56,10 +65,6 @@ func loggingHandler(nextHandler func(w http.ResponseWriter, r *http.Request)) fu
 func handler(resp http.ResponseWriter, req *http.Request) {
 	Licensing()
 
-	if liveTemplates {
-		SetupTemplate()
-	}
-
 	reader := getDbReader(driver, db)
 
 	layoutData = pageTemplateModel{
@@ -71,11 +76,16 @@ func handler(resp http.ResponseWriter, req *http.Request) {
 		Timestamp:   time.Now().String(),
 	}
 
-	database, err := reader.ReadSchema()
-	if err != nil {
-		fmt.Println("Error reading schema", err)
-		// todo: send 500 error to client
-		return
+	if !cachingEnabled {
+		SetupTemplate()
+		log.Print("Re-reading schema, this may take a while...")
+		var err error
+		database, err = reader.ReadSchema()
+		if err != nil {
+			fmt.Println("Error reading schema", err)
+			// todo: send 500 error to client
+			return
+		}
 	}
 
 	// todo: proper url routing
