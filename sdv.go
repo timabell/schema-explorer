@@ -26,7 +26,7 @@ func main() {
 		db       = flag.String("db", "", "connection string for mssql / filename for sqlite")
 		port     = flag.Int("port", 8080, "port to listen on")
 		listenOn = flag.String("listenOn", "localhost", "address to listen on") // secure by default, only listen for local connections
-		live     = flag.Bool("live", false, "update html templates from disk on every page load")
+		live     = flag.Bool("live", false, "update html templates & schema information from disk on every page load")
 	)
 	flag.Parse()
 	if *driver == "" {
