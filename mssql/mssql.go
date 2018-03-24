@@ -73,6 +73,10 @@ func addDescriptions(dbc *sql.DB, database schema.Database) error {
 		rows.Scan(&tableName, &colName, &description)
 		// todo: support non-dbo schema for descriptions
 		table := database.FindTable(&schema.Table{Schema: "dbo", Name: *tableName})
+		if table == nil {
+			// ignore unknown things. could be for views that we don't currently support
+			continue
+		}
 		if colName == nil {
 			table.Description = *description
 			continue
