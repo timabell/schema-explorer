@@ -1,6 +1,8 @@
 -- mssql example db for regression tests
 -- schema must match test code's expectations
 
+-- todo: drop sql doesn't cope with schema.
+
 -- use [sdv-regression-test]; -- not supported on azure sql
 
 -- ###################################
@@ -65,6 +67,8 @@ WHILE @name IS NOT NULL
 GO
 -- ###################################
 
+create SCHEMA kitchen;
+GO
 --------
 
 create table DataTypeTest (
@@ -133,6 +137,20 @@ create table toy (
 	belongsToId int references pet(petId)
 );
 alter table person add favouritePetId int references pet(petId)
+
+-- test different schema name
+/*
+drop table kitchen.sink
+drop table kitchen.person
+drop SCHEMA kitchen
+*/
+create table kitchen.sink (
+	sinkId int PRIMARY KEY
+);
+-- test a clashing name
+create table kitchen.person (
+	ghostPersonId int PRIMARY KEY
+);
 
 insert into person(personId,personName) values(1,'bob'),(2,'fred');
 insert into pet(petId,petName, ownerId, favouritePersonId)values(5, 'kitty',1,2);

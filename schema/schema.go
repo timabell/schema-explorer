@@ -114,7 +114,7 @@ func (fk Fk) String() string {
 // searches on schema+name
 func (database Database) FindTable(tableToFind *Table) (table *Table) {
 	for _, table := range database.Tables {
-		if table.Schema == tableToFind.Schema && table.Name == tableToFind.Name {
+		if (!database.Supports.Schema || table.Schema == tableToFind.Schema) && table.Name == tableToFind.Name {
 			return table
 		}
 	}

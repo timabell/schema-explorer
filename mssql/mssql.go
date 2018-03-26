@@ -56,11 +56,13 @@ func (model mssqlModel) ReadSchema() (database schema.Database, err error) {
 func addDescriptions(dbc *sql.DB, database schema.Database) error {
 	rows, err := dbc.Query(`
 		select
+			sch.name [schema],
 			tbl.name [table],
 			col.name [column],
 			ep.value [description]
 			from sys.extended_properties ep
 			inner join sys.objects tbl on tbl.object_id = ep.major_id
+			inner join sys.schemas sch on sch.schema_id = tbl.schema_id
 			left outer join sys.columns col on col.object_id = ep.major_id and col.column_id = ep.minor_id
 			where ep.name = 'MS_Description'
 		order by tbl.name, ep.minor_id`)
@@ -69,10 +71,10 @@ func addDescriptions(dbc *sql.DB, database schema.Database) error {
 	}
 	defer rows.Close()
 	for rows.Next() {
-		var tableName, colName, description *string
-		rows.Scan(&tableName, &colName, &description)
+		var schemaName, tableName, colName, description *string
+		rows.Scan(&schemaName, &tableName, &colName, &description)
 		// todo: support non-dbo schema for descriptions
-		table := database.FindTable(&schema.Table{Schema: "dbo", Name: *tableName})
+		table := database.FindTable(&schema.Table{Schema: *schemaName, Name: *tableName})
 		if table == nil {
 			// ignore unknown things. could be for views that we don't currently support
 			continue

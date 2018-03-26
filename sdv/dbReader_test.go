@@ -73,7 +73,7 @@ func Test_ReadSchema(t *testing.T) {
 	}
 }
 func checkColumnFkCount(database schema.Database, t *testing.T) {
-	table := findTable("pet", database, t)
+	table := findTable(schema.Table{Schema: "dbo", Name: "pet"}, database, t)
 	_, col := table.FindColumn("ownerId")
 	if col == nil {
 		t.Log(schema.TableDebug(*table))
@@ -97,7 +97,7 @@ func checkFkCount(database schema.Database, t *testing.T) {
 
 func checkInboundTableFkCount(database schema.Database, t *testing.T) {
 	expectedInboundCount := 2
-	table := findTable("person", database, t)
+	table := findTable(schema.Table{Schema: "dbo", Name: "person"}, database, t)
 	fkCount := len(table.InboundFks)
 	if fkCount != expectedInboundCount {
 		t.Fatalf("Expected %d inboundFks in table %s, found %d", expectedInboundCount, table, fkCount)
@@ -106,7 +106,7 @@ func checkInboundTableFkCount(database schema.Database, t *testing.T) {
 
 func checkTableFks(database schema.Database, t *testing.T) {
 	expectedFkCount := 2
-	table := findTable("pet", database, t)
+	table := findTable(schema.Table{Schema: "dbo", Name: "pet"}, database, t)
 	fkCount := len(table.Fks)
 	if fkCount != expectedFkCount {
 		t.Fatalf("Expected %d fks in table %s, found %d", expectedFkCount, table, fkCount)
@@ -118,12 +118,33 @@ func checkTableFks(database schema.Database, t *testing.T) {
 	t.Log(table.Fks[0].DestinationTable.Columns)
 }
 
+type descriptionCase struct {
+	schema      string
+	table       string
+	column      string
+	description string
+}
+
+var descriptions = []descriptionCase{
+	{schema: "dbo", table: "person", column: "", description: "somebody to love"},
+	{schema: "dbo", table: "person", column: "personName", description: "say my name!"},
+	{schema: "kitchen", table: "sink", column: "", description: "call a plumber!!!"},
+	{schema: "kitchen", table: "sink", column: "sinkId", description: "gotta number your sinks man!"},
+}
+
 func checkDescriptions(database schema.Database, t *testing.T) {
-	tableName := "person"
-	table := findTable(tableName, database, t)
-	expectedDescription := "somebody to love"
-	if table.Description != expectedDescription {
-		t.Fatalf("Expected description for table '%s' of '%s', got '%s'", tableName, expectedDescription, table.Description)
+	for _, testCase := range descriptions {
+		table := findTable(schema.Table{Schema: testCase.schema, Name: testCase.table}, database, t)
+		if testCase.column == "" {
+			if table.Description != testCase.description {
+				t.Errorf("Expected description for table '%s' of '%s', got '%s'", table, testCase.description, table.Description)
+			}
+		} else {
+			_, col := table.FindColumn(testCase.column)
+			if col.Description != testCase.description {
+				t.Errorf("Expected description for column '%s' table '%s' of '%s', got '%s'", col, table, testCase.description, col.Description)
+			}
+		}
 	}
 }
 
@@ -150,7 +171,7 @@ func Test_GetRows(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	table := findTable("DataTypeTest", database, t)
+	table := findTable(schema.Table{Schema: "dbo", Name: "DataTypeTest"}, database, t)
 
 	// read the data from it
 	rows, err := GetRows(reader, nil, table, 999)
@@ -191,13 +212,8 @@ func Test_GetRows(t *testing.T) {
 	}
 }
 
-// find a table. Automatically adds dbo for schema if supported
-func findTable(tableName string, database schema.Database, t *testing.T) *schema.Table {
-	var schemaName string
-	if database.Supports.Schema {
-		schemaName = "dbo"
-	}
-	tableToFind := schema.Table{Schema: schemaName, Name: tableName}
+// error if not found
+func findTable(tableToFind schema.Table, database schema.Database, t *testing.T) *schema.Table {
 	table := database.FindTable(&tableToFind)
 	if table == nil {
 		t.Fatal(tableToFind.String() + " table missing")
