@@ -117,3 +117,7 @@ blockquote .quote:before {
   left: 0.25em;
   font-size: 2em;
 }
+iframe {
+  /*youtube vid*/
+  max-width: 100%;
+}
