@@ -121,3 +121,8 @@ iframe {
   /*youtube vid*/
   max-width: 100%;
 }
+#headlines {
+  font-size: 2em;
+  text-align: center;
+  line-height: 2em;
+}
