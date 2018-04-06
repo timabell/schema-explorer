@@ -155,3 +155,26 @@ insert into pet(petId,petName, ownerId, favouritePersonId)values(6, 'fido',2,2);
 insert into toy(toyId, toyName, belongsToId) values(11,'mouse',5);
 insert into toy(toyId, toyName, belongsToId) values(12,'ball',6);
 update person set favouritePetId = 5 where personId = 2;
+
+-- wide, for checking diagram scaling manually
+create table parent ( parentId int PRIMARY KEY );
+create table child01 ( childId int PRIMARY KEY, parentId int references parent(parentId));
+create table child02 ( childId int PRIMARY KEY, parentId int references parent(parentId));
+create table child03 ( childId int PRIMARY KEY, parentId int references parent(parentId));
+create table child04 ( childId int PRIMARY KEY, parentId int references parent(parentId));
+create table child05 ( childId int PRIMARY KEY, parentId int references parent(parentId));
+create table child06 ( childId int PRIMARY KEY, parentId int references parent(parentId));
+create table child07 ( childId int PRIMARY KEY, parentId int references parent(parentId));
+create table child08 ( childId int PRIMARY KEY, parentId int references parent(parentId));
+create table child09 ( childId int PRIMARY KEY, parentId int references parent(parentId));
+create table child10 ( childId int PRIMARY KEY, parentId int references parent(parentId));
+create table child11 ( childId int PRIMARY KEY, parentId int references parent(parentId));
+create table child12 ( childId int PRIMARY KEY, parentId int references parent(parentId));
+create table child13 ( childId int PRIMARY KEY, parentId int references parent(parentId));
+create table child14 ( childId int PRIMARY KEY, parentId int references parent(parentId));
+create table child15 ( childId int PRIMARY KEY, parentId int references parent(parentId));
+create table child16 ( childId int PRIMARY KEY, parentId int references parent(parentId));
+create table child17 ( childId int PRIMARY KEY, parentId int references parent(parentId));
+create table child18 ( childId int PRIMARY KEY, parentId int references parent(parentId));
+create table child19 ( childId int PRIMARY KEY, parentId int references parent(parentId));
+create table child20 ( childId int PRIMARY KEY, parentId int references parent(parentId));
