@@ -6,10 +6,13 @@
 <script>
     var cy;
     function fitDiagram(){
-        // based on https://stackoverflow.com/a/27449713/10245
+        // fit box to diagram, based on https://stackoverflow.com/a/27449713/10245
         var boundingBox = cy.elements().boundingBox();
-        // console.log('diagram resized', boundingBox);
         $('#table-diagram').css('height', boundingBox.h);
+
+        // http://js.cytoscape.org/#cy.fit etc
+        cy.zoom(0.5);
+        cy.fit();
     }
     $(document).ready(function() {
         // http://js.cytoscape.org/#getting-started
@@ -23,7 +26,7 @@
                 {data: {id: '{{.Source}}_{{.Destination}}', source: '{{.Source}}', target: '{{.Destination}}'}},
             {{end}}
             ],
-            zoomingEnabled: false,
+            zoomingEnabled: true,
             panningEnabled: false,
             userPanningEnabled: false,
             boxSelectionEnabled: false,
