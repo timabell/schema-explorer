@@ -156,6 +156,8 @@ insert into toy(toyId, toyName, belongsToId) values(11,'mouse',5);
 insert into toy(toyId, toyName, belongsToId) values(12,'ball',6);
 update person set favouritePetId = 5 where personId = 2;
 
+/* for manual testing of diagrams, commented out to avoid interfering with regression test
+
 -- tall, for checking diagram scaling manually
 create table up1 ( upId int PRIMARY KEY);
 create table up2 ( upId int PRIMARY KEY, anotherId int references up1(upId));
@@ -200,3 +202,4 @@ create table child17 ( childId int PRIMARY KEY, parentId int references parent(p
 create table child18 ( childId int PRIMARY KEY, parentId int references parent(parentId));
 create table child19 ( childId int PRIMARY KEY, parentId int references parent(parentId));
 create table child20 ( childId int PRIMARY KEY, parentId int references parent(parentId));
+*/
