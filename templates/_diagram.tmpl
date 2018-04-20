@@ -14,7 +14,6 @@
 
         // adjust container height to match aspect ratio of diagram, up to a maximum of 1:2
         var aspectRatio = Math.max(0.5, boundingBox.w/boundingBox.h);
-        console.log(aspectRatio);
         var diagram = $('#table-diagram');
         var newHeight = diagram.width() / aspectRatio;
         $('#table-diagram').css('height', newHeight);
@@ -22,9 +21,7 @@
         // zoom to fit, cy.fit() doesn't seem to work
         var widthFit = diagram.width()/boundingBox.w;
         var heightFit = diagram.height()/boundingBox.h;
-        console.log(widthFit,heightFit);
         var newZoom = Math.min(1,Math.min(widthFit,heightFit));
-        console.log(newZoom);
         cy.zoom(newZoom);
 
         // shrink the box if it's ended up too big because of the zoom limit
