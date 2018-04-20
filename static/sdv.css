@@ -49,6 +49,8 @@ th, td {
     margin: 1em 0;
     border: 1px solid #333;
     padding: 1em;
+    resize:vertical;
+    overflow: auto;/* needed for resizing https://stackoverflow.com/a/391773 */
 }
 .hint{
     color: #666;
