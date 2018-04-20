@@ -5,15 +5,35 @@
 <p class="hint">Click a table in the diagram to jump straight to it</p>
 <script>
     var cy;
-    function fitDiagram(){
-        // fit box to diagram, based on https://stackoverflow.com/a/27449713/10245
-        var boundingBox = cy.elements().boundingBox();
-        $('#table-diagram').css('height', boundingBox.h);
 
-        // http://js.cytoscape.org/#cy.fit etc
-        cy.zoom(0.5);
-        cy.fit();
+    // adjust aspect ratio of diagram container to match aspect of diagram,
+    // then resize/pan the diagram to fit
+    function fitDiagram(){
+        cy.reset();
+        var boundingBox = cy.elements().boundingBox(); // ref: https://stackoverflow.com/a/27449713/10245
+
+        // adjust container height to match aspect ratio of diagram, up to a maximum of 1:2
+        var aspectRatio = Math.max(0.5, boundingBox.w/boundingBox.h);
+        console.log(aspectRatio);
+        var diagram = $('#table-diagram');
+        var newHeight = diagram.width() / aspectRatio;
+        $('#table-diagram').css('height', newHeight);
+
+        // zoom to fit, cy.fit() doesn't seem to work
+        var widthFit = diagram.width()/boundingBox.w;
+        var heightFit = diagram.height()/boundingBox.h;
+        console.log(widthFit,heightFit);
+        var newZoom = Math.min(1,Math.min(widthFit,heightFit));
+        console.log(newZoom);
+        cy.zoom(newZoom);
+
+        // shrink the box if it's ended up too big because of the zoom limit
+        if (diagram.height()>boundingBox.h) {
+            var newHeight = boundingBox.h;
+            $('#table-diagram').css('height', newHeight);
+        }
     }
+
     $(document).ready(function() {
         // http://js.cytoscape.org/#getting-started
         cy = cytoscape({
@@ -26,9 +46,6 @@
                 {data: {id: '{{.Source}}_{{.Destination}}', source: '{{.Source}}', target: '{{.Destination}}'}},
             {{end}}
             ],
-            zoomingEnabled: true,
-            panningEnabled: false,
-            userPanningEnabled: false,
             boxSelectionEnabled: false,
             layout: {
                 name: 'dagre'
