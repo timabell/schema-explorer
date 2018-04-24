@@ -10,6 +10,8 @@ func getDbReader(driver string, db string) dbReader {
 	switch driver {
 	case "mssql":
 		reader = mssql.NewMssql(db)
+	case "pg":
+		reader = pg.NewPg(db)
 	case "sqlite":
 		reader = sqlite.NewSqlite(db)
 	case "":
