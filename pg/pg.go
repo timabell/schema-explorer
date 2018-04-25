@@ -7,6 +7,7 @@ import (
 	"log"
 	"strconv"
 	"strings"
+	_ "github.com/lib/pq"
 )
 
 type pgModel struct {
@@ -83,7 +84,7 @@ func (model pgModel) getTables(dbc *sql.DB) (tables []*schema.Table, err error) 
 }
 
 func getConnection(connectionString string) (dbc *sql.DB, err error) {
-	dbc, err = sql.Open("pg3", connectionString)
+	dbc, err = sql.Open("postgres", connectionString)
 	if err != nil {
 		log.Println("connection error", err)
 	}
@@ -91,7 +92,7 @@ func getConnection(connectionString string) (dbc *sql.DB, err error) {
 }
 
 func (model pgModel) CheckConnection() (err error) {
-	dbc, err := getConnection(model.connectionSring)
+	dbc, err := getConnection(model.connectionString)
 	if dbc == nil {
 		log.Println(err)
 		panic("getConnection() returned nil")
@@ -148,7 +149,7 @@ func (model pgModel) GetSqlRows(query schema.RowFilter, table *schema.Table, row
 		sql = sql + " limit " + strconv.Itoa(rowLimit)
 	}
 
-	dbc, err := getConnection(model.connectionSring)
+	dbc, err := getConnection(model.connectionString)
 	if err != nil {
 		log.Print("GetRows failed to get connection")
 		return

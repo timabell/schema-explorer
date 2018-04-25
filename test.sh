@@ -21,4 +21,4 @@ echo "=================="
 
 (cd pg/ && ./setup.sh)
 
-go test -driver pg -db "sse-test" # -test.v
+go test -driver pg -db "postgres://postgres:postgres@localhost/sse-test" # -test.v
