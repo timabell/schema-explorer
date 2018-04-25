@@ -69,16 +69,15 @@ func (model pgModel) ReadSchema() (database schema.Database, err error) {
 }
 
 func (model pgModel) getTables(dbc *sql.DB) (tables []*schema.Table, err error) {
-	// todo: parameterise
-	rows, err := dbc.Query("SELECT name FROM pg_master WHERE type='table' AND name not like 'pg_%';")
+	rows, err := dbc.Query("select table_schema, table_name from information_schema.tables where table_type='BASE TABLE' and table_schema not in ('pg_catalog','information_schema')")
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 	for rows.Next() {
-		var name string
-		rows.Scan(&name)
-		tables = append(tables, &schema.Table{Name: name})
+		var name, schemaName string
+		rows.Scan(&schemaName, &name)
+		tables = append(tables, &schema.Table{Schema: schemaName, Name: name})
 	}
 	return tables, nil
 }
