@@ -47,5 +47,5 @@ func main() {
 func Usage() {
 	log.Print("Run with Sql Server: -driver mssql -db \"connectiongstring\" # see https://github.com/simnalamburt/go-mssqldb for connection string options")
 	log.Print("Run with postgres: -driver pg -db \"connectiongstring\" # see https://godoc.org/github.com/lib/pq for connectionstring options")
-	log.Print("Run with sqlite: -driver sqlite -db \"path\"")
+	log.Print("Run with sqlite: -driver sqlite -db \"path\" # see https://github.com/mattn/go-sqlite3 for more info")
 }
