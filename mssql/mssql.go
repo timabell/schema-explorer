@@ -3,6 +3,7 @@ package mssql
 import (
 	"bitbucket.org/timabell/sql-data-viewer/schema"
 	"database/sql"
+	_ "github.com/simnalamburt/go-mssqldb"
 	"log"
 	"strconv"
 	"strings"

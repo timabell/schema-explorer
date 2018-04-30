@@ -4,10 +4,10 @@ import (
 	"bitbucket.org/timabell/sql-data-viewer/schema"
 	"database/sql"
 	"fmt"
+	_ "github.com/lib/pq"
 	"log"
 	"strconv"
 	"strings"
-	_ "github.com/lib/pq"
 )
 
 type pgModel struct {

@@ -14,8 +14,6 @@ package main
 import (
 	"bitbucket.org/timabell/sql-data-viewer/sdv"
 	"flag"
-	_ "github.com/mattn/go-sqlite3"
-	_ "github.com/simnalamburt/go-mssqldb"
 	"log"
 	"os"
 )
@@ -47,6 +45,7 @@ func main() {
 }
 
 func Usage() {
-	log.Print("Run with Sql Server: ./sql-data-viewer -driver mssql -db \"connectiongstring\"")
-	log.Print("Run with sqlite: ./sql-data-viewer -driver sqlite -db \"path\"")
+	log.Print("Run with Sql Server: -driver mssql -db \"connectiongstring\" # see https://github.com/simnalamburt/go-mssqldb for connection string options")
+	log.Print("Run with postgres: -driver pg -db \"connectiongstring\" # see https://godoc.org/github.com/lib/pq for connectionstring options")
+	log.Print("Run with sqlite: -driver sqlite -db \"path\"")
 }
