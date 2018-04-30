@@ -69,7 +69,7 @@ func (model pgModel) ReadSchema() (database schema.Database, err error) {
 }
 
 func (model pgModel) getTables(dbc *sql.DB) (tables []*schema.Table, err error) {
-	rows, err := dbc.Query("select table_schema, table_name from information_schema.tables where table_type='BASE TABLE' and table_schema not in ('pg_catalog','information_schema')")
+	rows, err := dbc.Query("select schemaname, tablename from pg_catalog.pg_tables where schemaname not in ('pg_catalog','information_schema')")
 	if err != nil {
 		return nil, err
 	}
