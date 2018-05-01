@@ -5,4 +5,4 @@ sudo -u postgres psql -c 'alter user tim with superuser;' # https://stackoverflo
 createuser ssetest
 createdb sse-test
 psql -c "alter user ssetest with password 'ssetest'";
-psql -c "GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO ssetest;";
+psql -d sse-test -c "GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO ssetest;";
