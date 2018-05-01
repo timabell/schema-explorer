@@ -166,7 +166,7 @@ func (model pgModel) GetSqlRows(query schema.RowFilter, table *schema.Table, row
 
 func (model pgModel) getColumns(dbc *sql.DB, table *schema.Table) (cols []*schema.Column, err error) {
 	// todo: parameterise
-	rows, err := dbc.Query("PRAGMA table_info('" + table.Name + "');")
+	rows, err := dbc.Query("SELECT column_name, data_type, is_nullable, column_default FROM information_schema.columns where table_schema = '" + table.Schema + "' and table_name = '" + table.Name + "';")
 	if err != nil {
 		return
 	}
