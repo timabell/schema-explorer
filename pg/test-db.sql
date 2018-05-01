@@ -26,22 +26,25 @@ insert into DataTypeTest(
 
 -- select * from DataTypeTest;
 
-/*
+drop table if exists pet;
+drop table if exists person;
+drop table if exists toy;
+
 create table toy (
 	toyId int PRIMARY KEY,
-	toyName nvarchar(50),
-	belongsToId int references pet(petId)
+	toyName varchar(50)
+-- 	belongsToId int references pet(petId)
 );
 
 create table person (
 	personId int PRIMARY KEY,
-	personName nvarchar(50),
-	favouritePetId int references pet(petId)
+	personName varchar(50)
+-- 	favouritePetId int references pet(petId)
 );
 
 create table pet (
 	petId int PRIMARY KEY,
-	petName nvarchar(50),
+	petName varchar(50),
 	ownerId int references person(personId),
 	favouritePersonId int references person(personId)
 );
@@ -49,10 +52,13 @@ create table pet (
 insert into person(personId,personName) values(1,'bob'),(2,'fred');
 insert into pet(petId,petName, ownerId, favouritePersonId)values(5, 'kitty',1,2);
 insert into pet(petId,petName, ownerId, favouritePersonId)values(6, 'fido',2,2);
-insert into toy(toyId, toyName, belongsToId) values(11,'mouse',5);
-insert into toy(toyId, toyName, belongsToId) values(12,'ball',6);
-update person set favouritePetId = 5 where personId = 2;
-*/
+-- insert into toy(toyId, toyName, belongsToId) values(11,'mouse',5);
+-- insert into toy(toyId, toyName, belongsToId) values(12,'ball',6);
+-- update person set favouritePetId = 5 where personId = 2;
+
+select * from toy;
+select * from pet;
+select * from person;
 
 /* for manual testing of diagrams, commented out to avoid interfering with regression test
 
