@@ -110,7 +110,8 @@ func (model pgModel) CheckConnection() (err error) {
 
 func getFks(dbc *sql.DB, sourceTable *schema.Table, database schema.Database) (fks []*schema.Fk, err error) {
 	// todo: parameterise
-	rows, err := dbc.Query("PRAGMA foreign_key_list('" + sourceTable.Name + "');")
+	rows, err := dbc.Query("select 1 where 1=0;")
+	//rows, err := dbc.Query("SELECT column_name, data_type, is_nullable, column_default FROM information_schema.columns where table_schema = '" + sourceTable.Schema + "' and table_name = '" + sourceTable.Name + "';")
 	if err != nil {
 		return
 	}
@@ -155,6 +156,7 @@ func (model pgModel) GetSqlRows(query schema.RowFilter, table *schema.Table, row
 	}
 	defer dbc.Close()
 
+	log.Println(sql)
 	rows, err = dbc.Query(sql)
 	if err != nil {
 		log.Print("GetRows failed to get query")
@@ -166,7 +168,7 @@ func (model pgModel) GetSqlRows(query schema.RowFilter, table *schema.Table, row
 
 func (model pgModel) getColumns(dbc *sql.DB, table *schema.Table) (cols []*schema.Column, err error) {
 	// todo: parameterise
-	rows, err := dbc.Query("SELECT column_name, data_type, is_nullable, column_default FROM information_schema.columns where table_schema = '" + table.Schema + "' and table_name = '" + table.Name + "';")
+	rows, err := dbc.Query("select ns.nspname, tbl.relname, col.attname colname, col.attlen, col.attnum, typ.typname, col.attnotnull  from pg_catalog.pg_attribute col inner join pg_catalog.pg_class tbl on col.attrelid = tbl.oid inner join pg_catalog.pg_namespace ns on ns.oid = tbl.relnamespace inner join pg_catalog.pg_type typ on typ.oid = col.atttypid where tbl.relname = '" + table.Schema + "' and ns.nspname = '" + table.Name + "' and col.attnum > 0 and not col.attisdropped;")
 	if err != nil {
 		return
 	}
