@@ -4,6 +4,6 @@ echo "=================="
 echo "postgres"
 echo "=================="
 
-(cd pg/ && ./setup.sh)
+(cd pg/ && ./setup-ssetest.sh)
 
 go test ./... -driver pg -db "postgres://ssetestusr:ssetestusr@localhost/ssetest" # -test.v
