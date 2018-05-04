@@ -111,7 +111,7 @@ func handler(resp http.ResponseWriter, req *http.Request) {
 			return
 		}
 		table := database.FindTable(&requestedTable)
-		params := ParseParams(req.URL.Query())
+		params := ParseTableParams(req.URL.Query())
 
 		trail := readTrail(req)
 		trail.addTable(table)
@@ -185,7 +185,7 @@ type tableParams struct {
 const rowLimitKey = "_rowLimit" // this should be reasonably safe from clashes with column names
 const cardViewKey = "_cardView"
 
-func ParseParams(raw url.Values) (params tableParams) {
+func ParseTableParams(raw url.Values) (params tableParams) {
 	params = tableParams{
 		filter: schema.RowFilter(raw),
 	}
