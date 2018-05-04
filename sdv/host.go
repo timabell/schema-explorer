@@ -128,9 +128,11 @@ type tableParams struct {
 	filter   schema.RowFilter
 }
 
+// todo: more robust separation of query param keys
+const rowLimitKey = "_rowLimit" // this should be reasonably safe from clashes with column names
+const cardViewKey = "_cardView"
+
 func  ParseParams(raw url.Values)(params tableParams){
-	// todo: more robust separation of query param keys
-	const rowLimitKey = "_rowLimit" // this should be reasonably safe from clashes with column names
 	params = tableParams{
 		filter: schema.RowFilter(raw),
 	}
@@ -145,7 +147,6 @@ func  ParseParams(raw url.Values)(params tableParams){
 			return
 		}
 	}
-	cardViewKey := "_cardView"
 	cardViewString := raw.Get(cardViewKey)
 	if cardViewString != "" {
 		params.cardView = cardViewString == "true"
