@@ -22,6 +22,8 @@ type pageTemplateModel struct {
 type tablesViewModel struct {
 	LayoutData pageTemplateModel
 	Database   schema.Database
+	rowLimit int
+	cardView bool
 	Diagram    diagramViewModel
 }
 
@@ -110,20 +112,20 @@ func showTableList(resp http.ResponseWriter, database schema.Database) {
 	}
 }
 
-func showTable(resp http.ResponseWriter, reader dbReader, table *schema.Table, query schema.RowFilter, rowLimit int, cardView bool) error {
+func showTable(resp http.ResponseWriter, reader dbReader, table *schema.Table, params tableParams) error {
 	fieldFilter := make(FieldFilterList, 0)
-	if len(query) > 0 {
+	if len(params.filter) > 0 {
 		fieldKeys := make([]string, 0)
-		for field, _ := range query {
+		for field, _ := range params.filter {
 			fieldKeys = append(fieldKeys, field)
 		}
 		sort.Strings(fieldKeys)
 		for _, field := range fieldKeys {
-			fieldFilter = append(fieldFilter, FieldFilter{Field: field, Values: query[field]})
+			fieldFilter = append(fieldFilter, FieldFilter{Field: field, Values: params.filter[field]})
 		}
 	}
 
-	rowsData, err := GetRows(reader, query, table, rowLimit)
+	rowsData, err := GetRows(reader, params.filter, table, params.rowLimit)
 	if err != nil {
 		return err
 	}
@@ -149,10 +151,10 @@ func showTable(resp http.ResponseWriter, reader dbReader, table *schema.Table, q
 		LayoutData: layoutData,
 		Table:      *table,
 		Query:      fieldFilter,
-		RowLimit:   rowLimit,
+		RowLimit:   params.rowLimit,
 		Rows:       rows,
 		Diagram:    diagramViewModel{Tables: diagramTables, TableLinks: tableLinks},
-		CardView:   cardView,
+		CardView:   params.cardView,
 	}
 
 	viewModel.LayoutData.Title = fmt.Sprintf("%s | %s", table.String(), viewModel.LayoutData.Title)

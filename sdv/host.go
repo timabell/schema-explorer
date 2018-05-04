@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"net/url"
 )
 
 var db string
@@ -98,30 +99,9 @@ func handler(resp http.ResponseWriter, req *http.Request) {
 			return
 		}
 		table := database.FindTable(&requestedTable)
-		var query = req.URL.Query()
-		var rowLimit int
-		var cardView bool
+		params := ParseParams(req.URL.Query())
 		var err error
-		// todo: more robust separation of query param keys
-		const rowLimitKey = "_rowLimit" // this should be reasonably safe from clashes with column names
-		rowLimitString := query.Get(rowLimitKey)
-		if rowLimitString != "" {
-			rowLimit, err = strconv.Atoi(rowLimitString)
-			// exclude from column filters
-			query.Del(rowLimitKey)
-			if err != nil {
-				fmt.Println("error converting rows querystring value to int: ", err)
-				return
-			}
-		}
-		cardViewKey := "_cardView"
-		cardViewString := query.Get(cardViewKey)
-		if cardViewString != "" {
-			cardView = cardViewString == "true"
-			query.Del(cardViewKey)
-		}
-		var rowFilter = schema.RowFilter(query)
-		err = showTable(resp, reader, table, rowFilter, rowLimit, cardView)
+		err = showTable(resp, reader, table, params)
 		if err != nil {
 			fmt.Println("error converting rows querystring value to int: ", err)
 			return
@@ -139,5 +119,38 @@ func parseTableName(tableFullname string) (table schema.Table) {
 	} else {
 		table = schema.Table{Schema: "", Name: tableFullname}
 	}
+	return
+}
+
+type tableParams struct {
+	rowLimit int
+	cardView bool
+	filter   schema.RowFilter
+}
+
+func  ParseParams(raw url.Values)(params tableParams){
+	// todo: more robust separation of query param keys
+	const rowLimitKey = "_rowLimit" // this should be reasonably safe from clashes with column names
+	params = tableParams{
+		filter: schema.RowFilter(raw),
+	}
+	rowLimitString := raw.Get(rowLimitKey)
+	if rowLimitString != "" {
+		var err error
+		params.rowLimit, err = strconv.Atoi(rowLimitString)
+		// exclude from column filters
+		raw.Del(rowLimitKey)
+		if err != nil {
+			fmt.Println("error converting rows querystring value to int: ", err)
+			return
+		}
+	}
+	cardViewKey := "_cardView"
+	cardViewString := raw.Get(cardViewKey)
+	if cardViewString != "" {
+		params.cardView = cardViewString == "true"
+		raw.Del(cardViewKey)
+	}
+	params.filter = schema.RowFilter(raw)
 	return
 }
