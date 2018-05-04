@@ -93,6 +93,11 @@ func handler(resp http.ResponseWriter, req *http.Request) {
 	folders := strings.Split(req.URL.Path, "/")
 	switch folders[1] {
 	case "table-trail":
+		if len(folders) > 2 && folders[2] == "clear" {
+			clearTrailCookie(resp)
+			http.Redirect(resp, req, "/table-trail", http.StatusFound)
+			return
+		}
 		trail := readTrail(req)
 		err := showTableTrail(resp, database, trail)
 		if err != nil {
@@ -152,6 +157,10 @@ func (trailInfo *trail) addTable(table *schema.Table) {
 func (trailInfo *trail) setCookie(resp http.ResponseWriter) {
 	value := strings.Join(trailInfo.tables, ",")
 	trailCookie := &http.Cookie{Name: trailCookieName, Value: value, Path: "/"}
+	http.SetCookie(resp, trailCookie)
+}
+func clearTrailCookie(resp http.ResponseWriter) {
+	trailCookie := &http.Cookie{Name: trailCookieName, Value: "", Path: "/", Expires: time.Now().Add(-10000)}
 	http.SetCookie(resp, trailCookie)
 }
 
