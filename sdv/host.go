@@ -92,7 +92,7 @@ func handler(resp http.ResponseWriter, req *http.Request) {
 	// todo: proper url routing
 	folders := strings.Split(req.URL.Path, "/")
 	switch folders[1] {
-	case "table-trail":
+	case "table-trail": // todo: this should require http post
 		if len(folders) > 2 && folders[2] == "clear" {
 			clearTrailCookie(resp)
 			http.Redirect(resp, req, "/table-trail", http.StatusFound)
