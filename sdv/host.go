@@ -98,7 +98,14 @@ func handler(resp http.ResponseWriter, req *http.Request) {
 			http.Redirect(resp, req, "/table-trail", http.StatusFound)
 			return
 		}
-		trail := readTrail(req)
+		// get from querystring if populated, otherwise use cookies
+		tablesCsv := req.URL.Query().Get("tables")
+		var trail *trail
+		if tablesCsv != "" {
+			trail = trailFromCsv(tablesCsv)
+		} else {
+			trail = readTrail(req)
+		}
 		err := showTableTrail(resp, database, trail)
 		if err != nil {
 			fmt.Println("error rendering trail: ", err)
@@ -138,9 +145,13 @@ func readTrail(req *http.Request) *trail {
 	trailCookie, _ := req.Cookie(trailCookieName)
 	log.Printf("%#v", trailCookie)
 	if trailCookie != nil {
-		return &trail{strings.Split(trailCookie.Value, ",")}
+		return trailFromCsv(trailCookie.Value)
 	}
 	return &trail{}
+}
+
+func trailFromCsv(values string) *trail {
+	return &trail{strings.Split(values, ",")}
 }
 
 func (trailInfo *trail) addTable(table *schema.Table) {
