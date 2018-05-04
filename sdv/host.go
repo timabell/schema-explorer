@@ -100,11 +100,12 @@ func handler(resp http.ResponseWriter, req *http.Request) {
 		}
 		// get from querystring if populated, otherwise use cookies
 		tablesCsv := req.URL.Query().Get("tables")
-		var trail *trail
+		var trail *trailLog
 		if tablesCsv != "" {
 			trail = trailFromCsv(tablesCsv)
 		} else {
 			trail = readTrail(req)
+			trail.Dynamic = true
 		}
 		err := showTableTrail(resp, database, trail)
 		if err != nil {
@@ -135,39 +136,43 @@ func handler(resp http.ResponseWriter, req *http.Request) {
 	}
 }
 
-type trail struct {
-	tables []string
+type trailLog struct {
+	Tables  []string
+	Dynamic bool // whether this is dynamic from cookies or is from a permalink, for altering UI
+}
+
+func (trail trailLog) String() string {
+	return strings.Join(trail.Tables, ",")
 }
 
 const trailCookieName = "table-trail"
 
-func readTrail(req *http.Request) *trail {
+func readTrail(req *http.Request) *trailLog {
 	trailCookie, _ := req.Cookie(trailCookieName)
 	log.Printf("%#v", trailCookie)
 	if trailCookie != nil {
 		return trailFromCsv(trailCookie.Value)
 	}
-	return &trail{}
+	return &trailLog{}
 }
 
-func trailFromCsv(values string) *trail {
-	return &trail{strings.Split(values, ",")}
+func trailFromCsv(values string) *trailLog {
+	return &trailLog{Tables: strings.Split(values, ",")}
 }
 
-func (trailInfo *trail) addTable(table *schema.Table) {
+func (trail *trailLog) addTable(table *schema.Table) {
 	var exists = false
-	for _, x := range trailInfo.tables {
+	for _, x := range trail.Tables {
 		if x == table.String() {
 			exists = true
 		}
 	}
 	if !exists {
-		trailInfo.tables = append(trailInfo.tables, table.String())
+		trail.Tables = append(trail.Tables, table.String())
 	}
 }
-func (trailInfo *trail) setCookie(resp http.ResponseWriter) {
-	value := strings.Join(trailInfo.tables, ",")
-	trailCookie := &http.Cookie{Name: trailCookieName, Value: value, Path: "/"}
+func (trail *trailLog) setCookie(resp http.ResponseWriter) {
+	trailCookie := &http.Cookie{Name: trailCookieName, Value: trail.String(), Path: "/"}
 	http.SetCookie(resp, trailCookie)
 }
 func clearTrailCookie(resp http.ResponseWriter) {

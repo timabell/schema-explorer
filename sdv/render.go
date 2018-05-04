@@ -55,6 +55,11 @@ func (filterList FieldFilterList) AsQueryString() template.URL {
 	return template.URL(strings.Join(parts, "&"))
 }
 
+type trailViewModel struct {
+	LayoutData pageTemplateModel
+	Diagram    diagramViewModel
+	Trail      *trailLog
+}
 type dataViewModel struct {
 	LayoutData pageTemplateModel
 	Table      schema.Table
@@ -173,11 +178,11 @@ func showTable(resp http.ResponseWriter, reader dbReader, table *schema.Table, p
 	return nil
 }
 
-func showTableTrail(resp http.ResponseWriter, database schema.Database, trailInfo *trail) error {
+func showTableTrail(resp http.ResponseWriter, database schema.Database, trailInfo *trailLog) error {
 	log.Printf("%#v", trailInfo)
 
 	var diagramTables []*schema.Table
-	for _, x := range trailInfo.tables {
+	for _, x := range trailInfo.Tables {
 		tableStub := schema.TableFromString(x)
 		table := database.FindTable(&tableStub)
 		if table != nil { // this will happen if schema has changed since cookie was set
@@ -191,9 +196,10 @@ func showTableTrail(resp http.ResponseWriter, database schema.Database, trailInf
 	}
 	// todo: filter fks
 
-	viewModel := dataViewModel{
+	viewModel := trailViewModel{
 		LayoutData: layoutData,
 		Diagram:    diagramViewModel{Tables: diagramTables, TableLinks: tableLinks},
+		Trail:      trailInfo,
 	}
 
 	viewModel.LayoutData.Title = fmt.Sprintf("%s | %s", "trail", viewModel.LayoutData.Title)

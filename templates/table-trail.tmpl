@@ -2,11 +2,18 @@
 <nav>
     <ul>
         <li>
-            <a href='/'>&lt;&lt; Table list</a> |
-            <a href="/table-trail/clear">Clear</a>
+            <a href='/'>&lt;&lt; Table list</a>
+            {{if .Trail.Dynamic}}
+                | <a href="/table-trail/clear">Clear</a>
+                | <a href="/table-trail?tables={{.Trail}}">Permalink</a>
+            {{end}}
         </li>
     </ul>
 </nav>
+{{if .Trail.Dynamic}}
 <h2 id="tableList">Tables you've visited</h2>
+{{else}}
+<h2 id="tableList">Custom diagram</h2>
+{{end}}
 {{template "_diagram" .Diagram}}
 {{end}}
