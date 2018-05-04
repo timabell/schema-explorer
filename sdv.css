@@ -5,8 +5,8 @@
 }
 body{background-color: #f8f8f8;margin: 16px 32px;}
 h1 img{
-max-width: 100%;max-height: 12em;
-margin: 0 auto;
+  max-width: 100%;
+  margin: 0 auto;
   display: block;
 }
 .encore{font-size: 60%;}
