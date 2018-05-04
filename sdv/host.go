@@ -100,6 +100,28 @@ func handler(resp http.ResponseWriter, req *http.Request) {
 		}
 		table := database.FindTable(&requestedTable)
 		params := ParseParams(req.URL.Query())
+
+		// trail handling
+		trailCookie, _ := req.Cookie("table-trail")
+		var exists = false
+		var trail []string
+		if trailCookie == nil {
+			trailCookie=&http.Cookie{Name: "table-trail", Value: ""}
+			trail = append(trail, table.String())
+		}else{
+			trail = strings.Split(trailCookie.Value, ",")
+			for _, x := range trail {
+				if x == table.String() {
+					exists = true
+				}
+			}
+			if !exists {
+				trail = append(trail, table.String())
+			}
+		}
+		trailCookie.Value = strings.Join(trail, ",")
+		http.SetCookie(resp, trailCookie)
+
 		var err error
 		err = showTable(resp, reader, table, params)
 		if err != nil {
