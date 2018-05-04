@@ -22,8 +22,8 @@ type pageTemplateModel struct {
 type tablesViewModel struct {
 	LayoutData pageTemplateModel
 	Database   schema.Database
-	rowLimit int
-	cardView bool
+	rowLimit   int
+	cardView   bool
 	Diagram    diagramViewModel
 }
 

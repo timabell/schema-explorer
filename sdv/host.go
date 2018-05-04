@@ -6,10 +6,10 @@ import (
 	"log"
 	"net/http"
 	"net/http/httputil"
+	"net/url"
 	"strconv"
 	"strings"
 	"time"
-	"net/url"
 )
 
 var db string
@@ -92,6 +92,7 @@ func handler(resp http.ResponseWriter, req *http.Request) {
 	// todo: proper url routing
 	folders := strings.Split(req.URL.Path, "/")
 	switch folders[1] {
+	case "visited-tables":
 	case "tables":
 		requestedTable := parseTableName(folders[2])
 		if requestedTable.Name == "" { // google bot strips paths it seems, was causing a crash
@@ -101,26 +102,9 @@ func handler(resp http.ResponseWriter, req *http.Request) {
 		table := database.FindTable(&requestedTable)
 		params := ParseParams(req.URL.Query())
 
-		// trail handling
-		trailCookie, _ := req.Cookie("table-trail")
-		var exists = false
-		var trail []string
-		if trailCookie == nil {
-			trailCookie=&http.Cookie{Name: "table-trail", Value: ""}
-			trail = append(trail, table.String())
-		}else{
-			trail = strings.Split(trailCookie.Value, ",")
-			for _, x := range trail {
-				if x == table.String() {
-					exists = true
-				}
-			}
-			if !exists {
-				trail = append(trail, table.String())
-			}
-		}
-		trailCookie.Value = strings.Join(trail, ",")
-		http.SetCookie(resp, trailCookie)
+		trail := readTrail(req)
+		trail.addTable(table)
+		trail.setCookie(resp)
 
 		var err error
 		err = showTable(resp, reader, table, params)
@@ -131,6 +115,37 @@ func handler(resp http.ResponseWriter, req *http.Request) {
 	default:
 		showTableList(resp, database)
 	}
+}
+
+type trail struct {
+	tables []string
+}
+
+const trailCookieName = "table-trail"
+
+func readTrail(req *http.Request) *trail {
+	trailCookie, _ := req.Cookie(trailCookieName)
+	if trailCookie != nil {
+		return &trail{strings.Split(trailCookie.Value, ",")}
+	}
+	return &trail{}
+}
+
+func (trailInfo *trail) addTable(table *schema.Table) {
+	var exists = false
+	for _, x := range trailInfo.tables {
+		if x == table.String() {
+			exists = true
+		}
+	}
+	if !exists {
+		trailInfo.tables = append(trailInfo.tables, table.String())
+	}
+}
+func (trailInfo *trail) setCookie(resp http.ResponseWriter) {
+	value := strings.Join(trailInfo.tables, ",")
+	trailCookie := &http.Cookie{Name: trailCookieName, Value: value}
+	http.SetCookie(resp, trailCookie)
 }
 
 // Split dot-separated name into schema + table name
@@ -154,7 +169,7 @@ type tableParams struct {
 const rowLimitKey = "_rowLimit" // this should be reasonably safe from clashes with column names
 const cardViewKey = "_cardView"
 
-func  ParseParams(raw url.Values)(params tableParams){
+func ParseParams(raw url.Values) (params tableParams) {
 	params = tableParams{
 		filter: schema.RowFilter(raw),
 	}
