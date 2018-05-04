@@ -94,7 +94,7 @@ func handler(resp http.ResponseWriter, req *http.Request) {
 	switch folders[1] {
 	case "table-trail":
 		trail := readTrail(req)
-		err := showTableTrail(resp, reader, trail)
+		err := showTableTrail(resp, database, trail)
 		if err != nil {
 			fmt.Println("error rendering trail: ", err)
 			return

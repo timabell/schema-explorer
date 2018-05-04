@@ -173,15 +173,20 @@ func showTable(resp http.ResponseWriter, reader dbReader, table *schema.Table, p
 	return nil
 }
 
-func showTableTrail(resp http.ResponseWriter, reader dbReader, trailInfo *trail) error {
+func showTableTrail(resp http.ResponseWriter, database schema.Database, trailInfo *trail) error {
 	log.Printf("%#v", trailInfo)
 
 	var diagramTables []*schema.Table
-	for _, x := range trailInfo.tables{
-		table := schema.TableFromString(x)
-		diagramTables = append(diagramTables, &table)
+	for _, x := range trailInfo.tables {
+		tableStub := schema.TableFromString(x)
+		table := database.FindTable(&tableStub)
+		diagramTables = append(diagramTables, table)
 	}
+
 	var tableLinks []fkViewModel
+	for _, tableFks := range database.Fks {
+		tableLinks = append(tableLinks, fkViewModel{Source: *tableFks.SourceTable, Destination: *tableFks.DestinationTable})
+	}
 	// todo: filter fks
 
 	viewModel := dataViewModel{
