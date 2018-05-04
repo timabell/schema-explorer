@@ -180,7 +180,9 @@ func showTableTrail(resp http.ResponseWriter, database schema.Database, trailInf
 	for _, x := range trailInfo.tables {
 		tableStub := schema.TableFromString(x)
 		table := database.FindTable(&tableStub)
-		diagramTables = append(diagramTables, table)
+		if table != nil { // this will happen if schema has changed since cookie was set
+			diagramTables = append(diagramTables, table)
+		}
 	}
 
 	var tableLinks []fkViewModel
