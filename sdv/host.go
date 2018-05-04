@@ -92,7 +92,13 @@ func handler(resp http.ResponseWriter, req *http.Request) {
 	// todo: proper url routing
 	folders := strings.Split(req.URL.Path, "/")
 	switch folders[1] {
-	case "visited-tables":
+	case "table-trail":
+		trail := readTrail(req)
+		err := showTableTrail(resp, reader, trail)
+		if err != nil {
+			fmt.Println("error rendering trail: ", err)
+			return
+		}
 	case "tables":
 		requestedTable := parseTableName(folders[2])
 		if requestedTable.Name == "" { // google bot strips paths it seems, was causing a crash
@@ -109,7 +115,7 @@ func handler(resp http.ResponseWriter, req *http.Request) {
 		var err error
 		err = showTable(resp, reader, table, params)
 		if err != nil {
-			fmt.Println("error converting rows querystring value to int: ", err)
+			fmt.Println("error rendering table: ", err)
 			return
 		}
 	default:
@@ -125,6 +131,7 @@ const trailCookieName = "table-trail"
 
 func readTrail(req *http.Request) *trail {
 	trailCookie, _ := req.Cookie(trailCookieName)
+	log.Printf("%#v", trailCookie)
 	if trailCookie != nil {
 		return &trail{strings.Split(trailCookie.Value, ",")}
 	}
@@ -144,7 +151,7 @@ func (trailInfo *trail) addTable(table *schema.Table) {
 }
 func (trailInfo *trail) setCookie(resp http.ResponseWriter) {
 	value := strings.Join(trailInfo.tables, ",")
-	trailCookie := &http.Cookie{Name: trailCookieName, Value: value}
+	trailCookie := &http.Cookie{Name: trailCookieName, Value: value, Path: "/"}
 	http.SetCookie(resp, trailCookie)
 }
 

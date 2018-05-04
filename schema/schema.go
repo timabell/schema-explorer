@@ -73,6 +73,14 @@ func (table Table) String() string {
 	return table.Schema + "." + table.Name
 }
 
+func TableFromString(value string) Table {
+	parts := strings.SplitN(value, ".", 2)
+	if len(parts) == 2 {
+		return Table{Schema: parts[0], Name: parts[1]}
+	}
+	return Table{Schema: "", Name: parts[0]}
+}
+
 func TableDebug(table Table) string {
 	return fmt.Sprintf("%s: | cols: %s | fks: %s | inboundFks: %s", table.String(), table.Columns, table.Fks, table.InboundFks)
 }

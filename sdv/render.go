@@ -67,6 +67,7 @@ type dataViewModel struct {
 
 var tablesTemplate *template.Template
 var tableTemplate *template.Template
+var tableTrailTemplate *template.Template
 var layoutData pageTemplateModel
 
 // Make minus available in templates to be able to convert len to slice index
@@ -85,6 +86,10 @@ func SetupTemplate() {
 		log.Fatal(err)
 	}
 	tablesTemplate, err = template.Must(templates.Clone()).ParseGlob("templates/tables.tmpl")
+	if err != nil {
+		log.Fatal(err)
+	}
+	tableTrailTemplate, err = template.Must(templates.Clone()).ParseGlob("templates/table-trail.tmpl")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -160,6 +165,33 @@ func showTable(resp http.ResponseWriter, reader dbReader, table *schema.Table, p
 	viewModel.LayoutData.Title = fmt.Sprintf("%s | %s", table.String(), viewModel.LayoutData.Title)
 
 	err = tableTemplate.ExecuteTemplate(resp, "layout", viewModel)
+	if err != nil {
+		log.Print("template execution error", err)
+		panic(err)
+	}
+
+	return nil
+}
+
+func showTableTrail(resp http.ResponseWriter, reader dbReader, trailInfo *trail) error {
+	log.Printf("%#v", trailInfo)
+
+	var diagramTables []*schema.Table
+	for _, x := range trailInfo.tables{
+		table := schema.TableFromString(x)
+		diagramTables = append(diagramTables, &table)
+	}
+	var tableLinks []fkViewModel
+	// todo: filter fks
+
+	viewModel := dataViewModel{
+		LayoutData: layoutData,
+		Diagram:    diagramViewModel{Tables: diagramTables, TableLinks: tableLinks},
+	}
+
+	viewModel.LayoutData.Title = fmt.Sprintf("%s | %s", "trail", viewModel.LayoutData.Title)
+
+	err := tableTrailTemplate.ExecuteTemplate(resp, "layout", viewModel)
 	if err != nil {
 		log.Print("template execution error", err)
 		panic(err)
