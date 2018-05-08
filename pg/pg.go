@@ -115,7 +115,6 @@ func getFks(dbc *sql.DB, sourceTable *schema.Table, database schema.Database) (f
 	if err != nil {
 		return
 	}
-	log.Printf(schema.TableDebug(sourceTable))
 	defer rows.Close()
 	fks = []*schema.Fk{}
 	for rows.Next() {
@@ -168,18 +167,20 @@ func (model pgModel) GetSqlRows(query schema.RowFilter, table *schema.Table, row
 
 func (model pgModel) getColumns(dbc *sql.DB, table *schema.Table) (cols []*schema.Column, err error) {
 	// todo: parameterise
-	rows, err := dbc.Query("select ns.nspname, tbl.relname, col.attname colname, col.attlen, col.attnum, typ.typname, col.attnotnull  from pg_catalog.pg_attribute col inner join pg_catalog.pg_class tbl on col.attrelid = tbl.oid inner join pg_catalog.pg_namespace ns on ns.oid = tbl.relnamespace inner join pg_catalog.pg_type typ on typ.oid = col.atttypid where tbl.relname = '" + table.Schema + "' and ns.nspname = '" + table.Name + "' and col.attnum > 0 and not col.attisdropped;")
+	sql := "select col.attname colname, col.attlen, typ.typname, col.attnotnull from pg_catalog.pg_attribute col inner join pg_catalog.pg_class tbl on col.attrelid = tbl.oid inner join pg_catalog.pg_namespace ns on ns.oid = tbl.relnamespace inner join pg_catalog.pg_type typ on typ.oid = col.atttypid where col.attnum > 0 and not col.attisdropped and ns.nspname = '" + table.Schema + "' and tbl.relname = '" + table.Name + "' order by col.attnum;"
+
+	rows, err := dbc.Query(sql)
 	if err != nil {
+		log.Print(sql)
 		return
 	}
 	defer rows.Close()
 	cols = []*schema.Column{}
 	for rows.Next() {
-		var cid int
+		var len int
 		var name, typeName string
-		var notNull, pk bool
-		var defaultValue interface{}
-		rows.Scan(&cid, &name, &typeName, &notNull, &defaultValue, &pk)
+		var notNull bool
+		rows.Scan(&name, &len, &typeName, &notNull)
 		thisCol := schema.Column{Name: name, Type: typeName}
 		cols = append(cols, &thisCol)
 	}
