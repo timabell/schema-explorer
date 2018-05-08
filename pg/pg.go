@@ -110,17 +110,15 @@ func (model pgModel) CheckConnection() (err error) {
 
 func getFks(dbc *sql.DB, sourceTable *schema.Table, database schema.Database) (fks []*schema.Fk, err error) {
 	// todo: parameterise
-	rows, err := dbc.Query("select 1 where 1=0;")
-	//rows, err := dbc.Query("SELECT column_name, data_type, is_nullable, column_default FROM information_schema.columns where table_schema = '" + sourceTable.Schema + "' and table_name = '" + sourceTable.Name + "';")
+	rows, err := dbc.Query("select ftbl.relname, con.conkey, con.confkey from pg_constraint con inner join pg_namespace ns on con.connamespace = ns.oid inner join pg_class tbl on tbl.oid = con.conrelid inner join pg_class ftbl on ftbl.oid = con.confrelid where con.contype = 'f' and ns.nspname = '" + sourceTable.Schema + "' and tbl.relname = '" + sourceTable.Name + "';")
 	if err != nil {
 		return
 	}
 	defer rows.Close()
 	fks = []*schema.Fk{}
 	for rows.Next() {
-		var id, seq int
-		var destinationTableName, sourceColumnName, destinationColumnName, onUpdate, onDelete, match string
-		rows.Scan(&id, &seq, &destinationTableName, &sourceColumnName, &destinationColumnName, &onUpdate, &onDelete, &match)
+		var destinationTableName string
+		rows.Scan(&destinationTableName)
 		_, sourceColumn := sourceTable.FindColumn(sourceColumnName)
 		destinationTable := database.FindTable(&schema.Table{Name: destinationTableName})
 		_, destinationColumn := destinationTable.FindColumn(destinationColumnName)
