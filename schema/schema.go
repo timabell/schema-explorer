@@ -81,7 +81,7 @@ func TableFromString(value string) Table {
 	return Table{Schema: "", Name: parts[0]}
 }
 
-func TableDebug(table Table) string {
+func TableDebug(table *Table) string {
 	return fmt.Sprintf("%s: | cols: %s | fks: %s | inboundFks: %s", table.String(), table.Columns, table.Fks, table.InboundFks)
 }
 

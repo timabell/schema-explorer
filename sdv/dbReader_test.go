@@ -76,11 +76,11 @@ func checkColumnFkCount(database schema.Database, t *testing.T) {
 	table := findTable(schema.Table{Schema: "dbo", Name: "pet"}, database, t)
 	_, col := table.FindColumn("ownerId")
 	if col == nil {
-		t.Log(schema.TableDebug(*table))
+		t.Log(schema.TableDebug(table))
 		t.Fatal("Column ownderId not found while checking col fk count")
 	}
 	if col.Fk == nil {
-		t.Log(schema.TableDebug(*table))
+		t.Log(schema.TableDebug(table))
 		t.Logf("%#v", col)
 		t.Log(col.Fk)
 		t.Errorf("Fk entry missing from column %s.%s", table, col)
