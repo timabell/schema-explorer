@@ -133,13 +133,13 @@ func getFks(dbc *sql.DB, sourceTable *schema.Table, database schema.Database) (f
 func (model pgModel) GetSqlRows(query schema.RowFilter, table *schema.Table, rowLimit int) (rows *sql.Rows, err error) {
 	// todo: parameterise where possible
 	// todo: whitelist-sanitize unparameterizable parts
-	sql := "select * from " + table.Name
+	sql := "select * from \"" + table.Name + "\""
 
 	if len(query) > 0 {
 		sql = sql + " where "
 		clauses := make([]string, 0, len(query))
 		for k, v := range query {
-			clauses = append(clauses, k+" = "+v[0])
+			clauses = append(clauses, "\""+k+"\" = "+v[0])
 		}
 		sql = sql + strings.Join(clauses, " and ")
 	}
