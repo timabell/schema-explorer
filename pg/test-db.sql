@@ -25,7 +25,7 @@ create table person (
 );
 
 create table pet (
-	petId int PRIMARY KEY, petName varchar(50), ownerId int references person(personId),
+	petId int PRIMARY KEY, petName varchar(50), "ownerId" int references person(personId),
 	favouritePersonId int references person(personId)
 );
 
@@ -33,8 +33,8 @@ alter table toy add foreign key (belongsToId) REFERENCES pet (petId);
 alter table person add foreign key (favouritePetId) REFERENCES pet (petId);
 
 insert into person(personId,personName) values(1,'bob'),(2,'fred');
-insert into pet(petId,petName, ownerId, favouritePersonId)values(5, 'kitty',1,2);
-insert into pet(petId,petName, ownerId, favouritePersonId)values(6, 'fido',2,2);
+insert into pet(petId,petName, "ownerId", favouritePersonId)values(5, 'kitty',1,2);
+insert into pet(petId,petName, "ownerId", favouritePersonId)values(6, 'fido',2,2);
 insert into toy(toyId, toyName, belongsToId) values(11,'mouse',5);
 insert into toy(toyId, toyName, belongsToId) values(12,'ball',6);
 update person set favouritePetId = 5 where personId = 2;
