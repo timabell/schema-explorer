@@ -73,7 +73,7 @@ func Test_ReadSchema(t *testing.T) {
 	}
 }
 func checkColumnFkCount(database schema.Database, t *testing.T) {
-	table := findTable(schema.Table{Schema: "dbo", Name: "pet"}, database, t)
+	table := findTable(schema.Table{Schema: database.DefaultSchemaName, Name: "pet"}, database, t)
 	_, col := table.FindColumn("ownerId")
 	if col == nil {
 		t.Log(schema.TableDebug(table))
@@ -97,7 +97,7 @@ func checkFkCount(database schema.Database, t *testing.T) {
 
 func checkInboundTableFkCount(database schema.Database, t *testing.T) {
 	expectedInboundCount := 2
-	table := findTable(schema.Table{Schema: "dbo", Name: "person"}, database, t)
+	table := findTable(schema.Table{Schema: database.DefaultSchemaName, Name: "person"}, database, t)
 	fkCount := len(table.InboundFks)
 	if fkCount != expectedInboundCount {
 		t.Fatalf("Expected %d inboundFks in table %s, found %d", expectedInboundCount, table, fkCount)
@@ -106,7 +106,7 @@ func checkInboundTableFkCount(database schema.Database, t *testing.T) {
 
 func checkTableFks(database schema.Database, t *testing.T) {
 	expectedFkCount := 2
-	table := findTable(schema.Table{Schema: "dbo", Name: "pet"}, database, t)
+	table := findTable(schema.Table{Schema: database.DefaultSchemaName, Name: "pet"}, database, t)
 	fkCount := len(table.Fks)
 	if fkCount != expectedFkCount {
 		t.Fatalf("Expected %d fks in table %s, found %d", expectedFkCount, table, fkCount)
@@ -121,8 +121,8 @@ type descriptionCase struct {
 }
 
 var descriptions = []descriptionCase{
-	{schema: "dbo", table: "person", column: "", description: "somebody to love"},
-	{schema: "dbo", table: "person", column: "personName", description: "say my name!"},
+	{schema: database.DefaultSchemaName, table: "person", column: "", description: "somebody to love"},
+	{schema: database.DefaultSchemaName, table: "person", column: "personName", description: "say my name!"},
 	{schema: "kitchen", table: "sink", column: "", description: "call a plumber!!!"},
 	{schema: "kitchen", table: "sink", column: "sinkId", description: "gotta number your sinks man!"},
 }
@@ -166,7 +166,7 @@ func Test_GetRows(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	table := findTable(schema.Table{Schema: "dbo", Name: "DataTypeTest"}, database, t)
+	table := findTable(schema.Table{Schema: database.DefaultSchemaName, Name: "DataTypeTest"}, database, t)
 
 	// read the data from it
 	rows, err := GetRows(reader, nil, table, 999)
