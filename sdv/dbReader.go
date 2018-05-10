@@ -23,7 +23,9 @@ func GetRows(reader dbReader, query schema.RowFilter, table *schema.Table, rowLi
 		panic("GetSqlRows() returned nil")
 	}
 	defer rows.Close()
-
+	if len(table.Columns) == 0 {
+		panic("No columns found when reading table data table")
+	}
 	rowsData, err = GetAllData(len(table.Columns), rows)
 	if err != nil {
 		return nil, err

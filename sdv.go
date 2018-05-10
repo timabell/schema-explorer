@@ -14,16 +14,14 @@ package main
 import (
 	"bitbucket.org/timabell/sql-data-viewer/sdv"
 	"flag"
-	_ "github.com/mattn/go-sqlite3"
-	_ "github.com/simnalamburt/go-mssqldb"
 	"log"
 	"os"
 )
 
 func main() {
 	var (
-		driver   = flag.String("driver", "", "Driver to use (mssql or sqlite)")
-		db       = flag.String("db", "", "connection string for mssql / filename for sqlite")
+		driver   = flag.String("driver", "", "Driver to use (mssql, pg or sqlite)")
+		db       = flag.String("db", "", "connection string for mssql and pg, filename for sqlite")
 		port     = flag.Int("port", 8080, "port to listen on")
 		listenOn = flag.String("listenOn", "localhost", "address to listen on") // secure by default, only listen for local connections
 		live     = flag.Bool("live", false, "update html templates & schema information from disk on every page load")
@@ -47,6 +45,7 @@ func main() {
 }
 
 func Usage() {
-	log.Print("Run with Sql Server: ./sql-data-viewer -driver mssql -db \"connectiongstring\"")
-	log.Print("Run with sqlite: ./sql-data-viewer -driver sqlite -db \"path\"")
+	log.Print("Run with Sql Server: -driver mssql -db \"connectiongstring\" # see https://github.com/simnalamburt/go-mssqldb for connection string options")
+	log.Print("Run with postgres: -driver pg -db \"connectiongstring\" # see https://godoc.org/github.com/lib/pq for connectionstring options")
+	log.Print("Run with sqlite: -driver sqlite -db \"path\" # see https://github.com/mattn/go-sqlite3 for more info")
 }

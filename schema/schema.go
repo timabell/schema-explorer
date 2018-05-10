@@ -12,10 +12,11 @@ type SupportedFeatures struct {
 }
 
 type Database struct {
-	Tables      []*Table
-	Fks         []*Fk
-	Supports    SupportedFeatures
-	Description string
+	Tables            []*Table
+	Fks               []*Fk
+	Supports          SupportedFeatures
+	Description       string
+	DefaultSchemaName string
 }
 
 type Table struct {
@@ -81,7 +82,7 @@ func TableFromString(value string) Table {
 	return Table{Schema: "", Name: parts[0]}
 }
 
-func TableDebug(table Table) string {
+func TableDebug(table *Table) string {
 	return fmt.Sprintf("%s: | cols: %s | fks: %s | inboundFks: %s", table.String(), table.Columns, table.Fks, table.InboundFks)
 }
 
