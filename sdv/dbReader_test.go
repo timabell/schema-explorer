@@ -30,6 +30,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 	_ "github.com/simnalamburt/go-mssqldb"
 	"strings"
+	"log"
 )
 
 var testDb string
@@ -120,15 +121,16 @@ type descriptionCase struct {
 	description string
 }
 
-var descriptions = []descriptionCase{
-	{schema: database.DefaultSchemaName, table: "person", column: "", description: "somebody to love"},
-	{schema: database.DefaultSchemaName, table: "person", column: "personName", description: "say my name!"},
-	{schema: "kitchen", table: "sink", column: "", description: "call a plumber!!!"},
-	{schema: "kitchen", table: "sink", column: "sinkId", description: "gotta number your sinks man!"},
-}
-
 func checkDescriptions(database schema.Database, t *testing.T) {
+	var descriptions = []descriptionCase{
+		{schema: database.DefaultSchemaName, table: "person", column: "", description: "somebody to love"},
+		{schema: database.DefaultSchemaName, table: "person", column: "personName", description: "say my name!"},
+		{schema: "kitchen", table: "sink", column: "", description: "call a plumber!!!"},
+		{schema: "kitchen", table: "sink", column: "sinkId", description: "gotta number your sinks man!"},
+	}
+
 	for _, testCase := range descriptions {
+		log.Println(testCase)
 		table := findTable(schema.Table{Schema: testCase.schema, Name: testCase.table}, database, t)
 		if testCase.column == "" {
 			if table.Description != testCase.description {
