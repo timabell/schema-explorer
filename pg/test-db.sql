@@ -1,9 +1,9 @@
 -- postgres example db for regression tests
 -- schema must match test code's expectations
 
-create table "DataTypeTest" ( intpk integer primary key, "colCount" int, "field_INT" INT );
+create table "DataTypeTest" ( intpk integer primary key, "colCount" int, "field_INT4" INT );
 
-insert into "DataTypeTest"( intpk, "colCount", "field_INT"
+insert into "DataTypeTest"( intpk, "colCount", "field_INT4"
 )values(
 	10, --intpk
 	3, --colCount
