@@ -111,11 +111,6 @@ func checkTableFks(database schema.Database, t *testing.T) {
 	if fkCount != expectedFkCount {
 		t.Fatalf("Expected %d fks in table %s, found %d", expectedFkCount, table, fkCount)
 	}
-	t.Log(table.Fks[0])
-	t.Log(table.Fks[0].SourceTable)
-	t.Log(table.Fks[0].SourceTable.Columns)
-	t.Log(table.Fks[0].DestinationTable)
-	t.Log(table.Fks[0].DestinationTable.Columns)
 }
 
 type descriptionCase struct {
