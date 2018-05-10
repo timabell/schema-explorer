@@ -27,7 +27,10 @@ func (model pgModel) ReadSchema() (database schema.Database, err error) {
 	}
 	defer dbc.Close()
 
-	database = schema.Database{Supports: schema.SupportedFeatures{Schema: false}}
+	database = schema.Database{
+		Supports:          schema.SupportedFeatures{Schema: true, Descriptions: false},
+		DefaultSchemaName: "public",
+	}
 
 	// load table list
 	database.Tables, err = model.getTables(dbc)
@@ -121,7 +124,12 @@ func getFks(dbc *sql.DB, sourceTable *schema.Table, database schema.Database) (f
 		var sourceColumnName, destinationTableName, destinationColumnName string
 		rows.Scan(&sourceColumnName, &destinationTableName, &destinationColumnName)
 		_, sourceColumn := sourceTable.FindColumn(sourceColumnName)
-		destinationTable := database.FindTable(&schema.Table{Name: destinationTableName})
+		// todo: read schema of fk table
+		destinationTable := database.FindTable(&schema.Table{Schema:database.DefaultSchemaName,Name: destinationTableName})
+		if destinationTable == nil {
+			log.Print(database.DebugString())
+			panic (fmt.Sprintf("couldn't find table %s in database object while hooking up fks", destinationTableName))
+		}
 		_, destinationColumn := destinationTable.FindColumn(destinationColumnName)
 		fk := schema.NewFk(sourceTable, sourceColumn, destinationTable, destinationColumn)
 		sourceColumn.Fk = fk

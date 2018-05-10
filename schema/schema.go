@@ -12,10 +12,11 @@ type SupportedFeatures struct {
 }
 
 type Database struct {
-	Tables      []*Table
-	Fks         []*Fk
-	Supports    SupportedFeatures
-	Description string
+	Tables            []*Table
+	Fks               []*Fk
+	Supports          SupportedFeatures
+	Description       string
+	DefaultSchemaName string
 }
 
 type Table struct {

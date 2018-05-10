@@ -26,7 +26,10 @@ func (model mssqlModel) ReadSchema() (database schema.Database, err error) {
 	}
 	defer dbc.Close()
 
-	database = schema.Database{Supports: schema.SupportedFeatures{Schema: true, Descriptions: true}}
+	database = schema.Database{
+		Supports:          schema.SupportedFeatures{Schema: true, Descriptions: true},
+		DefaultSchemaName: "dbo",
+	}
 
 	database.Tables, err = model.getTables(dbc)
 	if err != nil {
