@@ -70,3 +70,14 @@ nav li{
     padding: 0;
     list-style-type: none;
 }
+#diagram-toolbar button{
+    background-color: #823331;
+    color: #f8f8f8;
+    padding: 0.5em 16px;
+    border-style: none;
+}
+@media print{
+    #diagram-toolbar{ display: none; }
+    nav{ display: none; }
+    .hint{ display: none; }
+}

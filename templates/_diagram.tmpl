@@ -1,8 +1,18 @@
 {{define "_diagram"}}
 <h2 id="diagram">Relationship diagram</h2>
+<div id="diagram-toolbar">
+    <button id="enable-zoom" onclick="toggleZoom(true)">enable zoom</button>
+    <button id="disable-zoom" onclick="toggleZoom(false)" style="display: none;">disable zoom</button>
+</div>
 <div id="table-diagram">
 </div>
-<p class="hint">Click a table in the diagram to jump straight to it</p>
+<p class="hint">
+    Hints: Click/touch a table in the diagram to jump straight to it.
+    Click/touch & drag to pan around.
+    Click enable-zoom then use the mouse wheel to zoom in to where the mouse pointer is.
+    Click/touch & drag a table to move it.
+    Customised table layout is not remembered.
+</p>
 <script>
     var cy;
 
@@ -81,10 +91,17 @@
         });
         cy.ready(function(){
             fitDiagram();
+            cy.zoomingEnabled(false);
         });
         cy.on('tap','node',function(e){
             window.location = '/tables/' + e.target.data().id + '?_rowLimit=100';
         })
     });
+
+    function toggleZoom(enable){
+        $('#enable-zoom').toggle(!enable);
+        $('#disable-zoom').toggle(enable);
+        cy.zoomingEnabled(enable);
+    }
 </script>
 {{end}}
