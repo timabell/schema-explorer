@@ -149,7 +149,6 @@ const trailCookieName = "table-trail"
 
 func readTrail(req *http.Request) *trailLog {
 	trailCookie, _ := req.Cookie(trailCookieName)
-	log.Printf("%#v", trailCookie)
 	if trailCookie != nil {
 		return trailFromCsv(trailCookie.Value)
 	}
