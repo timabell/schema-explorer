@@ -159,7 +159,7 @@
 {{if .CardView}}
     <p>
         {{/*todo: need a url builder to avoid ending up with ?& if there's no query*/}}
-        <a href="?{{.Query.AsQueryString}}&_rowLimit=100&_cardView=false#data">Switch to table view</a>
+        <a class="action-button button" href="?{{.Query.AsQueryString}}&_rowLimit=100&_cardView=false#data">Switch to table view</a>
     </p>
     {{ range .Rows }}
         {{$val := .}}
@@ -181,7 +181,7 @@
     {{end}}
 {{else}}
     <p>
-        <a href="?{{.Query.AsQueryString}}&_rowLimit=100&_cardView=true#data">Switch to card view</a>
+        <a class="action-button button" href="?{{.Query.AsQueryString}}&_rowLimit=100&_cardView=true#data">Switch to card view</a>
     </p>
     <table border=1>
         <tr>
