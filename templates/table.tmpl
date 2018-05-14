@@ -142,14 +142,10 @@
         </tr>
         {{end}}
         </tbody>
-        <tfoot>
-        <tr>
-            <td colspan="2">
-                <a href="?_rowLimit={{.RowLimit}}#data">Clear</a>
-            </td>
-        </tr>
-        </tfoot>
     </table>
+    <div>
+        <a class="action-button button" href="?_rowLimit={{.RowLimit}}#data">Clear Filter</a>
+    </div>
 {{end}}
 
 {{ if .RowLimit }}
