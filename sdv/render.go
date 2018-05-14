@@ -172,7 +172,6 @@ func showTable(resp http.ResponseWriter, reader dbReader, table *schema.Table, p
 	err = tableTemplate.ExecuteTemplate(resp, "layout", viewModel)
 	if err != nil {
 		log.Print("template execution error", err)
-		panic(err)
 	}
 
 	return nil
