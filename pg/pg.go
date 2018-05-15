@@ -125,10 +125,10 @@ func getFks(dbc *sql.DB, sourceTable *schema.Table, database schema.Database) (f
 		rows.Scan(&sourceColumnName, &destinationTableName, &destinationColumnName)
 		_, sourceColumn := sourceTable.FindColumn(sourceColumnName)
 		// todo: read schema of fk table
-		destinationTable := database.FindTable(&schema.Table{Schema:database.DefaultSchemaName,Name: destinationTableName})
+		destinationTable := database.FindTable(&schema.Table{Schema: database.DefaultSchemaName, Name: destinationTableName})
 		if destinationTable == nil {
 			log.Print(database.DebugString())
-			panic (fmt.Sprintf("couldn't find table %s in database object while hooking up fks", destinationTableName))
+			panic(fmt.Sprintf("couldn't find table %s in database object while hooking up fks", destinationTableName))
 		}
 		_, destinationColumn := destinationTable.FindColumn(destinationColumnName)
 		fk := schema.NewFk(sourceTable, sourceColumn, destinationTable, destinationColumn)
