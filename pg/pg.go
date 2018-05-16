@@ -143,11 +143,20 @@ func (model pgModel) GetSqlRows(query schema.RowFilter, table *schema.Table, row
 	// todo: whitelist-sanitize unparameterizable parts
 	sql := "select * from \"" + table.Name + "\""
 
+	var values []interface{}
 	if len(query) > 0 {
 		sql = sql + " where "
 		clauses := make([]string, 0, len(query))
+		values = make([]interface{}, 0, len(query))
+		var index = 1
 		for k, v := range query {
-			clauses = append(clauses, "\""+k+"\" = "+v[0])
+			_, col := table.FindColumn(k)
+			if col == nil {
+				panic("Column not found")
+			}
+			clauses = append(clauses, "\""+col.Name+"\" = $"+strconv.Itoa(index))
+			index = index + 1
+			values = append(values, v[0]) // todo: maybe support multiple values
 		}
 		sql = sql + strings.Join(clauses, " and ")
 	}
@@ -164,7 +173,7 @@ func (model pgModel) GetSqlRows(query schema.RowFilter, table *schema.Table, row
 	defer dbc.Close()
 
 	log.Println(sql)
-	rows, err = dbc.Query(sql)
+	rows, err = dbc.Query(sql, values...)
 	if err != nil {
 		log.Print("GetRows failed to get query")
 		log.Println(sql)
