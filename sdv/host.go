@@ -120,7 +120,9 @@ func handler(resp http.ResponseWriter, req *http.Request) {
 		}
 		table := database.FindTable(&requestedTable)
 		if table == nil {
-			panic("Table not found in db")
+			resp.WriteHeader(http.StatusNotFound)
+			fmt.Fprint(resp, "Alas, thy table hast not been seen of late. 404 my friend.")
+			return
 		}
 		params := ParseTableParams(req.URL.Query())
 
