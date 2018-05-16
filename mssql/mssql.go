@@ -198,21 +198,28 @@ func (model mssqlModel) allFks(dbc *sql.DB, database schema.Database) (allFks []
 
 func (model mssqlModel) GetSqlRows(query schema.RowFilter, table *schema.Table, rowLimit int) (rows *sql.Rows, err error) {
 	// todo: sql parameters instead of string concatenation
-	sqlText := "select"
+	sql := "select"
 
 	if rowLimit > 0 {
-		sqlText = sqlText + " top " + strconv.Itoa(rowLimit)
+		sql = sql + " top " + strconv.Itoa(rowLimit)
 	}
 
-	sqlText = sqlText + " * from " + table.String()
+	sql = sql + " * from " + table.String()
 
+	var values []interface{}
 	if len(query) > 0 {
-		sqlText = sqlText + " where "
+		sql = sql + " where "
 		clauses := make([]string, 0, len(query))
+		values = make([]interface{}, 0, len(query))
 		for k, v := range query {
-			clauses = append(clauses, k+" = "+v[0])
+			_, col := table.FindColumn(k)
+			if col == nil {
+				panic("Column not found")
+			}
+			clauses = append(clauses, col.Name+" = ?")
+			values = append(values, v[0]) // todo: maybe support multiple values
 		}
-		sqlText = sqlText + strings.Join(clauses, " and ")
+		sql = sql + strings.Join(clauses, " and ")
 	}
 
 	dbc, err := getConnection(model.connectionString)
@@ -222,9 +229,9 @@ func (model mssqlModel) GetSqlRows(query schema.RowFilter, table *schema.Table, 
 	}
 	defer dbc.Close()
 
-	rows, err = dbc.Query(sqlText)
+	rows, err = dbc.Query(sql, values...)
 	if rows == nil {
-		log.Println(sqlText)
+		log.Println(sql)
 		log.Println(err)
 		panic("Query returned nil for rows")
 	}
