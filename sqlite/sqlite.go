@@ -145,7 +145,11 @@ func (model sqliteModel) GetSqlRows(query schema.RowFilter, table *schema.Table,
 		clauses := make([]string, 0, len(query))
 		values = make([]interface{}, 0, len(query))
 		for k, v := range query {
-			clauses = append(clauses, k+" = ?")
+			_, col := table.FindColumn(k)
+			if col == nil {
+				panic("Column not found")
+			}
+			clauses = append(clauses, col.Name+" = ?")
 			values = append(values, v[0]) // todo: maybe support multiple values
 		}
 		sql = sql + strings.Join(clauses, " and ")
