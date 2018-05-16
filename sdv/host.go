@@ -119,6 +119,9 @@ func handler(resp http.ResponseWriter, req *http.Request) {
 			return
 		}
 		table := database.FindTable(&requestedTable)
+		if table == nil {
+			panic("Table not found in db")
+		}
 		params := ParseTableParams(req.URL.Query())
 
 		trail := readTrail(req)
