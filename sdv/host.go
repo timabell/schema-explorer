@@ -215,7 +215,7 @@ func ParseTableParams(raw url.Values) (params tableParams) {
 		raw.Del(rowLimitKey)
 		if err != nil {
 			fmt.Println("error converting rows querystring value to int: ", err)
-			return
+			panic(err)
 		}
 	}
 	cardViewString := raw.Get(cardViewKey)
