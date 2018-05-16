@@ -139,11 +139,14 @@ func (model sqliteModel) GetSqlRows(query schema.RowFilter, table *schema.Table,
 	// todo: whitelist-sanitize unparameterizable parts
 	sql := "select * from " + table.Name
 
+	var values []interface{}
 	if len(query) > 0 {
 		sql = sql + " where "
 		clauses := make([]string, 0, len(query))
+		values = make([]interface{}, 0, len(query))
 		for k, v := range query {
-			clauses = append(clauses, k+" = "+v[0])
+			clauses = append(clauses, k+" = ?")
+			values = append(values, v[0]) // todo: maybe support multiple values
 		}
 		sql = sql + strings.Join(clauses, " and ")
 	}
@@ -159,7 +162,7 @@ func (model sqliteModel) GetSqlRows(query schema.RowFilter, table *schema.Table,
 	}
 	defer dbc.Close()
 
-	rows, err = dbc.Query(sql)
+	rows, err = dbc.Query(sql, values...)
 	if err != nil {
 		log.Print("GetRows failed to get query")
 		log.Println(sql)

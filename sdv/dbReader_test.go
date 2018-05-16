@@ -161,6 +161,30 @@ var tests = []testCase{
 	{colName: "field_uniqueidentifier", row: 0, expectedType: "uniqueidentifier", expectedString: "b7a16c7a-a718-4ed8-97cb-20ccbadcc339"},
 }
 
+func Test_GetFilteredRows(t *testing.T) {
+	reader := getDbReader(testDbDriver, testDb)
+	database, err := reader.ReadSchema()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	table := findTable(schema.Table{Schema: database.DefaultSchemaName, Name: "DataTypeTest"}, database, t)
+
+	// read the data from it
+	var thing = map[string][]string{"intpk": {"10"}}
+	log.Print(thing)
+	query := schema.RowFilter(thing)
+	log.Print(query)
+	rows, err := GetRows(reader, query, table, 10)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(rows) != 1 {
+		t.Errorf("Expected 1 filterd row, got %d", len(rows))
+	}
+}
+
 func Test_GetRows(t *testing.T) {
 	reader := getDbReader(testDbDriver, testDb)
 	database, err := reader.ReadSchema()
