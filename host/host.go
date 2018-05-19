@@ -1,7 +1,13 @@
-package sdv
+package host
 
 import (
+	"bitbucket.org/timabell/sql-data-viewer/about"
+	"bitbucket.org/timabell/sql-data-viewer/licensing"
+	"bitbucket.org/timabell/sql-data-viewer/params"
+	"bitbucket.org/timabell/sql-data-viewer/reader"
+	"bitbucket.org/timabell/sql-data-viewer/render"
 	"bitbucket.org/timabell/sql-data-viewer/schema"
+	"bitbucket.org/timabell/sql-data-viewer/trail"
 	"fmt"
 	"log"
 	"net/http"
@@ -22,17 +28,17 @@ func RunServer(driverInfo string, dbConn string, port int, listenOn string, live
 	driver = driverInfo
 	cachingEnabled = !live
 
-	SetupTemplate()
+	render.SetupTemplate()
 
-	reader := getDbReader(driver, db)
-	err := reader.CheckConnection()
+	dbReader := reader.GetDbReader(driver, db)
+	err := dbReader.CheckConnection()
 	if err != nil {
 		log.Println(err)
 		panic("connection check failed")
 	}
 
 	log.Print("Reading schema, this may take a while...")
-	database, err = reader.ReadSchema()
+	database, err = dbReader.ReadSchema()
 	if err != nil {
 		fmt.Println("Error reading schema", err)
 		// todo: send 500 error to client
@@ -64,24 +70,24 @@ func loggingHandler(nextHandler func(w http.ResponseWriter, r *http.Request)) fu
 }
 
 func handler(resp http.ResponseWriter, req *http.Request) {
-	Licensing()
+	licensing.Licensing()
 
-	reader := getDbReader(driver, db)
+	dbReader := reader.GetDbReader(driver, db)
 
-	layoutData = pageTemplateModel{
+	layoutData := render.PageTemplateModel{
 		Db:          db,
-		Title:       About.ProductName,
-		About:       About,
-		Copyright:   CopyrightText(),
-		LicenseText: LicenseText(),
+		Title:       about.About.ProductName,
+		About:       about.About,
+		Copyright:   licensing.CopyrightText(),
+		LicenseText: licensing.LicenseText(),
 		Timestamp:   time.Now().String(),
 	}
 
 	if !cachingEnabled {
-		SetupTemplate()
+		render.SetupTemplate()
 		log.Print("Re-reading schema, this may take a while...")
 		var err error
-		database, err = reader.ReadSchema()
+		database, err = dbReader.ReadSchema()
 		if err != nil {
 			fmt.Println("Error reading schema", err)
 			// todo: send 500 error to client
@@ -94,20 +100,20 @@ func handler(resp http.ResponseWriter, req *http.Request) {
 	switch folders[1] {
 	case "table-trail": // todo: this should require http post
 		if len(folders) > 2 && folders[2] == "clear" {
-			clearTrailCookie(resp)
+			ClearTrailCookie(resp)
 			http.Redirect(resp, req, "/table-trail", http.StatusFound)
 			return
 		}
 		// get from querystring if populated, otherwise use cookies
 		tablesCsv := req.URL.Query().Get("tables")
-		var trail *trailLog
+		var trail *trail.TrailLog
 		if tablesCsv != "" {
 			trail = trailFromCsv(tablesCsv)
 		} else {
-			trail = readTrail(req)
+			trail = ReadTrail(req)
 			trail.Dynamic = true
 		}
-		err := showTableTrail(resp, database, trail)
+		err := render.ShowTableTrail(resp, database, trail, layoutData)
 		if err != nil {
 			fmt.Println("error rendering trail: ", err)
 			return
@@ -126,62 +132,19 @@ func handler(resp http.ResponseWriter, req *http.Request) {
 		}
 		params := ParseTableParams(req.URL.Query())
 
-		trail := readTrail(req)
-		trail.addTable(table)
-		trail.setCookie(resp)
+		trail := ReadTrail(req)
+		trail.AddTable(table)
+		SetCookie(trail, resp)
 
 		var err error
-		err = showTable(resp, reader, table, params)
+		err = render.ShowTable(resp, dbReader, table, params, layoutData)
 		if err != nil {
 			fmt.Println("error rendering table: ", err)
 			return
 		}
 	default:
-		showTableList(resp, database)
+		render.ShowTableList(resp, database, layoutData)
 	}
-}
-
-type trailLog struct {
-	Tables  []string
-	Dynamic bool // whether this is dynamic from cookies or is from a permalink, for altering UI
-}
-
-func (trail trailLog) String() string {
-	return strings.Join(trail.Tables, ",")
-}
-
-const trailCookieName = "table-trail"
-
-func readTrail(req *http.Request) *trailLog {
-	trailCookie, _ := req.Cookie(trailCookieName)
-	if trailCookie != nil {
-		return trailFromCsv(trailCookie.Value)
-	}
-	return &trailLog{}
-}
-
-func trailFromCsv(values string) *trailLog {
-	return &trailLog{Tables: strings.Split(values, ",")}
-}
-
-func (trail *trailLog) addTable(table *schema.Table) {
-	var exists = false
-	for _, x := range trail.Tables {
-		if x == table.String() {
-			exists = true
-		}
-	}
-	if !exists {
-		trail.Tables = append(trail.Tables, table.String())
-	}
-}
-func (trail *trailLog) setCookie(resp http.ResponseWriter) {
-	trailCookie := &http.Cookie{Name: trailCookieName, Value: trail.String(), Path: "/"}
-	http.SetCookie(resp, trailCookie)
-}
-func clearTrailCookie(resp http.ResponseWriter) {
-	trailCookie := &http.Cookie{Name: trailCookieName, Value: "", Path: "/", Expires: time.Now().Add(-10000)}
-	http.SetCookie(resp, trailCookie)
 }
 
 // Split dot-separated name into schema + table name
@@ -195,24 +158,18 @@ func parseTableName(tableFullname string) (table schema.Table) {
 	return
 }
 
-type tableParams struct {
-	rowLimit int
-	cardView bool
-	filter   schema.RowFilter
-}
-
 // todo: more robust separation of query param keys
 const rowLimitKey = "_rowLimit" // this should be reasonably safe from clashes with column names
 const cardViewKey = "_cardView"
 
-func ParseTableParams(raw url.Values) (params tableParams) {
-	params = tableParams{
-		filter: schema.RowFilter(raw),
+func ParseTableParams(raw url.Values) (tableParams params.TableParams) {
+	tableParams = params.TableParams{
+		Filter: schema.RowFilter(raw),
 	}
 	rowLimitString := raw.Get(rowLimitKey)
 	if rowLimitString != "" {
 		var err error
-		params.rowLimit, err = strconv.Atoi(rowLimitString)
+		tableParams.RowLimit, err = strconv.Atoi(rowLimitString)
 		// exclude from column filters
 		raw.Del(rowLimitKey)
 		if err != nil {
@@ -222,9 +179,9 @@ func ParseTableParams(raw url.Values) (params tableParams) {
 	}
 	cardViewString := raw.Get(cardViewKey)
 	if cardViewString != "" {
-		params.cardView = cardViewString == "true"
+		tableParams.CardView = cardViewString == "true"
 		raw.Del(cardViewKey)
 	}
-	params.filter = schema.RowFilter(raw)
+	tableParams.Filter = schema.RowFilter(raw)
 	return
 }

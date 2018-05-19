@@ -1,4 +1,4 @@
-package sdv
+package reader
 
 import (
 	"bitbucket.org/timabell/sql-data-viewer/mssql"
@@ -6,8 +6,8 @@ import (
 	"bitbucket.org/timabell/sql-data-viewer/sqlite"
 )
 
-func getDbReader(driver string, db string) dbReader {
-	var reader dbReader
+func GetDbReader(driver string, db string) DbReader {
+	var reader DbReader
 	switch driver {
 	case "mssql":
 		reader = mssql.NewMssql(db)

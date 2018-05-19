@@ -12,7 +12,9 @@ defined in the database's schema.
 package main
 
 import (
-	"bitbucket.org/timabell/sql-data-viewer/sdv"
+	"bitbucket.org/timabell/sql-data-viewer/about"
+	"bitbucket.org/timabell/sql-data-viewer/host"
+	"bitbucket.org/timabell/sql-data-viewer/licensing"
 	"flag"
 	"log"
 	"os"
@@ -34,14 +36,14 @@ func main() {
 		os.Exit(1)
 	}
 
-	log.Printf("%s Viewer v%s, %s", sdv.About.ProductName, sdv.About.Version, sdv.CopyrightText())
-	log.Print(sdv.About.Website)
-	log.Printf("Feeback/support/contact: <%s>", sdv.About.Email)
-	log.Printf(sdv.LicenseText())
-	sdv.Licensing()
+	log.Printf("%s Viewer v%s, %s", about.About.ProductName, about.About.Version, licensing.CopyrightText())
+	log.Print(about.About.Website)
+	log.Printf("Feeback/support/contact: <%s>", about.About.Email)
+	log.Printf(licensing.LicenseText())
+	licensing.Licensing()
 
 	// todo: cleanup way db info is passed to server & handler
-	sdv.RunServer(*driver, *db, *port, *listenOn, *live)
+	host.RunServer(*driver, *db, *port, *listenOn, *live)
 }
 
 func Usage() {

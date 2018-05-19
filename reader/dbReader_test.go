@@ -1,4 +1,4 @@
-package sdv
+package reader
 
 /*
 Tests multiple rdbms implementations by way of test.sh shell script that repeatedly runs the same
@@ -51,7 +51,7 @@ func init() {
 }
 
 func Test_CheckConnection(t *testing.T) {
-	reader := getDbReader(testDbDriver, testDb)
+	reader := GetDbReader(testDbDriver, testDb)
 	err := reader.CheckConnection()
 	if err != nil {
 		t.Fatal(err)
@@ -59,7 +59,7 @@ func Test_CheckConnection(t *testing.T) {
 }
 
 func Test_ReadSchema(t *testing.T) {
-	reader := getDbReader(testDbDriver, testDb)
+	reader := GetDbReader(testDbDriver, testDb)
 	database, err := reader.ReadSchema()
 	if err != nil {
 		t.Fatal(err)
@@ -162,7 +162,7 @@ var tests = []testCase{
 }
 
 func Test_GetFilteredRows(t *testing.T) {
-	reader := getDbReader(testDbDriver, testDb)
+	reader := GetDbReader(testDbDriver, testDb)
 	database, err := reader.ReadSchema()
 	if err != nil {
 		t.Fatal(err)
@@ -186,7 +186,7 @@ func Test_GetFilteredRows(t *testing.T) {
 }
 
 func Test_GetRows(t *testing.T) {
-	reader := getDbReader(testDbDriver, testDb)
+	reader := GetDbReader(testDbDriver, testDb)
 	database, err := reader.ReadSchema()
 	if err != nil {
 		t.Fatal(err)

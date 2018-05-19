@@ -1,10 +1,10 @@
-package sdv
+package about
 
-type aboutType struct {
+type AboutType struct {
 	Version, Email, ProductName, Website string
 }
 
-var About = aboutType{
+var About = AboutType{
 	ProductName: "Sql Schema Explorer",
 	Version:     "0.24",
 	Website:     "http://schemaexplorer.io/",

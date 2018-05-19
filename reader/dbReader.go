@@ -1,4 +1,4 @@
-package sdv
+package reader
 
 import (
 	"bitbucket.org/timabell/sql-data-viewer/schema"
@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-type dbReader interface {
+type DbReader interface {
 	CheckConnection() (err error)
 	ReadSchema() (database schema.Database, err error)
 	GetSqlRows(query schema.RowFilter, table *schema.Table, rowLimit int) (rows *sql.Rows, err error)
@@ -17,7 +17,7 @@ type dbReader interface {
 // Single row of data
 type RowData []interface{}
 
-func GetRows(reader dbReader, query schema.RowFilter, table *schema.Table, rowLimit int) (rowsData []RowData, err error) {
+func GetRows(reader DbReader, query schema.RowFilter, table *schema.Table, rowLimit int) (rowsData []RowData, err error) {
 	rows, err := reader.GetSqlRows(query, table, rowLimit)
 	if rows == nil {
 		panic("GetSqlRows() returned nil")

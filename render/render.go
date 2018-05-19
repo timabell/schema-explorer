@@ -1,7 +1,11 @@
-package sdv
+package render
 
 import (
+	"bitbucket.org/timabell/sql-data-viewer/about"
+	"bitbucket.org/timabell/sql-data-viewer/params"
+	"bitbucket.org/timabell/sql-data-viewer/reader"
 	"bitbucket.org/timabell/sql-data-viewer/schema"
+	"bitbucket.org/timabell/sql-data-viewer/trail"
 	"fmt"
 	"html/template"
 	"log"
@@ -10,17 +14,17 @@ import (
 	"strings"
 )
 
-type pageTemplateModel struct {
+type PageTemplateModel struct {
 	Title       string
 	Db          string
-	About       aboutType
+	About       about.AboutType
 	Copyright   string
 	LicenseText string
 	Timestamp   string
 }
 
 type tablesViewModel struct {
-	LayoutData pageTemplateModel
+	LayoutData PageTemplateModel
 	Database   schema.Database
 	rowLimit   int
 	cardView   bool
@@ -56,12 +60,12 @@ func (filterList FieldFilterList) AsQueryString() template.URL {
 }
 
 type trailViewModel struct {
-	LayoutData pageTemplateModel
+	LayoutData PageTemplateModel
 	Diagram    diagramViewModel
-	Trail      *trailLog
+	Trail      *trail.TrailLog
 }
 type dataViewModel struct {
-	LayoutData pageTemplateModel
+	LayoutData PageTemplateModel
 	Table      schema.Table
 	Query      FieldFilterList
 	RowLimit   int
@@ -73,7 +77,6 @@ type dataViewModel struct {
 var tablesTemplate *template.Template
 var tableTemplate *template.Template
 var tableTrailTemplate *template.Template
-var layoutData pageTemplateModel
 
 // Make minus available in templates to be able to convert len to slice index
 // https://stackoverflow.com/a/24838050/10245
@@ -104,7 +107,7 @@ func SetupTemplate() {
 	}
 }
 
-func showTableList(resp http.ResponseWriter, database schema.Database) {
+func ShowTableList(resp http.ResponseWriter, database schema.Database, layoutData PageTemplateModel) {
 	var tableLinks []fkViewModel
 	for _, fk := range database.Fks {
 		tableLinks = append(tableLinks, fkViewModel{Source: *fk.SourceTable, Destination: *fk.DestinationTable})
@@ -122,20 +125,20 @@ func showTableList(resp http.ResponseWriter, database schema.Database) {
 	}
 }
 
-func showTable(resp http.ResponseWriter, reader dbReader, table *schema.Table, params tableParams) error {
+func ShowTable(resp http.ResponseWriter, dbReader reader.DbReader, table *schema.Table, params params.TableParams, layoutData PageTemplateModel) error {
 	fieldFilter := make(FieldFilterList, 0)
-	if len(params.filter) > 0 {
+	if len(params.Filter) > 0 {
 		fieldKeys := make([]string, 0)
-		for field, _ := range params.filter {
+		for field, _ := range params.Filter {
 			fieldKeys = append(fieldKeys, field)
 		}
 		sort.Strings(fieldKeys)
 		for _, field := range fieldKeys {
-			fieldFilter = append(fieldFilter, FieldFilter{Field: field, Values: params.filter[field]})
+			fieldFilter = append(fieldFilter, FieldFilter{Field: field, Values: params.Filter[field]})
 		}
 	}
 
-	rowsData, err := GetRows(reader, params.filter, table, params.rowLimit)
+	rowsData, err := reader.GetRows(dbReader, params.Filter, table, params.RowLimit)
 	if err != nil {
 		return err
 	}
@@ -161,10 +164,10 @@ func showTable(resp http.ResponseWriter, reader dbReader, table *schema.Table, p
 		LayoutData: layoutData,
 		Table:      *table,
 		Query:      fieldFilter,
-		RowLimit:   params.rowLimit,
+		RowLimit:   params.RowLimit,
 		Rows:       rows,
 		Diagram:    diagramViewModel{Tables: diagramTables, TableLinks: tableLinks},
-		CardView:   params.cardView,
+		CardView:   params.CardView,
 	}
 
 	viewModel.LayoutData.Title = fmt.Sprintf("%s | %s", table.String(), viewModel.LayoutData.Title)
@@ -177,7 +180,7 @@ func showTable(resp http.ResponseWriter, reader dbReader, table *schema.Table, p
 	return nil
 }
 
-func showTableTrail(resp http.ResponseWriter, database schema.Database, trailInfo *trailLog) error {
+func ShowTableTrail(resp http.ResponseWriter, database schema.Database, trailInfo *trail.TrailLog, layoutData PageTemplateModel) error {
 	log.Printf("%#v", trailInfo)
 
 	var diagramTables []*schema.Table
@@ -212,7 +215,7 @@ func showTableTrail(resp http.ResponseWriter, database schema.Database, trailInf
 	return nil
 }
 
-func buildRow(rowData RowData, table *schema.Table) cells {
+func buildRow(rowData reader.RowData, table *schema.Table) cells {
 	row := cells{}
 	for colIndex, col := range table.Columns {
 		cellData := rowData[colIndex]
@@ -263,7 +266,7 @@ func groupFksByTable(inboundFks []*schema.Fk) groupedFkMap {
 	return groupedFks
 }
 
-func buildInwardLink(fk *schema.Fk, rowData RowData) string {
+func buildInwardLink(fk *schema.Fk, rowData reader.RowData) string {
 	// todo: handle non-string primary key
 	linkHTML := fmt.Sprintf(
 		"<a href='%s?%s=",
@@ -304,7 +307,7 @@ func buildCell(col *schema.Column, cellData interface{}) string {
 	}
 	var valueHTML string
 	hasFk := col.Fk != nil
-	stringValue := *DbValueToString(cellData, col.Type)
+	stringValue := *reader.DbValueToString(cellData, col.Type)
 	if hasFk {
 		// todo: compound-fk support
 		valueHTML = fmt.Sprintf("<a href='%s?%s=", col.Fk.DestinationTable, col.Fk.DestinationColumns[0].Name)

@@ -1,0 +1,22 @@
+package trail
+
+import (
+	"bitbucket.org/timabell/sql-data-viewer/schema"
+)
+
+type TrailLog struct {
+	Tables  []string
+	Dynamic bool // whether this is dynamic from cookies or is from a permalink, for altering UI
+}
+
+func (trail *TrailLog) AddTable(table *schema.Table) {
+	var exists = false
+	for _, x := range trail.Tables {
+		if x == table.String() {
+			exists = true
+		}
+	}
+	if !exists {
+		trail.Tables = append(trail.Tables, table.String())
+	}
+}
