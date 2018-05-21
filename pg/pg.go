@@ -1,6 +1,7 @@
 package pg
 
 import (
+	"bitbucket.org/timabell/sql-data-viewer/params"
 	"bitbucket.org/timabell/sql-data-viewer/schema"
 	"database/sql"
 	"fmt"
@@ -138,12 +139,13 @@ func getFks(dbc *sql.DB, sourceTable *schema.Table, database schema.Database) (f
 	return
 }
 
-func (model pgModel) GetSqlRows(query schema.RowFilter, table *schema.Table, rowLimit int) (rows *sql.Rows, err error) {
+func (model pgModel) GetSqlRows(table *schema.Table, params params.TableParams) (rows *sql.Rows, err error) {
 	// todo: parameterise where possible
 	// todo: whitelist-sanitize unparameterizable parts
 	sql := "select * from \"" + table.Name + "\""
 
 	var values []interface{}
+	query := params.Filter
 	if len(query) > 0 {
 		sql = sql + " where "
 		clauses := make([]string, 0, len(query))
@@ -161,8 +163,12 @@ func (model pgModel) GetSqlRows(query schema.RowFilter, table *schema.Table, row
 		sql = sql + strings.Join(clauses, " and ")
 	}
 
-	if rowLimit > 0 {
-		sql = sql + " limit " + strconv.Itoa(rowLimit)
+	if len(params.Sort) > 0 {
+		sql = sql + " order by \"" + params.Sort[0].String() + "\"" // todo: more than one & desc
+	}
+
+	if params.RowLimit > 0 {
+		sql = sql + " limit " + strconv.Itoa(params.RowLimit)
 	}
 
 	dbc, err := getConnection(model.connectionString)

@@ -173,9 +173,11 @@ func Test_GetFilteredRows(t *testing.T) {
 	// read the data from it
 	var thing = map[string][]string{"intpk": {"10"}}
 	log.Print(thing)
-	query := schema.RowFilter(thing)
-	log.Print(query)
-	rows, err := GetRows(reader, query, table, 10)
+	params := TableParams{
+		Filter:   schema.RowFilter(thing),
+		RowLimit: 10,
+	}
+	rows, err := GetRows(reader, table, params)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -195,7 +197,10 @@ func Test_GetRows(t *testing.T) {
 	table := findTable(schema.Table{Schema: database.DefaultSchemaName, Name: "DataTypeTest"}, database, t)
 
 	// read the data from it
-	rows, err := GetRows(reader, nil, table, 999)
+	params := TableParams{
+		RowLimit: 999,
+	}
+	rows, err := GetRows(reader, table, params)
 	if err != nil {
 		t.Fatal(err)
 	}

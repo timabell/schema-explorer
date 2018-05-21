@@ -1,6 +1,7 @@
 package reader
 
 import (
+	"bitbucket.org/timabell/sql-data-viewer/params"
 	"bitbucket.org/timabell/sql-data-viewer/schema"
 	"database/sql"
 	"fmt"
@@ -11,14 +12,14 @@ import (
 type DbReader interface {
 	CheckConnection() (err error)
 	ReadSchema() (database schema.Database, err error)
-	GetSqlRows(query schema.RowFilter, table *schema.Table, rowLimit int) (rows *sql.Rows, err error)
+	GetSqlRows(table *schema.Table, params params.TableParams) (rows *sql.Rows, err error)
 }
 
 // Single row of data
 type RowData []interface{}
 
-func GetRows(reader DbReader, query schema.RowFilter, table *schema.Table, rowLimit int) (rowsData []RowData, err error) {
-	rows, err := reader.GetSqlRows(query, table, rowLimit)
+func GetRows(reader DbReader, table *schema.Table, params params.TableParams) (rowsData []RowData, err error) {
+	rows, err := reader.GetSqlRows(table, params)
 	if rows == nil {
 		panic("GetSqlRows() returned nil")
 	}

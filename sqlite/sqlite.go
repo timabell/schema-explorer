@@ -3,6 +3,7 @@ package sqlite
 // Sqlite doesn't support schema so table.schema is ignored throughout
 
 import (
+	"bitbucket.org/timabell/sql-data-viewer/params"
 	"bitbucket.org/timabell/sql-data-viewer/schema"
 	"database/sql"
 	"fmt"
@@ -134,12 +135,13 @@ func getFks(dbc *sql.DB, sourceTable *schema.Table, database schema.Database) (f
 	return
 }
 
-func (model sqliteModel) GetSqlRows(query schema.RowFilter, table *schema.Table, rowLimit int) (rows *sql.Rows, err error) {
+func (model sqliteModel) GetSqlRows(table *schema.Table, params params.TableParams) (rows *sql.Rows, err error) {
 	// todo: parameterise where possible
 	// todo: whitelist-sanitize unparameterizable parts
 	sql := "select * from " + table.Name
 
 	var values []interface{}
+	query := params.Filter
 	if len(query) > 0 {
 		sql = sql + " where "
 		clauses := make([]string, 0, len(query))
@@ -155,6 +157,11 @@ func (model sqliteModel) GetSqlRows(query schema.RowFilter, table *schema.Table,
 		sql = sql + strings.Join(clauses, " and ")
 	}
 
+	if len(params.Sort) > 0 {
+		sql = sql + " order by " + params.Sort[0].String() // todo: more than one & desc
+	}
+
+	rowLimit := params.RowLimit
 	if rowLimit > 0 {
 		sql = sql + " limit " + strconv.Itoa(rowLimit)
 	}

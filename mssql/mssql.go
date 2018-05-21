@@ -1,6 +1,7 @@
 package mssql
 
 import (
+	"bitbucket.org/timabell/sql-data-viewer/params"
 	"bitbucket.org/timabell/sql-data-viewer/schema"
 	"database/sql"
 	_ "github.com/simnalamburt/go-mssqldb"
@@ -196,17 +197,18 @@ func (model mssqlModel) allFks(dbc *sql.DB, database schema.Database) (allFks []
 	return
 }
 
-func (model mssqlModel) GetSqlRows(query schema.RowFilter, table *schema.Table, rowLimit int) (rows *sql.Rows, err error) {
+func (model mssqlModel) GetSqlRows(table *schema.Table, params params.TableParams) (rows *sql.Rows, err error) {
 	// todo: sql parameters instead of string concatenation
 	sql := "select"
 
-	if rowLimit > 0 {
-		sql = sql + " top " + strconv.Itoa(rowLimit)
+	if params.RowLimit > 0 {
+		sql = sql + " top " + strconv.Itoa(params.RowLimit)
 	}
 
 	sql = sql + " * from " + table.String()
 
 	var values []interface{}
+	query := params.Filter
 	if len(query) > 0 {
 		sql = sql + " where "
 		clauses := make([]string, 0, len(query))
