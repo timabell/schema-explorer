@@ -183,7 +183,7 @@
         <tr>
             {{ range .Table.Columns }}
                 <th title='type: {{.Type}}'>
-                    {{.Name}}&nbsp;<a href="?{{$.Query.AsQueryString}}&_sort={{.Name}}#data">\/</a>
+                    {{.Name}}&nbsp;<a href="?{{$.Query.AsQueryString}}&_sort={{.Name}}~desc#data">\/</a>
                 </th>
             {{end}}
             <th class='references'>referenced by</th>

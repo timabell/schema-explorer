@@ -158,7 +158,10 @@ func (model sqliteModel) GetSqlRows(table *schema.Table, params params.TablePara
 	}
 
 	if len(params.Sort) > 0 {
-		sql = sql + " order by " + params.Sort[0].String() // todo: more than one & desc
+		sql = sql + " order by " + params.Sort[0].Column.String() // todo: more than one & desc
+		if params.Sort[0].Descending{
+			sql = sql + " desc"
+		}
 	}
 
 	rowLimit := params.RowLimit

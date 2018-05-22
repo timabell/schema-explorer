@@ -174,21 +174,7 @@ func ParseTableParams(raw url.Values, table *schema.Table) (tableParams params.T
 		}
 	}
 	sortString := raw.Get(sortKey)
-	if sortString != "" {
-		var err error
-		columnStrings := strings.Split(sortString, ",")
-		for _, columnString := range columnStrings {
-			_, column := table.FindColumn(columnString)
-			if column == nil {
-				panic("column not found for sorting: " + columnString)
-			}
-			tableParams.Sort = append(tableParams.Sort, column)
-		}
-		if err != nil {
-			fmt.Println("error parsing Sort order", err)
-			panic(err)
-		}
-	}
+	tableParams.Sort = ParseSortParams(sortString, table)
 	cardViewString := raw.Get(cardViewKey)
 	if cardViewString != "" {
 		tableParams.CardView = cardViewString == "true"
@@ -201,5 +187,39 @@ func ParseTableParams(raw url.Values, table *schema.Table) (tableParams params.T
 
 	tableParams.Filter = schema.RowFilter(raw)
 
+	return
+}
+
+func ParseSortParams(sortString string, table *schema.Table) (sort []params.SortCol) {
+	sort = []params.SortCol{}
+	if sortString == "" {
+		return
+	}
+	var err error
+	columnStrings := strings.Split(sortString, ",")
+	for _, columnString := range columnStrings {
+		const descStr = "~desc"
+		const ascStr = "~asc"
+		var columnName string
+		var colSort = params.SortCol{}
+		if strings.HasSuffix(columnString, descStr) {
+			colSort.Descending = true
+			columnName = strings.TrimSuffix(columnString, descStr)
+		} else if strings.HasSuffix(columnString, ascStr) {
+			columnName = strings.TrimSuffix(columnString, ascStr)
+		} else {
+			columnName = columnString
+		}
+		_, column := table.FindColumn(columnName)
+		if column == nil {
+			panic("column not found for sorting: " + columnString)
+		}
+		colSort.Column = column
+		sort = append(sort, colSort)
+	}
+	if err != nil {
+		fmt.Println("error parsing Sort order", err)
+		panic(err)
+	}
 	return
 }
