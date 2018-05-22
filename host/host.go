@@ -199,14 +199,11 @@ func ParseSortParams(sortString string, table *schema.Table) (sort []params.Sort
 	columnStrings := strings.Split(sortString, ",")
 	for _, columnString := range columnStrings {
 		const descStr = "~desc"
-		const ascStr = "~asc"
 		var columnName string
 		var colSort = params.SortCol{}
 		if strings.HasSuffix(columnString, descStr) {
 			colSort.Descending = true
 			columnName = strings.TrimSuffix(columnString, descStr)
-		} else if strings.HasSuffix(columnString, ascStr) {
-			columnName = strings.TrimSuffix(columnString, ascStr)
 		} else {
 			columnName = columnString
 		}
