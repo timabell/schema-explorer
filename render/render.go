@@ -138,7 +138,7 @@ func ShowTable(resp http.ResponseWriter, dbReader reader.DbReader, table *schema
 		}
 	}
 
-	rowsData, err := reader.GetRows(dbReader, params.Filter, table, params.RowLimit)
+	rowsData, err := reader.GetRows(dbReader, table, params)
 	if err != nil {
 		return err
 	}
@@ -196,7 +196,7 @@ func ShowTableTrail(resp http.ResponseWriter, database schema.Database, trailInf
 	for _, tableFks := range database.Fks {
 		tableLinks = append(tableLinks, fkViewModel{Source: *tableFks.SourceTable, Destination: *tableFks.DestinationTable})
 	}
-	// todo: filter fks
+	// todo: Filter fks
 
 	viewModel := trailViewModel{
 		LayoutData: layoutData,
