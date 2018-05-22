@@ -224,6 +224,13 @@ func (model mssqlModel) GetSqlRows(table *schema.Table, params params.TableParam
 		sql = sql + strings.Join(clauses, " and ")
 	}
 
+	if len(params.Sort) > 0 {
+		sql = sql + " order by " + params.Sort[0].Column.String() // todo: more than one & desc
+		if params.Sort[0].Descending{
+			sql = sql + " desc"
+		}
+	}
+
 	dbc, err := getConnection(model.connectionString)
 	if dbc == nil {
 		log.Println(err)
