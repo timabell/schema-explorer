@@ -64,14 +64,13 @@ type trailViewModel struct {
 	Diagram    diagramViewModel
 	Trail      *trail.TrailLog
 }
-type dataViewModel struct {
-	LayoutData PageTemplateModel
-	Table      schema.Table
-	Query      FieldFilterList
-	RowLimit   int
-	Rows       []cells
-	Diagram    diagramViewModel
-	CardView   bool
+type tableDataViewModel struct {
+	LayoutData  PageTemplateModel
+	Table       schema.Table
+	TableParams params.TableParams
+	Query       FieldFilterList
+	Rows        []cells
+	Diagram     diagramViewModel
 }
 
 var tablesTemplate *template.Template
@@ -125,20 +124,20 @@ func ShowTableList(resp http.ResponseWriter, database schema.Database, layoutDat
 	}
 }
 
-func ShowTable(resp http.ResponseWriter, dbReader reader.DbReader, table *schema.Table, params params.TableParams, layoutData PageTemplateModel) error {
+func ShowTable(resp http.ResponseWriter, dbReader reader.DbReader, table *schema.Table, tableParams params.TableParams, layoutData PageTemplateModel) error {
 	fieldFilter := make(FieldFilterList, 0)
-	if len(params.Filter) > 0 {
+	if len(tableParams.Filter) > 0 {
 		fieldKeys := make([]string, 0)
-		for field, _ := range params.Filter {
+		for field, _ := range tableParams.Filter {
 			fieldKeys = append(fieldKeys, field)
 		}
 		sort.Strings(fieldKeys)
 		for _, field := range fieldKeys {
-			fieldFilter = append(fieldFilter, FieldFilter{Field: field, Values: params.Filter[field]})
+			fieldFilter = append(fieldFilter, FieldFilter{Field: field, Values: tableParams.Filter[field]})
 		}
 	}
 
-	rowsData, err := reader.GetRows(dbReader, table, params)
+	rowsData, err := reader.GetRows(dbReader, table, tableParams)
 	if err != nil {
 		return err
 	}
@@ -160,14 +159,13 @@ func ShowTable(resp http.ResponseWriter, dbReader reader.DbReader, table *schema
 		tableLinks = append(tableLinks, fkViewModel{Source: *inboundFks.SourceTable, Destination: *inboundFks.DestinationTable})
 	}
 
-	viewModel := dataViewModel{
-		LayoutData: layoutData,
-		Table:      *table,
-		Query:      fieldFilter,
-		RowLimit:   params.RowLimit,
-		Rows:       rows,
-		Diagram:    diagramViewModel{Tables: diagramTables, TableLinks: tableLinks},
-		CardView:   params.CardView,
+	viewModel := tableDataViewModel{
+		LayoutData:  layoutData,
+		Table:       *table,
+		Query:       fieldFilter,
+		TableParams: tableParams,
+		Rows:        rows,
+		Diagram:     diagramViewModel{Tables: diagramTables, TableLinks: tableLinks},
 	}
 
 	viewModel.LayoutData.Title = fmt.Sprintf("%s | %s", table.String(), viewModel.LayoutData.Title)

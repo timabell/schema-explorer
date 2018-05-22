@@ -148,11 +148,11 @@
     </div>
 {{end}}
 
-{{ if .RowLimit }}
-    <p class='filtered'>First {{.RowLimit}} rows<p>
+{{ if .TableParams.RowLimit }}
+    <p class='filtered'>First {{.TableParams.RowLimit}} rows<p>
 {{end}}
 
-{{if .CardView}}
+{{if .TableParams.CardView}}
     <p>
         {{/*todo: need a url builder to avoid ending up with ?& if there's no query*/}}
         <a class="action-button button" href="?{{.Query.AsQueryString}}&_rowLimit=100&_cardView=false#data">Switch to table view</a>

@@ -226,7 +226,7 @@ func (model mssqlModel) GetSqlRows(table *schema.Table, params params.TableParam
 
 	if len(params.Sort) > 0 {
 		sql = sql + " order by " + params.Sort[0].Column.String() // todo: more than one & desc
-		if params.Sort[0].Descending{
+		if params.Sort[0].Descending {
 			sql = sql + " desc"
 		}
 	}
