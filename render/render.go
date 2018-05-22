@@ -23,7 +23,7 @@ type PageTemplateModel struct {
 	Timestamp   string
 }
 
-type tablesViewModel struct {
+type tableListViewModel struct {
 	LayoutData PageTemplateModel
 	Database   schema.Database
 	rowLimit   int
@@ -112,7 +112,7 @@ func ShowTableList(resp http.ResponseWriter, database schema.Database, layoutDat
 		tableLinks = append(tableLinks, fkViewModel{Source: *fk.SourceTable, Destination: *fk.DestinationTable})
 	}
 
-	model := tablesViewModel{
+	model := tableListViewModel{
 		LayoutData: layoutData,
 		Database:   database,
 		Diagram:    diagramViewModel{Tables: database.Tables, TableLinks: tableLinks},
