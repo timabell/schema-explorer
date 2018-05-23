@@ -144,7 +144,7 @@
         </tbody>
     </table>
     <div>
-        <a class="action-button button" href="?_rowLimit={{.TableParams.RowLimit}}#data">Clear Filter</a>
+        <a class="action-button button" href="?{{.TableParams.ClearFilter.AsQueryString}}#data">Clear Filter</a>
     </div>
 {{end}}
 

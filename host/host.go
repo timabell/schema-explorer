@@ -12,8 +12,6 @@ import (
 	"log"
 	"net/http"
 	"net/http/httputil"
-	"net/url"
-	"strconv"
 	"strings"
 	"time"
 )
@@ -130,7 +128,7 @@ func handler(resp http.ResponseWriter, req *http.Request) {
 			fmt.Fprint(resp, "Alas, thy table hast not been seen of late. 404 my friend.")
 			return
 		}
-		params := ParseTableParams(req.URL.Query(), table)
+		params := params.ParseTableParams(req.URL.Query(), table)
 
 		trail := ReadTrail(req)
 		trail.AddTable(table)
@@ -154,91 +152,6 @@ func parseTableName(tableFullname string) (table schema.Table) {
 		table = schema.Table{Schema: splitName[0], Name: splitName[1]}
 	} else {
 		table = schema.Table{Schema: "", Name: tableFullname}
-	}
-	return
-}
-
-// todo: more robust separation of query param keys
-const rowLimitKey = "_rowLimit" // this should be reasonably safe from clashes with column names
-const cardViewKey = "_cardView"
-const sortKey = "_sort"
-
-func ParseTableParams(raw url.Values, table *schema.Table) (tableParams *params.TableParams) {
-	tableParams = &params.TableParams{}
-	ParseRowLimit(raw, tableParams)
-	ParseSortParams(raw, tableParams, table)
-	ParseCardView(raw, tableParams)
-
-	// exclude special params from column filters
-	raw.Del(rowLimitKey)
-	raw.Del(sortKey)
-	raw.Del(cardViewKey)
-
-	ParseFilters(raw, tableParams, table)
-
-	return
-}
-
-func ParseFilters(raw url.Values, tableParams *params.TableParams, table *schema.Table) {
-	if len(raw) > 0 {
-		for k, v := range raw {
-			_, col := table.FindColumn(k)
-			if col == nil {
-				panic("Column '" + k + "' not found")
-			}
-			tableParams.Filter = append(tableParams.Filter, params.FieldFilter{Field: col, Values: v})
-		}
-	}
-}
-
-func ParseCardView(raw url.Values, tableParams *params.TableParams) {
-	cardViewString := raw.Get(cardViewKey)
-	if cardViewString != "" {
-		tableParams.CardView = cardViewString == "true"
-	}
-}
-
-func ParseRowLimit(raw url.Values, tableParams *params.TableParams) {
-	rowLimitString := raw.Get(rowLimitKey)
-	if rowLimitString == "" {
-		return
-	}
-	var err error
-	tableParams.RowLimit, err = strconv.Atoi(rowLimitString)
-	if err != nil {
-		fmt.Println("error converting rows querystring value to int: ", err)
-		panic(err)
-	}
-}
-
-func ParseSortParams(raw url.Values, tableParams *params.TableParams, table *schema.Table) {
-	sortString := raw.Get(sortKey)
-	tableParams.Sort = []params.SortCol{}
-	if sortString == "" {
-		return
-	}
-	var err error
-	columnStrings := strings.Split(sortString, ",")
-	for _, columnString := range columnStrings {
-		const descStr = "~desc"
-		var columnName string
-		var colSort = params.SortCol{}
-		if strings.HasSuffix(columnString, descStr) {
-			colSort.Descending = true
-			columnName = strings.TrimSuffix(columnString, descStr)
-		} else {
-			columnName = columnString
-		}
-		_, column := table.FindColumn(columnName)
-		if column == nil {
-			panic("column not found for sorting: " + columnString)
-		}
-		colSort.Column = column
-		tableParams.Sort = append(tableParams.Sort, colSort)
-	}
-	if err != nil {
-		fmt.Println("error parsing Sort order", err)
-		panic(err)
 	}
 	return
 }
