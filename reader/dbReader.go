@@ -12,13 +12,13 @@ import (
 type DbReader interface {
 	CheckConnection() (err error)
 	ReadSchema() (database schema.Database, err error)
-	GetSqlRows(table *schema.Table, params params.TableParams) (rows *sql.Rows, err error)
+	GetSqlRows(table *schema.Table, params *params.TableParams) (rows *sql.Rows, err error)
 }
 
 // Single row of data
 type RowData []interface{}
 
-func GetRows(reader DbReader, table *schema.Table, params params.TableParams) (rowsData []RowData, err error) {
+func GetRows(reader DbReader, table *schema.Table, params *params.TableParams) (rowsData []RowData, err error) {
 	rows, err := reader.GetSqlRows(table, params)
 	if rows == nil {
 		panic("GetSqlRows() returned nil")

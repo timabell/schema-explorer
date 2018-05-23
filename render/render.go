@@ -43,22 +43,6 @@ type fkViewModel struct {
 
 type cells []template.HTML
 
-type FieldFilter struct {
-	Field  string
-	Values []string
-}
-
-type FieldFilterList []FieldFilter
-
-func (filterList FieldFilterList) AsQueryString() template.URL {
-	var parts []string
-	for _, part := range filterList {
-		// todo: support multiple values correctly
-		parts = append(parts, fmt.Sprintf("%s=%s", part.Field, strings.Join(part.Values, ",")))
-	}
-	return template.URL(strings.Join(parts, "&"))
-}
-
 type trailViewModel struct {
 	LayoutData PageTemplateModel
 	Diagram    diagramViewModel
@@ -67,8 +51,7 @@ type trailViewModel struct {
 type tableDataViewModel struct {
 	LayoutData  PageTemplateModel
 	Table       schema.Table
-	TableParams params.TableParams
-	Query       FieldFilterList
+	TableParams *params.TableParams
 	Rows        []cells
 	Diagram     diagramViewModel
 }
@@ -124,19 +107,7 @@ func ShowTableList(resp http.ResponseWriter, database schema.Database, layoutDat
 	}
 }
 
-func ShowTable(resp http.ResponseWriter, dbReader reader.DbReader, table *schema.Table, tableParams params.TableParams, layoutData PageTemplateModel) error {
-	fieldFilter := make(FieldFilterList, 0)
-	if len(tableParams.Filter) > 0 {
-		fieldKeys := make([]string, 0)
-		for field, _ := range tableParams.Filter {
-			fieldKeys = append(fieldKeys, field)
-		}
-		sort.Strings(fieldKeys)
-		for _, field := range fieldKeys {
-			fieldFilter = append(fieldFilter, FieldFilter{Field: field, Values: tableParams.Filter[field]})
-		}
-	}
-
+func ShowTable(resp http.ResponseWriter, dbReader reader.DbReader, table *schema.Table, tableParams *params.TableParams, layoutData PageTemplateModel) error {
 	rowsData, err := reader.GetRows(dbReader, table, tableParams)
 	if err != nil {
 		return err
@@ -162,7 +133,6 @@ func ShowTable(resp http.ResponseWriter, dbReader reader.DbReader, table *schema
 	viewModel := tableDataViewModel{
 		LayoutData:  layoutData,
 		Table:       *table,
-		Query:       fieldFilter,
 		TableParams: tableParams,
 		Rows:        rows,
 		Diagram:     diagramViewModel{Tables: diagramTables, TableLinks: tableLinks},

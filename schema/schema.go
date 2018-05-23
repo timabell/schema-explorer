@@ -58,10 +58,6 @@ type Fk struct {
 	DestinationColumns ColumnList
 }
 
-// filtering of results with column name / value(s) pairs,
-// matches type of url.Values so can pass straight through
-type RowFilter map[string][]string
-
 // Simplified fk constructor for single-column foreign keys
 func NewFk(sourceTable *Table, sourceColumn *Column, destinationTable *Table, destinationColumn *Column) *Fk {
 	return &Fk{SourceTable: sourceTable, SourceColumns: ColumnList{sourceColumn}, DestinationTable: destinationTable, DestinationColumns: ColumnList{destinationColumn}}

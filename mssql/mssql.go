@@ -197,7 +197,7 @@ func (model mssqlModel) allFks(dbc *sql.DB, database schema.Database) (allFks []
 	return
 }
 
-func (model mssqlModel) GetSqlRows(table *schema.Table, params params.TableParams) (rows *sql.Rows, err error) {
+func (model mssqlModel) GetSqlRows(table *schema.Table, params *params.TableParams) (rows *sql.Rows, err error) {
 	// todo: sql parameters instead of string concatenation
 	sql := "select"
 
@@ -213,13 +213,10 @@ func (model mssqlModel) GetSqlRows(table *schema.Table, params params.TableParam
 		sql = sql + " where "
 		clauses := make([]string, 0, len(query))
 		values = make([]interface{}, 0, len(query))
-		for k, v := range query {
-			_, col := table.FindColumn(k)
-			if col == nil {
-				panic("Column not found")
-			}
+		for _, v := range query {
+			col := v.Field
 			clauses = append(clauses, col.Name+" = ?")
-			values = append(values, v[0]) // todo: maybe support multiple values
+			values = append(values, v.Values[0]) // todo: maybe support multiple values
 		}
 		sql = sql + strings.Join(clauses, " and ")
 	}

@@ -119,7 +119,7 @@
 </table>
 
 <h2 id="data">Data</h2>
-{{ if .Query }}
+{{ if .TableParams.Filter }}
     <table class='filters'>
         <thead>
         <tr>
@@ -129,7 +129,7 @@
         </tr>
         </thead>
         <tbody>
-        {{ range .Query }}
+        {{ range .TableParams.Filter }}
         <tr>
             <th>
                 {{.Field}}
@@ -155,7 +155,7 @@
 {{if .TableParams.CardView}}
     <p>
         {{/*todo: need a url builder to avoid ending up with ?& if there's no query*/}}
-        <a class="action-button button" href="?{{.Query.AsQueryString}}&_rowLimit=100&_cardView=false#data">Switch to table view</a>
+        <a class="action-button button" href="?{{.TableParams.Filter.AsQueryString}}&_rowLimit=100&_cardView=false#data">Switch to table view</a>
     </p>
     {{ range .Rows }}
         {{$val := .}}
@@ -177,13 +177,13 @@
     {{end}}
 {{else}}
     <p>
-        <a class="action-button button" href="?{{.Query.AsQueryString}}&_rowLimit=100&_cardView=true#data">Switch to card view</a>
+        <a class="action-button button" href="?{{.TableParams.Filter.AsQueryString}}&_rowLimit=100&_cardView=true#data">Switch to card view</a>
     </p>
     <table border=1>
         <tr>
             {{ range .Table.Columns }}
                 <th title='type: {{.Type}}'>
-                    {{.Name}}&nbsp;<a href="?{{$.Query.AsQueryString}}&_sort={{.Name}}#data">\/</a>
+                    {{.Name}}&nbsp;<a href="?{{$.TableParams.Filter.AsQueryString}}&_sort={{.Name}}#data">\/</a>
                 </th>
             {{end}}
             <th class='references'>referenced by</th>

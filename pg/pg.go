@@ -139,7 +139,7 @@ func getFks(dbc *sql.DB, sourceTable *schema.Table, database schema.Database) (f
 	return
 }
 
-func (model pgModel) GetSqlRows(table *schema.Table, params params.TableParams) (rows *sql.Rows, err error) {
+func (model pgModel) GetSqlRows(table *schema.Table, params *params.TableParams) (rows *sql.Rows, err error) {
 	// todo: parameterise where possible
 	// todo: whitelist-sanitize unparameterizable parts
 	sql := "select * from \"" + table.Name + "\""
@@ -151,14 +151,11 @@ func (model pgModel) GetSqlRows(table *schema.Table, params params.TableParams) 
 		clauses := make([]string, 0, len(query))
 		values = make([]interface{}, 0, len(query))
 		var index = 1
-		for k, v := range query {
-			_, col := table.FindColumn(k)
-			if col == nil {
-				panic("Column not found")
-			}
+		for _, v := range query {
+			col := v.Field
 			clauses = append(clauses, "\""+col.Name+"\" = $"+strconv.Itoa(index))
 			index = index + 1
-			values = append(values, v[0]) // todo: maybe support multiple values
+			values = append(values, v.Values[0]) // todo: maybe support multiple values
 		}
 		sql = sql + strings.Join(clauses, " and ")
 	}

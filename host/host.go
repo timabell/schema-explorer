@@ -163,35 +163,57 @@ const rowLimitKey = "_rowLimit" // this should be reasonably safe from clashes w
 const cardViewKey = "_cardView"
 const sortKey = "_sort"
 
-func ParseTableParams(raw url.Values, table *schema.Table) (tableParams params.TableParams) {
-	rowLimitString := raw.Get(rowLimitKey)
-	if rowLimitString != "" {
-		var err error
-		tableParams.RowLimit, err = strconv.Atoi(rowLimitString)
-		if err != nil {
-			fmt.Println("error converting rows querystring value to int: ", err)
-			panic(err)
-		}
-	}
-	sortString := raw.Get(sortKey)
-	tableParams.Sort = ParseSortParams(sortString, table)
-	cardViewString := raw.Get(cardViewKey)
-	if cardViewString != "" {
-		tableParams.CardView = cardViewString == "true"
-	}
+func ParseTableParams(raw url.Values, table *schema.Table) (tableParams *params.TableParams) {
+	tableParams = &params.TableParams{}
+	ParseRowLimit(raw, tableParams)
+	ParseSortParams(raw, tableParams, table)
+	ParseCardView(raw, tableParams)
 
 	// exclude special params from column filters
 	raw.Del(rowLimitKey)
 	raw.Del(sortKey)
 	raw.Del(cardViewKey)
 
-	tableParams.Filter = schema.RowFilter(raw)
+	ParseFilters(raw, tableParams, table)
 
 	return
 }
 
-func ParseSortParams(sortString string, table *schema.Table) (sort []params.SortCol) {
-	sort = []params.SortCol{}
+func ParseFilters(raw url.Values, tableParams *params.TableParams, table *schema.Table) {
+	if len(raw) > 0 {
+		for k, v := range raw {
+			_, col := table.FindColumn(k)
+			if col == nil {
+				panic("Column '" + k + "' not found")
+			}
+			tableParams.Filter = append(tableParams.Filter, params.FieldFilter{Field: col, Values: v})
+		}
+	}
+}
+
+func ParseCardView(raw url.Values, tableParams *params.TableParams) {
+	cardViewString := raw.Get(cardViewKey)
+	if cardViewString != "" {
+		tableParams.CardView = cardViewString == "true"
+	}
+}
+
+func ParseRowLimit(raw url.Values, tableParams *params.TableParams) {
+	rowLimitString := raw.Get(rowLimitKey)
+	if rowLimitString == "" {
+		return
+	}
+	var err error
+	tableParams.RowLimit, err = strconv.Atoi(rowLimitString)
+	if err != nil {
+		fmt.Println("error converting rows querystring value to int: ", err)
+		panic(err)
+	}
+}
+
+func ParseSortParams(raw url.Values, tableParams *params.TableParams, table *schema.Table) {
+	sortString := raw.Get(sortKey)
+	tableParams.Sort = []params.SortCol{}
 	if sortString == "" {
 		return
 	}
@@ -212,7 +234,7 @@ func ParseSortParams(sortString string, table *schema.Table) (sort []params.Sort
 			panic("column not found for sorting: " + columnString)
 		}
 		colSort.Column = column
-		sort = append(sort, colSort)
+		tableParams.Sort = append(tableParams.Sort, colSort)
 	}
 	if err != nil {
 		fmt.Println("error parsing Sort order", err)
