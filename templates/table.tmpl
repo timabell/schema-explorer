@@ -186,7 +186,7 @@
         <tr>
             {{ range .Table.Columns }}
                 <th title='type: {{.Type}}'>
-                    {{.Name}}&nbsp;<a href="?{{($.TableParams.ClearSort.AddSort .).AsQueryString}}#data">\/</a>
+                    {{.Name}}&nbsp;<a href="?{{($.TableParams.AddSort .).AsQueryString}}#data">\/</a>
                 </th>
             {{end}}
             <th class='references'>referenced by</th>

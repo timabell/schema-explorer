@@ -59,20 +59,35 @@ func (tableParams TableParams) ClearFilter() TableParams {
 
 func (tableParams TableParams) AsQueryString() template.URL {
 	parts := BuildFilterParts(tableParams.Filter)
-	// todo: sort param
-	//if len(tableParams.Sort){
-	//	parts = append(parts, fmt.Sprintf("%s=%s", sortKey, tableParams.Sort))
-	//}
-	for _, sortCol := range tableParams.Sort {
-		parts = append(parts, fmt.Sprintf("%s=%s", sortKey, sortCol.Column))
-	}
+
+	sortParts := BuildSortParts(tableParams)
+	parts = append(parts, sortParts...)
+
 	if tableParams.CardView {
 		parts = append(parts, fmt.Sprintf("%s=%s", cardViewKey, "true"))
 	}
+
 	if tableParams.RowLimit > 0 {
 		parts = append(parts, fmt.Sprintf("%s=%d", rowLimitKey, tableParams.RowLimit))
 	}
+
 	return template.URL(strings.Join(parts, "&"))
+}
+
+func BuildSortParts(tableParams TableParams) []string {
+	var sort []string
+	for _, sortCol := range tableParams.Sort {
+		if sortCol.Descending {
+			sort = append(sort, sortCol.Column.Name+descStr)
+		} else {
+			sort = append(sort, sortCol.Column.Name)
+		}
+	}
+	var parts []string
+	if len(sort) > 0 {
+		parts = append(parts, fmt.Sprintf("%s=%s", sortKey, strings.Join(sort, ",")))
+	}
+	return parts
 }
 
 func (filterList FieldFilterList) AsQueryString() template.URL {
@@ -142,6 +157,8 @@ func ParseRowLimit(raw url.Values, tableParams *TableParams) {
 	}
 }
 
+const descStr = "~desc"
+
 func ParseSortParams(raw url.Values, tableParams *TableParams, table *schema.Table) {
 	sortString := raw.Get(sortKey)
 	tableParams.Sort = []SortCol{}
@@ -151,7 +168,6 @@ func ParseSortParams(raw url.Values, tableParams *TableParams, table *schema.Tab
 	var err error
 	columnStrings := strings.Split(sortString, ",")
 	for _, columnString := range columnStrings {
-		const descStr = "~desc"
 		var columnName string
 		var colSort = SortCol{}
 		if strings.HasSuffix(columnString, descStr) {
