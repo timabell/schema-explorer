@@ -40,6 +40,17 @@ func (tableParams TableParams) CardViewOn() TableParams {
 	return tableParams
 }
 
+func (tableParams TableParams) AddSort(col *schema.Column) TableParams {
+	// todo: don't add again. maybe handle in markup
+	tableParams.Sort = append(tableParams.Sort, SortCol{Column: col})
+	return tableParams
+}
+
+func (tableParams TableParams) ClearSort() TableParams {
+	tableParams.Sort = nil
+	return tableParams
+}
+
 func (tableParams TableParams) ClearFilter() TableParams {
 	tableParams.Filter = nil
 	return tableParams

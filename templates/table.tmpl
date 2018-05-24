@@ -147,6 +147,9 @@
         <a class="action-button button" href="?{{.TableParams.ClearFilter.AsQueryString}}#data">Clear Filter</a>
     </div>
 {{end}}
+<p>
+    <a class="action-button button" href="?{{.TableParams.ClearSort.AsQueryString}}#data">Reset Sort Order</a>
+</p>
 
 {{ if .TableParams.RowLimit }}
     <p class='filtered'>First {{.TableParams.RowLimit}} rows<p>
@@ -183,7 +186,7 @@
         <tr>
             {{ range .Table.Columns }}
                 <th title='type: {{.Type}}'>
-                    {{.Name}}&nbsp;<a href="?{{$.TableParams.AsQueryString}}&_sort={{.Name}}#data">\/</a>
+                    {{.Name}}&nbsp;<a href="?{{($.TableParams.ClearSort.AddSort .).AsQueryString}}#data">\/</a>
                 </th>
             {{end}}
             <th class='references'>referenced by</th>
