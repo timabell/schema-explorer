@@ -41,7 +41,8 @@ func (tableParams TableParams) CardViewOn() TableParams {
 }
 
 func (tableParams TableParams) AddSort(col *schema.Column) TableParams {
-	// todo: don't add again. maybe handle in markup
+	// todo: don't add again. maybe handle in markup. Or maybe use that to toggle desc and move to front of list
+
 	tableParams.Sort = append(tableParams.Sort, SortCol{Column: col})
 	return tableParams
 }
