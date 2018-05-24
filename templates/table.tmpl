@@ -155,7 +155,7 @@
 {{if .TableParams.CardView}}
     <p>
         {{/*todo: need a url builder to avoid ending up with ?& if there's no query*/}}
-        <a class="action-button button" href="?{{.TableParams.Filter.AsQueryString}}&_rowLimit=100&_cardView=false#data">Switch to table view</a>
+        <a class="action-button button" href="?{{.TableParams.CardViewOff.AsQueryString}}&_rowLimit=100&_cardView=false#data">Switch to table view</a>
     </p>
     {{ range .Rows }}
         {{$val := .}}

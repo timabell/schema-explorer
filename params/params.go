@@ -28,7 +28,19 @@ type FieldFilter struct {
 
 type FieldFilterList []FieldFilter
 
-func (tableParams *TableParams) ClearFilter() *TableParams {
+// explicitly not using pointer in order to modify a copy
+
+func (tableParams TableParams) CardViewOff() TableParams {
+	tableParams.CardView = false
+	return tableParams
+}
+
+func (tableParams TableParams) CardViewOn() TableParams {
+	tableParams.CardView = true
+	return tableParams
+}
+
+func (tableParams TableParams) ClearFilter() TableParams {
 	tableParams.Filter = nil
 	return tableParams
 }
