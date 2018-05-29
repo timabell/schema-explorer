@@ -149,8 +149,6 @@ func ShowTable(resp http.ResponseWriter, dbReader reader.DbReader, table *schema
 }
 
 func ShowTableTrail(resp http.ResponseWriter, database schema.Database, trailInfo *trail.TrailLog, layoutData PageTemplateModel) error {
-	log.Printf("%#v", trailInfo)
-
 	var diagramTables []*schema.Table
 	for _, x := range trailInfo.Tables {
 		tableStub := schema.TableFromString(x)
