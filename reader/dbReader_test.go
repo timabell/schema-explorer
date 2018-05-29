@@ -26,6 +26,7 @@ import (
 	"flag"
 	"testing"
 
+	"bitbucket.org/timabell/sql-data-viewer/params"
 	"bitbucket.org/timabell/sql-data-viewer/schema"
 	_ "github.com/mattn/go-sqlite3"
 	_ "github.com/simnalamburt/go-mssqldb"
@@ -170,14 +171,14 @@ func Test_GetFilteredRows(t *testing.T) {
 
 	table := findTable(schema.Table{Schema: database.DefaultSchemaName, Name: "DataTypeTest"}, database, t)
 
-	// read the data from it
-	var thing = map[string][]string{"intpk": {"10"}}
-	log.Print(thing)
-	params := TableParams{
-		Filter:   schema.RowFilter(thing),
+	_, col := table.FindColumn("intpk")
+	filter := params.FieldFilter{Field: col, Values: []string{"10"}}
+	log.Print(filter)
+	tableParams := &params.TableParams{
+		Filter:   params.FieldFilterList{filter},
 		RowLimit: 10,
 	}
-	rows, err := GetRows(reader, table, params)
+	rows, err := GetRows(reader, table, tableParams)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -197,7 +198,7 @@ func Test_GetRows(t *testing.T) {
 	table := findTable(schema.Table{Schema: database.DefaultSchemaName, Name: "DataTypeTest"}, database, t)
 
 	// read the data from it
-	params := TableParams{
+	params := &params.TableParams{
 		RowLimit: 999,
 	}
 	rows, err := GetRows(reader, table, params)
