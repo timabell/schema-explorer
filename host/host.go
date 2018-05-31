@@ -14,6 +14,7 @@ import (
 	"net/http/httputil"
 	"strings"
 	"time"
+	"github.com/gorilla/mux"
 )
 
 var db string
@@ -43,7 +44,28 @@ func RunServer(driverInfo string, dbConn string, port int, listenOn string, live
 		return
 	}
 
-	serve(handler, port, listenOn)
+	r := mux.NewRouter()
+	r.PathPrefix("/static/").Handler(
+		http.StripPrefix("/static/", http.FileServer(http.Dir(""))))
+	r.HandleFunc("/", TableListHandler)
+	r.HandleFunc("/tables/{tableName}", TableHandler)
+	listenOnHostPort := fmt.Sprintf("%s:%d", listenOn, port) // e.g. localhost:8080 or 0.0.0.0:80
+	srv := &http.Server{
+		Handler: r,
+		Addr: listenOnHostPort,
+		WriteTimeout: 300 * time.Second,
+		ReadTimeout:  300 * time.Second,
+	}
+	log.Printf("Starting server on http://%s/ - Press Ctrl-C to kill server.\n", listenOnHostPort)
+	log.Fatal(srv.ListenAndServe())
+	//serve(handler, port, listenOn)
+}
+func TableListHandler(writer http.ResponseWriter, request *http.Request) {
+	fmt.Fprint(writer, "hello")
+}
+func TableHandler(writer http.ResponseWriter, request *http.Request) {
+	tableName := mux.Vars(request)["tableName"]
+	fmt.Fprint(writer, "teh table " + tableName)
 }
 
 func serve(handler func(http.ResponseWriter, *http.Request), port int, listenOn string) {
@@ -55,6 +77,7 @@ func serve(handler func(http.ResponseWriter, *http.Request), port int, listenOn 
 	log.Panic("http.ListenAndServe didn't block")
 }
 
+// wrap handler, log requests as they pass through
 func loggingHandler(nextHandler func(w http.ResponseWriter, r *http.Request)) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		dump, err := httputil.DumpRequest(r, false)
