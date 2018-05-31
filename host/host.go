@@ -60,22 +60,19 @@ func RunServer(driverInfo string, dbConn string, port int, listenOn string, live
 	log.Fatal(srv.ListenAndServe())
 	//serve(handler, port, listenOn)
 }
-func TableListHandler(writer http.ResponseWriter, request *http.Request) {
-	fmt.Fprint(writer, "hello")
-}
-func TableHandler(writer http.ResponseWriter, request *http.Request) {
-	tableName := mux.Vars(request)["tableName"]
-	fmt.Fprint(writer, "teh table " + tableName)
-}
+//func TableHandler(writer http.ResponseWriter, request *http.Request) {
+//	tableName := mux.Vars(request)["tableName"]
+//	fmt.Fprint(writer, "teh table " + tableName)
+//}
 
-func serve(handler func(http.ResponseWriter, *http.Request), port int, listenOn string) {
-	http.HandleFunc("/", loggingHandler(handler))
-	http.Handle("/static/", http.FileServer(http.Dir("")))
-	listenOnHostPort := fmt.Sprintf("%s:%d", listenOn, port) // e.g. localhost:8080 or 0.0.0.0:80
-	log.Printf("Starting server on http://%s/ - Press Ctrl-C to kill server.\n", listenOnHostPort)
-	log.Fatal(http.ListenAndServe(listenOnHostPort, nil))
-	log.Panic("http.ListenAndServe didn't block")
-}
+//func serve(handler func(http.ResponseWriter, *http.Request), port int, listenOn string) {
+//	http.HandleFunc("/", loggingHandler(handler))
+//	http.Handle("/static/", http.FileServer(http.Dir("")))
+//	listenOnHostPort := fmt.Sprintf("%s:%d", listenOn, port) // e.g. localhost:8080 or 0.0.0.0:80
+//	log.Printf("Starting server on http://%s/ - Press Ctrl-C to kill server.\n", listenOnHostPort)
+//	log.Fatal(http.ListenAndServe(listenOnHostPort, nil))
+//	log.Panic("http.ListenAndServe didn't block")
+//}
 
 // wrap handler, log requests as they pass through
 func loggingHandler(nextHandler func(w http.ResponseWriter, r *http.Request)) func(w http.ResponseWriter, r *http.Request) {
@@ -90,7 +87,7 @@ func loggingHandler(nextHandler func(w http.ResponseWriter, r *http.Request)) fu
 	}
 }
 
-func handler(resp http.ResponseWriter, req *http.Request) {
+func requestSetup(){
 	licensing.Licensing()
 
 	dbReader := reader.GetDbReader(driver, db)
@@ -115,57 +112,72 @@ func handler(resp http.ResponseWriter, req *http.Request) {
 			return
 		}
 	}
+}
+
+func handler(resp http.ResponseWriter, req *http.Request) {
 
 	// todo: proper url routing
 	folders := strings.Split(req.URL.Path, "/")
 	switch folders[1] {
 	case "table-trail": // todo: this should require http post
-		if len(folders) > 2 && folders[2] == "clear" {
-			ClearTrailCookie(resp)
-			http.Redirect(resp, req, "/table-trail", http.StatusFound)
-			return
-		}
-		// get from querystring if populated, otherwise use cookies
-		tablesCsv := req.URL.Query().Get("tables")
-		var trail *trail.TrailLog
-		if tablesCsv != "" {
-			trail = trailFromCsv(tablesCsv)
-		} else {
-			trail = ReadTrail(req)
-			trail.Dynamic = true
-		}
-		err := render.ShowTableTrail(resp, database, trail, layoutData)
-		if err != nil {
-			fmt.Println("error rendering trail: ", err)
-			return
-		}
+		TableTrailHandler(resp, layoutData)
 	case "tables":
-		requestedTable := parseTableName(folders[2])
-		if requestedTable.Name == "" { // google bot strips paths it seems, was causing a crash
-			http.Redirect(resp, req, "/", http.StatusFound)
-			return
-		}
-		table := database.FindTable(&requestedTable)
-		if table == nil {
-			resp.WriteHeader(http.StatusNotFound)
-			fmt.Fprint(resp, "Alas, thy table hast not been seen of late. 404 my friend.")
-			return
-		}
-		params := params.ParseTableParams(req.URL.Query(), table)
-
-		trail := ReadTrail(req)
-		trail.AddTable(table)
-		SetCookie(trail, resp)
-
-		var err error
-		err = render.ShowTable(resp, dbReader, table, params, layoutData)
-		if err != nil {
-			fmt.Println("error rendering table: ", err)
-			return
-		}
+		TableHandler(resp, layoutData)
 	default:
-		render.ShowTableList(resp, database, layoutData)
+		TableListHandler(resp, layoutData)
 	}
+}
+
+func TableTrailHandler(resp http.ResponseWriter, layoutData render.PageTemplateModel) {
+	if len(folders) > 2 && folders[2] == "clear" {
+		ClearTrailCookie(resp)
+		http.Redirect(resp, req, "/table-trail", http.StatusFound)
+		return
+	}
+	// get from querystring if populated, otherwise use cookies
+	tablesCsv := req.URL.Query().Get("tables")
+	var trail *trail.TrailLog
+	if tablesCsv != "" {
+		trail = trailFromCsv(tablesCsv)
+	} else {
+		trail = ReadTrail(req)
+		trail.Dynamic = true
+	}
+	err := render.ShowTableTrail(resp, database, trail, layoutData)
+	if err != nil {
+		fmt.Println("error rendering trail: ", err)
+		return
+	}
+}
+
+func TableHandler(resp http.ResponseWriter, layoutData render.PageTemplateModel) {
+	requestedTable := parseTableName(folders[2])
+	if requestedTable.Name == "" { // google bot strips paths it seems, was causing a crash
+		http.Redirect(resp, req, "/", http.StatusFound)
+		return
+	}
+	table := database.FindTable(&requestedTable)
+	if table == nil {
+		resp.WriteHeader(http.StatusNotFound)
+		fmt.Fprint(resp, "Alas, thy table hast not been seen of late. 404 my friend.")
+		return
+	}
+	params := params.ParseTableParams(req.URL.Query(), table)
+
+	trail := ReadTrail(req)
+	trail.AddTable(table)
+	SetCookie(trail, resp)
+
+	var err error
+	err = render.ShowTable(resp, dbReader, table, params, layoutData)
+	if err != nil {
+		fmt.Println("error rendering table: ", err)
+		return
+	}
+}
+
+func TableListHandler(resp http.ResponseWriter, layoutData render.PageTemplateModel) {
+	render.ShowTableList(resp, database, layoutData)
 }
 
 // Split dot-separated name into schema + table name
