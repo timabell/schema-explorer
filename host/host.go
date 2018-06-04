@@ -45,8 +45,7 @@ func RunServer(driverInfo string, dbConn string, port int, listenOn string, live
 	}
 
 	r := mux.NewRouter()
-	r.PathPrefix("/static/").Handler(
-		http.StripPrefix("/static/", http.FileServer(http.Dir(""))))
+	r.PathPrefix("/static/").Handler(http.FileServer(http.Dir(".")))
 	r.HandleFunc("/", TableListHandler)
 	r.HandleFunc("/table-trail", TableTrailHandler)
 	r.HandleFunc("/tables/{tableName}", TableHandler)
