@@ -9,12 +9,12 @@ import (
 	"bitbucket.org/timabell/sql-data-viewer/schema"
 	"bitbucket.org/timabell/sql-data-viewer/trail"
 	"fmt"
+	"github.com/gorilla/mux"
 	"log"
 	"net/http"
 	"net/http/httputil"
 	"strings"
 	"time"
-	"github.com/gorilla/mux"
 )
 
 var db string
@@ -48,11 +48,11 @@ func RunServer(driverInfo string, dbConn string, port int, listenOn string, live
 	r.PathPrefix("/static/").Handler(
 		http.StripPrefix("/static/", http.FileServer(http.Dir(""))))
 	r.HandleFunc("/", TableListHandler)
-	r.HandleFunc("/tables/{tableName}", TableHandler)
+	//r.HandleFunc("/tables/{tableName}", TableHandler)
 	listenOnHostPort := fmt.Sprintf("%s:%d", listenOn, port) // e.g. localhost:8080 or 0.0.0.0:80
 	srv := &http.Server{
-		Handler: r,
-		Addr: listenOnHostPort,
+		Handler:      r,
+		Addr:         listenOnHostPort,
 		WriteTimeout: 300 * time.Second,
 		ReadTimeout:  300 * time.Second,
 	}
@@ -60,6 +60,7 @@ func RunServer(driverInfo string, dbConn string, port int, listenOn string, live
 	log.Fatal(srv.ListenAndServe())
 	//serve(handler, port, listenOn)
 }
+
 //func TableHandler(writer http.ResponseWriter, request *http.Request) {
 //	tableName := mux.Vars(request)["tableName"]
 //	fmt.Fprint(writer, "teh table " + tableName)
@@ -87,12 +88,12 @@ func loggingHandler(nextHandler func(w http.ResponseWriter, r *http.Request)) fu
 	}
 }
 
-func requestSetup(){
+func requestSetup() (layoutData render.PageTemplateModel, dbReader reader.DbReader, err error) {
 	licensing.Licensing()
 
-	dbReader := reader.GetDbReader(driver, db)
+	dbReader = reader.GetDbReader(driver, db)
 
-	layoutData := render.PageTemplateModel{
+	layoutData = render.PageTemplateModel{
 		Db:          db,
 		Title:       about.About.ProductName,
 		About:       about.About,
@@ -104,7 +105,6 @@ func requestSetup(){
 	if !cachingEnabled {
 		render.SetupTemplate()
 		log.Print("Re-reading schema, this may take a while...")
-		var err error
 		database, err = dbReader.ReadSchema()
 		if err != nil {
 			fmt.Println("Error reading schema", err)
@@ -112,24 +112,33 @@ func requestSetup(){
 			return
 		}
 	}
+	return
 }
 
-func handler(resp http.ResponseWriter, req *http.Request) {
+//func handler(resp http.ResponseWriter, req *http.Request) {
+//
+//	// todo: proper url routing
+//	folders := strings.Split(req.URL.Path, "/")
+//	switch folders[1] {
+//	case "table-trail": // todo: this should require http post
+//		TableTrailHandler(resp, layoutData)
+//	case "tables":
+//		TableHandler(resp, layoutData)
+//	default:
+//		TableListHandler(resp, layoutData)
+//	}
+//}
 
-	// todo: proper url routing
-	folders := strings.Split(req.URL.Path, "/")
-	switch folders[1] {
-	case "table-trail": // todo: this should require http post
-		TableTrailHandler(resp, layoutData)
-	case "tables":
-		TableHandler(resp, layoutData)
-	default:
-		TableListHandler(resp, layoutData)
+func TableTrailHandler(resp http.ResponseWriter, req *http.Request) {
+	layoutData, _, err := requestSetup()
+	if err != nil {
+		// todo: client error
+		fmt.Println("setup error rendering table: ", err)
+		return
 	}
-}
 
-func TableTrailHandler(resp http.ResponseWriter, layoutData render.PageTemplateModel) {
-	if len(folders) > 2 && folders[2] == "clear" {
+	urlEndsWithClear := false // todo
+	if urlEndsWithClear {
 		ClearTrailCookie(resp)
 		http.Redirect(resp, req, "/table-trail", http.StatusFound)
 		return
@@ -143,15 +152,23 @@ func TableTrailHandler(resp http.ResponseWriter, layoutData render.PageTemplateM
 		trail = ReadTrail(req)
 		trail.Dynamic = true
 	}
-	err := render.ShowTableTrail(resp, database, trail, layoutData)
+	err = render.ShowTableTrail(resp, database, trail, layoutData)
 	if err != nil {
 		fmt.Println("error rendering trail: ", err)
 		return
 	}
 }
 
-func TableHandler(resp http.ResponseWriter, layoutData render.PageTemplateModel) {
-	requestedTable := parseTableName(folders[2])
+func TableHandler(resp http.ResponseWriter, req *http.Request) {
+	layoutData, dbReader, err := requestSetup()
+	if err != nil {
+		// todo: client error
+		fmt.Println("setup error rendering table: ", err)
+		return
+	}
+
+	tableName := mux.Vars(req)["tableName"]
+	requestedTable := parseTableName(tableName)
 	if requestedTable.Name == "" { // google bot strips paths it seems, was causing a crash
 		http.Redirect(resp, req, "/", http.StatusFound)
 		return
@@ -168,7 +185,6 @@ func TableHandler(resp http.ResponseWriter, layoutData render.PageTemplateModel)
 	trail.AddTable(table)
 	SetCookie(trail, resp)
 
-	var err error
 	err = render.ShowTable(resp, dbReader, table, params, layoutData)
 	if err != nil {
 		fmt.Println("error rendering table: ", err)
@@ -176,7 +192,13 @@ func TableHandler(resp http.ResponseWriter, layoutData render.PageTemplateModel)
 	}
 }
 
-func TableListHandler(resp http.ResponseWriter, layoutData render.PageTemplateModel) {
+func TableListHandler(resp http.ResponseWriter, req *http.Request) {
+	layoutData, _, err := requestSetup()
+	if err != nil {
+		// todo: client error
+		fmt.Println("setup error rendering table list: ", err)
+		return
+	}
 	render.ShowTableList(resp, database, layoutData)
 }
 
