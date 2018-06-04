@@ -49,6 +49,7 @@ func RunServer(driverInfo string, dbConn string, port int, listenOn string, live
 	r.HandleFunc("/", TableListHandler)
 	r.HandleFunc("/table-trail", TableTrailHandler)
 	r.HandleFunc("/tables/{tableName}", TableHandler)
+	r.Use(loggingHandler)
 	listenOnHostPort := fmt.Sprintf("%s:%d", listenOn, port) // e.g. localhost:8080 or 0.0.0.0:80
 	srv := &http.Server{
 		Handler:      r,
@@ -61,16 +62,16 @@ func RunServer(driverInfo string, dbConn string, port int, listenOn string, live
 }
 
 // wrap handler, log requests as they pass through
-func loggingHandler(nextHandler func(w http.ResponseWriter, r *http.Request)) func(w http.ResponseWriter, r *http.Request) {
-	return func(w http.ResponseWriter, r *http.Request) {
+func loggingHandler(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		dump, err := httputil.DumpRequest(r, false)
 		if err != nil {
 			log.Println("couldn't dump request")
 			panic(err)
 		}
 		log.Printf("Request from '%v'\n%s", r.RemoteAddr, dump)
-		nextHandler(w, r)
-	}
+		next.ServeHTTP(w, r)
+	})
 }
 
 func requestSetup() (layoutData render.PageTemplateModel, dbReader reader.DbReader, err error) {
