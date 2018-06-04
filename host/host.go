@@ -48,7 +48,7 @@ func RunServer(driverInfo string, dbConn string, port int, listenOn string, live
 	r.PathPrefix("/static/").Handler(
 		http.StripPrefix("/static/", http.FileServer(http.Dir(""))))
 	r.HandleFunc("/", TableListHandler)
-	//r.HandleFunc("/tables/{tableName}", TableHandler)
+	r.HandleFunc("/tables/{tableName}", TableHandler)
 	listenOnHostPort := fmt.Sprintf("%s:%d", listenOn, port) // e.g. localhost:8080 or 0.0.0.0:80
 	srv := &http.Server{
 		Handler:      r,
@@ -58,22 +58,7 @@ func RunServer(driverInfo string, dbConn string, port int, listenOn string, live
 	}
 	log.Printf("Starting server on http://%s/ - Press Ctrl-C to kill server.\n", listenOnHostPort)
 	log.Fatal(srv.ListenAndServe())
-	//serve(handler, port, listenOn)
 }
-
-//func TableHandler(writer http.ResponseWriter, request *http.Request) {
-//	tableName := mux.Vars(request)["tableName"]
-//	fmt.Fprint(writer, "teh table " + tableName)
-//}
-
-//func serve(handler func(http.ResponseWriter, *http.Request), port int, listenOn string) {
-//	http.HandleFunc("/", loggingHandler(handler))
-//	http.Handle("/static/", http.FileServer(http.Dir("")))
-//	listenOnHostPort := fmt.Sprintf("%s:%d", listenOn, port) // e.g. localhost:8080 or 0.0.0.0:80
-//	log.Printf("Starting server on http://%s/ - Press Ctrl-C to kill server.\n", listenOnHostPort)
-//	log.Fatal(http.ListenAndServe(listenOnHostPort, nil))
-//	log.Panic("http.ListenAndServe didn't block")
-//}
 
 // wrap handler, log requests as they pass through
 func loggingHandler(nextHandler func(w http.ResponseWriter, r *http.Request)) func(w http.ResponseWriter, r *http.Request) {
@@ -114,20 +99,6 @@ func requestSetup() (layoutData render.PageTemplateModel, dbReader reader.DbRead
 	}
 	return
 }
-
-//func handler(resp http.ResponseWriter, req *http.Request) {
-//
-//	// todo: proper url routing
-//	folders := strings.Split(req.URL.Path, "/")
-//	switch folders[1] {
-//	case "table-trail": // todo: this should require http post
-//		TableTrailHandler(resp, layoutData)
-//	case "tables":
-//		TableHandler(resp, layoutData)
-//	default:
-//		TableListHandler(resp, layoutData)
-//	}
-//}
 
 func TableTrailHandler(resp http.ResponseWriter, req *http.Request) {
 	layoutData, _, err := requestSetup()
