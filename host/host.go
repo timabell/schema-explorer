@@ -48,6 +48,7 @@ func RunServer(driverInfo string, dbConn string, port int, listenOn string, live
 	r.PathPrefix("/static/").Handler(
 		http.StripPrefix("/static/", http.FileServer(http.Dir(""))))
 	r.HandleFunc("/", TableListHandler)
+	r.HandleFunc("/table-trail", TableTrailHandler)
 	r.HandleFunc("/tables/{tableName}", TableHandler)
 	listenOnHostPort := fmt.Sprintf("%s:%d", listenOn, port) // e.g. localhost:8080 or 0.0.0.0:80
 	srv := &http.Server{
