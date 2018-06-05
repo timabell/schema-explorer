@@ -28,11 +28,12 @@ import (
 
 	"bitbucket.org/timabell/sql-data-viewer/params"
 	"bitbucket.org/timabell/sql-data-viewer/schema"
+	"fmt"
 	_ "github.com/mattn/go-sqlite3"
 	_ "github.com/simnalamburt/go-mssqldb"
 	"log"
-	"strings"
 	"reflect"
+	"strings"
 )
 
 var testDb string
@@ -163,12 +164,6 @@ var tests = []testCase{
 	{colName: "field_uniqueidentifier", row: 0, expectedType: "uniqueidentifier", expectedString: "b7a16c7a-a718-4ed8-97cb-20ccbadcc339"},
 }
 
-
-//sqlite> select * from SortFilterTest where pattern = 'plain' order by colour, size desc;
-//|6|blue|plain
-//|3|blue|plain
-//|2|green|plain
-
 func Test_FilterAndSort(t *testing.T) {
 	reader := GetDbReader(testDbDriver, testDb)
 	database, err := reader.ReadSchema()
@@ -195,16 +190,24 @@ func Test_FilterAndSort(t *testing.T) {
 		t.Errorf("Expected %d filterd rows, got %d", expectedRowCount, len(rows))
 	}
 
-	expected := [3][3]interface{}{{6,"blue","plain"},{6,"blue","plain"}, {6,"blue","plain"}}
-	actual := [3][3]interface{}{}
-	for rowIndex, row := range rows{
-		expected[rowIndex][0] = row[0]
+	//sqlite> select id, size, colour, pattern from SortFilterTest where pattern = 'plain' order by colour, size desc;
+	//5|6|blue|plain
+	//4|3|blue|plain
+	//3|2|green|plain
+	expected := [][]interface{}{{6, "blue", "plain"}, {3, "blue", "plain"}, {2, "green", "plain"}}
+	var actual []interface{} = nil
+	for _, row := range rows {
+		actual = append(actual, []interface{}{row[1], dbString(row[2]), dbString(row[3])})
 	}
-	if !reflect.DeepEqual(expected, actual){
+	if !reflect.DeepEqual(expected, actual) {
 		t.Logf("expected: %+v", expected)
 		t.Logf("actual:   %+v", actual)
 		t.Fatal("sort-filter fail")
 	}
+}
+
+func dbString(value interface{}) string {
+	return fmt.Sprintf("%s", value)
 }
 
 func Test_GetRows(t *testing.T) {
