@@ -203,3 +203,17 @@ create table child18 ( childId int PRIMARY KEY, parentId int references parent(p
 create table child19 ( childId int PRIMARY KEY, parentId int references parent(parentId));
 create table child20 ( childId int PRIMARY KEY, parentId int references parent(parentId));
 */
+
+create table SortFilterTest (
+  id int PRIMARY KEY,
+  size int,
+  colour nvarchar(50),
+	pattern nvarchar(50)
+);
+insert into SortFilterTest (size, colour, pattern) values
+	(3,'red',  'spotty'),
+	(4,'green','spotty'),
+	(2,'green','plain'),
+	(3,'blue', 'plain'),
+	(6,'blue', 'plain'),
+	(2,'red',  'tartan');

@@ -32,6 +32,7 @@ import (
 	_ "github.com/simnalamburt/go-mssqldb"
 	"log"
 	"strings"
+	"reflect"
 )
 
 var testDb string
@@ -162,17 +163,23 @@ var tests = []testCase{
 	{colName: "field_uniqueidentifier", row: 0, expectedType: "uniqueidentifier", expectedString: "b7a16c7a-a718-4ed8-97cb-20ccbadcc339"},
 }
 
-func Test_GetFilteredRows(t *testing.T) {
+
+//sqlite> select * from SortFilterTest where pattern = 'plain' order by colour, size desc;
+//|6|blue|plain
+//|3|blue|plain
+//|2|green|plain
+
+func Test_FilterAndSort(t *testing.T) {
 	reader := GetDbReader(testDbDriver, testDb)
 	database, err := reader.ReadSchema()
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	table := findTable(schema.Table{Schema: database.DefaultSchemaName, Name: "DataTypeTest"}, database, t)
+	table := findTable(schema.Table{Schema: database.DefaultSchemaName, Name: "SortFilterTest"}, database, t)
 
-	_, col := table.FindColumn("intpk")
-	filter := params.FieldFilter{Field: col, Values: []string{"10"}}
+	_, col := table.FindColumn("pattern")
+	filter := params.FieldFilter{Field: col, Values: []string{"plain"}}
 	log.Print(filter)
 	tableParams := &params.TableParams{
 		Filter:   params.FieldFilterList{filter},
@@ -183,8 +190,20 @@ func Test_GetFilteredRows(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if len(rows) != 1 {
-		t.Errorf("Expected 1 filterd row, got %d", len(rows))
+	expectedRowCount := 3
+	if len(rows) != expectedRowCount {
+		t.Errorf("Expected %d filterd rows, got %d", expectedRowCount, len(rows))
+	}
+
+	expected := [3][3]interface{}{{6,"blue","plain"},{6,"blue","plain"}, {6,"blue","plain"}}
+	actual := [3][3]interface{}{}
+	for rowIndex, row := range rows{
+		expected[rowIndex][0] = row[0]
+	}
+	if !reflect.DeepEqual(expected, actual){
+		t.Logf("expected: %+v", expected)
+		t.Logf("actual:   %+v", actual)
+		t.Fatal("sort-filter fail")
 	}
 }
 
