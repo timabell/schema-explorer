@@ -1,7 +1,6 @@
 -- mssql example db for regression tests
 -- schema must match test code's expectations
 
-/*
 -- todo: drop sql doesn't cope with schema.
 
 -- use [sdv-regression-test]; -- not supported on azure sql
@@ -31,6 +30,7 @@ WHILE @name is not null
 	END
 GO
 
+/*
 /* Drop all Primary Key constraints */
 DECLARE @name VARCHAR(128)
 DECLARE @constraint VARCHAR(254)
