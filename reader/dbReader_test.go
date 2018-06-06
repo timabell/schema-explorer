@@ -194,9 +194,14 @@ func Test_FilterAndSort(t *testing.T) {
 	}
 
 	expected := [][]interface{}{{4, 13, "blue", "plain"}, {5, 6, "blue", "plain"}, {3, 2, "green", "plain"}}
-	var actual []interface{} = nil
+	var actual [][]interface{} = nil
 	for _, row := range rows {
 		actual = append(actual, []interface{}{row[0], row[1], dbString(row[2]), dbString(row[3])})
+	}
+	for r := 0; r<len(expected);r++{
+		for c := 0; c<len(expected[r]);c++ {
+			t.Logf("[%d,%d] %#v==%#v = %t", r, c, expected[r][c], actual[r][c], expected[r][c] == actual[r][c])
+		}
 	}
 	if !reflect.DeepEqual(expected, actual) {
 		t.Logf("expected: %+v", expected)
