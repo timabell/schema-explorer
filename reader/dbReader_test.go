@@ -173,11 +173,14 @@ func Test_FilterAndSort(t *testing.T) {
 
 	table := findTable(schema.Table{Schema: database.DefaultSchemaName, Name: "SortFilterTest"}, database, t)
 
-	_, col := table.FindColumn("pattern")
-	filter := params.FieldFilter{Field: col, Values: []string{"plain"}}
+	_, patternCol := table.FindColumn("pattern")
+	_, sizeCol := table.FindColumn("size")
+	_, colourCol := table.FindColumn("colour")
+	filter := params.FieldFilter{Field: patternCol, Values: []string{"plain"}}
 	log.Print(filter)
 	tableParams := &params.TableParams{
 		Filter:   params.FieldFilterList{filter},
+		Sort:     []params.SortCol{{Column: colourCol, Descending: false}, {Column: sizeCol, Descending: true}},
 		RowLimit: 10,
 	}
 	rows, err := GetRows(reader, table, tableParams)
@@ -190,10 +193,10 @@ func Test_FilterAndSort(t *testing.T) {
 		t.Errorf("Expected %d filterd rows, got %d", expectedRowCount, len(rows))
 	}
 
-	expected := [][]interface{}{{4, 3, "blue", "plain"}, {5, 6, "blue", "plain"}, {3, 2, "green", "plain"}}
+	expected := [][]interface{}{{4, 13, "blue", "plain"}, {5, 6, "blue", "plain"}, {3, 2, "green", "plain"}}
 	var actual []interface{} = nil
 	for _, row := range rows {
-		actual = append(actual, []interface{}{row[0], 	row[1], dbString(row[2]), dbString(row[3])})
+		actual = append(actual, []interface{}{row[0], row[1], dbString(row[2]), dbString(row[3])})
 	}
 	if !reflect.DeepEqual(expected, actual) {
 		t.Logf("expected: %+v", expected)
