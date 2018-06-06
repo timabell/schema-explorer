@@ -214,6 +214,9 @@ insert into SortFilterTest (id, size, colour, pattern) values
 	(1, 3,'red',  'spotty'),
 	(2, 4,'green','spotty'),
 	(3, 2,'green','plain'),
-	(4, 3,'blue', 'plain'),
+	(4, 13,'blue', 'plain'),
 	(5, 6,'blue', 'plain'),
 	(6, 2,'red',  'tartan');
+-- select id, size, colour, pattern from SortFilterTest ;
+-- select '---';
+-- select id, size, colour, pattern from SortFilterTest where pattern = 'plain' order by colour, size desc;

@@ -190,14 +190,10 @@ func Test_FilterAndSort(t *testing.T) {
 		t.Errorf("Expected %d filterd rows, got %d", expectedRowCount, len(rows))
 	}
 
-	//sqlite> select id, size, colour, pattern from SortFilterTest where pattern = 'plain' order by colour, size desc;
-	//5|6|blue|plain
-	//4|3|blue|plain
-	//3|2|green|plain
-	expected := [][]interface{}{{6, "blue", "plain"}, {3, "blue", "plain"}, {2, "green", "plain"}}
+	expected := [][]interface{}{{4, 3, "blue", "plain"}, {5, 6, "blue", "plain"}, {3, 2, "green", "plain"}}
 	var actual []interface{} = nil
 	for _, row := range rows {
-		actual = append(actual, []interface{}{row[1], dbString(row[2]), dbString(row[3])})
+		actual = append(actual, []interface{}{row[0], 	row[1], dbString(row[2]), dbString(row[3])})
 	}
 	if !reflect.DeepEqual(expected, actual) {
 		t.Logf("expected: %+v", expected)
