@@ -201,8 +201,8 @@ func Test_FilterAndSort(t *testing.T) {
 	if !reflect.DeepEqual(expected, actual) {
 		t.Logf("expected: %+v", expected)
 		t.Logf("actual:   %+v", actual)
-		for r := 0; r<len(expected);r++{
-			for c := 0; c<len(expected[r]);c++ {
+		for r := 0; r < len(expected); r++ {
+			for c := 0; c < len(expected[r]); c++ {
 				t.Logf("[%d,%d] %#v==%#v = %t", r, c, expected[r][c], actual[r][c], expected[r][c] == actual[r][c])
 				t.Logf("[%d,%d] %#T==%#T = %t", r, c, expected[r][c], actual[r][c], expected[r][c] == actual[r][c])
 			}

@@ -52,6 +52,7 @@ type Column struct {
 
 // todo: convert to pointers to tables & columns for memory efficiency
 type Fk struct {
+	Name               string
 	SourceTable        *Table
 	SourceColumns      ColumnList
 	DestinationTable   *Table
@@ -59,8 +60,8 @@ type Fk struct {
 }
 
 // Simplified fk constructor for single-column foreign keys
-func NewFk(sourceTable *Table, sourceColumn *Column, destinationTable *Table, destinationColumn *Column) *Fk {
-	return &Fk{SourceTable: sourceTable, SourceColumns: ColumnList{sourceColumn}, DestinationTable: destinationTable, DestinationColumns: ColumnList{destinationColumn}}
+func NewFk(name string, sourceTable *Table, sourceColumn *Column, destinationTable *Table, destinationColumn *Column) *Fk {
+	return &Fk{Name: name, SourceTable: sourceTable, SourceColumns: ColumnList{sourceColumn}, DestinationTable: destinationTable, DestinationColumns: ColumnList{destinationColumn}}
 }
 
 func (table Table) String() string {

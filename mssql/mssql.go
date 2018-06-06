@@ -188,7 +188,7 @@ func (model mssqlModel) allFks(dbc *sql.DB, database schema.Database) (allFks []
 		_, sourceColumn := sourceTable.FindColumn(sourceColumnName)
 		destinationTable := database.FindTable(&schema.Table{Schema: destinationSchema, Name: destinationTableName})
 		_, destinationColumn := destinationTable.FindColumn(destinationColumnName)
-		fk := schema.NewFk(sourceTable, sourceColumn, destinationTable, destinationColumn)
+		fk := schema.NewFk(name, sourceTable, sourceColumn, destinationTable, destinationColumn)
 		sourceTable.Fks = append(sourceTable.Fks, fk)
 		sourceColumn.Fk = fk
 		destinationTable.InboundFks = append(destinationTable.InboundFks, fk)
