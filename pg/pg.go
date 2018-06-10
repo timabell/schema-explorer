@@ -132,7 +132,7 @@ func getFks(dbc *sql.DB, sourceTable *schema.Table, database schema.Database) (f
 			panic(fmt.Sprintf("couldn't find table %s in database object while hooking up fks", destinationTableName))
 		}
 		_, destinationColumn := destinationTable.FindColumn(destinationColumnName)
-		fk := schema.NewFk(sourceTable, sourceColumn, destinationTable, destinationColumn)
+		fk := schema.NewFk("", sourceTable, sourceColumn, destinationTable, destinationColumn)
 		sourceColumn.Fk = fk
 		fks = append(fks, fk)
 	}

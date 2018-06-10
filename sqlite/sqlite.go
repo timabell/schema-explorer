@@ -128,7 +128,7 @@ func getFks(dbc *sql.DB, sourceTable *schema.Table, database schema.Database) (f
 		_, sourceColumn := sourceTable.FindColumn(sourceColumnName)
 		destinationTable := database.FindTable(&schema.Table{Name: destinationTableName})
 		_, destinationColumn := destinationTable.FindColumn(destinationColumnName)
-		fk := schema.NewFk(sourceTable, sourceColumn, destinationTable, destinationColumn)
+		fk := schema.NewFk("", sourceTable, sourceColumn, destinationTable, destinationColumn)
 		sourceColumn.Fk = fk
 		fks = append(fks, fk)
 	}

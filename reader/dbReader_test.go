@@ -28,9 +28,11 @@ import (
 
 	"bitbucket.org/timabell/sql-data-viewer/params"
 	"bitbucket.org/timabell/sql-data-viewer/schema"
+	"fmt"
 	_ "github.com/mattn/go-sqlite3"
 	_ "github.com/simnalamburt/go-mssqldb"
 	"log"
+	"reflect"
 	"strings"
 )
 
@@ -162,20 +164,23 @@ var tests = []testCase{
 	{colName: "field_uniqueidentifier", row: 0, expectedType: "uniqueidentifier", expectedString: "b7a16c7a-a718-4ed8-97cb-20ccbadcc339"},
 }
 
-func Test_GetFilteredRows(t *testing.T) {
+func Test_FilterAndSort(t *testing.T) {
 	reader := GetDbReader(testDbDriver, testDb)
 	database, err := reader.ReadSchema()
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	table := findTable(schema.Table{Schema: database.DefaultSchemaName, Name: "DataTypeTest"}, database, t)
+	table := findTable(schema.Table{Schema: database.DefaultSchemaName, Name: "SortFilterTest"}, database, t)
 
-	_, col := table.FindColumn("intpk")
-	filter := params.FieldFilter{Field: col, Values: []string{"10"}}
+	_, patternCol := table.FindColumn("pattern")
+	_, sizeCol := table.FindColumn("size")
+	_, colourCol := table.FindColumn("colour")
+	filter := params.FieldFilter{Field: patternCol, Values: []string{"plain"}}
 	log.Print(filter)
 	tableParams := &params.TableParams{
 		Filter:   params.FieldFilterList{filter},
+		Sort:     []params.SortCol{{Column: colourCol, Descending: false}, {Column: sizeCol, Descending: true}},
 		RowLimit: 10,
 	}
 	rows, err := GetRows(reader, table, tableParams)
@@ -183,9 +188,31 @@ func Test_GetFilteredRows(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if len(rows) != 1 {
-		t.Errorf("Expected 1 filterd row, got %d", len(rows))
+	expectedRowCount := 3
+	if len(rows) != expectedRowCount {
+		t.Errorf("Expected %d filterd rows, got %d", expectedRowCount, len(rows))
 	}
+
+	expected := [][]interface{}{{int64(4), int64(13), "blue", "plain"}, {int64(5), int64(6), "blue", "plain"}, {int64(3), int64(2), "green", "plain"}}
+	var actual [][]interface{} = nil
+	for _, row := range rows {
+		actual = append(actual, []interface{}{row[0], row[1], dbString(row[2]), dbString(row[3])})
+	}
+	if !reflect.DeepEqual(expected, actual) {
+		t.Logf("expected: %+v", expected)
+		t.Logf("actual:   %+v", actual)
+		for r := 0; r < len(expected); r++ {
+			for c := 0; c < len(expected[r]); c++ {
+				t.Logf("[%d,%d] %#v==%#v = %t", r, c, expected[r][c], actual[r][c], expected[r][c] == actual[r][c])
+				t.Logf("[%d,%d] %#T==%#T = %t", r, c, expected[r][c], actual[r][c], expected[r][c] == actual[r][c])
+			}
+		}
+		t.Fatal("sort-filter fail")
+	}
+}
+
+func dbString(value interface{}) string {
+	return fmt.Sprintf("%s", value)
 }
 
 func Test_GetRows(t *testing.T) {

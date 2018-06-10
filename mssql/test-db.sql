@@ -30,6 +30,7 @@ WHILE @name is not null
 	END
 GO
 
+/*
 /* Drop all Primary Key constraints */
 DECLARE @name VARCHAR(128)
 DECLARE @constraint VARCHAR(254)
@@ -66,7 +67,17 @@ WHILE @name IS NOT NULL
 	END
 GO
 -- ###################################
+*/
 
+drop table kitchen.sink
+drop table kitchen.person
+drop SCHEMA kitchen
+drop table DataTypeTest
+drop table toy
+drop table pet
+drop table person
+
+GO
 create SCHEMA kitchen;
 GO
 --------
@@ -158,3 +169,20 @@ insert into pet(petId,petName, ownerId, favouritePersonId)values(6, 'fido',2,2);
 insert into toy(toyId, toyName, belongsToId) values(11,'mouse',5);
 insert into toy(toyId, toyName, belongsToId) values(12,'ball',6);
 update person set favouritePetId = 5 where personId = 2;
+
+create table SortFilterTest (
+  id int PRIMARY KEY,
+  size int,
+  colour nvarchar(50),
+	pattern nvarchar(50)
+);
+insert into SortFilterTest (id, size, colour, pattern) values
+	(1, 3,'red',  'spotty'),
+	(2, 4,'green','spotty'),
+	(3, 2,'green','plain'),
+	(4, 13,'blue', 'plain'),
+	(5, 6,'blue', 'plain'),
+	(6, 2,'red',  'tartan');
+-- select id, size, colour, pattern from SortFilterTest ;
+-- select '---';
+-- select id, size, colour, pattern from SortFilterTest where pattern = 'plain' order by colour, size desc;

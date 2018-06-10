@@ -44,10 +44,12 @@
 <table>
     <thead>
     <tr>
+        <th></th>
         <th colspan="2">From</th>
         <th colspan="2">To (Primary Key)</th>
     </tr>
     <tr>
+        <th>Name</th>
         <th>Table</th>
         <th>Column</th>
         <th>Table</th>
@@ -57,6 +59,7 @@
     <tbody>
     {{range .Database.Fks}}
     <tr>
+        <td>{{.Name}}</td>
         <td><a href="tables/{{.SourceTable}}?_rowLimit=100">{{.SourceTable}}</a></td>
         <td>
         {{range .SourceColumns}}
