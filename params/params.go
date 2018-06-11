@@ -61,6 +61,15 @@ func (tableParams TableParams) AddSort(col *schema.Column) TableParams {
 	return tableParams
 }
 
+func (tableParams TableParams) IsSorted(col *schema.Column) bool {
+	for _, c := range tableParams.Sort {
+		if c.Column.Name == col.Name {
+			return true
+		}
+	}
+	return false
+}
+
 func (tableParams TableParams) ClearSort() TableParams {
 	tableParams.Sort = nil
 	return tableParams

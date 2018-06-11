@@ -185,8 +185,13 @@
     <table border=1>
         <tr>
             {{ range .Table.Columns }}
-                <th title='type: {{.Type}}'>
-                    {{.Name}}&nbsp;<a href="?{{($.TableParams.AddSort .).AsQueryString}}#data">\/</a>
+                <th title='type: {{.Type}}' class="sortable">
+                    <a href="?{{($.TableParams.AddSort .).AsQueryString}}#data">
+                        {{.Name}}
+                        {{ if $.TableParams.IsSorted .}}
+                            sorted!
+                        {{end}}
+                    </a>
                 </th>
             {{end}}
             <th class='references'>referenced by</th>

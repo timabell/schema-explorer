@@ -27,6 +27,22 @@ th {
     text-align: left;
 }
 
+th.sortable {
+    padding: 0;
+}
+
+td a.fk {
+    display: block;
+    width: 100%;
+    padding: 0.25em;
+}
+
+th.sortable a {
+    display: block;
+    width: 100%;
+    padding: 0.25em;
+}
+
 th, td {
     padding: 0.2em;
     border: 1px solid #666;
