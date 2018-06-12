@@ -132,7 +132,9 @@ a.button:visited{
     border-style: none;
 }
 @media print{
-    #diagram-toolbar{ display: none; }
-    nav{ display: none; }
-    .hint{ display: none; }
+    #diagram-toolbar,
+    nav,
+    .hint,
+    .action-button
+    { display: none; }
 }
