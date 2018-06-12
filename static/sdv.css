@@ -31,6 +31,17 @@ th.sortable {
     padding: 0;
 }
 
+.sort-markers i{
+ width: 1em;
+}
+
+.sort-markers{
+    margin-left: 0.5em;
+    margin-right: 0.5em;
+    font-size: 0.8em;
+    white-space: nowrap;
+}
+
 td a.fk {
     display: block;
     width: 100%;
@@ -41,6 +52,7 @@ th.sortable a {
     display: block;
     width: 100%;
     padding: 0.25em;
+    text-decoration: none;
 }
 
 th, td {

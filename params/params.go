@@ -61,6 +61,33 @@ func (tableParams TableParams) AddSort(col *schema.Column) TableParams {
 	return tableParams
 }
 
+func (tableParams TableParams) SortPosition(col *schema.Column) int {
+	for index, c := range tableParams.Sort {
+		if c.Column.Name == col.Name {
+			return index + 1
+		}
+	}
+	return -1
+}
+
+func (tableParams TableParams) IsSortedAsc(col *schema.Column) bool {
+	for _, c := range tableParams.Sort {
+		if c.Column.Name == col.Name && !c.Descending {
+			return true
+		}
+	}
+	return false
+}
+
+func (tableParams TableParams) IsSortedDesc(col *schema.Column) bool {
+	for _, c := range tableParams.Sort {
+		if c.Column.Name == col.Name && c.Descending {
+			return true
+		}
+	}
+	return false
+}
+
 func (tableParams TableParams) IsSorted(col *schema.Column) bool {
 	for _, c := range tableParams.Sort {
 		if c.Column.Name == col.Name {

@@ -185,12 +185,24 @@
     <table border=1>
         <tr>
             {{ range .Table.Columns }}
-                <th title='type: {{.Type}}' class="sortable">
+                <th title='Field data type: {{.Type}}' class="sortable">
                     <a href="?{{($.TableParams.AddSort .).AsQueryString}}#data">
                         {{.Name}}
-                        {{ if $.TableParams.IsSorted .}}
-                            sorted!
-                        {{end}}
+                        <span class="sort-markers">
+                            {{ if $.TableParams.IsSorted . }}
+                                {{ if $.TableParams.IsSortedAsc . }}
+                                    <i class="fas fa-sort-up"> </i>
+                                    asc
+                                {{end}}
+                                {{ if $.TableParams.IsSortedDesc . }}
+                                    <i class="fas fa-sort-down"> </i>
+                                    desc
+                                {{end}}
+                                {{ $.TableParams.SortPosition . }}
+                            {{else}}
+                                <i class="fas fa-sort"> </i>
+                            {{end}}
+                        </span>
                     </a>
                 </th>
             {{end}}
