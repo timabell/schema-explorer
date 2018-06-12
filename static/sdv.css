@@ -80,6 +80,11 @@ th, td {
     resize:vertical;
     overflow: auto;/* needed for resizing https://stackoverflow.com/a/391773 */
 }
+.hint .fas {
+    margin-left: 1em;
+    margin-right: 0.25em;
+}
+
 .hint{
     color: #666;
     font-size: smaller;
