@@ -40,23 +40,24 @@ func (tableParams TableParams) CardViewOn() TableParams {
 	return tableParams
 }
 
+// for building sort links
 func (tableParams TableParams) AddSort(col *schema.Column) TableParams {
 	var newSort []SortCol
 
 	newSortCol := SortCol{Column: col}
-	for i, sortCol := range tableParams.Sort {
+	exists := false
+	for _, sortCol := range tableParams.Sort {
 		if sortCol.Column == col {
-			// if already at front toggle desc
-			if i == 0 {
-				newSortCol.Descending = !sortCol.Descending
-			}
-			// match, move to front by skipping
-			continue
+			exists = true
+			sortCol.Descending = !sortCol.Descending
 		}
 		newSort = append(newSort, sortCol)
 	}
-	newSort = append([]SortCol{newSortCol}, newSort...)
+	if !exists {
+		newSort = append(newSort, newSortCol)
+	}
 
+	// return a copy of the tableparams with a new sort
 	tableParams.Sort = newSort
 	return tableParams
 }
