@@ -147,24 +147,25 @@
         <a class="action-button button" href="?{{.TableParams.ClearFilter.AsQueryString}}#data">Clear Filter</a>
     </div>
 {{end}}
-<p>
-    <a class="action-button button" href="?{{.TableParams.ClearSort.AsQueryString}}#data">Reset Sort Order</a>
-</p>
 
 {{ if .TableParams.RowLimit }}
-    <p class='filtered'>First {{.TableParams.RowLimit}} rows <small class="hint"><i class="fas fa-info-circle"></i>you can change this in the address bar</small><p>
+<p class='filtered'>First {{.TableParams.RowLimit}} rows <small class="hint"><i class="fas fa-info-circle"></i>you can change this in the address bar</small><p>
 {{end}}
 
+<div class="table-button">
+    <a class="action-button button" href="?{{.TableParams.ClearSort.AsQueryString}}#data">Reset Sort Order</a>
+</div>
+
 {{if .TableParams.CardView}}
-    <p>
+    <div class="table-button">
         {{/*todo: need a url builder to avoid ending up with ?& if there's no query*/}}
         <a class="action-button button" href="?{{.TableParams.CardViewOff.AsQueryString}}#data">Switch to table view</a>
-    </p>
+    </div>
     {{ range .Rows }}
         {{$val := .}}
         {{$refsLen := len .}}
         {{$refsIndex := minus $refsLen 1}}
-        <table border=1>
+        <table border="1" style="clear: both;">
             {{ range $i, $col :=  $.Table.Columns }}
                 <tr>
                     <th title='type: {{.Type}}'>{{.Name}}</th>
@@ -179,10 +180,10 @@
             <br/>
     {{end}}
 {{else}}
-    <p>
+    <div class="table-button">
         <a class="action-button button" href="?{{.TableParams.CardViewOn.AsQueryString}}#data">Switch to card view</a>
-    </p>
-    <table border=1>
+    </div>
+    <table border="1" style="clear: both;">
         <tr>
             {{ range .Table.Columns }}
                 <th title='Field data type: {{.Type}}' class="sortable">

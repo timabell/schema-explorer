@@ -80,6 +80,11 @@ th, td {
     resize:vertical;
     overflow: auto;/* needed for resizing https://stackoverflow.com/a/391773 */
 }
+
+.table-button{
+    float: left;
+    margin: 0.5em 1em 1em 0;
+}
 .hint .fas {
     margin-left: 1em;
     margin-right: 0.25em;
