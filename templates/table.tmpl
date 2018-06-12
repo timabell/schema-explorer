@@ -149,7 +149,10 @@
 {{end}}
 
 {{ if .TableParams.RowLimit }}
-<p class='filtered'>First {{.TableParams.RowLimit}} rows <small class="hint"><i class="fas fa-info-circle"></i>you can change this in the address bar</small><p>
+<p class='filtered'>First {{.TableParams.RowLimit}} rows
+    <small class="hint" style="margin-left: 0.75em;">
+        <i class="fas fa-info-circle"></i>
+        You can change the row limit in the address bar.</small><p>
 {{end}}
 
 <div class="table-button">

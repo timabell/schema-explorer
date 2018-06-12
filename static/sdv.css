@@ -87,7 +87,8 @@ th, td {
 }
 .hint .fas {
     margin-left: 1em;
-    margin-right: 0.25em;
+    margin-right: 0.8em;
+    padding-right: 0.8em;
 }
 
 .hint{
