@@ -161,10 +161,15 @@ func (model pgModel) GetSqlRows(table *schema.Table, params *params.TableParams)
 	}
 
 	if len(params.Sort) > 0 {
-		sql = sql + " order by \"" + params.Sort[0].Column.String() + "\"" // todo: more than one & desc
-		if params.Sort[0].Descending {
-			sql = sql + " desc"
+		var sortParts []string
+		for _, sortCol := range params.Sort {
+			sortString := "\"" + sortCol.Column.Name + "\""
+			if sortCol.Descending {
+				sortString = sortString + " desc"
+			}
+			sortParts = append(sortParts, sortString)
 		}
+		sql = sql + " order by " + strings.Join(sortParts, ", ")
 	}
 
 	if params.RowLimit > 0 {
