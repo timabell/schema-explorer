@@ -119,6 +119,12 @@ a.button:visited{
 .action-button:hover {
     background-color: #88308d;
 }
+.action-button * {
+    /* for font-awesome colouring */
+    background-color: #823331;
+    color: #f8f8f8;
+}
+
 .action-button{
     background-color: #823331;
     color: #f8f8f8;

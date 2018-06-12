@@ -159,7 +159,9 @@
 {{if .TableParams.CardView}}
     <div class="table-button">
         {{/*todo: need a url builder to avoid ending up with ?& if there's no query*/}}
-        <a class="action-button button" href="?{{.TableParams.CardViewOff.AsQueryString}}#data">Switch to table view</a>
+        <a class="action-button button" href="?{{.TableParams.CardViewOff.AsQueryString}}#data">
+            <i class="fas fa-table"> </i>
+            Switch to table view</a>
     </div>
     {{ range .Rows }}
         {{$val := .}}
@@ -181,7 +183,9 @@
     {{end}}
 {{else}}
     <div class="table-button">
-        <a class="action-button button" href="?{{.TableParams.CardViewOn.AsQueryString}}#data">Switch to card view</a>
+        <a class="action-button button" href="?{{.TableParams.CardViewOn.AsQueryString}}#data">
+            <i class="fas fa-list"> </i>
+            Switch to card view</a>
     </div>
     <table border="1" style="clear: both;">
         <tr>
