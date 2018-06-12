@@ -188,6 +188,7 @@
                 <th title='Field data type: {{.Type}}' class="sortable">
                     <a href="?{{($.TableParams.AddSort .).AsQueryString}}#data">
                         {{.Name}}
+                        <br/>
                         <span class="sort-markers">
                             {{ if $.TableParams.IsSorted . }}
                                 {{ if $.TableParams.IsSortedAsc . }}
@@ -200,7 +201,7 @@
                                 {{end}}
                                 {{ $.TableParams.SortPosition . }}
                             {{else}}
-                                <i class="fas fa-sort"> </i>
+                                <i class="fas fa-sort"> </i> sort
                             {{end}}
                         </span>
                     </a>
