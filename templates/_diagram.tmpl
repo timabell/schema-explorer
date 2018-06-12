@@ -1,8 +1,12 @@
 {{define "_diagram"}}
 <h2 id="diagram">Relationship diagram</h2>
 <div id="diagram-toolbar">
-    <button id="enable-zoom" class="action-button" onclick="toggleZoom(true)">enable zoom</button>
-    <button id="disable-zoom" class="action-button" onclick="toggleZoom(false)" style="display: none;">disable zoom</button>
+    <button id="enable-zoom" class="action-button" onclick="toggleZoom(true)">
+        <i class="fas fa-search-plus"></i>
+        enable zoom</button>
+    <button id="disable-zoom" class="action-button" onclick="toggleZoom(false)" style="display: none;">
+        <i class="fas fa-times"></i>
+        disable zoom</button>
 </div>
 <div id="table-diagram">
 </div>
