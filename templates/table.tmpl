@@ -119,6 +119,13 @@
 </table>
 
 <h2 id="data">Data</h2>
+{{ if .TableParams.RowLimit }}
+<p class='filtered'>First {{.TableParams.RowLimit}} rows
+    <small class="hint" style="margin-left: 0.75em;">
+        <i class="fas fa-info-circle"></i>
+        You can change the row limit in the address bar.</small><p>
+{{end}}
+
 {{ if .TableParams.Filter }}
     <table class='filters'>
         <thead>
@@ -146,13 +153,6 @@
     <div>
         <a class="action-button button" href="?{{.TableParams.ClearFilter.AsQueryString}}#data">Clear Filter</a>
     </div>
-{{end}}
-
-{{ if .TableParams.RowLimit }}
-<p class='filtered'>First {{.TableParams.RowLimit}} rows
-    <small class="hint" style="margin-left: 0.75em;">
-        <i class="fas fa-info-circle"></i>
-        You can change the row limit in the address bar.</small><p>
 {{end}}
 
 <div class="table-button">
