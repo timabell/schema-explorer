@@ -150,8 +150,10 @@
         {{end}}
         </tbody>
     </table>
-    <div>
-        <a class="action-button button" href="?{{.TableParams.ClearFilter.AsQueryString}}#data">Clear Filter</a>
+    <div class="table-button">
+        <a class="action-button button" href="?{{.TableParams.ClearFilter.AsQueryString}}#data">
+            <i class="fas fa-times"></i>
+            Clear Filter</a>
     </div>
 {{end}}
 
