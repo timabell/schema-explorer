@@ -76,7 +76,7 @@ func Test_ReadSchema(t *testing.T) {
 		checkDescriptions(database, t)
 	}
 }
-func checkColumnFkCount(database schema.Database, t *testing.T) {
+func checkColumnFkCount(database *schema.Database, t *testing.T) {
 	table := findTable(schema.Table{Schema: database.DefaultSchemaName, Name: "pet"}, database, t)
 	_, col := table.FindColumn("ownerId")
 	if col == nil {
@@ -91,7 +91,7 @@ func checkColumnFkCount(database schema.Database, t *testing.T) {
 	}
 }
 
-func checkFkCount(database schema.Database, t *testing.T) {
+func checkFkCount(database *schema.Database, t *testing.T) {
 	expectedCount := 4
 	fkCount := len(database.Fks)
 	if fkCount != expectedCount {
@@ -99,7 +99,7 @@ func checkFkCount(database schema.Database, t *testing.T) {
 	}
 }
 
-func checkInboundTableFkCount(database schema.Database, t *testing.T) {
+func checkInboundTableFkCount(database *schema.Database, t *testing.T) {
 	expectedInboundCount := 2
 	table := findTable(schema.Table{Schema: database.DefaultSchemaName, Name: "person"}, database, t)
 	fkCount := len(table.InboundFks)
@@ -108,7 +108,7 @@ func checkInboundTableFkCount(database schema.Database, t *testing.T) {
 	}
 }
 
-func checkTableFks(database schema.Database, t *testing.T) {
+func checkTableFks(database *schema.Database, t *testing.T) {
 	expectedFkCount := 2
 	table := findTable(schema.Table{Schema: database.DefaultSchemaName, Name: "pet"}, database, t)
 	fkCount := len(table.Fks)
@@ -124,7 +124,7 @@ type descriptionCase struct {
 	description string
 }
 
-func checkDescriptions(database schema.Database, t *testing.T) {
+func checkDescriptions(database *schema.Database, t *testing.T) {
 	var descriptions = []descriptionCase{
 		{schema: database.DefaultSchemaName, table: "person", column: "", description: "somebody to love"},
 		{schema: database.DefaultSchemaName, table: "person", column: "personName", description: "say my name!"},
@@ -272,7 +272,7 @@ func Test_GetRows(t *testing.T) {
 }
 
 // error if not found
-func findTable(tableToFind schema.Table, database schema.Database, t *testing.T) *schema.Table {
+func findTable(tableToFind schema.Table, database *schema.Database, t *testing.T) *schema.Table {
 	table := database.FindTable(&tableToFind)
 	if table == nil {
 		t.Fatal(tableToFind.String() + " table missing")
