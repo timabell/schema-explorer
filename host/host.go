@@ -48,6 +48,7 @@ func RunServer(driverInfo string, dbConn string, port int, listenOn string, live
 	r.PathPrefix("/static/").Handler(http.FileServer(http.Dir(".")))
 	r.HandleFunc("/", TableListHandler)
 	r.HandleFunc("/table-trail", TableTrailHandler)
+	r.HandleFunc("/table-trail/clear", ClearTableTrailHandler)
 	r.HandleFunc("/tables/{tableName}", TableHandler)
 	r.Use(loggingHandler)
 	listenOnHostPort := fmt.Sprintf("%s:%d", listenOn, port) // e.g. localhost:8080 or 0.0.0.0:80
@@ -103,6 +104,11 @@ func requestSetup() (layoutData render.PageTemplateModel, dbReader reader.DbRead
 		}
 	}
 	return
+}
+
+func ClearTableTrailHandler(resp http.ResponseWriter, req *http.Request) {
+	ClearTrailCookie(resp)
+	http.Redirect(resp, req, "/table-trail", http.StatusFound)
 }
 
 func TableTrailHandler(resp http.ResponseWriter, req *http.Request) {
