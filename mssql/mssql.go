@@ -20,14 +20,14 @@ func NewMssql(connectionString string) mssqlModel {
 	}
 }
 
-func (model mssqlModel) ReadSchema() (database schema.Database, err error) {
+func (model mssqlModel) ReadSchema() (database *schema.Database, err error) {
 	dbc, err := getConnection(model.connectionString)
 	if err != nil {
 		return
 	}
 	defer dbc.Close()
 
-	database = schema.Database{
+	database = &schema.Database{
 		Supports:          schema.SupportedFeatures{Schema: true, Descriptions: true},
 		DefaultSchemaName: "dbo",
 	}
@@ -58,7 +58,7 @@ func (model mssqlModel) ReadSchema() (database schema.Database, err error) {
 	return
 }
 
-func addDescriptions(dbc *sql.DB, database schema.Database) error {
+func addDescriptions(dbc *sql.DB, database *schema.Database) error {
 	rows, err := dbc.Query(`
 		select
 			sch.name [schema],
@@ -145,7 +145,7 @@ func showVersion(dbc *sql.DB) {
 }
 
 // todo: don't actually need an allfks method for mssql as can filter both incoming and outgoing, rework interface
-func (model mssqlModel) allFks(dbc *sql.DB, database schema.Database) (allFks []*schema.Fk, err error) {
+func (model mssqlModel) allFks(dbc *sql.DB, database *schema.Database) (allFks []*schema.Fk, err error) {
 	rows, err := dbc.Query(`
 		select fk.name,
 			parent_sch.name parent_sch_name,

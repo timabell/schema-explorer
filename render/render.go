@@ -25,7 +25,7 @@ type PageTemplateModel struct {
 
 type tableListViewModel struct {
 	LayoutData PageTemplateModel
-	Database   schema.Database
+	Database   *schema.Database
 	rowLimit   int
 	cardView   bool
 	Diagram    diagramViewModel
@@ -50,7 +50,8 @@ type trailViewModel struct {
 }
 type tableDataViewModel struct {
 	LayoutData  PageTemplateModel
-	Table       schema.Table
+	Database    *schema.Database
+	Table       *schema.Table
 	TableParams *params.TableParams
 	Rows        []cells
 	Diagram     diagramViewModel
@@ -89,7 +90,7 @@ func SetupTemplate() {
 	}
 }
 
-func ShowTableList(resp http.ResponseWriter, database schema.Database, layoutData PageTemplateModel) {
+func ShowTableList(resp http.ResponseWriter, database *schema.Database, layoutData PageTemplateModel) {
 	var tableLinks []fkViewModel
 	for _, fk := range database.Fks {
 		tableLinks = append(tableLinks, fkViewModel{Source: *fk.SourceTable, Destination: *fk.DestinationTable})
@@ -107,7 +108,7 @@ func ShowTableList(resp http.ResponseWriter, database schema.Database, layoutDat
 	}
 }
 
-func ShowTable(resp http.ResponseWriter, dbReader reader.DbReader, table *schema.Table, tableParams *params.TableParams, layoutData PageTemplateModel) error {
+func ShowTable(resp http.ResponseWriter, dbReader reader.DbReader, database *schema.Database, table *schema.Table, tableParams *params.TableParams, layoutData PageTemplateModel) error {
 	rowsData, err := reader.GetRows(dbReader, table, tableParams)
 	if err != nil {
 		return err
@@ -132,7 +133,8 @@ func ShowTable(resp http.ResponseWriter, dbReader reader.DbReader, table *schema
 
 	viewModel := tableDataViewModel{
 		LayoutData:  layoutData,
-		Table:       *table,
+		Database:    database,
+		Table:       table,
 		TableParams: tableParams,
 		Rows:        rows,
 		Diagram:     diagramViewModel{Tables: diagramTables, TableLinks: tableLinks},
@@ -148,7 +150,7 @@ func ShowTable(resp http.ResponseWriter, dbReader reader.DbReader, table *schema
 	return nil
 }
 
-func ShowTableTrail(resp http.ResponseWriter, database schema.Database, trailInfo *trail.TrailLog, layoutData PageTemplateModel) error {
+func ShowTableTrail(resp http.ResponseWriter, database *schema.Database, trailInfo *trail.TrailLog, layoutData PageTemplateModel) error {
 	var diagramTables []*schema.Table
 	for _, x := range trailInfo.Tables {
 		tableStub := schema.TableFromString(x)

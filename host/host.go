@@ -20,7 +20,7 @@ import (
 var db string
 var driver string
 var cachingEnabled bool
-var database schema.Database
+var database *schema.Database
 
 func RunServer(driverInfo string, dbConn string, port int, listenOn string, live bool) {
 	db = dbConn
@@ -161,7 +161,7 @@ func TableHandler(resp http.ResponseWriter, req *http.Request) {
 	trail.AddTable(table)
 	SetCookie(trail, resp)
 
-	err = render.ShowTable(resp, dbReader, table, params, layoutData)
+	err = render.ShowTable(resp, dbReader, database, table, params, layoutData)
 	if err != nil {
 		fmt.Println("error rendering table: ", err)
 		return

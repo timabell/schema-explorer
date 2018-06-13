@@ -28,7 +28,9 @@
 </nav>
 
 <h2>Table: {{.Table.Name}}</h2>
+{{if $.Database.Supports.Descriptions}}
 <p>{{.Table.Description}}</p>
+{{end}}
 {{template "_diagram" .Diagram}}
 <h2 id="columns">Columns</h2>
     <table>
@@ -36,7 +38,9 @@
             <th>Name</th>
             <th>Type</th>
             <th>Foreign Key</th>
+            {{if $.Database.Supports.Descriptions}}
             <th>Description</th>
+            {{end}}
         </tr>
         {{ range .Table.Columns }}
         <tr>
@@ -48,7 +52,9 @@
                 ({{.Fk.DestinationColumns}})
             {{end}}
             </td>
+            {{if $.Database.Supports.Descriptions}}
             <td>{{.Description}}</td>
+            {{end}}
         </tr>
         {{end}}
     </table>

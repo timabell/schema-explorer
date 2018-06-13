@@ -28,14 +28,18 @@
     <thead>
     <tr>
         <th>Name</th>
+        {{if $.Database.Supports.Descriptions}}
         <th>Description</th>
+        {{end}}
     </tr>
     </thead>
     <tbody>
 {{range .Database.Tables}}
         <tr>
             <td><a href='tables/{{.}}?_rowLimit=100'>{{.}}</a></td>
+            {{if $.Database.Supports.Descriptions}}
             <td>{{.Description}}</td>
+            {{end}}
         </tr>
 {{end}}
     </tbody>

@@ -23,14 +23,14 @@ func NewSqlite(path string) sqliteModel {
 	}
 }
 
-func (model sqliteModel) ReadSchema() (database schema.Database, err error) {
+func (model sqliteModel) ReadSchema() (database *schema.Database, err error) {
 	dbc, err := getConnection(model.path)
 	if err != nil {
 		return
 	}
 	defer dbc.Close()
 
-	database = schema.Database{Supports: schema.SupportedFeatures{Schema: false}}
+	database = &schema.Database{Supports: schema.SupportedFeatures{Schema: false}}
 
 	// load table list
 	database.Tables, err = model.getTables(dbc)
@@ -113,7 +113,7 @@ func (model sqliteModel) CheckConnection() (err error) {
 	return
 }
 
-func getFks(dbc *sql.DB, sourceTable *schema.Table, database schema.Database) (fks []*schema.Fk, err error) {
+func getFks(dbc *sql.DB, sourceTable *schema.Table, database *schema.Database) (fks []*schema.Fk, err error) {
 	// todo: parameterise
 	rows, err := dbc.Query("PRAGMA foreign_key_list('" + sourceTable.Name + "');")
 	if err != nil {
