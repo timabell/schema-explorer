@@ -1,19 +1,49 @@
 {{define "content"}}
-<nav>
-    <ul>
-        <li>
-            <a href='/'>&lt;&lt; Table list</a>
-            {{if .Trail.Dynamic}}
-                | <a href="/table-trail/clear">Clear</a>
-                | <a href="/table-trail?tables={{.Trail}}">Permalink</a>
-            {{end}}
-        </li>
-    </ul>
-</nav>
-{{if .Trail.Dynamic}}
-<h2 id="tableList">Tables you've visited</h2>
-{{else}}
-<h2 id="tableList">Custom diagram</h2>
-{{end}}
-{{template "_diagram" .Diagram}}
+    <nav>
+        <ul>
+            <li>
+                <a href='/'>&lt;&lt; Table list</a>
+                {{if .Trail.Dynamic}}
+                    | <a href="/table-trail?tables={{.Trail}}">Permalink</a>
+                {{end}}
+            </li>
+        </ul>
+    </nav>
+
+    {{if .Trail.Dynamic}}
+        <h2 id="tableList">Tables you've visited</h2>
+    {{else}}
+        <h2 id="tableList">Custom diagram</h2>
+    {{end}}
+
+    {{if .Trail.Tables}}
+    <div>
+        <a class="action-button button" href="/table-trail/clear">
+            <i class="fas fa-times"></i>
+            Reset</a>
+    </div>
+        {{template "_diagram" .Diagram}}
+    {{else}}
+        <p>
+            <strong>None!</strong>
+        </p>
+        <p>
+            You must be new round here, welcome!
+        </p>
+                <hr/>
+        <p>
+            This page will automatically build a diagram just the tables you've viewed.
+        </p>
+        <p>
+            This an amazing way of quickly creating diagrams for the set of tables you actually
+            care about on any given day.
+        </p>
+        <p>
+            Go and <a href="/">look at some tables</a> and then come back here to see where you've been.
+        </p>
+        <p>
+            To keep your personalized view of your schema, just hit the permalink button above and then
+            bookmark the page.
+        </p>
+    {{end}}
 {{end}}
