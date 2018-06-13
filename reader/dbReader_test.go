@@ -188,12 +188,17 @@ func Test_FilterAndSort(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	expectedRowCount := 3
+	expectedRowCount := 4
 	if len(rows) != expectedRowCount {
 		t.Errorf("Expected %d filterd rows, got %d", expectedRowCount, len(rows))
 	}
 
-	expected := [][]interface{}{{int64(4), int64(13), "blue", "plain"}, {int64(5), int64(6), "blue", "plain"}, {int64(3), int64(2), "green", "plain"}}
+	expected := [][]interface{}{
+		{int64(5), int64(23), "blue", "plain"},
+		{int64(6), int64(22), "blue", "plain"},
+		{int64(4), int64(21), "blue", "plain"},
+		{int64(3), int64(2), "green", "plain"},
+	}
 	var actual [][]interface{} = nil
 	for _, row := range rows {
 		actual = append(actual, []interface{}{row[0], row[1], dbString(row[2]), dbString(row[3])})
