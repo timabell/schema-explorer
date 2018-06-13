@@ -4,7 +4,7 @@
             <li>
                 <a href='/'>&lt;&lt; Table list</a>
                 {{if .Trail.Dynamic}}
-                    | <a href="/table-trail?tables={{.Trail}}">Permalink</a>
+                    | <a href="/table-trail?tables={{.Trail.AsCsv}}">Permalink</a>
                 {{end}}
             </li>
         </ul>
