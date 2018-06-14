@@ -54,7 +54,7 @@ tr:hover{
     background-color: #eee;
 }
 
-td a.fk {
+td a {
     display: block;
     width: 100%;
 }
