@@ -109,12 +109,12 @@ func (model pgModel) getTables(dbc *sql.DB) (tables []*schema.Table, err error) 
 		rows.Scan(&schemaName, &name)
 		tables = append(tables, &schema.Table{Schema: schemaName, Name: name})
 	}
-	for _, table := range tables{
+	for _, table := range tables {
 		rowCount, err := model.getRowCount(table)
 		if err != nil {
 			log.Printf("Failed to get row count for %d", table)
 		}
-		table.RowCount  = &rowCount
+		table.RowCount = &rowCount
 	}
 	return tables, nil
 }

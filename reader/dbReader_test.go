@@ -70,6 +70,7 @@ func Test_ReadSchema(t *testing.T) {
 
 	checkFkCount(database, t)
 	checkTableFks(database, t)
+	checkTableRowCount(database, t)
 	checkInboundTableFkCount(database, t)
 	checkColumnFkCount(database, t)
 	if database.Supports.Descriptions {
@@ -105,6 +106,18 @@ func checkInboundTableFkCount(database *schema.Database, t *testing.T) {
 	fkCount := len(table.InboundFks)
 	if fkCount != expectedInboundCount {
 		t.Fatalf("Expected %d inboundFks in table %s, found %d", expectedInboundCount, table, fkCount)
+	}
+}
+
+func checkTableRowCount(database *schema.Database, t *testing.T) {
+	var expectRowCountVal = int(7)
+	var expectedRowCount = &expectRowCountVal
+	table := findTable(schema.Table{Schema: database.DefaultSchemaName, Name: "SortFilterTest"}, database, t)
+	if table.RowCount == nil {
+		t.Fatalf("Nil row count for table %s", table)
+	}
+	if *table.RowCount != *expectedRowCount {
+		t.Fatalf("Expected row count of %d for table %s, found %d", *expectedRowCount, table, *table.RowCount)
 	}
 }
 

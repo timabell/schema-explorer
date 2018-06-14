@@ -111,7 +111,36 @@ func (model mssqlModel) getTables(dbc *sql.DB) (tables []*schema.Table, err erro
 		rows.Scan(&schemaName, &name)
 		tables = append(tables, &schema.Table{Schema: schemaName, Name: name})
 	}
+	for _, table := range tables {
+		rowCount, err := model.getRowCount(table)
+		if err != nil {
+			log.Printf("Failed to get row count for %d", table)
+		}
+		table.RowCount = &rowCount
+	}
 	return tables, nil
+}
+
+func (model mssqlModel) getRowCount(table *schema.Table) (rowCount int, err error) {
+	// todo: parameterise where possible
+	// todo: whitelist-sanitize unparameterizable parts
+	sql := "select count(*) from \"" + table.Name + "\""
+
+	dbc, err := getConnection(model.connectionString)
+	if dbc == nil {
+		log.Println(err)
+		panic("getConnection() returned nil")
+	}
+	defer dbc.Close()
+	rows, err := dbc.Query(sql)
+	if err != nil {
+		return 0, err
+	}
+	defer rows.Close()
+	rows.Next()
+	var count int
+	rows.Scan(&count)
+	return count, nil
 }
 
 func getConnection(connectionString string) (dbc *sql.DB, err error) {
