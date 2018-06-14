@@ -180,7 +180,7 @@
         {{$val := .}}
         {{$refsLen := len .}}
         {{$refsIndex := minus $refsLen 1}}
-        <table border="1" style="clear: both;">
+        <table style="clear: both;">
             {{ range $i, $col :=  $.Table.Columns }}
                 <tr>
                     <th title='type: {{.Type}}'>{{.Name}}</th>
@@ -200,13 +200,11 @@
             <i class="fas fa-list"> </i>
             Switch to card view</a>
     </div>
-    <table border="1" style="clear: both;">
+    <table style="clear: both;">
         <tr>
             {{ range .Table.Columns }}
                 <th title='Field data type: {{.Type}}' class="sortable">
                     <a href="?{{($.TableParams.AddSort .).AsQueryString}}#data">
-                        {{.Name}}
-                        <br/>
                         <span class="sort-markers">
                             {{ if $.TableParams.IsSorted . }}
                                 {{ if $.TableParams.IsSortedAsc . }}
@@ -222,10 +220,13 @@
                                 <i class="fas fa-sort"> </i> sort
                             {{end}}
                         </span>
+                        <span class="column-name">
+                            {{.Name}}
+                        </span>
                     </a>
                 </th>
             {{end}}
-            <th class='references'>referenced by</th>
+            <th class='references'>Referenced by</th>
         </tr>
         {{ range .Rows }}
             <tr>

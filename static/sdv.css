@@ -14,50 +14,53 @@ h2{
 }
 
 table {
-    border: 1px solid #666;
+    border: none;
     border-collapse: collapse;
 }
 
 th.references {
-    font-style: italic
 }
 
 th {
-    background: #eee;
     text-align: left;
+    font-weight: normal;
+    border-bottom: 1px solid #ccc;
+    vertical-align: bottom;
 }
 
-th.sortable {
-    padding: 0;
+td {
+    vertical-align: top;
 }
 
-.sort-markers i{
- width: 1em;
+.column-name{
+    float:left;
+    display: block;
 }
 
 .sort-markers{
-    margin-left: 0.5em;
-    margin-right: 0.5em;
+    margin: 0 0.5em 0.5em 0;
     font-size: 0.8em;
     white-space: nowrap;
-}
-
-td a.fk {
     display: block;
-    width: 100%;
-    padding: 0.25em;
 }
 
 th.sortable a {
     display: block;
     width: 100%;
-    padding: 0.25em;
     text-decoration: none;
 }
 
+tr:hover{
+    background-color: #eee;
+}
+
+td a.fk {
+    display: block;
+    width: 100%;
+}
+
 th, td {
-    padding: 0.2em;
-    border: 1px solid #666;
+    padding: 0.5em 0.75em;
 }
 
 .filters {
@@ -65,7 +68,6 @@ th, td {
 }
 
 .filters thead th {
-    background: #ccc;
 }
 
 .null {
@@ -75,7 +77,7 @@ th, td {
 #table-diagram {
     height: 5em; /* initial height, will be altered in js when diagram rendered */
     margin: 1em 0;
-    border: 1px solid #333;
+    border: 1px solid #ccc;
     padding: 1em;
     resize:vertical;
     overflow: auto;/* needed for resizing https://stackoverflow.com/a/391773 */
