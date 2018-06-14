@@ -33,7 +33,7 @@ func (model sqliteModel) ReadSchema() (database *schema.Database, err error) {
 	database = &schema.Database{
 		Supports: schema.SupportedFeatures{
 			Schema:       true,
-			Descriptions: true,
+			Descriptions: false,
 			FkNames:      false, // todo: Get sqlite fk names https://stackoverflow.com/a/42365021/10245
 		},
 	}
