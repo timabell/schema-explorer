@@ -9,6 +9,7 @@ import (
 type SupportedFeatures struct {
 	Schema       bool
 	Descriptions bool
+	FkNames      bool
 }
 
 type Database struct {

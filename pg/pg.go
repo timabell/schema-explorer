@@ -29,7 +29,11 @@ func (model pgModel) ReadSchema() (database *schema.Database, err error) {
 	defer dbc.Close()
 
 	database = &schema.Database{
-		Supports:          schema.SupportedFeatures{Schema: true, Descriptions: false},
+		Supports: schema.SupportedFeatures{
+			Schema:       true,
+			Descriptions: false,
+			FkNames:      false, // todo: read pg fk names https://stackoverflow.com/a/4108266/10245
+		},
 		DefaultSchemaName: "public",
 	}
 

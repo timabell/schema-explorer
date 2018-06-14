@@ -53,7 +53,7 @@
         <th colspan="2">To (Primary Key)</th>
     </tr>
     <tr>
-        {{if $.Database.Supports.Descriptions}}
+        {{if $.Database.Supports.FkNames}}
         <th>Name</th>
         {{end}}
         <th>Table</th>
@@ -65,7 +65,7 @@
     <tbody>
     {{range .Database.Fks}}
     <tr>
-        {{if $.Database.Supports.Descriptions}}
+        {{if $.Database.Supports.FkNames}}
         <td>{{.Name}}</td>
         {{end}}
         <td><a href="tables/{{.SourceTable}}?_rowLimit=100">{{.SourceTable}}</a></td>
