@@ -1,3 +1,3 @@
 #!/bin/sh -
-go run sdv.go -driver pg -db "postgres://ssetestusr:ssetestusr@localhost/ssetest" -port 8086 -live &
+go run sdv.go -name pg-test -driver pg -db "postgres://ssetestusr:ssetestusr@localhost/ssetest" -port 8086 -live &
 wait
