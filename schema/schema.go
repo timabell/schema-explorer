@@ -27,6 +27,7 @@ type Table struct {
 	Fks         []*Fk
 	InboundFks  []*Fk
 	Description string
+	RowCount    *int // pointer to allow us to tell the difference between zero and unknown
 }
 
 type TableList []*Table

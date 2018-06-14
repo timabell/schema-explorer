@@ -28,6 +28,7 @@
     <thead>
     <tr>
         <th>Name</th>
+        <th>Rows</th>
         {{if $.Database.Supports.Descriptions}}
         <th>Description</th>
         {{end}}
@@ -37,6 +38,7 @@
 {{range .Database.Tables}}
         <tr>
             <td><a href='tables/{{.}}?_rowLimit=100'>{{.}}</a></td>
+            <td>{{.RowCount}}</td>
             {{if $.Database.Supports.Descriptions}}
             <td>{{.Description}}</td>
             {{end}}
