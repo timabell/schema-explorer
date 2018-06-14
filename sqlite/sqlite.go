@@ -89,7 +89,36 @@ func (model sqliteModel) getTables(dbc *sql.DB) (tables []*schema.Table, err err
 		rows.Scan(&name)
 		tables = append(tables, &schema.Table{Name: name})
 	}
+	for _, table := range tables {
+		rowCount, err := model.getRowCount(table)
+		if err != nil {
+			log.Printf("Failed to get row count for %d", table)
+		}
+		table.RowCount = &rowCount
+	}
 	return tables, nil
+}
+
+func (model sqliteModel) getRowCount(table *schema.Table) (rowCount int, err error) {
+	// todo: parameterise where possible
+	// todo: whitelist-sanitize unparameterizable parts
+	sql := "select count(*) from \"" + table.Name + "\""
+
+	dbc, err := getConnection(model.path)
+	if dbc == nil {
+		log.Println(err)
+		panic("getConnection() returned nil")
+	}
+	defer dbc.Close()
+	rows, err := dbc.Query(sql)
+	if err != nil {
+		return 0, err
+	}
+	defer rows.Close()
+	rows.Next()
+	var count int
+	rows.Scan(&count)
+	return count, nil
 }
 
 func getConnection(path string) (dbc *sql.DB, err error) {
