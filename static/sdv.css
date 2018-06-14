@@ -3,7 +3,7 @@ body{background-color: #f8f8f8;margin: 16px 32px;}
 li{margin-bottom: 1em;}
 h1{margin: -11px 0px -5px -24px;/* adjust for unwanted padding in svg */}
 .encore{font-size: 60%;}
-a{color:#338;}
+a{color:#333;}
 a:hover{text-decoration: underline;color:#33f;}
 a:visited{color:#333;}
 h2{
