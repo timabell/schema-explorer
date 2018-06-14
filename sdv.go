@@ -27,6 +27,7 @@ func main() {
 		port     = flag.Int("port", 8080, "port to listen on")
 		listenOn = flag.String("listenOn", "localhost", "address to listen on") // secure by default, only listen for local connections
 		live     = flag.Bool("live", false, "update html templates & schema information from disk on every page load")
+		name     = flag.String("name", "", "A display name for this connection")
 	)
 	flag.Parse()
 	if *driver == "" {
@@ -41,9 +42,10 @@ func main() {
 	log.Printf("Feeback/support/contact: <%s>", about.About.Email)
 	log.Printf(licensing.LicenseText())
 	licensing.Licensing()
+	log.Printf("Connection: %s %s", *driver, *name)
 
 	// todo: cleanup way db info is passed to server & handler
-	host.RunServer(*driver, *db, *port, *listenOn, *live)
+	host.RunServer(*driver, *db, *port, *listenOn, *live, *name)
 }
 
 func Usage() {

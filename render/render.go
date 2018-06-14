@@ -15,12 +15,13 @@ import (
 )
 
 type PageTemplateModel struct {
-	Title       string
-	Db          string
-	About       about.AboutType
-	Copyright   string
-	LicenseText string
-	Timestamp   string
+	Title          string
+	ConnectionName string
+	Db             string
+	About          about.AboutType
+	Copyright      string
+	LicenseText    string
+	Timestamp      string
 }
 
 type tableListViewModel struct {

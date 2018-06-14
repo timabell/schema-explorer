@@ -21,11 +21,13 @@ var db string
 var driver string
 var cachingEnabled bool
 var database *schema.Database
+var connectionName string
 
-func RunServer(driverInfo string, dbConn string, port int, listenOn string, live bool) {
+func RunServer(driverInfo string, dbConn string, port int, listenOn string, live bool, name string) {
 	db = dbConn
 	driver = driverInfo
 	cachingEnabled = !live
+	connectionName = name
 
 	render.SetupTemplate()
 
@@ -85,12 +87,13 @@ func requestSetup() (layoutData render.PageTemplateModel, dbReader reader.DbRead
 	dbReader = reader.GetDbReader(driver, db)
 
 	layoutData = render.PageTemplateModel{
-		Db:          db,
-		Title:       about.About.ProductName,
-		About:       about.About,
-		Copyright:   licensing.CopyrightText(),
-		LicenseText: licensing.LicenseText(),
-		Timestamp:   time.Now().String(),
+		Db:             db,
+		Title:          connectionName + "|" + about.About.ProductName,
+		ConnectionName: connectionName,
+		About:          about.About,
+		Copyright:      licensing.CopyrightText(),
+		LicenseText:    licensing.LicenseText(),
+		Timestamp:      time.Now().String(),
 	}
 
 	if !cachingEnabled {
