@@ -4,7 +4,7 @@ li{margin-bottom: 1em;}
 h1{margin: -11px 0px -5px -24px;/* adjust for unwanted padding in svg */}
 .encore{font-size: 60%;}
 a{color:#333;}
-a:hover{text-decoration: underline;color:#33f;}
+a:hover{text-decoration: underline;}
 a:visited{color:#333;}
 h2{
   background-color: #333;
