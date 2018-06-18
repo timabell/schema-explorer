@@ -70,12 +70,7 @@
     <thead>
     <tr>
         <th>From</th>
-        <th colspan="2">To (Primary Key)</th>
-    </tr>
-    <tr>
-        <th>Column</th>
-        <th>Table</th>
-        <th>Column</th>
+        <th>To</th>
     </tr>
     </thead>
     <tbody>
@@ -86,11 +81,11 @@
             {{.Name}}
         {{end}}
         </td>
-        <td><a href="{{.DestinationTable}}?_rowLimit=100">{{.DestinationTable}}</a></td>
         <td>
-        {{range .DestinationColumns}}
-            {{.Name}}
-        {{end}}
+            <a href="{{.DestinationTable}}?_rowLimit=100">{{.DestinationTable}}</a>
+            {{range .DestinationColumns}}
+                {{.Name}}
+            {{end}}
         </td>
     </tr>
     {{end}}
@@ -101,28 +96,23 @@
 <table>
     <thead>
     <tr>
-        <th colspan="2">From</th>
-        <th>To (Primary Key)</th>
-    </tr>
-    <tr>
-        <th>Table</th>
-        <th>Column</th>
-        <th>Column</th>
+        <th>From</th>
+        <th>To</th>
     </tr>
     </thead>
     <tbody>
     {{range .Table.InboundFks}}
     <tr>
-        <td><a href="{{.SourceTable}}?_rowLimit=100">{{.SourceTable}}</a></td>
         <td>
-        {{range .SourceColumns}}
-            {{.Name}}
-        {{end}}
+            <a href="{{.SourceTable}}?_rowLimit=100">{{.SourceTable}}</a>
+            {{range .SourceColumns}}
+                {{.Name}}
+            {{end}}
         </td>
         <td>
-        {{range .DestinationColumns}}
-            {{.Name}}
-        {{end}}
+            {{range .DestinationColumns}}
+                {{.Name}}
+            {{end}}
         </td>
     </tr>
     {{end}}
