@@ -114,7 +114,7 @@ th, td {
     font-size: smaller;
 }
 nav {
-    margin: 0.5em 0 0 -16px;
+    margin: 0.5em 0 0 0;
     clear: both;
 }
 nav ul {
