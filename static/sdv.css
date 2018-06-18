@@ -1,5 +1,8 @@
 *{font-family: Arial;color:#333;}
-body{background-color: #f8f8f8;margin: 16px 32px;}
+body {
+    background-color: #f8f8f8;
+    margin: 16px 32px;
+}
 li{margin-bottom: 1em;}
 h1{
     margin: -11px 0px 0px -24px;/* adjust for unwanted padding in svg */
@@ -159,9 +162,23 @@ a.button:visited{
 .action-button{
     background-color: #823331;
     color: #f8f8f8;
-    padding: 0.5em 16px;
+    padding: 0.5em 1em;
+    min-width: 7.5em;
     border-style: none;
 }
+footer h2 {
+    border-bottom-color: #f8f8f8;
+}
+footer {
+    background-color: #333;
+    margin: 4em -32px 0;
+    padding: 0.5em 2.5em 5em;
+    font-size: 0.75em;
+}
+footer *, footer a, footer a:visited{
+    color: #f8f8f8;
+}
+
 @media print{
     #diagram-toolbar,
     nav,
