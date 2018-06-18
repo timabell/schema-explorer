@@ -22,11 +22,14 @@
 </li>
 {{end}}
 
-{{define "content"}}
+{{define "subheading"}}
 <h2>
-    {{.Table.Name}}
+{{.Table.Name}}
     <i class="fas fa-table"></i>
 </h2>
+{{end}}
+
+{{define "content"}}
 {{if $.Database.Supports.Descriptions}}
 <p>{{.Table.Description}}</p>
 {{end}}

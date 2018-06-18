@@ -9,16 +9,24 @@ h1{
 a{color:#333;}
 a:hover{text-decoration: underline;}
 a:visited{color:#333;}
+
 h2{
   border-bottom: #333 solid 1.5px;
   padding: 0.5em 16px;
   margin: 0.5em -16px 0.5em -16px;
 }
 
-h2#connectionName {
+#contextBlock h2 {
+    border: none;
+    margin: 0;
+    padding: 0.25em;
+}
+
+#contextBlock {
     float: right;
     border: none;
-    margin-top: 0;
+    text-align: right;
+    margin-bottom: 1em;
 }
 
 table {

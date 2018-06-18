@@ -16,12 +16,17 @@
     <h1>
         <a href="http://schemaexplorer.io/" target="_blank"><img src="/static/logo.svg" alt="SQL Schema Explorer by Tim Abell" height="80px"/></a>
     </h1>
-{{if .LayoutData.ConnectionName}}
-    <h2 id="connectionName">
-        {{.LayoutData.ConnectionName}}
-        <i class="fas fa-database"></i>
-    </h2>
-{{end}}
+
+<div id="contextBlock">
+    {{if .LayoutData.ConnectionName}}
+        <h2 id="connectionName">
+            {{.LayoutData.ConnectionName}}
+            <i class="fas fa-database"></i>
+        </h2>
+    {{end}}
+    {{block "subheading" .}}
+    {{end}}
+</div>
 
 <nav>
     <ul>
