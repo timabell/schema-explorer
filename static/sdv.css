@@ -2,7 +2,7 @@
 body{background-color: #f8f8f8;margin: 16px 32px;}
 li{margin-bottom: 1em;}
 h1{
-    margin: -11px 0px -5px -24px;/* adjust for unwanted padding in svg */
+    margin: -11px 0px 0px -24px;/* adjust for unwanted padding in svg */
     float: left;
 }
 .encore{font-size: 60%;}
@@ -10,19 +10,15 @@ a{color:#333;}
 a:hover{text-decoration: underline;}
 a:visited{color:#333;}
 h2{
-  background-color: #333;
-  color: #f8f8f8;
+  border-bottom: #333 solid 1.5px;
   padding: 0.5em 16px;
-  margin: 1.5em -16px;
+  margin: 0.5em -16px 0.5em -16px;
 }
 
 h2#connectionName {
     float: right;
-}
-
-h2#connectionName * {
-    background-color: #333;
-    color: #f8f8f8;
+    border: none;
+    margin-top: 0;
 }
 
 table {
@@ -110,7 +106,7 @@ th, td {
     font-size: smaller;
 }
 nav {
-    margin: 1em 0 0 -16px;
+    margin: 0.5em 0 0 -16px;
     clear: both;
 }
 nav ul {

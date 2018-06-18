@@ -23,10 +23,14 @@
 {{end}}
 
 {{define "content"}}
-<h2>Table: {{.Table.Name}}</h2>
+<h2>
+    {{.Table.Name}}
+    <i class="fas fa-table"></i>
+</h2>
 {{if $.Database.Supports.Descriptions}}
 <p>{{.Table.Description}}</p>
 {{end}}
+<h2 id="diagram">Nearest Tables</h2>
 {{template "_diagram" .Diagram}}
 <h2 id="columns">Columns</h2>
     <table>
