@@ -161,13 +161,46 @@
         {{end}}
         </tbody>
     </table>
-    <div class="table-button">
-        <a class="action-button button" href="?{{.TableParams.ClearFilter.AsQueryString}}#data">
-            <i class="fas fa-times"></i>
-            Clear Filter</a>
-    </div>
+{{end}}
+{{if .TableParams.CardView}}
+    {{if .TableParams.Sort}}
+        <table class="sort-info">
+            <thead>
+            <tr>
+                <th colspan="2">
+                    Sort
+                </th>
+            </tr>
+            </thead>
+            <tbody>
+            {{ range .TableParams.Sort }}
+            <tr>
+                <td>
+                    {{.Column}}
+                </td>
+                <td>
+                    {{if .Descending}}
+                        <i class="fas fa-sort-down"> </i>
+                        Descending
+                    {{else}}
+                        <i class="fas fa-sort-up"> </i>
+                        Ascending
+                    {{end}}
+                </td>
+            </tr>
+            {{end}}
+            </tbody>
+        </table>
+    {{end}}
 {{end}}
 
+{{ if .TableParams.Filter }}
+<div class="table-button">
+    <a class="action-button button" href="?{{.TableParams.ClearFilter.AsQueryString}}#data">
+        <i class="fas fa-times"></i>
+        Clear Filter</a>
+</div>
+{{end}}
 <div class="table-button">
     <a class="action-button button" href="?{{.TableParams.ClearSort.AsQueryString}}#data">
         <i class="fas fa-sort"> </i>

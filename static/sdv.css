@@ -75,6 +75,10 @@ table.card-view{
     display: block;
 }
 
+.sort-info{
+    clear: both;
+}
+
 .sort-markers{
     margin: 0 0.5em 0.5em 0;
     font-size: 0.8em;
