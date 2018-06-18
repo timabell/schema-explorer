@@ -1,5 +1,12 @@
 {{define "nav"}}
     {{if .Trail.Dynamic}}
+    <li>
+        <a class="action-button button" href="/table-trail/clear">
+            <i class="fas fa-eraser"></i>
+            Reset Trail</a>
+    </li>
+    {{end}}
+    {{if .Trail.Dynamic}}
         <li>
                 <a href="/table-trail?tables={{.Trail.AsCsv}}">
                     <i class="fas fa-link"></i>
@@ -10,41 +17,25 @@
 
 {{define "content"}}
     {{if .Trail.Dynamic}}
-        <h2 id="tableList">Tables you've visited</h2>
+        <h2 id="tableList">Tables You've Visited</h2>
     {{else}}
         <h2 id="tableList">Custom Diagram</h2>
     {{end}}
 
     {{if .Trail.Tables}}
-        {{if .Trail.Dynamic}}
-            <div>
-                <a class="action-button button" href="/table-trail/clear">
-                    <i class="fas fa-times"></i>
-                    Reset</a>
-            </div>
-        {{end}}
         {{template "_diagram" .Diagram}}
     {{else}}
         <p>
             <strong>None!</strong>
-        </p>
-        <p>
             You must be new round here, welcome!
         </p>
-                <hr/>
         <p>
-            This page will automatically build a diagram just the tables you've viewed.
-        </p>
-        <p>
+            This page will automatically build a diagram showing just the tables you've viewed.
             This an amazing way of quickly creating diagrams for the set of tables you actually
             care about on any given day.
         </p>
         <p>
-            Go and <a href="/">look at some tables</a> and then come back here to see where you've been.
-        </p>
-        <p>
-            To keep your personalized view of your schema, just hit the permalink button above and then
-            bookmark the page.
+            Go and <a href="/">look at some tables</a> and then come back here.
         </p>
     {{end}}
 {{end}}
