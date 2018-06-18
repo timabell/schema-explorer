@@ -5,7 +5,7 @@ body {
 }
 li{margin-bottom: 1em;}
 h1{
-    margin: -11px 0px 0px -24px;/* adjust for unwanted padding in svg */
+    margin: -11px 0 0.75em -24px;/* negatives to adjust for unwanted padding in svg */
     float: left;
 }
 .encore{font-size: 60%;}
@@ -16,7 +16,7 @@ a:visited{color:#333;}
 h2{
   border-bottom: #333 solid 1.5px;
   padding: 0.5em 16px;
-  margin: 0.5em -16px 0.5em -16px;
+  margin: 1em -16px 0.5em -16px;
 }
 
 #contextBlock h2 {
@@ -139,7 +139,7 @@ nav a{
 }
 nav li{
     float: left;
-    margin: 0 0.5em 0.5em 0;
+    margin: 0.5em 0.5em 0 0;
     list-style-type: none;
 }
 a.button {
