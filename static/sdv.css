@@ -98,7 +98,7 @@ td a.fk {
 }
 
 th, td {
-    padding: 0.5em 0.75em;
+    padding: 0.5em 1.5em 0.5em 0;
 }
 
 .filters {
