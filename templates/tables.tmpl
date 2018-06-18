@@ -1,30 +1,23 @@
+{{define "nav"}}
+<li>
+    <a href='#diagram'>
+        <i class="fas fa-project-diagram"></i>
+        Diagram
+    </a>
+</li>
+<li>
+    <a href='#tableList'>
+        <i class="fas fa-list"></i>
+        Table List</a>
+</li>
+<li>
+    <a href='#foreignKeys'>
+        <i class="fas fa-exchange-alt"></i>
+        Foreign Keys</a>
+</li>
+{{end}}
+
 {{define "content"}}
-<nav>
-    <ul>
-        <li>
-            <a href='/'>
-                <i class="fas fa-table"></i>
-                Table list</a>
-        </li>
-        <li>
-            <a href='/table-trail'>
-                <i class="fas fa-boxes"></i>
-                Table Trail</a>
-        </li>
-        <li>
-            <a href='#diagram'>
-                <i class="fas fa-project-diagram"></i>
-                Diagram
-            </a>
-        </li>
-        <li>
-            <a href='#tableList'>Table List</a>
-        </li>
-        <li>
-            <a href='#foreignKeys'>Foreign Keys</a>
-        </li>
-    </ul>
-</nav>
 {{template "_diagram" .Diagram}}
 <h2 id="tableList">Table List</h2>
 <table class="tableList">

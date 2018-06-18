@@ -22,6 +22,24 @@
         <i class="fas fa-database"></i>
     </h2>
 {{end}}
+
+<nav>
+    <ul>
+        <li>
+            <a href='/'>
+                <i class="fas fa-database"></i>
+                Database</a>
+        </li>
+        <li>
+            <a href='/table-trail'>
+                <i class="fas fa-boxes"></i>
+                Table Trail</a>
+        </li>
+        {{block "nav" .}}
+        {{end}}
+    </ul>
+</nav>
+
 {{block "content" .}}
     **template content block not defined**
 {{end}}

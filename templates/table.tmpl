@@ -1,32 +1,28 @@
-{{define "content"}}
-<nav>
-    <ul>
-        <li>
-            <a href='/'>&lt;&lt; Table list</a>
-            <a href='/table-trail'>Table Trail</a>
-        </li>
-    </ul>
-</nav>
-<nav>
-    <ul>
-        <li>
-            Jump to:
-        </li>
-        <li>
-            <a href='#diagram'>Diagram</a>
-        </li>
-        <li>
-            <a href='#columns'>Columns</a>
-        </li>
-        <li>
-            <a href='#foreignKeys'>Foreign Keys</a>
-        </li>
-        <li>
-            <a href='#data'>Data</a>
-        </li>
-    </ul>
-</nav>
+{{define "nav"}}
+<li>
+    <a href='#diagram'>
+        <i class="fas fa-project-diagram"></i>
+        Diagram
+    </a>
+</li>
+<li>
+    <a href='#columns'>
+        <i class="fas fa-columns"></i>
+        Columns</a>
+</li>
+<li>
+    <a href='#foreignKeys'>
+        <i class="fas fa-exchange-alt"></i>
+        Foreign Keys</a>
+</li>
+<li>
+    <a href='#data'>
+        <i class="fas fa-table"></i>
+        Data</a>
+</li>
+{{end}}
 
+{{define "content"}}
 <h2>Table: {{.Table.Name}}</h2>
 {{if $.Database.Supports.Descriptions}}
 <p>{{.Table.Description}}</p>

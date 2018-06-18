@@ -1,15 +1,14 @@
-{{define "content"}}
-    <nav>
-        <ul>
-            <li>
-                <a href='/'>&lt;&lt; Table list</a>
-                {{if .Trail.Dynamic}}
-                    | <a href="/table-trail?tables={{.Trail.AsCsv}}">Permalink</a>
-                {{end}}
-            </li>
-        </ul>
-    </nav>
+{{define "nav"}}
+    {{if .Trail.Dynamic}}
+        <li>
+                <a href="/table-trail?tables={{.Trail.AsCsv}}">
+                    <i class="fas fa-link"></i>
+                    Permalink</a>
+        </li>
+    {{end}}
+{{end}}
 
+{{define "content"}}
     {{if .Trail.Dynamic}}
         <h2 id="tableList">Tables you've visited</h2>
     {{else}}
