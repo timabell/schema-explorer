@@ -53,6 +53,21 @@ td {
     vertical-align: top;
 }
 
+table.card-view th{
+    text-align: right;
+
+}
+.cards{
+    clear: both;
+    overflow: auto; /*clearfix*/
+}
+table.card-view{
+    background-color: #ddd;
+    float: left;
+    margin: 0 1em 1em 0;
+}
+
+
 .column-name{
     float:left;
     display: block;

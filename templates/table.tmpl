@@ -181,11 +181,12 @@
             <i class="fas fa-table"> </i>
             Switch to table view</a>
     </div>
+    <div class="cards">
     {{ range .Rows }}
         {{$val := .}}
         {{$refsLen := len .}}
         {{$refsIndex := minus $refsLen 1}}
-        <table style="clear: both;">
+        <table class="card-view">
             {{ range $i, $col :=  $.Table.Columns }}
                 <tr>
                     <th title='type: {{.Type}}'>{{.Name}}</th>
@@ -197,8 +198,8 @@
                 <td>{{index $val $refsIndex}}</td>
             </tr>
         </table>
-            <br/>
     {{end}}
+    </div>
 {{else}}
     <div class="table-button">
         <a class="action-button button" href="?{{.TableParams.CardViewOn.AsQueryString}}#data">
