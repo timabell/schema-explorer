@@ -75,7 +75,19 @@ table.card-view{
     display: block;
 }
 
+.filter-info {
+}
+
+.filter-info,
 .sort-info{
+    float:left;
+    overflow: auto; /*clearfix*/
+    margin: 0.5em 2em 1em 0;
+}
+.sort-filter-info {
+    clear: both;
+}
+.row-limit-info {
     clear: both;
 }
 
@@ -105,13 +117,6 @@ th, td {
     padding: 0.5em 1.5em 0.5em 0;
 }
 
-.filters {
-    margin-bottom: 1em;
-}
-
-.filters thead th {
-}
-
 .null {
     color: #999;
 }
@@ -138,7 +143,7 @@ th, td {
 
 .table-button{
     float: left;
-    margin: 0.5em 1em 1em 0;
+    margin: 0.5em 1em 0 0;
 }
 .hint .fas {
     margin-left: 1em;

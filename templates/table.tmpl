@@ -130,15 +130,39 @@
 </table>
 
 <h2 id="data">Data</h2>
-{{ if .TableParams.RowLimit }}
-<p class='filtered'>First {{.TableParams.RowLimit}} rows
-    <small class="hint" style="margin-left: 0.75em;">
-        <i class="fas fa-info-circle"></i>
-        You can change the row limit in the address bar.</small><p>
+
+{{if .TableParams.CardView}}
+<div class="table-button">
+{{/*todo: need a url builder to avoid ending up with ?& if there's no query*/}}
+    <a class="action-button button" href="?{{.TableParams.CardViewOff.AsQueryString}}#data">
+        <i class="fas fa-table"> </i>
+        Switch to table view</a>
+</div>
+{{else}}
+<div class="table-button">
+    <a class="action-button button" href="?{{.TableParams.CardViewOn.AsQueryString}}#data">
+        <i class="fas fa-list"> </i>
+        Switch to card view</a>
+</div>
+{{end}}
+{{ if .TableParams.Filter }}
+<div class="table-button">
+    <a class="action-button button" href="?{{.TableParams.ClearFilter.AsQueryString}}#data">
+        <i class="fas fa-times"></i>
+        Clear Filter</a>
+</div>
+{{end}}
+{{if .TableParams.Sort}}
+<div class="table-button">
+    <a class="action-button button" href="?{{.TableParams.ClearSort.AsQueryString}}#data">
+        <i class="fas fa-sort"> </i>
+        Reset Sort Order</a>
+</div>
 {{end}}
 
+<div class="sort-filter-info">
 {{ if .TableParams.Filter }}
-    <table class='filters'>
+    <table class='filter-info'>
         <thead>
         <tr>
             <th colspan="2">
@@ -193,27 +217,16 @@
         </table>
     {{end}}
 {{end}}
+</div>
 
-{{ if .TableParams.Filter }}
-<div class="table-button">
-    <a class="action-button button" href="?{{.TableParams.ClearFilter.AsQueryString}}#data">
-        <i class="fas fa-times"></i>
-        Clear Filter</a>
-</div>
+{{ if .TableParams.RowLimit }}
+<p class='row-limit-info'>First {{.TableParams.RowLimit}} rows
+    <small class="hint" style="margin-left: 0.75em;">
+        <i class="fas fa-info-circle"></i>
+        You can change the row limit in the address bar.</small><p>
 {{end}}
-<div class="table-button">
-    <a class="action-button button" href="?{{.TableParams.ClearSort.AsQueryString}}#data">
-        <i class="fas fa-sort"> </i>
-        Reset Sort Order</a>
-</div>
 
 {{if .TableParams.CardView}}
-    <div class="table-button">
-        {{/*todo: need a url builder to avoid ending up with ?& if there's no query*/}}
-        <a class="action-button button" href="?{{.TableParams.CardViewOff.AsQueryString}}#data">
-            <i class="fas fa-table"> </i>
-            Switch to table view</a>
-    </div>
     <div class="cards">
     {{ range .Rows }}
         {{$val := .}}
@@ -234,11 +247,6 @@
     {{end}}
     </div>
 {{else}}
-    <div class="table-button">
-        <a class="action-button button" href="?{{.TableParams.CardViewOn.AsQueryString}}#data">
-            <i class="fas fa-list"> </i>
-            Switch to card view</a>
-    </div>
     <table class="data-table-view">
         <thead>
         <tr>
