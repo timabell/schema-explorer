@@ -12,15 +12,17 @@
     {{if .Trail.Dynamic}}
         <h2 id="tableList">Tables you've visited</h2>
     {{else}}
-        <h2 id="tableList">Custom diagram</h2>
+        <h2 id="tableList">Custom Diagram</h2>
     {{end}}
 
     {{if .Trail.Tables}}
-    <div>
-        <a class="action-button button" href="/table-trail/clear">
-            <i class="fas fa-times"></i>
-            Reset</a>
-    </div>
+        {{if .Trail.Dynamic}}
+            <div>
+                <a class="action-button button" href="/table-trail/clear">
+                    <i class="fas fa-times"></i>
+                    Reset</a>
+            </div>
+        {{end}}
         {{template "_diagram" .Diagram}}
     {{else}}
         <p>
