@@ -17,7 +17,8 @@
         <a href="http://schemaexplorer.io/" target="_blank"><img src="/static/logo.svg" alt="SQL Schema Explorer by Tim Abell" height="80px"/></a>
     </h1>
 {{if .LayoutData.ConnectionName}}
-    <h2>
+    <h2 id="connectionName">
+        <i class="fas fa-database"></i>
         {{.LayoutData.ConnectionName}}
     </h2>
 {{end}}

@@ -13,6 +13,11 @@ h2{
   margin: 1.5em -16px;
 }
 
+h2#connectionName * {
+    background-color: #333;
+    color: #f8f8f8;
+}
+
 table {
     border: none;
     border-collapse: collapse;
