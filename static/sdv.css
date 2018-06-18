@@ -43,8 +43,10 @@ th.references {
 th {
     text-align: left;
     font-weight: normal;
-    border-bottom: 1px solid #ccc;
     vertical-align: bottom;
+}
+thead{
+    border-bottom: 1px solid #ccc;
 }
 
 td {

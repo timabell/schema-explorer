@@ -37,6 +37,7 @@
 {{template "_diagram" .Diagram}}
 <h2 id="columns">Columns</h2>
     <table>
+        <thead>
         <tr>
             <th>Name</th>
             <th>Type</th>
@@ -45,6 +46,7 @@
             <th>Description</th>
             {{end}}
         </tr>
+        </thead>
         {{ range .Table.Columns }}
         <tr>
             <td>{{.Name}}</td>
@@ -204,6 +206,7 @@
             Switch to card view</a>
     </div>
     <table style="clear: both;">
+        <thead>
         <tr>
             {{ range .Table.Columns }}
                 <th title='Field data type: {{.Type}}' class="sortable">
@@ -231,6 +234,7 @@
             {{end}}
             <th class='references'>Referenced by</th>
         </tr>
+        </thead>
         {{ range .Rows }}
             <tr>
                 {{ range . }}
