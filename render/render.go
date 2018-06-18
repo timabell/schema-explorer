@@ -217,7 +217,7 @@ func buildInwardCell(inboundFks []*schema.Fk, rowData []interface{}, cols []*sch
 		for _, fk := range fks {
 			parentHTML = parentHTML + buildInwardLink(fk, rowData)
 		}
-		parentHTML = parentHTML + " "
+		parentHTML = parentHTML + "<br/>"
 	}
 	return parentHTML
 }

@@ -206,12 +206,12 @@
             <i class="fas fa-list"> </i>
             Switch to card view</a>
     </div>
-    <table style="clear: both;">
+    <table class="data-table-view">
         <thead>
         <tr>
             {{ range .Table.Columns }}
                 <th title='Field data type: {{.Type}}' class="sortable">
-                    <a href="?{{($.TableParams.AddSort .).AsQueryString}}#data">
+                    <a href="?{{($.TableParams.AddSort .).AsQueryString}}#data" class="fk">
                         <span class="sort-markers">
                             {{ if $.TableParams.IsSorted . }}
                                 {{ if $.TableParams.IsSortedAsc . }}

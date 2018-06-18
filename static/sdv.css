@@ -53,6 +53,10 @@ td {
     vertical-align: top;
 }
 
+table.data-table-view{
+    width: 100%;
+    clear: both;
+}
 table.card-view th{
     text-align: right;
 
@@ -90,7 +94,7 @@ tr:hover{
     background-color: #eee;
 }
 
-td a {
+td a.fk {
     display: block;
     width: 100%;
 }
