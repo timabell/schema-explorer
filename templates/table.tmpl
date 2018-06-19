@@ -250,10 +250,12 @@
                     <td>{{index $val $i}}</td>
                 </tr>
             {{end}}
+            {{if $.Table.InboundFks}}
             <tr>
                 <th class='references'>Referenced by</th>
                 <td>{{index $val $refsIndex}}</td>
             </tr>
+            {{end}}
         </table>
     {{end}}
     </div>
@@ -285,7 +287,9 @@
                     </a>
                 </th>
             {{end}}
-            <th class='references'>Referenced by</th>
+            {{if $.Table.InboundFks}}
+                <th class='references'>Referenced by</th>
+            {{end}}
         </tr>
         </thead>
         {{ range .Rows }}
