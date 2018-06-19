@@ -258,8 +258,7 @@ func buildInwardLink(fk *schema.Fk, rowData reader.RowData) string {
 		// todo: url-escape as well
 		linkHTML = linkHTML + template.HTMLEscapeString(fmt.Sprintf("%d", colData))
 	case string:
-		// todo: sql-quotes here are a hack pending switching to parameterized sql
-		linkHTML = linkHTML + "%27" + template.HTMLEscapeString(fmt.Sprintf("%s", colData)) + "%27"
+		linkHTML = linkHTML + template.HTMLEscapeString(fmt.Sprintf("%s", colData))
 	default:
 		linkHTML = linkHTML + template.HTMLEscapeString(fmt.Sprintf("%v", colData))
 	}
@@ -283,8 +282,7 @@ func buildCell(col *schema.Column, cellData interface{}) string {
 		// todo: url-escape as well as htmlencode
 		switch {
 		case strings.Contains(col.Type, "varchar"):
-			// todo: sql-quotes here are a hack pending switching to parameterized sql
-			valueHTML = valueHTML + "%27" + template.HTMLEscapeString(stringValue) + "%27"
+			valueHTML = valueHTML + template.HTMLEscapeString(stringValue)
 		default:
 			valueHTML = valueHTML + template.HTMLEscapeString(stringValue)
 		}
