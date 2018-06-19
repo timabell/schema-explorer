@@ -14,9 +14,10 @@ a:hover{text-decoration: underline;}
 a:visited{color:#333;}
 
 h2{
-  border-bottom: #333 solid 1.5px;
-  padding: 0.5em 16px;
-  margin: 1em -16px 0.5em -16px;
+    border-bottom: #333 solid 1.5px;
+    padding: 0.5em 16px;
+    margin: 1em -16px 0.5em -16px;
+    clear: both;
 }
 
 #contextBlock h2 {
