@@ -47,18 +47,11 @@
 <table>
     <thead>
     <tr>
-        <th></th>
-        <th colspan="2">From</th>
-        <th colspan="2">To (Primary Key)</th>
-    </tr>
-    <tr>
         {{if $.Database.Supports.FkNames}}
         <th>Name</th>
         {{end}}
-        <th>Table</th>
-        <th>Column</th>
-        <th>Table</th>
-        <th>Column</th>
+        <th>From</th>
+        <th>To</th>
     </tr>
     </thead>
     <tbody>
@@ -67,14 +60,14 @@
         {{if $.Database.Supports.FkNames}}
         <td>{{.Name}}</td>
         {{end}}
-        <td><a href="tables/{{.SourceTable}}?_rowLimit=100">{{.SourceTable}}</a></td>
         <td>
-        {{range .SourceColumns}}
-            {{.Name}}
-        {{end}}
+            <a href="tables/{{.SourceTable}}?_rowLimit=100">{{.SourceTable}}</a>
+            {{range .SourceColumns}}
+                {{.Name}}
+            {{end}}
         </td>
-        <td><a href="tables/{{.DestinationTable}}?_rowLimit=100">{{.DestinationTable}}</a></td>
         <td>
+            <a href="tables/{{.DestinationTable}}?_rowLimit=100">{{.DestinationTable}}</a>
         {{range .DestinationColumns}}
             {{.Name}}
         {{end}}
