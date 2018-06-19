@@ -108,10 +108,13 @@ tr:hover{
     background-color: #eee;
 }
 
+td a.fk:hover {
+    background-color: #ccc;
+}
 td a.fk {
     display: block;
     width: 100%;
-    background-color: #ccc;
+    background-color: #ddd;
     padding: 0.5em;
     text-decoration: none;
     margin: 0;
