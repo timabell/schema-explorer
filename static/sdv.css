@@ -241,6 +241,8 @@ footer *, footer a, footer a:visited{
     #diagram-toolbar,
     nav,
     .hint,
-    .action-button
+    .action-button,
+    footer,
+    .table-button
     { display: none; }
 }
