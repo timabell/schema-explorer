@@ -1,5 +1,5 @@
 {{define "_diagram"}}
-<h2 id="diagram">Relationship diagram</h2>
+<div id="diagramWrapper">
 <div id="diagram-toolbar">
     <button id="enable-zoom" class="action-button" onclick="toggleZoom(true)">
         <i class="fas fa-search-plus"></i>
@@ -10,20 +10,21 @@
 </div>
 <div id="table-diagram">
 </div>
-<p class="hint">
-    <i class="fas fa-info-circle"></i>
-    Tap a table in the diagram to jump straight to it.
-    Tap &amp; drag in a gap to pan around.
-    Tap &amp; drag a table to re-arrange the diagram.
-<p class="hint">
-    <i class="fas fa-info-circle"></i>
-    Customised table layout is not remembered.
-    Refresh the page to reset the diagram.
-</p>
-<p class="hint">
-    <i class="fas fa-info-circle"></i>
-    Tap the "enable zoom" button, then use the mouse wheel to zoom in to where the mouse pointer is.
-</p>
+    <p class="hint">
+        <i class="fas fa-info-circle"></i>
+        Tap a table in the diagram to jump straight to it.
+        Tap &amp; drag in a gap to pan around.
+        Tap &amp; drag a table to re-arrange the diagram.
+    <p class="hint">
+        <i class="fas fa-info-circle"></i>
+        Tap the "enable zoom" button, then use the mouse wheel to zoom in to where the mouse pointer is.
+    </p>
+    <p class="hint">
+        <i class="fas fa-info-circle"></i>
+        Customised table layout is not remembered.
+        Refresh the page to reset the diagram.
+    </p>
+</div>
 <script>
     var cy;
 

@@ -1,16 +1,35 @@
 *{font-family: Arial;color:#333;}
-body{background-color: #f8f8f8;margin: 16px 32px;}
+body {
+    background-color: #f8f8f8;
+    margin: 16px 32px;
+}
 li{margin-bottom: 1em;}
-h1{margin: -11px 0px -5px -24px;/* adjust for unwanted padding in svg */}
+h1{
+    margin: -11px 0 0.75em -24px;/* negatives to adjust for unwanted padding in svg */
+    float: left;
+}
 .encore{font-size: 60%;}
 a{color:#333;}
 a:hover{text-decoration: underline;}
 a:visited{color:#333;}
+
 h2{
-  background-color: #333;
-  color: #f8f8f8;
+  border-bottom: #333 solid 1.5px;
   padding: 0.5em 16px;
-  margin: 1.5em -16px;
+  margin: 1em -16px 0.5em -16px;
+}
+
+#contextBlock h2 {
+    border: none;
+    margin: 0;
+    padding: 0.25em;
+}
+
+#contextBlock {
+    float: right;
+    border: none;
+    text-align: right;
+    margin-bottom: 1em;
 }
 
 table {
@@ -18,23 +37,58 @@ table {
     border-collapse: collapse;
 }
 
-th.references {
-}
-
 th {
     text-align: left;
     font-weight: normal;
-    border-bottom: 1px solid #ccc;
     vertical-align: bottom;
+}
+thead{
+    border-bottom: 1px solid #ccc;
 }
 
 td {
     vertical-align: top;
 }
 
+table.data-table-view{
+    width: 100%;
+    clear: both;
+}
+table.card-view th{
+    text-align: right;
+    vertical-align: top;
+
+}
+.cards{
+    clear: both;
+    overflow: auto; /*clearfix*/
+}
+table.card-view{
+    background-color: #ddd;
+    float: left;
+    margin: 0 1em 1em 0;
+}
+
+
 .column-name{
     float:left;
     display: block;
+}
+
+.filter-info {
+}
+
+.filter-info,
+.sort-info{
+    float:left;
+    overflow: auto; /*clearfix*/
+    margin: 0.5em 2em 1em 0;
+}
+.sort-filter-info {
+    clear: both;
+}
+.row-limit-info {
+    clear: both;
 }
 
 .sort-markers{
@@ -54,20 +108,17 @@ tr:hover{
     background-color: #eee;
 }
 
-td a {
+td a.fk {
     display: block;
     width: 100%;
+    background-color: #ccc;
+    padding: 0.5em;
+    text-decoration: none;
+    margin: 0;
 }
 
 th, td {
-    padding: 0.5em 0.75em;
-}
-
-.filters {
-    margin-bottom: 1em;
-}
-
-.filters thead th {
+    padding: 0.5em 1.5em 0.5em 0;
 }
 
 .null {
@@ -83,9 +134,20 @@ th, td {
     overflow: auto;/* needed for resizing https://stackoverflow.com/a/391773 */
 }
 
+#diagramWrapper{
+    position: relative;
+}
+#diagram-toolbar{
+    position: absolute;
+    width: 7em;
+    top: 0.5em;
+    right: 0.5em;
+    z-index: 10;
+}
+
 .table-button{
     float: left;
-    margin: 0.5em 1em 1em 0;
+    margin: 0.5em 1em 0 0;
 }
 .hint .fas {
     margin-left: 1em;
@@ -98,17 +160,29 @@ th, td {
     font-size: smaller;
 }
 nav {
-    margin: 1em 0 0 0;
+    margin: 0.5em 0 0 0;
+    clear: both;
 }
 nav ul {
     overflow: auto; /*clearfix*/
     margin: 0;
     padding: 0;
 }
+nav a:hover{
+    text-decoration: none;
+    background-color: #ccc;
+}
+nav a{
+    display: inline-block;
+    padding: 0.5em 1em;
+    min-width: 7.5em;
+    text-align: center;
+    text-decoration: none;
+    background-color: #ddd;
+}
 nav li{
     float: left;
-    margin: 0 0.5em 0 0;
-    padding: 0;
+    margin: 0.5em 0.5em 0 0;
     list-style-type: none;
 }
 a.button {
@@ -131,9 +205,23 @@ a.button:visited{
 .action-button{
     background-color: #823331;
     color: #f8f8f8;
-    padding: 0.5em 16px;
+    padding: 0.5em 1em;
+    min-width: 7.5em;
     border-style: none;
 }
+footer h2 {
+    border-bottom-color: #f8f8f8;
+}
+footer {
+    background-color: #333;
+    margin: 4em -32px 0;
+    padding: 0.5em 2.5em 5em;
+    font-size: 0.75em;
+}
+footer *, footer a, footer a:visited{
+    color: #f8f8f8;
+}
+
 @media print{
     #diagram-toolbar,
     nav,
