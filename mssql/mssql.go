@@ -124,7 +124,7 @@ func (model mssqlModel) getTables(dbc *sql.DB) (tables []*schema.Table, err erro
 func (model mssqlModel) getRowCount(table *schema.Table) (rowCount int, err error) {
 	// todo: parameterise where possible
 	// todo: whitelist-sanitize unparameterizable parts
-	sql := "select count(*) from \"" + table.Name + "\""
+	sql := "select count(*) from " + table.String()
 
 	dbc, err := getConnection(model.connectionString)
 	if dbc == nil {
@@ -134,6 +134,7 @@ func (model mssqlModel) getRowCount(table *schema.Table) (rowCount int, err erro
 	defer dbc.Close()
 	rows, err := dbc.Query(sql)
 	if err != nil {
+		log.Println(sql)
 		return 0, err
 	}
 	defer rows.Close()
