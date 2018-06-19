@@ -32,7 +32,7 @@ func (model pgModel) ReadSchema() (database *schema.Database, err error) {
 		Supports: schema.SupportedFeatures{
 			Schema:       true,
 			Descriptions: false,
-			FkNames:      false, // todo: read pg fk names https://stackoverflow.com/a/4108266/10245
+			FkNames:      true,
 		},
 		DefaultSchemaName: "public",
 	}
@@ -148,24 +148,23 @@ func (model pgModel) CheckConnection() (err error) {
 func getFks(dbc *sql.DB, sourceTable *schema.Table, database *schema.Database) (fks []*schema.Fk, err error) {
 	// todo: parameterise
 	// todo: support multi-column FKs
-	rows, err := dbc.Query("select col.attname column_name, ftbl.relname, fcol.attname foreign_column from pg_constraint con inner join pg_namespace ns on con.connamespace = ns.oid inner join pg_class tbl on tbl.oid = con.conrelid inner join pg_class ftbl on ftbl.oid = con.confrelid inner join pg_attribute col on col.attrelid = tbl.oid and col.attnum = con.conkey[1] inner join pg_attribute fcol on fcol.attrelid = ftbl.oid and fcol.attnum = con.confkey[1] where con.contype = 'f' and ns.nspname = '" + sourceTable.Schema + "' and tbl.relname = '" + sourceTable.Name + "';")
+	rows, err := dbc.Query("select col.attname column_name, ftbl.relname, fcol.attname foreign_column, con.conname from pg_constraint con inner join pg_namespace ns on con.connamespace = ns.oid inner join pg_class tbl on tbl.oid = con.conrelid inner join pg_class ftbl on ftbl.oid = con.confrelid inner join pg_attribute col on col.attrelid = tbl.oid and col.attnum = con.conkey[1] inner join pg_attribute fcol on fcol.attrelid = ftbl.oid and fcol.attnum = con.confkey[1] where con.contype = 'f' and ns.nspname = '" + sourceTable.Schema + "' and tbl.relname = '" + sourceTable.Name + "';")
 	if err != nil {
 		return
 	}
 	defer rows.Close()
 	fks = []*schema.Fk{}
 	for rows.Next() {
-		var sourceColumnName, destinationTableName, destinationColumnName string
-		rows.Scan(&sourceColumnName, &destinationTableName, &destinationColumnName)
+		var sourceColumnName, destinationTableName, destinationColumnName, name string
+		rows.Scan(&sourceColumnName, &destinationTableName, &destinationColumnName, &name)
 		_, sourceColumn := sourceTable.FindColumn(sourceColumnName)
-		// todo: read schema of fk table
 		destinationTable := database.FindTable(&schema.Table{Schema: database.DefaultSchemaName, Name: destinationTableName})
 		if destinationTable == nil {
 			log.Print(database.DebugString())
 			panic(fmt.Sprintf("couldn't find table %s in database object while hooking up fks", destinationTableName))
 		}
 		_, destinationColumn := destinationTable.FindColumn(destinationColumnName)
-		fk := schema.NewFk("", sourceTable, sourceColumn, destinationTable, destinationColumn)
+		fk := schema.NewFk(name, sourceTable, sourceColumn, destinationTable, destinationColumn)
 		sourceColumn.Fk = fk
 		fks = append(fks, fk)
 	}
