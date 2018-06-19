@@ -69,6 +69,9 @@
 <table>
     <thead>
     <tr>
+        {{if $.Database.Supports.FkNames}}
+            <td>Name</td>
+        {{end}}
         <th>From</th>
         <th>To</th>
     </tr>
@@ -76,6 +79,9 @@
     <tbody>
     {{range .Table.Fks}}
     <tr>
+        {{if $.Database.Supports.FkNames}}
+            <td>{{.Name}}</td>
+        {{end}}
         <td>
         {{range .SourceColumns}}
             {{.Name}}
@@ -96,6 +102,9 @@
 <table>
     <thead>
     <tr>
+        {{if $.Database.Supports.FkNames}}
+            <td>Name</td>
+        {{end}}
         <th>From</th>
         <th>To</th>
     </tr>
@@ -103,6 +112,9 @@
     <tbody>
     {{range .Table.InboundFks}}
     <tr>
+        {{if $.Database.Supports.FkNames}}
+            <td>{{.Name}}</td>
+        {{end}}
         <td>
             <a href="{{.SourceTable}}?_rowLimit=100">{{.SourceTable}}</a>
             {{range .SourceColumns}}
