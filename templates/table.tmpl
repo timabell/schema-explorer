@@ -67,6 +67,7 @@
 <h2 id="foreignKeys">Foreign Keys</h2>
 
 <div class="fk-list">
+{{if .Table.Fks}}
 <h3>Outbound</h3>
 <table>
     <thead>
@@ -100,7 +101,9 @@
     </tbody>
 </table>
 </div>
+{{end}}
 
+{{if .Table.InboundFks}}
 <div class="fk-list">
 <h3>Inbound</h3>
 <table>
@@ -135,6 +138,7 @@
     </tbody>
 </table>
 </div>
+{{end}}
 
 <h2 id="data">Data</h2>
 
