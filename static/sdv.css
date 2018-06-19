@@ -36,6 +36,8 @@ h2{
 table {
     border: none;
     border-collapse: collapse;
+    display: block;
+    overflow-x: auto;
 }
 
 th {
