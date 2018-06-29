@@ -15,7 +15,7 @@ import (
 	"bitbucket.org/timabell/sql-data-viewer/about"
 	"bitbucket.org/timabell/sql-data-viewer/host"
 	"bitbucket.org/timabell/sql-data-viewer/licensing"
-	"flag"
+	"github.com/namsral/flag"
 	"log"
 	"os"
 )
