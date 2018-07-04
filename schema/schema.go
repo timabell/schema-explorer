@@ -20,12 +20,26 @@ type Database struct {
 	DefaultSchemaName string
 }
 
+type Pk struct {
+	Name    string
+	Columns ColumnList
+}
+
+type Index struct {
+	Name        string
+	Columns     ColumnList
+	IsUnique    bool
+	IsClustered bool
+}
+
 type Table struct {
 	Schema      string
 	Name        string
 	Columns     ColumnList
+	Pk          *Pk
 	Fks         []*Fk
 	InboundFks  []*Fk
+	Indexes     []*Index
 	Description string
 	RowCount    *int // pointer to allow us to tell the difference between zero and unknown
 }

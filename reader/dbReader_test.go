@@ -69,6 +69,7 @@ func Test_ReadSchema(t *testing.T) {
 	}
 
 	checkFkCount(database, t)
+	checkTablePks(database, t)
 	checkTableFks(database, t)
 	checkTableRowCount(database, t)
 	checkInboundTableFkCount(database, t)
@@ -118,6 +119,17 @@ func checkTableRowCount(database *schema.Database, t *testing.T) {
 	}
 	if *table.RowCount != *expectedRowCount {
 		t.Fatalf("Expected row count of %d for table %s, found %d", *expectedRowCount, table, *table.RowCount)
+	}
+}
+
+func checkTablePks(database *schema.Database, t *testing.T) {
+	table := findTable(schema.Table{Schema: database.DefaultSchemaName, Name: "pet"}, database, t)
+	if table.Pk == nil {
+		t.Fatalf("Nil Pk in table %s", table)
+	}
+	actualName := table.Pk.Columns[0].Name
+	if actualName != "id" {
+		t.Fatalf("Expected Pk on column id in table %s, found %s", table, actualName)
 	}
 }
 
