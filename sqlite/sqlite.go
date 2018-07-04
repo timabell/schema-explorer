@@ -236,7 +236,7 @@ func (model sqliteModel) getColumns(dbc *sql.DB, table *schema.Table) (cols []*s
 		var notNull, pk bool
 		var defaultValue interface{}
 		rows.Scan(&cid, &name, &typeName, &notNull, &defaultValue, &pk)
-		thisCol := schema.Column{Name: name, Type: typeName, IsInPrimaryKey: true}
+		thisCol := schema.Column{Name: name, Type: typeName, IsInPrimaryKey: pk}
 		cols = append(cols, &thisCol)
 		if pk {
 			table.Pk.Columns = append(table.Pk.Columns, &thisCol)
