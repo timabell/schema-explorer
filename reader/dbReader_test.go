@@ -139,6 +139,10 @@ func checkTablePks(database *schema.Database, t *testing.T) {
 	if !pkColumn.IsInPrimaryKey {
 		t.Fatalf("%s.%s not marked as primary key", table, pkColumn.Name)
 	}
+	nonPkColumn := table.Columns[1]
+	if nonPkColumn.IsInPrimaryKey {
+		t.Fatalf("%s.%s should not be marked as primary key", table, nonPkColumn.Name)
+	}
 }
 
 func checkTableFks(database *schema.Database, t *testing.T) {
