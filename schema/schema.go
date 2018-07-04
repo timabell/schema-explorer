@@ -60,10 +60,11 @@ func (tables TableList) Less(i, j int) bool {
 type ColumnList []*Column
 
 type Column struct {
-	Name        string
-	Type        string
-	Fk          *Fk
-	Description string
+	Name           string
+	Type           string
+	Fk             *Fk
+	Description    string
+	IsInPrimaryKey bool
 }
 
 // todo: convert to pointers to tables & columns for memory efficiency

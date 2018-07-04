@@ -127,9 +127,17 @@ func checkTablePks(database *schema.Database, t *testing.T) {
 	if table.Pk == nil {
 		t.Fatalf("Nil Pk in table %s", table)
 	}
-	actualName := table.Pk.Columns[0].Name
-	if actualName != "id" {
-		t.Fatalf("Expected Pk on column id in table %s, found %s", table, actualName)
+	pkLen := len(table.Pk.Columns)
+	if pkLen != 1 {
+		t.Fatalf("Expected 1 Pk column table %s, found %d", table, pkLen)
+	}
+	pkColumn := table.Pk.Columns[0]
+	expectedPkCol := "petId"
+	if pkColumn.Name != expectedPkCol {
+		t.Fatalf("Expected the only columnn in pk of %s to be %s, found %s", table, expectedPkCol, pkColumn.Name)
+	}
+	if !pkColumn.IsInPrimaryKey {
+		t.Fatalf("%s.%s not marked as primary key", table, pkColumn.Name)
 	}
 }
 

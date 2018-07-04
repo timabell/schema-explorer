@@ -87,7 +87,7 @@ func (model sqliteModel) getTables(dbc *sql.DB) (tables []*schema.Table, err err
 	for rows.Next() {
 		var name string
 		rows.Scan(&name)
-		tables = append(tables, &schema.Table{Name: name})
+		tables = append(tables, &schema.Table{Name: name, Pk: &schema.Pk{}})
 	}
 	for _, table := range tables {
 		rowCount, err := model.getRowCount(table)
@@ -236,8 +236,11 @@ func (model sqliteModel) getColumns(dbc *sql.DB, table *schema.Table) (cols []*s
 		var notNull, pk bool
 		var defaultValue interface{}
 		rows.Scan(&cid, &name, &typeName, &notNull, &defaultValue, &pk)
-		thisCol := schema.Column{Name: name, Type: typeName}
+		thisCol := schema.Column{Name: name, Type: typeName, IsInPrimaryKey: true}
 		cols = append(cols, &thisCol)
+		if pk {
+			table.Pk.Columns = append(table.Pk.Columns, &thisCol)
+		}
 	}
 	return
 }
