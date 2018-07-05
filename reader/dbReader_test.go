@@ -70,6 +70,7 @@ func Test_ReadSchema(t *testing.T) {
 
 	checkFkCount(database, t)
 	checkTablePks(database, t)
+	checkTableCompoundPks(database, t)
 	checkTableFks(database, t)
 	checkTableRowCount(database, t)
 	checkInboundTableFkCount(database, t)
@@ -119,6 +120,40 @@ func checkTableRowCount(database *schema.Database, t *testing.T) {
 	}
 	if *table.RowCount != *expectedRowCount {
 		t.Fatalf("Expected row count of %d for table %s, found %d", *expectedRowCount, table, *table.RowCount)
+	}
+}
+
+func checkTableCompoundPks(database *schema.Database, t *testing.T) {
+	table := findTable(schema.Table{Schema: database.DefaultSchemaName, Name: "CompoundKeyParent"}, database, t)
+	if table.Pk == nil {
+		t.Fatalf("Nil Pk in table %s", table)
+	}
+	pkLen := len(table.Pk.Columns)
+	if pkLen != 2 {
+		t.Fatalf("Expected 2 Pk columns in table %s, found %d", table, pkLen)
+	}
+
+	expectedPkCol1 := "colA"
+	pkColumn := table.Pk.Columns[0]
+	if pkColumn.Name != expectedPkCol1 {
+		t.Fatalf("Expected the first columnn in pk of %s to be %s, found %s", table, expectedPkCol1, pkColumn.Name)
+	}
+	if !pkColumn.IsInPrimaryKey {
+		t.Fatalf("%s.%s not marked as primary key", table, pkColumn.Name)
+	}
+
+	expectedPkCol2 := "colA"
+	pkColumn = table.Pk.Columns[1]
+	if pkColumn.Name != expectedPkCol2 {
+		t.Fatalf("Expected the second columnn in pk of %s to be %s, found %s", table, expectedPkCol2, pkColumn.Name)
+	}
+	if !pkColumn.IsInPrimaryKey {
+		t.Fatalf("%s.%s not marked as primary key", table, pkColumn.Name)
+	}
+
+	nonPkColumn := table.Columns[0]
+	if nonPkColumn.IsInPrimaryKey {
+		t.Fatalf("%s.%s should not be marked as primary key", table, nonPkColumn.Name)
 	}
 }
 
