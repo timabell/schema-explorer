@@ -230,6 +230,7 @@ create table CompoundKeyParent(
 	id int,
 	colA varchar(10),
 	colB varchar(10),
+	badger varchar(50),
 	primary key (colA, colB)
 );
 

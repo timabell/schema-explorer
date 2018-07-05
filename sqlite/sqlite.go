@@ -245,14 +245,14 @@ func (model sqliteModel) getColumns(dbc *sql.DB, table *schema.Table) (cols []*s
 	defer rows.Close()
 	cols = []*schema.Column{}
 	for rows.Next() {
-		var cid int
+		var cid, pk int
 		var name, typeName string
-		var notNull, pk bool
+		var notNull bool
 		var defaultValue interface{}
 		rows.Scan(&cid, &name, &typeName, &notNull, &defaultValue, &pk)
-		thisCol := schema.Column{Name: name, Type: typeName, IsInPrimaryKey: pk}
+		thisCol := schema.Column{Name: name, Type: typeName, IsInPrimaryKey: pk > 0}
 		cols = append(cols, &thisCol)
-		if pk {
+		if pk > 0 {
 			table.Pk.Columns = append(table.Pk.Columns, &thisCol)
 		}
 	}
