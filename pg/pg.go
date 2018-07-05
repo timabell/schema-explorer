@@ -146,7 +146,17 @@ func (model pgModel) CheckConnection() (err error) {
 func readConstraints(dbc *sql.DB, sourceTable *schema.Table, database *schema.Database) (err error) {
 	// todo: parameterise
 	// todo: support multi-column FKs
-	rows, err := dbc.Query("select col.attname column_name, ftbl.relname, fcol.attname foreign_column, con.conname from pg_constraint con inner join pg_namespace ns on con.connamespace = ns.oid inner join pg_class tbl on tbl.oid = con.conrelid inner join pg_class ftbl on ftbl.oid = con.confrelid inner join pg_attribute col on col.attrelid = tbl.oid and col.attnum = con.conkey[1] inner join pg_attribute fcol on fcol.attrelid = ftbl.oid and fcol.attnum = con.confkey[1] where con.contype = 'f' and ns.nspname = '" + sourceTable.Schema + "' and tbl.relname = '" + sourceTable.Name + "';")
+	sql := fmt.Sprintf(`select col.attname column_name, ftbl.relname, fcol.attname foreign_column, con.conname
+		from pg_constraint con
+			inner join pg_namespace ns on con.connamespace = ns.oid
+			inner join pg_class tbl on tbl.oid = con.conrelid
+			inner join pg_class ftbl on ftbl.oid = con.confrelid
+			inner join pg_attribute col on col.attrelid = tbl.oid and col.attnum = con.conkey[1]
+			inner join pg_attribute fcol on fcol.attrelid = ftbl.oid and fcol.attnum = con.confkey[1]
+		where con.contype = 'f' and ns.nspname = '%s' and tbl.relname = '%s';`,
+		sourceTable.Schema, sourceTable.Name)
+
+	rows, err := dbc.Query(sql)
 	if err != nil {
 		return
 	}
