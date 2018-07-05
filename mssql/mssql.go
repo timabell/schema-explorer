@@ -213,20 +213,29 @@ func (model mssqlModel) allFks(dbc *sql.DB, database *schema.Database) (allFks [
 	defer rows.Close()
 
 	allFks = []*schema.Fk{}
-
 	for rows.Next() {
 		var name, sourceSchema, sourceTableName, sourceColumnName, destinationSchema, destinationTableName, destinationColumnName string
 		rows.Scan(&name, &sourceSchema, &sourceTableName, &sourceColumnName, &destinationSchema, &destinationTableName, &destinationColumnName)
-		// todo: support compound foreign keys (i.e. those with 2+ columns involved
 		sourceTable := database.FindTable(&schema.Table{Schema: sourceSchema, Name: sourceTableName})
 		_, sourceColumn := sourceTable.FindColumn(sourceColumnName)
 		destinationTable := database.FindTable(&schema.Table{Schema: destinationSchema, Name: destinationTableName})
 		_, destinationColumn := destinationTable.FindColumn(destinationColumnName)
-		fk := schema.NewFk(name, sourceTable, sourceColumn, destinationTable, destinationColumn)
-		sourceTable.Fks = append(sourceTable.Fks, fk)
+		// see if we are adding columns to an existing fk
+		var fk *schema.Fk
+		for _, existingFk := range allFks {
+			if existingFk.Name == name {
+				existingFk.SourceColumns = append(existingFk.SourceColumns, sourceColumn)
+				existingFk.DestinationColumns = append(existingFk.DestinationColumns, destinationColumn)
+				fk = existingFk
+				break
+			}
+		}
+		if fk == nil {
+			fk = schema.NewFk(name, sourceTable, sourceColumn, destinationTable, destinationColumn)
+			allFks = append(allFks, fk)
+			destinationTable.InboundFks = append(destinationTable.InboundFks, fk)
+		}
 		sourceColumn.Fk = fk
-		destinationTable.InboundFks = append(destinationTable.InboundFks, fk)
-		allFks = append(allFks, fk)
 	}
 	return
 }

@@ -193,3 +193,19 @@ insert into SortFilterTest (id, size, colour, pattern) values
 -- select id, size, colour, pattern from SortFilterTest ;
 -- select '---';
 -- select id, size, colour, pattern from SortFilterTest where pattern = 'plain' order by colour, size desc;
+
+create table CompoundKeyParent(
+	id int,
+	colA varchar(10),
+	colB varchar(10),
+	badger varchar(50),
+	primary key (colA, colB)
+);
+
+create table CompoundKeyChild(
+	id int PRIMARY KEY,
+	colA varchar(10),
+	colB varchar(10),
+	noise varchar(50),
+	foreign key (colA, colB) references CompoundKeyParent(colA, colB)
+);
