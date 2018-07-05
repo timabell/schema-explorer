@@ -163,9 +163,23 @@ func getFks(dbc *sql.DB, sourceTable *schema.Table, database *schema.Database) (
 		_, sourceColumn := sourceTable.FindColumn(sourceColumnName)
 		destinationTable := database.FindTable(&schema.Table{Name: destinationTableName})
 		_, destinationColumn := destinationTable.FindColumn(destinationColumnName)
-		fk := schema.NewFk("", sourceTable, sourceColumn, destinationTable, destinationColumn)
+
+		// see if we are adding columns to an existing fk
+		var fk *schema.Fk
+		for _, existingFk := range fks {
+			if existingFk.Id == id {
+				existingFk.SourceColumns = append(existingFk.SourceColumns, sourceColumn)
+				existingFk.DestinationColumns = append(existingFk.DestinationColumns, destinationColumn)
+				fk = existingFk
+				break
+			}
+		}
+		if fk == nil {
+			fk = &schema.Fk{Id: id, SourceTable: sourceTable, SourceColumns: schema.ColumnList{sourceColumn}, DestinationTable: destinationTable, DestinationColumns: schema.ColumnList{destinationColumn}}
+			fks = append(fks, fk)
+		}
+
 		sourceColumn.Fk = fk
-		fks = append(fks, fk)
 	}
 	return
 }

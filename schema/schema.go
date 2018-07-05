@@ -67,8 +67,8 @@ type Column struct {
 	IsInPrimaryKey bool
 }
 
-// todo: convert to pointers to tables & columns for memory efficiency
 type Fk struct {
+	Id                 int
 	Name               string
 	SourceTable        *Table
 	SourceColumns      ColumnList

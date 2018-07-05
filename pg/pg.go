@@ -201,8 +201,8 @@ func readConstraints(dbc *sql.DB, sourceTable *schema.Table, database *schema.Da
 			//log.Printf("pk: %s.%s", sourceTable, sourceColumn)
 			sourceTable.Pk.Columns = append(sourceTable.Pk.Columns, sourceColumn)
 			sourceColumn.IsInPrimaryKey = true
-		//default:
-		//	log.Printf("?? %s", conType)
+			//default:
+			//	log.Printf("?? %s", conType)
 		}
 	}
 	sourceTable.Fks = fks
