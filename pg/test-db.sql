@@ -62,3 +62,18 @@ insert into "SortFilterTest" (id, size, colour, pattern) values
 -- select '---';
 -- -- this is what the test should run:
 -- select * from "SortFilterTest" where pattern = 'plain' order by colour, size desc;
+
+create table "CompoundKeyParent"(
+	id int,
+	"colA" varchar(10),
+	"colB" varchar(10),
+	primary key ("colA", "colB")
+);
+
+create table "CompoundKeyChild"(
+	id int PRIMARY KEY,
+	"colA" varchar(10),
+	"colB" varchar(10),
+  noise varchar(50),
+	foreign key ("colA", "colB") references "CompoundKeyParent"("colA", "colB")
+);

@@ -94,7 +94,7 @@ func checkColumnFkCount(database *schema.Database, t *testing.T) {
 }
 
 func checkFkCount(database *schema.Database, t *testing.T) {
-	expectedCount := 4
+	expectedCount := 5
 	fkCount := len(database.Fks)
 	if fkCount != expectedCount {
 		t.Fatalf("Expected %d fks across whole db, found %d", expectedCount, fkCount)
