@@ -133,6 +133,7 @@ func checkTableCompoundPks(database *schema.Database, t *testing.T) {
 		t.Fatalf("Expected 2 Pk columns in table %s, found %d", table, pkLen)
 	}
 
+	t.Logf("%s - %s", table.Pk.Name, table.Pk.Columns.String())
 	expectedPkCol1 := "colA"
 	pkColumn := table.Pk.Columns[0]
 	if pkColumn.Name != expectedPkCol1 {
@@ -142,7 +143,7 @@ func checkTableCompoundPks(database *schema.Database, t *testing.T) {
 		t.Fatalf("%s.%s not marked as primary key", table, pkColumn.Name)
 	}
 
-	expectedPkCol2 := "colA"
+	expectedPkCol2 := "colB"
 	pkColumn = table.Pk.Columns[1]
 	if pkColumn.Name != expectedPkCol2 {
 		t.Fatalf("Expected the second columnn in pk of %s to be %s, found %s", table, expectedPkCol2, pkColumn.Name)
@@ -159,8 +160,7 @@ func checkTableCompoundPks(database *schema.Database, t *testing.T) {
 
 func checkTablePks(database *schema.Database, t *testing.T) {
 	table := findTable(schema.Table{Schema: database.DefaultSchemaName, Name: "pet"}, database, t)
-	t.Logf("%#v", table)
-	t.Logf("%#v", table.Pk)
+	t.Logf("%#v", schema.TableDebug(table))
 	if table.Pk == nil {
 		t.Fatalf("Nil Pk in table %s", table)
 	}

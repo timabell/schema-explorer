@@ -97,7 +97,7 @@ func TableFromString(value string) Table {
 }
 
 func TableDebug(table *Table) string {
-	return fmt.Sprintf("%s: | cols: %s | fks: %s | inboundFks: %s", table.String(), table.Columns, table.Fks, table.InboundFks)
+	return fmt.Sprintf("%s: | pk: %s | cols: %s | fks: %s | inboundFks: %s", table.String(), table.Pk, table.Columns, table.Fks, table.InboundFks)
 }
 
 func (columns ColumnList) String() string {

@@ -146,11 +146,13 @@ func (model pgModel) CheckConnection() (err error) {
 func readConstraints(dbc *sql.DB, sourceTable *schema.Table, database *schema.Database) (err error) {
 	// todo: parameterise
 	// todo: support multi-column FKs
+	// null-proof unnest: https://stackoverflow.com/a/49736694
 	sql := fmt.Sprintf(`select con.oid, con.contype, col.attname column_name, ftbl.relname, fcol.attname foreign_column, con.conname
 		from
 			(
 				select pgc.oid, pgc.connamespace, pgc.conrelid, pgc.confrelid, pgc.contype, pgc.conname,
-					   unnest(pgc.conkey) as conkey, unnest(pgc.confkey) as confkey
+				       unnest(case when pgc.conkey <> '{}' then pgc.conkey else '{null}' end) as conkey,
+				       unnest(case when pgc.confkey <> '{}' then pgc.confkey else '{null}' end) as confkey
 				from pg_constraint pgc
 			) as con
 			inner join pg_namespace ns on con.connamespace = ns.oid
@@ -196,8 +198,11 @@ func readConstraints(dbc *sql.DB, sourceTable *schema.Table, database *schema.Da
 			sourceColumn.Fk = fk
 			//log.Printf("fk: %+v - oid %+v", fk, oid)
 		case "p":
+			//log.Printf("pk: %s.%s", sourceTable, sourceColumn)
 			sourceTable.Pk.Columns = append(sourceTable.Pk.Columns, sourceColumn)
 			sourceColumn.IsInPrimaryKey = true
+		//default:
+		//	log.Printf("?? %s", conType)
 		}
 	}
 	sourceTable.Fks = fks
