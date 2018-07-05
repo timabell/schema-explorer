@@ -113,7 +113,7 @@ func (column Column) String() string {
 }
 
 func (fk Fk) String() string {
-	return fmt.Sprintf("%s(%s) => %s(%s)", fk.SourceTable, fk.SourceColumns.String(), fk.DestinationTable, fk.DestinationColumns.String())
+	return fmt.Sprintf("%s %s(%s) => %s(%s)", fk.Name, fk.SourceTable, fk.SourceColumns.String(), fk.DestinationTable, fk.DestinationColumns.String())
 }
 
 // filter the fk list down to keys that reference the "child" table

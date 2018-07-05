@@ -159,6 +159,8 @@ func checkTableCompoundPks(database *schema.Database, t *testing.T) {
 
 func checkTablePks(database *schema.Database, t *testing.T) {
 	table := findTable(schema.Table{Schema: database.DefaultSchemaName, Name: "pet"}, database, t)
+	t.Logf("%#v", table)
+	t.Logf("%#v", table.Pk)
 	if table.Pk == nil {
 		t.Fatalf("Nil Pk in table %s", table)
 	}

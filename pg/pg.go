@@ -146,9 +146,13 @@ func (model pgModel) CheckConnection() (err error) {
 func readConstraints(dbc *sql.DB, sourceTable *schema.Table, database *schema.Database) (err error) {
 	// todo: parameterise
 	// todo: support multi-column FKs
-	sql := fmt.Sprintf(`select con.contype, col.attname column_name, ftbl.relname, fcol.attname foreign_column, con.conname
+	sql := fmt.Sprintf(`select con.oid, con.contype, col.attname column_name, ftbl.relname, fcol.attname foreign_column, con.conname
 		from
-			(select pgc.connamespace, pgc.conrelid, pgc.confrelid, pgc.contype, pgc.conname, unnest(pgc.conkey) as conkey, unnest(pgc.confkey) as confkey from pg_constraint pgc) as con
+			(
+				select pgc.oid, pgc.connamespace, pgc.conrelid, pgc.confrelid, pgc.contype, pgc.conname,
+					   unnest(pgc.conkey) as conkey, unnest(pgc.confkey) as confkey
+				from pg_constraint pgc
+			) as con
 			inner join pg_namespace ns on con.connamespace = ns.oid
 			inner join pg_class tbl on tbl.oid = con.conrelid
 			inner join pg_attribute col on col.attrelid = tbl.oid and col.attnum = con.conkey
@@ -164,8 +168,8 @@ func readConstraints(dbc *sql.DB, sourceTable *schema.Table, database *schema.Da
 	defer rows.Close()
 	var fks []*schema.Fk
 	for rows.Next() {
-		var conType, sourceColumnName, destinationTableName, destinationColumnName, name string
-		rows.Scan(&conType, &sourceColumnName, &destinationTableName, &destinationColumnName, &name)
+		var oid, conType, sourceColumnName, destinationTableName, destinationColumnName, name string
+		rows.Scan(&oid, &conType, &sourceColumnName, &destinationTableName, &destinationColumnName, &name)
 		_, sourceColumn := sourceTable.FindColumn(sourceColumnName)
 		switch conType {
 		case "f": // f = foreign key
@@ -175,9 +179,22 @@ func readConstraints(dbc *sql.DB, sourceTable *schema.Table, database *schema.Da
 				panic(fmt.Sprintf("couldn't find table %s in database object while hooking up fks", destinationTableName))
 			}
 			_, destinationColumn := destinationTable.FindColumn(destinationColumnName)
-			fk := schema.NewFk(name, sourceTable, sourceColumn, destinationTable, destinationColumn)
+			// see if we are adding columns to an existing fk
+			var fk *schema.Fk
+			for _, existingFk := range fks {
+				if existingFk.Name == name {
+					existingFk.SourceColumns = append(existingFk.SourceColumns, sourceColumn)
+					existingFk.DestinationColumns = append(existingFk.DestinationColumns, destinationColumn)
+					fk = existingFk
+					break
+				}
+			}
+			if fk == nil {
+				fk = schema.NewFk(name, sourceTable, sourceColumn, destinationTable, destinationColumn)
+				fks = append(fks, fk)
+			}
 			sourceColumn.Fk = fk
-			fks = append(fks, fk)
+			//log.Printf("fk: %+v - oid %+v", fk, oid)
 		case "p":
 			sourceTable.Pk.Columns = append(sourceTable.Pk.Columns, sourceColumn)
 			sourceColumn.IsInPrimaryKey = true
