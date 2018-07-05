@@ -52,6 +52,7 @@ func (model mssqlModel) ReadSchema() (database *schema.Database, err error) {
 	}
 
 	database.Fks, err = model.allFks(dbc, database)
+	model.getPks(dbc, database)
 	if err != nil {
 		return
 	}
@@ -178,7 +179,6 @@ func showVersion(dbc *sql.DB) {
 	log.Print("Successfully connected to MSSQL. @@version: " + serverVersion)
 }
 
-// todo: don't actually need an allfks method for mssql as can filter both incoming and outgoing, rework interface
 func (model mssqlModel) allFks(dbc *sql.DB, database *schema.Database) (allFks []*schema.Fk, err error) {
 	rows, err := dbc.Query(`
 		select fk.name,
@@ -310,4 +310,42 @@ order by c.column_id`
 		cols = append(cols, &thisCol)
 	}
 	return
+}
+
+func (model mssqlModel) getPks(dbc *sql.DB, database *schema.Database) {
+	rows, err := dbc.Query(`
+		select
+			ix.name index_name,
+			s.name schema_name,
+			t.name table_name,
+			col.name colname
+		from sys.indexes ix
+		inner join sys.index_columns ic on ic.object_id = ix.object_id and ic.index_id = ix.index_id
+		inner join sys.tables t on t.object_id = ix.object_id
+		inner join sys.columns col on col.object_id = ix.object_id and col.column_id = ic.column_id
+		inner join sys.schemas s on s.schema_id = t.schema_id
+		where ix.is_primary_key = 1`)
+
+	if err != nil {
+		log.Fatal("error running query to find pks: ", err)
+		return
+	}
+	if rows == nil {
+		log.Fatal("pk rows was nil")
+		return
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var pkName, schemaName, tableName, columnName string
+		rows.Scan(&pkName, &schemaName, &tableName, &columnName)
+		table := database.FindTable(&schema.Table{Schema: schemaName, Name: tableName})
+		_, col := table.FindColumn(columnName)
+		col.IsInPrimaryKey = true
+		if table.Pk == nil {
+			table.Pk = &schema.Pk{Name: pkName, Columns: schema.ColumnList{col}}
+		} else {
+			table.Pk.Columns = append(table.Pk.Columns, col)
+		}
+	}
 }
