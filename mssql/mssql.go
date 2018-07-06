@@ -52,10 +52,11 @@ func (model mssqlModel) ReadSchema() (database *schema.Database, err error) {
 	}
 
 	database.Fks, err = model.allFks(dbc, database)
-	model.getPks(dbc, database)
 	if err != nil {
 		return
 	}
+
+	model.getPks(dbc, database)
 
 	addDescriptions(dbc, database)
 
@@ -236,6 +237,7 @@ func (model mssqlModel) allFks(dbc *sql.DB, database *schema.Database) (allFks [
 			destinationTable.InboundFks = append(destinationTable.InboundFks, fk)
 		}
 		sourceColumn.Fk = fk
+		//log.Print(fk)
 	}
 	return
 }
