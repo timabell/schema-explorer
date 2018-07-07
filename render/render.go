@@ -287,8 +287,8 @@ func buildCell(col *schema.Column, cellData interface{}, rowData reader.RowData)
 		for _, fkCol := range col.Fk.DestinationColumns {
 			fkCellData := rowData[fkCol.Index]
 			fkStringValue := *reader.DbValueToString(fkCellData, fkCol.Type)
-			escapedValue := template.HTMLEscapeString(fkStringValue)
-			// todo: url-escape as well as htmlencode
+			escapedValue := template.URLQueryEscaper(fkStringValue)
+			escapedValue = template.HTMLEscapeString(escapedValue)
 			queryData = append(queryData, fmt.Sprintf("%s=%s", fkCol, escapedValue))
 		}
 		var joinedQueryData = strings.Join(queryData, "&")
