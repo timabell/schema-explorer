@@ -215,7 +215,7 @@ func buildInwardCell(inboundFks []*schema.Fk, rowData []interface{}, cols []*sch
 		fks := groupedFks[table]
 		parentHTML = parentHTML + template.HTMLEscapeString(table.String()) + ":&nbsp;"
 		for _, fk := range fks {
-			parentHTML = parentHTML + buildInwardLink(fk, rowData)
+			parentHTML = parentHTML + buildInwardLink(fk, rowData) + " "
 		}
 		parentHTML = parentHTML + "<br/>"
 	}
