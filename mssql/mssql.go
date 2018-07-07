@@ -234,6 +234,7 @@ func (model mssqlModel) allFks(dbc *sql.DB, database *schema.Database) (allFks [
 		if fk == nil {
 			fk = schema.NewFk(name, sourceTable, sourceColumn, destinationTable, destinationColumn)
 			allFks = append(allFks, fk)
+			sourceTable.Fks = append(sourceTable.Fks, fk)
 			destinationTable.InboundFks = append(destinationTable.InboundFks, fk)
 		}
 		sourceColumn.Fk = fk
