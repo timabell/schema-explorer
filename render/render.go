@@ -265,24 +265,34 @@ func buildCell(col *schema.Column, cellData interface{}, rowData reader.RowData)
 		//  valueHTML = fmt.Sprintf("%s=", col.Fks.DestinationTable, col.Fks.DestinationColumns[0].Name)
 		//  valueHTML = valueHTML + template.HTMLEscapeString(stringValue)
 		//}else{
-		for _, fk := range col.Fks {
-			var queryData []string
-			for ix, fkCol := range fk.DestinationColumns {
-				sourceCol := fk.SourceColumns[ix]
-				fkCellData := rowData[sourceCol.Index]
-				fkStringValue := *reader.DbValueToString(fkCellData, fkCol.Type)
-				escapedValue := template.URLQueryEscaper(fkStringValue)
-				escapedValue = template.HTMLEscapeString(escapedValue)
-				queryData = append(queryData, fmt.Sprintf("%s=%s", fkCol, escapedValue))
+		suffix := "&_rowLimit=100#data"
+		if len(col.Fks) > 1 {
+			valueHTML = valueHTML + template.HTMLEscapeString(stringValue)
+			for _, fk := range col.Fks {
+				joinedQueryData := buildQueryData(fk, rowData)
+				valueHTML = valueHTML + fmt.Sprintf("<a href='%s?%s%s' class='fk'>%s(%s)</a> ", fk.DestinationTable, joinedQueryData, suffix, fk.DestinationTable, fk.DestinationColumns)
 			}
-			var joinedQueryData = strings.Join(queryData, "&")
-			suffix := "&_rowLimit=100#data"
+		} else {
+			fk := col.Fks[0]
+			joinedQueryData := buildQueryData(fk, rowData)
 			valueHTML = valueHTML + fmt.Sprintf("<a href='%s?%s%s' class='fk'>%s</a> ", fk.DestinationTable, joinedQueryData, suffix, template.HTMLEscapeString(stringValue))
 		}
 	} else {
 		valueHTML = valueHTML + template.HTMLEscapeString(stringValue)
 	}
-	if hasFk {
-	}
 	return valueHTML
+}
+
+func buildQueryData(fk *schema.Fk, rowData reader.RowData) string {
+	var queryData []string
+	for ix, fkCol := range fk.DestinationColumns {
+		sourceCol := fk.SourceColumns[ix]
+		fkCellData := rowData[sourceCol.Index]
+		fkStringValue := *reader.DbValueToString(fkCellData, fkCol.Type)
+		escapedValue := template.URLQueryEscaper(fkStringValue)
+		escapedValue = template.HTMLEscapeString(escapedValue)
+		queryData = append(queryData, fmt.Sprintf("%s=%s", fkCol, escapedValue))
+	}
+	var joinedQueryData = strings.Join(queryData, "&")
+	return joinedQueryData
 }
