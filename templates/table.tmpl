@@ -54,9 +54,9 @@
             <td>{{.Name}}</td>
             <td>{{.Type}}</td>
             <td>
-            {{if .Fk}}
-                <a href="{{.Fk.DestinationTable}}?_rowLimit=100">{{.Fk.DestinationTable}}</a>
-                ({{.Fk.DestinationColumns}})
+            {{range .Fks }}
+                <a href="{{.DestinationTable}}?_rowLimit=100">{{.DestinationTable}}</a>
+                ({{.DestinationColumns}})
             {{end}}
             </td>
             {{if $.Database.Supports.Descriptions}}

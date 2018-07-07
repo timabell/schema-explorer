@@ -86,11 +86,11 @@ func checkColumnFkCount(database *schema.Database, t *testing.T) {
 		t.Log(schema.TableDebug(table))
 		t.Fatal("Column ownderId not found while checking col fk count")
 	}
-	if col.Fk == nil {
+	if col.Fks == nil {
 		t.Log(schema.TableDebug(table))
 		t.Logf("%#v", col)
-		t.Log(col.Fk)
-		t.Errorf("Fk entry missing from column %s.%s", table, col)
+		t.Log(col.Fks)
+		t.Errorf("Fks entry missing from column %s.%s", table, col)
 	}
 }
 

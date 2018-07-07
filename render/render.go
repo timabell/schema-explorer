@@ -256,31 +256,33 @@ func buildCell(col *schema.Column, cellData interface{}, rowData reader.RowData)
 		return "<span class='null'>[null]</span>"
 	}
 	var valueHTML string
-	hasFk := col.Fk != nil
+	hasFk := col.Fks != nil
 	stringValue := *reader.DbValueToString(cellData, col.Type)
 	if hasFk {
 		// todo: possible performance optimisation to save lots of lookups within a loop for the majority case of single column fks
-		//if len(col.Fk.SourceColumns) ==1{
-		//	valueHTML = fmt.Sprintf("<a href='%s?%s=", col.Fk.DestinationTable, col.Fk.DestinationColumns[0].Name)
-		//  valueHTML = fmt.Sprintf("%s=", col.Fk.DestinationTable, col.Fk.DestinationColumns[0].Name)
+		//if len(col.Fks.SourceColumns) ==1{
+		//	valueHTML = fmt.Sprintf("<a href='%s?%s=", col.Fks.DestinationTable, col.Fks.DestinationColumns[0].Name)
+		//  valueHTML = fmt.Sprintf("%s=", col.Fks.DestinationTable, col.Fks.DestinationColumns[0].Name)
 		//  valueHTML = valueHTML + template.HTMLEscapeString(stringValue)
 		//}else{
-		var queryData []string
-		for ix, fkCol := range col.Fk.DestinationColumns {
-			sourceCol := col.Fk.SourceColumns[ix]
-			fkCellData := rowData[sourceCol.Index]
-			fkStringValue := *reader.DbValueToString(fkCellData, fkCol.Type)
-			escapedValue := template.URLQueryEscaper(fkStringValue)
-			escapedValue = template.HTMLEscapeString(escapedValue)
-			queryData = append(queryData, fmt.Sprintf("%s=%s", fkCol, escapedValue))
+		for _, fk := range col.Fks {
+			var queryData []string
+			for ix, fkCol := range fk.DestinationColumns {
+				sourceCol := fk.SourceColumns[ix]
+				fkCellData := rowData[sourceCol.Index]
+				fkStringValue := *reader.DbValueToString(fkCellData, fkCol.Type)
+				escapedValue := template.URLQueryEscaper(fkStringValue)
+				escapedValue = template.HTMLEscapeString(escapedValue)
+				queryData = append(queryData, fmt.Sprintf("%s=%s", fkCol, escapedValue))
+			}
+			var joinedQueryData = strings.Join(queryData, "&")
+			suffix := "&_rowLimit=100#data"
+			valueHTML = valueHTML + fmt.Sprintf("<a href='%s?%s%s' class='fk'>%s</a> ", fk.DestinationTable, joinedQueryData, suffix, template.HTMLEscapeString(stringValue))
 		}
-		var joinedQueryData = strings.Join(queryData, "&")
-		suffix := "&_rowLimit=100#data"
-		valueHTML = fmt.Sprintf("<a href='%s?%s%s' class='fk'>", col.Fk.DestinationTable, joinedQueryData, suffix)
+	} else {
+		valueHTML = valueHTML + template.HTMLEscapeString(stringValue)
 	}
-	valueHTML = valueHTML + template.HTMLEscapeString(stringValue)
 	if hasFk {
-		valueHTML = valueHTML + "</a>"
 	}
 	return valueHTML
 }

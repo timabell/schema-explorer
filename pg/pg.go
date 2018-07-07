@@ -195,7 +195,7 @@ func readConstraints(dbc *sql.DB, sourceTable *schema.Table, database *schema.Da
 				fk = schema.NewFk(name, sourceTable, sourceColumn, destinationTable, destinationColumn)
 				fks = append(fks, fk)
 			}
-			sourceColumn.Fk = fk
+			sourceColumn.Fks = append(sourceColumn.Fks, fk)
 			//log.Printf("fk: %+v - oid %+v", fk, oid)
 		case "p":
 			//log.Printf("pk: %s.%s", sourceTable, sourceColumn)

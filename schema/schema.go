@@ -63,7 +63,7 @@ type Column struct {
 	Index          int
 	Name           string
 	Type           string
-	Fk             *Fk
+	Fks            []*Fk
 	Description    string
 	IsInPrimaryKey bool
 }
@@ -176,12 +176,14 @@ func (database Database) DebugString() string {
 			buffer.WriteString("\t\"")
 			buffer.WriteString(col.Description)
 			buffer.WriteString("\"\n")
-			if col.Fk != nil {
-				buffer.WriteString("    - ")
-				buffer.WriteString(col.Fk.String())
-				buffer.WriteString(" ")
-				buffer.WriteString(fmt.Sprintf("%p", col.Fk))
-				buffer.WriteString("\n")
+			if col.Fks != nil {
+				for _, fk := range col.Fks {
+					buffer.WriteString("    - ")
+					buffer.WriteString(fk.String())
+					buffer.WriteString(" ")
+					buffer.WriteString(fmt.Sprintf("%p", fk))
+					buffer.WriteString("\n")
+				}
 			}
 		}
 		for _, fk := range table.Fks {

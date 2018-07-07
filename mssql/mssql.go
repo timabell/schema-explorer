@@ -237,7 +237,7 @@ func (model mssqlModel) allFks(dbc *sql.DB, database *schema.Database) (allFks [
 			sourceTable.Fks = append(sourceTable.Fks, fk)
 			destinationTable.InboundFks = append(destinationTable.InboundFks, fk)
 		}
-		sourceColumn.Fk = fk
+		sourceColumn.Fks = append(sourceColumn.Fks, fk)
 		//log.Print(fk)
 	}
 	return

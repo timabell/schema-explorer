@@ -179,7 +179,7 @@ func getFks(dbc *sql.DB, sourceTable *schema.Table, database *schema.Database) (
 			fks = append(fks, fk)
 		}
 
-		sourceColumn.Fk = fk
+		sourceColumn.Fks = append(sourceColumn.Fks, fk)
 	}
 	return
 }
