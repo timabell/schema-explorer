@@ -245,7 +245,10 @@ create table CompoundKeyChild(
 insert into CompoundKeyParent(id, colA, colB, badger)values
 	(1,'a1', 'b1', 'mash'),
 	(2,'a2', 'b2', 'bodger'),
-	(3,'a2', 'b3', 'mmmmm');
+	(3,'a2', 'b3', 'mmmmm'),
+	(4,'a<&''2\6', 'b2', 'mwah ha ha');
 insert into CompoundKeyChild(id, colA, colB, noise)values
-	(1,'a1', 'b1', 'badger'),
-	(2,'a2', 'b2', 'bodger');
+	(1,'a1', 'b1', 'pig'),
+	(2,'a1', 'b1', 'swine'),
+	(3,'a2', 'b2', 'horse'),
+	(4,'a<&''2\6', 'b2', 'does it blend?');
