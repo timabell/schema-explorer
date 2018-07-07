@@ -236,36 +236,17 @@ func groupFksByTable(inboundFks []*schema.Fk) groupedFkMap {
 }
 
 func buildInwardLink(fk *schema.Fk, rowData reader.RowData) string {
-	// todo: handle non-string primary key
-	linkHTML := fmt.Sprintf(
-		"<a href='%s?%s=",
-		template.URLQueryEscaper(fk.SourceTable),
-		template.URLQueryEscaper(fk.SourceColumns))
-	// todo: handle compound keys
-	if len(fk.DestinationColumns) > 1 {
-		log.Print("unsupported: compound key. " + fk.String())
-		return ""
+	var queryData []string
+	for _, fkCol := range fk.SourceColumns {
+		fkCellData := rowData[fkCol.Index]
+		fkStringValue := *reader.DbValueToString(fkCellData, fkCol.Type)
+		escapedValue := template.URLQueryEscaper(fkStringValue)
+		escapedValue = template.HTMLEscapeString(escapedValue)
+		queryData = append(queryData, fmt.Sprintf("%s=%s", fkCol, escapedValue))
 	}
-	destinationColumnIndex, _ := fk.DestinationTable.FindColumn(fk.DestinationColumns[0].Name)
-	if destinationColumnIndex < 0 {
-		log.Print(fk)
-		log.Printf("%#v", fk.DestinationTable)
-		log.Panic("Destination column not found in referenced table")
-	}
-	colData := rowData[destinationColumnIndex]
-	switch colData.(type) {
-	case int64:
-		// todo: url-escape as well
-		linkHTML = linkHTML + template.HTMLEscapeString(fmt.Sprintf("%d", colData))
-	case string:
-		linkHTML = linkHTML + template.HTMLEscapeString(fmt.Sprintf("%s", colData))
-	default:
-		linkHTML = linkHTML + template.HTMLEscapeString(fmt.Sprintf("%v", colData))
-	}
-	linkHTML = linkHTML + fmt.Sprintf(
-		// todo: factor out row limit, move to a cookie perhaps
-		"&_rowLimit=100#data' class='parentFk'>%s</a>&nbsp;",
-		template.HTMLEscaper(fk.SourceColumns.String()))
+	var joinedQueryData = strings.Join(queryData, "&")
+	suffix := "&_rowLimit=100#data"
+	linkHTML := fmt.Sprintf("<a href='%s?%s%s' class='parentFk'>%s</a>", fk.SourceTable, joinedQueryData, suffix, fk.SourceColumns)
 	return linkHTML
 }
 
