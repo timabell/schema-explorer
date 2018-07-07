@@ -237,9 +237,10 @@ func groupFksByTable(inboundFks []*schema.Fk) groupedFkMap {
 
 func buildInwardLink(fk *schema.Fk, rowData reader.RowData) string {
 	var queryData []string
-	for _, fkCol := range fk.SourceColumns {
-		fkCellData := rowData[fkCol.Index]
-		fkStringValue := *reader.DbValueToString(fkCellData, fkCol.Type)
+	for ix, fkCol := range fk.SourceColumns {
+		destCol := fk.DestinationColumns[ix]
+		fkCellData := rowData[destCol.Index]
+		fkStringValue := reader.DbValueToString(fkCellData, fkCol.Type)
 		escapedValue := template.URLQueryEscaper(fkStringValue)
 		escapedValue = template.HTMLEscapeString(escapedValue)
 		queryData = append(queryData, fmt.Sprintf("%s=%s", fkCol, escapedValue))
@@ -265,8 +266,9 @@ func buildCell(col *schema.Column, cellData interface{}, rowData reader.RowData)
 		//  valueHTML = valueHTML + template.HTMLEscapeString(stringValue)
 		//}else{
 		var queryData []string
-		for _, fkCol := range col.Fk.DestinationColumns {
-			fkCellData := rowData[fkCol.Index]
+		for ix, fkCol := range col.Fk.DestinationColumns {
+			sourceCol := col.Fk.SourceColumns[ix]
+			fkCellData := rowData[sourceCol.Index]
 			fkStringValue := *reader.DbValueToString(fkCellData, fkCol.Type)
 			escapedValue := template.URLQueryEscaper(fkStringValue)
 			escapedValue = template.HTMLEscapeString(escapedValue)
