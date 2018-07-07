@@ -242,7 +242,10 @@
         <table class="card-view">
             {{ range $i, $col :=  $.Table.Columns }}
                 <tr>
-                    <th title='type: {{.Type}}'>{{.Name}}</th>
+                    <th title='type: {{.Type}}'>
+                        {{ if .IsInPrimaryKey}}<i class="fas fa-key" title="Primary Key"></i>{{end}}
+                        {{.Name}}
+                    </th>
                     <td>{{index $val $i}}</td>
                 </tr>
             {{end}}
@@ -279,6 +282,7 @@
                         </span>
                         <span class="column-name">
                             {{.Name}}
+                            {{ if .IsInPrimaryKey}}<i class="fas fa-key" title="Primary Key"></i>{{end}}
                         </span>
                     </a>
                 </th>
