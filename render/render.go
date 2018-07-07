@@ -210,15 +210,18 @@ func buildInwardCell(inboundFks []*schema.Fk, rowData []interface{}, cols []*sch
 	// sort list of tables (requires TableList to implement sort interface)
 	sort.Sort(keys)
 	// iterate through sorted list of keys, using that to find entry in map
-	parentHTML := ""
+	parentHTML := "<span class='parent-fks'>"
 	for _, table := range keys {
 		fks := groupedFks[table]
-		parentHTML = parentHTML + template.HTMLEscapeString(table.String()) + ":&nbsp;"
+		parentHTML = parentHTML + "<span class='parent-fk-table'>"
+		parentHTML = parentHTML + template.HTMLEscapeString(table.String()) + ":"
+		parentHTML = parentHTML + "</span>"
 		for _, fk := range fks {
 			parentHTML = parentHTML + buildInwardLink(fk, rowData) + " "
 		}
 		parentHTML = parentHTML + "<br/>"
 	}
+	parentHTML = parentHTML + "</span>"
 	return parentHTML
 }
 
@@ -238,16 +241,15 @@ func groupFksByTable(inboundFks []*schema.Fk) groupedFkMap {
 func buildInwardLink(fk *schema.Fk, rowData reader.RowData) string {
 	var queryData []string
 	for ix, fkCol := range fk.SourceColumns {
-		destCol := fk.DestinationColumns[ix]
-		fkCellData := rowData[destCol.Index]
-		fkStringValue := reader.DbValueToString(fkCellData, fkCol.Type)
-		escapedValue := template.URLQueryEscaper(fkStringValue)
-		escapedValue = template.HTMLEscapeString(escapedValue)
-		queryData = append(queryData, fmt.Sprintf("%s=%s", fkCol, escapedValue))
+		destinationCol := fk.DestinationColumns[ix]
+		fkCellData := rowData[destinationCol.Index]
+		escapedName := template.HTMLEscapeString(template.URLQueryEscaper(fkCol.String()))
+		escapedValue := template.HTMLEscapeString(template.URLQueryEscaper(reader.DbValueToString(fkCellData, fkCol.Type)))
+		queryData = append(queryData, fmt.Sprintf("%s=%s", escapedName, escapedValue))
 	}
 	var joinedQueryData = strings.Join(queryData, "&")
 	suffix := "&_rowLimit=100#data"
-	linkHTML := fmt.Sprintf("<a href='%s?%s%s' class='parentFk'>%s</a>", fk.SourceTable, joinedQueryData, suffix, fk.SourceColumns)
+	linkHTML := fmt.Sprintf("<a href='%s?%s%s' class='parent-fk-link'>%s</a>", fk.SourceTable, joinedQueryData, suffix, fk.SourceColumns)
 	return linkHTML
 }
 
