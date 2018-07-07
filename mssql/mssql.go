@@ -306,11 +306,13 @@ order by c.column_id`
 	rows, err := dbc.Query(sqlText)
 	defer rows.Close()
 	cols = []*schema.Column{}
+	colIndex := 0
 	for rows.Next() {
 		var name, typeName string
 		rows.Scan(&name, &typeName)
-		thisCol := schema.Column{Name: name, Type: typeName}
+		thisCol := schema.Column{Index: colIndex, Name: name, Type: typeName}
 		cols = append(cols, &thisCol)
+		colIndex++
 	}
 	return
 }

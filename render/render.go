@@ -188,7 +188,7 @@ func buildRow(rowData reader.RowData, table *schema.Table) cells {
 	row := cells{}
 	for colIndex, col := range table.Columns {
 		cellData := rowData[colIndex]
-		valueHTML := buildCell(col, cellData)
+		valueHTML := buildCell(col, cellData, rowData)
 		row = append(row, template.HTML(valueHTML))
 	}
 	parentHTML := buildInwardCell(table.InboundFks, rowData, table.Columns)
@@ -269,7 +269,7 @@ func buildInwardLink(fk *schema.Fk, rowData reader.RowData) string {
 	return linkHTML
 }
 
-func buildCell(col *schema.Column, cellData interface{}) string {
+func buildCell(col *schema.Column, cellData interface{}, rowData reader.RowData) string {
 	if cellData == nil {
 		return "<span class='null'>[null]</span>"
 	}
@@ -277,16 +277,23 @@ func buildCell(col *schema.Column, cellData interface{}) string {
 	hasFk := col.Fk != nil
 	stringValue := *reader.DbValueToString(cellData, col.Type)
 	if hasFk {
-		// todo: compound-fk support
-		valueHTML = fmt.Sprintf("<a href='%s?%s=", col.Fk.DestinationTable, col.Fk.DestinationColumns[0].Name)
-		// todo: url-escape as well as htmlencode
-		switch {
-		case strings.Contains(col.Type, "varchar"):
-			valueHTML = valueHTML + template.HTMLEscapeString(stringValue)
-		default:
-			valueHTML = valueHTML + template.HTMLEscapeString(stringValue)
+		// todo: possible performance optimisation to save lots of lookups within a loop for the majority case of single column fks
+		//if len(col.Fk.SourceColumns) ==1{
+		//	valueHTML = fmt.Sprintf("<a href='%s?%s=", col.Fk.DestinationTable, col.Fk.DestinationColumns[0].Name)
+		//  valueHTML = fmt.Sprintf("%s=", col.Fk.DestinationTable, col.Fk.DestinationColumns[0].Name)
+		//  valueHTML = valueHTML + template.HTMLEscapeString(stringValue)
+		//}else{
+		var queryData []string
+		for _, fkCol := range col.Fk.DestinationColumns {
+			fkCellData := rowData[fkCol.Index]
+			fkStringValue := *reader.DbValueToString(fkCellData, fkCol.Type)
+			escapedValue := template.HTMLEscapeString(fkStringValue)
+			// todo: url-escape as well as htmlencode
+			queryData = append(queryData, fmt.Sprintf("%s=%s", fkCol, escapedValue))
 		}
-		valueHTML = valueHTML + "&_rowLimit=100#data' class='fk'>"
+		var joinedQueryData = strings.Join(queryData, "&")
+		suffix := "&_rowLimit=100#data"
+		valueHTML = fmt.Sprintf("<a href='%s?%s%s' class='fk'>", col.Fk.DestinationTable, joinedQueryData, suffix)
 	}
 	valueHTML = valueHTML + template.HTMLEscapeString(stringValue)
 	if hasFk {

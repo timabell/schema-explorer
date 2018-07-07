@@ -244,7 +244,8 @@ create table CompoundKeyChild(
 
 insert into CompoundKeyParent(id, colA, colB, badger)values
 	(1,'a1', 'b1', 'mash'),
-	(2,'a2', 'b2', 'bodger');
+	(2,'a2', 'b2', 'bodger'),
+	(3,'a2', 'b3', 'mmmmm');
 insert into CompoundKeyChild(id, colA, colB, noise)values
 	(1,'a1', 'b1', 'badger'),
 	(2,'a2', 'b2', 'bodger');

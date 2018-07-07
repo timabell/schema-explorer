@@ -274,13 +274,15 @@ func (model pgModel) getColumns(dbc *sql.DB, table *schema.Table) (cols []*schem
 	}
 	defer rows.Close()
 	cols = []*schema.Column{}
+	colIndex := 0
 	for rows.Next() {
 		var len int
 		var name, typeName string
 		var notNull bool
 		rows.Scan(&name, &len, &typeName, &notNull)
-		thisCol := schema.Column{Name: name, Type: typeName}
+		thisCol := schema.Column{Index: colIndex, Name: name, Type: typeName}
 		cols = append(cols, &thisCol)
+		colIndex++
 	}
 	return
 }
