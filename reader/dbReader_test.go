@@ -95,7 +95,7 @@ func checkColumnFkCount(database *schema.Database, t *testing.T) {
 }
 
 func checkFkCount(database *schema.Database, t *testing.T) {
-	expectedCount := 5
+	expectedCount := 6
 	fkCount := len(database.Fks)
 	if fkCount != expectedCount {
 		t.Fatalf("Expected %d fks across whole db, found %d", expectedCount, fkCount)
@@ -143,7 +143,7 @@ func checkTableCompoundPks(database *schema.Database, t *testing.T) {
 		t.Fatalf("%s.%s not marked as primary key", table, pkColumn.Name)
 	}
 
-	expectedPkColIndex := 1
+	expectedPkColIndex := 2
 	if pkColumn.Index != expectedPkColIndex {
 		t.Fatalf("Expected the first columnn in pk of %s to have index %d, found %d", table, expectedPkColIndex, pkColumn.Index)
 	}

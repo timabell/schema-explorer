@@ -246,7 +246,7 @@ create table CompoundKeyChild(
 	colA varchar(10),
 	colB varchar(10),
 	noise varchar(50),
-	foreign key (colB) references CompoundKeyAunty(colB)
+	foreign key (colB) references CompoundKeyAunty(colB),
 	foreign key (colA, colB) references CompoundKeyParent(colA, colB)
 );
 

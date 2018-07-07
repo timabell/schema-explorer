@@ -76,6 +76,10 @@ drop table DataTypeTest
 drop table toy
 drop table pet
 drop table person
+drop table SortFilterTest
+drop table CompoundKeyChild
+drop table CompoundKeyParent
+drop table CompoundKeyAunty
 
 GO
 create SCHEMA kitchen;
@@ -196,10 +200,17 @@ insert into SortFilterTest (id, size, colour, pattern) values
 
 create table CompoundKeyParent(
 	id int,
+	padding int,
 	colA varchar(10),
 	colB varchar(10),
 	badger varchar(50),
 	primary key (colA, colB)
+);
+
+create table CompoundKeyAunty(
+	id int,
+	colB varchar(10),
+	primary key (colB)
 );
 
 create table CompoundKeyChild(
@@ -207,6 +218,7 @@ create table CompoundKeyChild(
 	colA varchar(10),
 	colB varchar(10),
 	noise varchar(50),
+	foreign key (colB) references CompoundKeyAunty(colB),
 	foreign key (colA, colB) references CompoundKeyParent(colA, colB)
 );
 
@@ -215,8 +227,13 @@ insert into CompoundKeyParent(id, colA, colB, badger)values
 	(2,'a2', 'b2', 'bodger'),
 	(3,'a2', 'b3', 'mmmmm'),
 	(4,'a<&''2\6', 'b2', 'mwah ha ha');
+insert into CompoundKeyAunty(id, colB)values
+	(10, 'b1'),
+	(11, 'b2'),
+	(12, 'b3');
 insert into CompoundKeyChild(id, colA, colB, noise)values
 	(1,'a1', 'b1', 'pig'),
 	(2,'a1', 'b1', 'swine'),
 	(3,'a2', 'b2', 'horse'),
 	(4,'a<&''2\6', 'b2', 'does it blend?');
+
