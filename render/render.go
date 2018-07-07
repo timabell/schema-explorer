@@ -188,7 +188,7 @@ func buildRow(rowData reader.RowData, table *schema.Table) cells {
 	row := cells{}
 	for colIndex, col := range table.Columns {
 		cellData := rowData[colIndex]
-		valueHTML := buildCell(col, cellData)
+		valueHTML := buildCell(col, cellData, rowData)
 		row = append(row, template.HTML(valueHTML))
 	}
 	parentHTML := buildInwardCell(table.InboundFks, rowData, table.Columns)
@@ -210,15 +210,18 @@ func buildInwardCell(inboundFks []*schema.Fk, rowData []interface{}, cols []*sch
 	// sort list of tables (requires TableList to implement sort interface)
 	sort.Sort(keys)
 	// iterate through sorted list of keys, using that to find entry in map
-	parentHTML := ""
+	parentHTML := "<span class='parent-fks'>"
 	for _, table := range keys {
 		fks := groupedFks[table]
-		parentHTML = parentHTML + template.HTMLEscapeString(table.String()) + ":&nbsp;"
+		parentHTML = parentHTML + "<span class='parent-fk-table'>"
+		parentHTML = parentHTML + template.HTMLEscapeString(table.String()) + ":"
+		parentHTML = parentHTML + "</span>"
 		for _, fk := range fks {
-			parentHTML = parentHTML + buildInwardLink(fk, rowData)
+			parentHTML = parentHTML + buildInwardLink(fk, rowData) + " "
 		}
 		parentHTML = parentHTML + "<br/>"
 	}
+	parentHTML = parentHTML + "</span>"
 	return parentHTML
 }
 
@@ -236,61 +239,74 @@ func groupFksByTable(inboundFks []*schema.Fk) groupedFkMap {
 }
 
 func buildInwardLink(fk *schema.Fk, rowData reader.RowData) string {
-	// todo: handle non-string primary key
-	linkHTML := fmt.Sprintf(
-		"<a href='%s?%s=",
-		template.URLQueryEscaper(fk.SourceTable),
-		template.URLQueryEscaper(fk.SourceColumns))
-	// todo: handle compound keys
-	if len(fk.DestinationColumns) > 1 {
-		log.Print("unsupported: compound key. " + fk.String())
-		return ""
+	var queryData []string
+	for ix, fkCol := range fk.SourceColumns {
+		destinationCol := fk.DestinationColumns[ix]
+		fkCellData := rowData[destinationCol.Index]
+		escapedName := template.HTMLEscapeString(template.URLQueryEscaper(fkCol.String()))
+		escapedValue := template.HTMLEscapeString(template.URLQueryEscaper(reader.DbValueToString(fkCellData, fkCol.Type)))
+		queryData = append(queryData, fmt.Sprintf("%s=%s", escapedName, escapedValue))
 	}
-	destinationColumnIndex, _ := fk.DestinationTable.FindColumn(fk.DestinationColumns[0].Name)
-	if destinationColumnIndex < 0 {
-		log.Print(fk)
-		log.Printf("%#v", fk.DestinationTable)
-		log.Panic("Destination column not found in referenced table")
-	}
-	colData := rowData[destinationColumnIndex]
-	switch colData.(type) {
-	case int64:
-		// todo: url-escape as well
-		linkHTML = linkHTML + template.HTMLEscapeString(fmt.Sprintf("%d", colData))
-	case string:
-		linkHTML = linkHTML + template.HTMLEscapeString(fmt.Sprintf("%s", colData))
-	default:
-		linkHTML = linkHTML + template.HTMLEscapeString(fmt.Sprintf("%v", colData))
-	}
-	linkHTML = linkHTML + fmt.Sprintf(
-		// todo: factor out row limit, move to a cookie perhaps
-		"&_rowLimit=100#data' class='parentFk'>%s</a>&nbsp;",
-		template.HTMLEscaper(fk.SourceColumns.String()))
+	var joinedQueryData = strings.Join(queryData, "&")
+	suffix := "&_rowLimit=100#data"
+	linkHTML := fmt.Sprintf("<a href='%s?%s%s' class='parent-fk-link'>%s</a>", fk.SourceTable, joinedQueryData, suffix, fk.SourceColumns)
 	return linkHTML
 }
 
-func buildCell(col *schema.Column, cellData interface{}) string {
+func buildCell(col *schema.Column, cellData interface{}, rowData reader.RowData) string {
 	if cellData == nil {
-		return "<span class='null'>[null]</span>"
+		return "<span class='null bare-value'>[null]</span>"
 	}
 	var valueHTML string
-	hasFk := col.Fk != nil
+	hasFk := col.Fks != nil
 	stringValue := *reader.DbValueToString(cellData, col.Type)
 	if hasFk {
-		// todo: compound-fk support
-		valueHTML = fmt.Sprintf("<a href='%s?%s=", col.Fk.DestinationTable, col.Fk.DestinationColumns[0].Name)
-		// todo: url-escape as well as htmlencode
-		switch {
-		case strings.Contains(col.Type, "varchar"):
-			valueHTML = valueHTML + template.HTMLEscapeString(stringValue)
-		default:
-			valueHTML = valueHTML + template.HTMLEscapeString(stringValue)
+		// todo: possible performance optimisation to save lots of lookups within a loop for the majority case of single column fks
+		//if len(col.Fks.SourceColumns) ==1{
+		//	valueHTML = fmt.Sprintf("<a href='%s?%s=", col.Fks.DestinationTable, col.Fks.DestinationColumns[0].Name)
+		//  valueHTML = fmt.Sprintf("%s=", col.Fks.DestinationTable, col.Fks.DestinationColumns[0].Name)
+		//  valueHTML = valueHTML + template.HTMLEscapeString(stringValue)
+		//}else{
+		suffix := "&_rowLimit=100#data"
+		if len(col.Fks) > 1 {
+			valueHTML = "<span class='compound-value'>" + template.HTMLEscapeString(stringValue) + "</span> "
+			for _, fk := range col.Fks {
+				var cssClass string
+				if len(fk.SourceColumns) > 1 {
+					cssClass = "fk compound multi"
+				} else {
+					cssClass = "fk multi"
+				}
+				joinedQueryData := buildQueryData(fk, rowData)
+				valueHTML = valueHTML + fmt.Sprintf("<a href='%s?%s%s' class='%s'>%s(%s)</a> ", fk.DestinationTable, joinedQueryData, suffix, cssClass, fk.DestinationTable, fk.DestinationColumns)
+			}
+		} else {
+			fk := col.Fks[0]
+			var cssClass string
+			if len(fk.SourceColumns) > 1 {
+				cssClass = "fk compound single"
+			} else {
+				cssClass = "fk single"
+			}
+			joinedQueryData := buildQueryData(fk, rowData)
+			valueHTML = valueHTML + fmt.Sprintf("<a href='%s?%s%s' class='%s'>%s</a> ", fk.DestinationTable, joinedQueryData, suffix, cssClass, template.HTMLEscapeString(stringValue))
 		}
-		valueHTML = valueHTML + "&_rowLimit=100#data' class='fk'>"
-	}
-	valueHTML = valueHTML + template.HTMLEscapeString(stringValue)
-	if hasFk {
-		valueHTML = valueHTML + "</a>"
+	} else {
+		valueHTML = "<span class='bare-value'>" + template.HTMLEscapeString(stringValue) + "</span> "
 	}
 	return valueHTML
+}
+
+func buildQueryData(fk *schema.Fk, rowData reader.RowData) string {
+	var queryData []string
+	for ix, fkCol := range fk.DestinationColumns {
+		sourceCol := fk.SourceColumns[ix]
+		fkCellData := rowData[sourceCol.Index]
+		fkStringValue := *reader.DbValueToString(fkCellData, fkCol.Type)
+		escapedValue := template.URLQueryEscaper(fkStringValue)
+		escapedValue = template.HTMLEscapeString(escapedValue)
+		queryData = append(queryData, fmt.Sprintf("%s=%s", fkCol, escapedValue))
+	}
+	var joinedQueryData = strings.Join(queryData, "&")
+	return joinedQueryData
 }

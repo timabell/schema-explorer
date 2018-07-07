@@ -39,6 +39,7 @@
     <table>
         <thead>
         <tr>
+            <th></th>
             <th>Name</th>
             <th>Type</th>
             <th>Foreign Key</th>
@@ -49,12 +50,13 @@
         </thead>
         {{ range .Table.Columns }}
         <tr>
+            <td>{{ if .IsInPrimaryKey}}<i class="fas fa-key"></i> Primary Key{{end}}</td>
             <td>{{.Name}}</td>
             <td>{{.Type}}</td>
             <td>
-            {{if .Fk}}
-                <a href="{{.Fk.DestinationTable}}?_rowLimit=100">{{.Fk.DestinationTable}}</a>
-                ({{.Fk.DestinationColumns}})
+            {{range .Fks }}
+                <a href="{{.DestinationTable}}?_rowLimit=100">{{.DestinationTable}}</a>
+                ({{.DestinationColumns}})
             {{end}}
             </td>
             {{if $.Database.Supports.Descriptions}}
@@ -92,9 +94,7 @@
         </td>
         <td>
             <a href="{{.DestinationTable}}?_rowLimit=100">{{.DestinationTable}}</a>
-            {{range .DestinationColumns}}
-                {{.Name}}
-            {{end}}
+            ({{.DestinationColumns}})
         </td>
     </tr>
     {{end}}
@@ -124,14 +124,10 @@
         {{end}}
         <td>
             <a href="{{.SourceTable}}?_rowLimit=100">{{.SourceTable}}</a>
-            {{range .SourceColumns}}
-                {{.Name}}
-            {{end}}
+            ({{.DestinationColumns}})
         </td>
         <td>
-            {{range .DestinationColumns}}
-                {{.Name}}
-            {{end}}
+            ({{.DestinationColumns}})
         </td>
     </tr>
     {{end}}
@@ -246,7 +242,10 @@
         <table class="card-view">
             {{ range $i, $col :=  $.Table.Columns }}
                 <tr>
-                    <th title='type: {{.Type}}'>{{.Name}}</th>
+                    <th title='type: {{.Type}}'>
+                        {{ if .IsInPrimaryKey}}<i class="fas fa-key" title="Primary Key"></i>{{end}}
+                        {{.Name}}
+                    </th>
                     <td>{{index $val $i}}</td>
                 </tr>
             {{end}}
@@ -283,6 +282,7 @@
                         </span>
                         <span class="column-name">
                             {{.Name}}
+                            {{ if .IsInPrimaryKey}}<i class="fas fa-key" title="Primary Key"></i>{{end}}
                         </span>
                     </a>
                 </th>

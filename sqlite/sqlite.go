@@ -87,7 +87,7 @@ func (model sqliteModel) getTables(dbc *sql.DB) (tables []*schema.Table, err err
 	for rows.Next() {
 		var name string
 		rows.Scan(&name)
-		tables = append(tables, &schema.Table{Name: name})
+		tables = append(tables, &schema.Table{Name: name, Pk: &schema.Pk{}})
 	}
 	for _, table := range tables {
 		rowCount, err := model.getRowCount(table)
@@ -163,9 +163,23 @@ func getFks(dbc *sql.DB, sourceTable *schema.Table, database *schema.Database) (
 		_, sourceColumn := sourceTable.FindColumn(sourceColumnName)
 		destinationTable := database.FindTable(&schema.Table{Name: destinationTableName})
 		_, destinationColumn := destinationTable.FindColumn(destinationColumnName)
-		fk := schema.NewFk("", sourceTable, sourceColumn, destinationTable, destinationColumn)
-		sourceColumn.Fk = fk
-		fks = append(fks, fk)
+
+		// see if we are adding columns to an existing fk
+		var fk *schema.Fk
+		for _, existingFk := range fks {
+			if existingFk.Id == id {
+				existingFk.SourceColumns = append(existingFk.SourceColumns, sourceColumn)
+				existingFk.DestinationColumns = append(existingFk.DestinationColumns, destinationColumn)
+				fk = existingFk
+				break
+			}
+		}
+		if fk == nil {
+			fk = &schema.Fk{Id: id, SourceTable: sourceTable, SourceColumns: schema.ColumnList{sourceColumn}, DestinationTable: destinationTable, DestinationColumns: schema.ColumnList{destinationColumn}}
+			fks = append(fks, fk)
+		}
+
+		sourceColumn.Fks = append(sourceColumn.Fks, fk)
 	}
 	return
 }
@@ -230,14 +244,19 @@ func (model sqliteModel) getColumns(dbc *sql.DB, table *schema.Table) (cols []*s
 	}
 	defer rows.Close()
 	cols = []*schema.Column{}
+	colIndex := 0
 	for rows.Next() {
-		var cid int
+		var cid, pk int
 		var name, typeName string
-		var notNull, pk bool
+		var notNull bool
 		var defaultValue interface{}
 		rows.Scan(&cid, &name, &typeName, &notNull, &defaultValue, &pk)
-		thisCol := schema.Column{Name: name, Type: typeName}
+		thisCol := schema.Column{Index: colIndex, Name: name, Type: typeName, IsInPrimaryKey: pk > 0}
 		cols = append(cols, &thisCol)
+		if pk > 0 {
+			table.Pk.Columns = append(table.Pk.Columns, &thisCol)
+		}
+		colIndex++
 	}
 	return
 }

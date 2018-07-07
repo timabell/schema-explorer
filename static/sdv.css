@@ -128,20 +128,51 @@ tr:hover{
     background-color: #eee;
 }
 
+.column-name,
+td .parent-fks{
+    white-space: nowrap;
+}
+
+td .parent-fk-link:hover,
 td a.fk:hover {
     background-color: #ccc;
 }
-td a.fk {
-    display: block;
-    width: 100%;
-    background-color: #ddd;
+
+td .parent-fk-link{
+    display: inline-block;
     padding: 0.5em;
+    margin: 0 0 0.5em 0.25em;
+}
+td .parent-fk-table,
+td .compound-value,
+td .bare-value{
+    display: inline-block;
+    padding: 0.5em 0;
+}
+
+td a.fk {
+    display: inline-block;
+    padding: 0.5em;
+    margin: 0 0 0.5em 0;
+}
+td .compound-value{
+    padding: 0.5em;
+}
+td .compound-value,
+td .parent-fk-link,
+td a.fk {
+    background-color: #ddd;
+}
+td a.fk.single {
+    width: 100%;
+}
+td .parent-fk-link,
+td a.fk {
     text-decoration: none;
-    margin: 0;
 }
 
 th, td {
-    padding: 0.5em 1.5em 0.5em 0;
+    padding: 0.5em 1.5em 0.5em 0.5em;
 }
 
 .null {

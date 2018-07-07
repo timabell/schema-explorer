@@ -20,12 +20,26 @@ type Database struct {
 	DefaultSchemaName string
 }
 
+type Pk struct {
+	Name    string
+	Columns ColumnList
+}
+
+type Index struct {
+	Name        string
+	Columns     ColumnList
+	IsUnique    bool
+	IsClustered bool
+}
+
 type Table struct {
 	Schema      string
 	Name        string
 	Columns     ColumnList
+	Pk          *Pk
 	Fks         []*Fk
 	InboundFks  []*Fk
+	Indexes     []*Index
 	Description string
 	RowCount    *int // pointer to allow us to tell the difference between zero and unknown
 }
@@ -46,14 +60,16 @@ func (tables TableList) Less(i, j int) bool {
 type ColumnList []*Column
 
 type Column struct {
-	Name        string
-	Type        string
-	Fk          *Fk
-	Description string
+	Index          int
+	Name           string
+	Type           string
+	Fks            []*Fk
+	Description    string
+	IsInPrimaryKey bool
 }
 
-// todo: convert to pointers to tables & columns for memory efficiency
 type Fk struct {
+	Id                 int
 	Name               string
 	SourceTable        *Table
 	SourceColumns      ColumnList
@@ -82,7 +98,7 @@ func TableFromString(value string) Table {
 }
 
 func TableDebug(table *Table) string {
-	return fmt.Sprintf("%s: | cols: %s | fks: %s | inboundFks: %s", table.String(), table.Columns, table.Fks, table.InboundFks)
+	return fmt.Sprintf("%s: | pk: %s | cols: %s | fks: %s | inboundFks: %s", table.String(), table.Pk, table.Columns, table.Fks, table.InboundFks)
 }
 
 func (columns ColumnList) String() string {
@@ -98,7 +114,7 @@ func (column Column) String() string {
 }
 
 func (fk Fk) String() string {
-	return fmt.Sprintf("%s(%s) => %s(%s)", fk.SourceTable, fk.SourceColumns.String(), fk.DestinationTable, fk.DestinationColumns.String())
+	return fmt.Sprintf("%s %s(%s) => %s(%s)", fk.Name, fk.SourceTable, fk.SourceColumns.String(), fk.DestinationTable, fk.DestinationColumns.String())
 }
 
 // filter the fk list down to keys that reference the "child" table
@@ -160,12 +176,14 @@ func (database Database) DebugString() string {
 			buffer.WriteString("\t\"")
 			buffer.WriteString(col.Description)
 			buffer.WriteString("\"\n")
-			if col.Fk != nil {
-				buffer.WriteString("    - ")
-				buffer.WriteString(col.Fk.String())
-				buffer.WriteString(" ")
-				buffer.WriteString(fmt.Sprintf("%p", col.Fk))
-				buffer.WriteString("\n")
+			if col.Fks != nil {
+				for _, fk := range col.Fks {
+					buffer.WriteString("    - ")
+					buffer.WriteString(fk.String())
+					buffer.WriteString(" ")
+					buffer.WriteString(fmt.Sprintf("%p", fk))
+					buffer.WriteString("\n")
+				}
 			}
 		}
 		for _, fk := range table.Fks {

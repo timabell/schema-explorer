@@ -56,6 +56,8 @@ func (model mssqlModel) ReadSchema() (database *schema.Database, err error) {
 		return
 	}
 
+	model.getPks(dbc, database)
+
 	addDescriptions(dbc, database)
 
 	//log.Print(database.DebugString())
@@ -178,7 +180,6 @@ func showVersion(dbc *sql.DB) {
 	log.Print("Successfully connected to MSSQL. @@version: " + serverVersion)
 }
 
-// todo: don't actually need an allfks method for mssql as can filter both incoming and outgoing, rework interface
 func (model mssqlModel) allFks(dbc *sql.DB, database *schema.Database) (allFks []*schema.Fk, err error) {
 	rows, err := dbc.Query(`
 		select fk.name,
@@ -213,20 +214,31 @@ func (model mssqlModel) allFks(dbc *sql.DB, database *schema.Database) (allFks [
 	defer rows.Close()
 
 	allFks = []*schema.Fk{}
-
 	for rows.Next() {
 		var name, sourceSchema, sourceTableName, sourceColumnName, destinationSchema, destinationTableName, destinationColumnName string
 		rows.Scan(&name, &sourceSchema, &sourceTableName, &sourceColumnName, &destinationSchema, &destinationTableName, &destinationColumnName)
-		// todo: support compound foreign keys (i.e. those with 2+ columns involved
 		sourceTable := database.FindTable(&schema.Table{Schema: sourceSchema, Name: sourceTableName})
 		_, sourceColumn := sourceTable.FindColumn(sourceColumnName)
 		destinationTable := database.FindTable(&schema.Table{Schema: destinationSchema, Name: destinationTableName})
 		_, destinationColumn := destinationTable.FindColumn(destinationColumnName)
-		fk := schema.NewFk(name, sourceTable, sourceColumn, destinationTable, destinationColumn)
-		sourceTable.Fks = append(sourceTable.Fks, fk)
-		sourceColumn.Fk = fk
-		destinationTable.InboundFks = append(destinationTable.InboundFks, fk)
-		allFks = append(allFks, fk)
+		// see if we are adding columns to an existing fk
+		var fk *schema.Fk
+		for _, existingFk := range allFks {
+			if existingFk.Name == name {
+				existingFk.SourceColumns = append(existingFk.SourceColumns, sourceColumn)
+				existingFk.DestinationColumns = append(existingFk.DestinationColumns, destinationColumn)
+				fk = existingFk
+				break
+			}
+		}
+		if fk == nil {
+			fk = schema.NewFk(name, sourceTable, sourceColumn, destinationTable, destinationColumn)
+			allFks = append(allFks, fk)
+			sourceTable.Fks = append(sourceTable.Fks, fk)
+			destinationTable.InboundFks = append(destinationTable.InboundFks, fk)
+		}
+		sourceColumn.Fks = append(sourceColumn.Fks, fk)
+		//log.Print(fk)
 	}
 	return
 }
@@ -294,11 +306,51 @@ order by c.column_id`
 	rows, err := dbc.Query(sqlText)
 	defer rows.Close()
 	cols = []*schema.Column{}
+	colIndex := 0
 	for rows.Next() {
 		var name, typeName string
 		rows.Scan(&name, &typeName)
-		thisCol := schema.Column{Name: name, Type: typeName}
+		thisCol := schema.Column{Index: colIndex, Name: name, Type: typeName}
 		cols = append(cols, &thisCol)
+		colIndex++
 	}
 	return
+}
+
+func (model mssqlModel) getPks(dbc *sql.DB, database *schema.Database) {
+	rows, err := dbc.Query(`
+		select
+			ix.name index_name,
+			s.name schema_name,
+			t.name table_name,
+			col.name colname
+		from sys.indexes ix
+		inner join sys.index_columns ic on ic.object_id = ix.object_id and ic.index_id = ix.index_id
+		inner join sys.tables t on t.object_id = ix.object_id
+		inner join sys.columns col on col.object_id = ix.object_id and col.column_id = ic.column_id
+		inner join sys.schemas s on s.schema_id = t.schema_id
+		where ix.is_primary_key = 1`)
+
+	if err != nil {
+		log.Fatal("error running query to find pks: ", err)
+		return
+	}
+	if rows == nil {
+		log.Fatal("pk rows was nil")
+		return
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var pkName, schemaName, tableName, columnName string
+		rows.Scan(&pkName, &schemaName, &tableName, &columnName)
+		table := database.FindTable(&schema.Table{Schema: schemaName, Name: tableName})
+		_, col := table.FindColumn(columnName)
+		col.IsInPrimaryKey = true
+		if table.Pk == nil {
+			table.Pk = &schema.Pk{Name: pkName, Columns: schema.ColumnList{col}}
+		} else {
+			table.Pk.Columns = append(table.Pk.Columns, col)
+		}
+	}
 }

@@ -55,13 +55,11 @@ func (model pgModel) ReadSchema() (database *schema.Database, err error) {
 
 	// fks
 	for _, table := range database.Tables {
-		var fks []*schema.Fk
-		fks, err = getFks(dbc, table, database)
+		err = readConstraints(dbc, table, database)
 		if err != nil {
 			return
 		}
-		table.Fks = fks
-		database.Fks = append(database.Fks, fks...)
+		database.Fks = append(database.Fks, table.Fks...)
 	}
 
 	// hook-up inbound fks
@@ -107,7 +105,7 @@ func (model pgModel) getTables(dbc *sql.DB) (tables []*schema.Table, err error) 
 	for rows.Next() {
 		var name, schemaName string
 		rows.Scan(&schemaName, &name)
-		tables = append(tables, &schema.Table{Schema: schemaName, Name: name})
+		tables = append(tables, &schema.Table{Schema: schemaName, Name: name, Pk: &schema.Pk{}})
 	}
 	for _, table := range tables {
 		rowCount, err := model.getRowCount(table)
@@ -145,29 +143,69 @@ func (model pgModel) CheckConnection() (err error) {
 	return
 }
 
-func getFks(dbc *sql.DB, sourceTable *schema.Table, database *schema.Database) (fks []*schema.Fk, err error) {
+func readConstraints(dbc *sql.DB, sourceTable *schema.Table, database *schema.Database) (err error) {
 	// todo: parameterise
 	// todo: support multi-column FKs
-	rows, err := dbc.Query("select col.attname column_name, ftbl.relname, fcol.attname foreign_column, con.conname from pg_constraint con inner join pg_namespace ns on con.connamespace = ns.oid inner join pg_class tbl on tbl.oid = con.conrelid inner join pg_class ftbl on ftbl.oid = con.confrelid inner join pg_attribute col on col.attrelid = tbl.oid and col.attnum = con.conkey[1] inner join pg_attribute fcol on fcol.attrelid = ftbl.oid and fcol.attnum = con.confkey[1] where con.contype = 'f' and ns.nspname = '" + sourceTable.Schema + "' and tbl.relname = '" + sourceTable.Name + "';")
+	// null-proof unnest: https://stackoverflow.com/a/49736694
+	sql := fmt.Sprintf(`select con.oid, con.contype, col.attname column_name, ftbl.relname, fcol.attname foreign_column, con.conname
+		from
+			(
+				select pgc.oid, pgc.connamespace, pgc.conrelid, pgc.confrelid, pgc.contype, pgc.conname,
+				       unnest(case when pgc.conkey <> '{}' then pgc.conkey else '{null}' end) as conkey,
+				       unnest(case when pgc.confkey <> '{}' then pgc.confkey else '{null}' end) as confkey
+				from pg_constraint pgc
+			) as con
+			inner join pg_namespace ns on con.connamespace = ns.oid
+			inner join pg_class tbl on tbl.oid = con.conrelid
+			inner join pg_attribute col on col.attrelid = tbl.oid and col.attnum = con.conkey
+			left outer join pg_class ftbl on ftbl.oid = con.confrelid
+			left outer join pg_attribute fcol on fcol.attrelid = ftbl.oid and fcol.attnum = con.confkey
+		where ns.nspname = '%s' and tbl.relname = '%s';`,
+		sourceTable.Schema, sourceTable.Name)
+
+	rows, err := dbc.Query(sql)
 	if err != nil {
 		return
 	}
 	defer rows.Close()
-	fks = []*schema.Fk{}
+	var fks []*schema.Fk
 	for rows.Next() {
-		var sourceColumnName, destinationTableName, destinationColumnName, name string
-		rows.Scan(&sourceColumnName, &destinationTableName, &destinationColumnName, &name)
+		var oid, conType, sourceColumnName, destinationTableName, destinationColumnName, name string
+		rows.Scan(&oid, &conType, &sourceColumnName, &destinationTableName, &destinationColumnName, &name)
 		_, sourceColumn := sourceTable.FindColumn(sourceColumnName)
-		destinationTable := database.FindTable(&schema.Table{Schema: database.DefaultSchemaName, Name: destinationTableName})
-		if destinationTable == nil {
-			log.Print(database.DebugString())
-			panic(fmt.Sprintf("couldn't find table %s in database object while hooking up fks", destinationTableName))
+		switch conType {
+		case "f": // f = foreign key
+			destinationTable := database.FindTable(&schema.Table{Schema: database.DefaultSchemaName, Name: destinationTableName})
+			if destinationTable == nil {
+				log.Print(database.DebugString())
+				panic(fmt.Sprintf("couldn't find table %s in database object while hooking up fks", destinationTableName))
+			}
+			_, destinationColumn := destinationTable.FindColumn(destinationColumnName)
+			// see if we are adding columns to an existing fk
+			var fk *schema.Fk
+			for _, existingFk := range fks {
+				if existingFk.Name == name {
+					existingFk.SourceColumns = append(existingFk.SourceColumns, sourceColumn)
+					existingFk.DestinationColumns = append(existingFk.DestinationColumns, destinationColumn)
+					fk = existingFk
+					break
+				}
+			}
+			if fk == nil {
+				fk = schema.NewFk(name, sourceTable, sourceColumn, destinationTable, destinationColumn)
+				fks = append(fks, fk)
+			}
+			sourceColumn.Fks = append(sourceColumn.Fks, fk)
+			//log.Printf("fk: %+v - oid %+v", fk, oid)
+		case "p":
+			//log.Printf("pk: %s.%s", sourceTable, sourceColumn)
+			sourceTable.Pk.Columns = append(sourceTable.Pk.Columns, sourceColumn)
+			sourceColumn.IsInPrimaryKey = true
+			//default:
+			//	log.Printf("?? %s", conType)
 		}
-		_, destinationColumn := destinationTable.FindColumn(destinationColumnName)
-		fk := schema.NewFk(name, sourceTable, sourceColumn, destinationTable, destinationColumn)
-		sourceColumn.Fk = fk
-		fks = append(fks, fk)
 	}
+	sourceTable.Fks = fks
 	return
 }
 
@@ -236,13 +274,15 @@ func (model pgModel) getColumns(dbc *sql.DB, table *schema.Table) (cols []*schem
 	}
 	defer rows.Close()
 	cols = []*schema.Column{}
+	colIndex := 0
 	for rows.Next() {
 		var len int
 		var name, typeName string
 		var notNull bool
 		rows.Scan(&name, &len, &typeName, &notNull)
-		thisCol := schema.Column{Name: name, Type: typeName}
+		thisCol := schema.Column{Index: colIndex, Name: name, Type: typeName}
 		cols = append(cols, &thisCol)
+		colIndex++
 	}
 	return
 }
