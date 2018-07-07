@@ -94,9 +94,7 @@
         </td>
         <td>
             <a href="{{.DestinationTable}}?_rowLimit=100">{{.DestinationTable}}</a>
-            {{range .DestinationColumns}}
-                {{.Name}}
-            {{end}}
+            ({{.DestinationColumns}})
         </td>
     </tr>
     {{end}}
@@ -126,14 +124,10 @@
         {{end}}
         <td>
             <a href="{{.SourceTable}}?_rowLimit=100">{{.SourceTable}}</a>
-            {{range .SourceColumns}}
-                {{.Name}}
-            {{end}}
+            ({{.DestinationColumns}})
         </td>
         <td>
-            {{range .DestinationColumns}}
-                {{.Name}}
-            {{end}}
+            ({{.DestinationColumns}})
         </td>
     </tr>
     {{end}}
