@@ -253,7 +253,7 @@ func buildInwardLink(fk *schema.Fk, rowData reader.RowData) string {
 
 func buildCell(col *schema.Column, cellData interface{}, rowData reader.RowData) string {
 	if cellData == nil {
-		return "<span class='null'>[null]</span>"
+		return "<span class='null bare-value'>[null]</span>"
 	}
 	var valueHTML string
 	hasFk := col.Fks != nil
@@ -267,18 +267,30 @@ func buildCell(col *schema.Column, cellData interface{}, rowData reader.RowData)
 		//}else{
 		suffix := "&_rowLimit=100#data"
 		if len(col.Fks) > 1 {
-			valueHTML = valueHTML + template.HTMLEscapeString(stringValue)
+			valueHTML = "<span class='compound-value'>" + template.HTMLEscapeString(stringValue) + "</span> "
 			for _, fk := range col.Fks {
+				var cssClass string
+				if len(fk.SourceColumns) > 1 {
+					cssClass = "fk compound multi"
+				} else {
+					cssClass = "fk multi"
+				}
 				joinedQueryData := buildQueryData(fk, rowData)
-				valueHTML = valueHTML + fmt.Sprintf("<a href='%s?%s%s' class='fk'>%s(%s)</a> ", fk.DestinationTable, joinedQueryData, suffix, fk.DestinationTable, fk.DestinationColumns)
+				valueHTML = valueHTML + fmt.Sprintf("<a href='%s?%s%s' class='%s'>%s(%s)</a> ", fk.DestinationTable, joinedQueryData, suffix, cssClass, fk.DestinationTable, fk.DestinationColumns)
 			}
 		} else {
 			fk := col.Fks[0]
+			var cssClass string
+			if len(fk.SourceColumns) > 1 {
+				cssClass = "fk compound single"
+			} else {
+				cssClass = "fk single"
+			}
 			joinedQueryData := buildQueryData(fk, rowData)
-			valueHTML = valueHTML + fmt.Sprintf("<a href='%s?%s%s' class='fk'>%s</a> ", fk.DestinationTable, joinedQueryData, suffix, template.HTMLEscapeString(stringValue))
+			valueHTML = valueHTML + fmt.Sprintf("<a href='%s?%s%s' class='%s'>%s</a> ", fk.DestinationTable, joinedQueryData, suffix, cssClass, template.HTMLEscapeString(stringValue))
 		}
 	} else {
-		valueHTML = valueHTML + template.HTMLEscapeString(stringValue)
+		valueHTML = "<span class='bare-value'>" + template.HTMLEscapeString(stringValue) + "</span> "
 	}
 	return valueHTML
 }

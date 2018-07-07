@@ -131,13 +131,23 @@ tr:hover{
 td a.fk:hover {
     background-color: #ccc;
 }
+td .bare-value,
+td .parentFk,
+td .compound-value,
 td a.fk {
-    display: block;
-    width: 100%;
-    background-color: #ddd;
+    display: inline-block;
     padding: 0.5em;
-    text-decoration: none;
     margin: 0;
+}
+td .compound-value,
+td a.fk {
+    background-color: #ddd;
+}
+td a.fk.single {
+    width: 100%;
+}
+td a.fk {
+    text-decoration: none;
 }
 
 th, td {
