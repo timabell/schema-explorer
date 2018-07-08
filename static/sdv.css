@@ -38,6 +38,7 @@ table {
     border-collapse: collapse;
     display: block;
     overflow-x: auto;
+    margin-left: -0.5em;
 }
 
 th {
@@ -102,7 +103,7 @@ table.card-view{
 .sort-info{
     float:left;
     overflow: auto; /*clearfix*/
-    margin: 0.5em 2em 1em 0;
+    margin: 0.5em 2.5em 1em -0.5em;
 }
 .sort-filter-info {
     clear: both;
