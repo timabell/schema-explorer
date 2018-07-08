@@ -10,7 +10,7 @@ h1{
 }
 .encore{font-size: 60%;}
 a{color:#333;}
-a:hover{text-decoration: underline;}
+a:hover{text-decoration: underline !important;}
 a:visited{color:#333;}
 
 h2{
