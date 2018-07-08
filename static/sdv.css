@@ -103,7 +103,7 @@ table.card-view{
 .sort-info{
     float:left;
     overflow: auto; /*clearfix*/
-    margin: 0.5em 2.5em 1em -0.5em;
+    margin: 0.5em 2.5oem 1em -0.5em;
 }
 .sort-filter-info {
     clear: both;
@@ -135,7 +135,7 @@ td .parent-fks{
 }
 
 td .parent-fk-link:hover,
-td a.fk:hover {
+td a:hover {
     background-color: #ccc;
 }
 
@@ -151,7 +151,7 @@ td .bare-value{
     padding: 0.5em 0;
 }
 
-td a.fk {
+td a {
     display: inline-block;
     padding: 0.5em;
     margin: 0 0 0.5em 0;
@@ -161,14 +161,14 @@ td .compound-value{
 }
 td .compound-value,
 td .parent-fk-link,
-td a.fk {
+td a {
     background-color: #ddd;
 }
 td a.fk.single {
     width: 100%;
 }
 td .parent-fk-link,
-td a.fk {
+td a {
     text-decoration: none;
 }
 

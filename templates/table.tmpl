@@ -50,9 +50,9 @@
         </thead>
         {{ range .Table.Columns }}
         <tr>
-            <td>{{ if .IsInPrimaryKey}}<i class="fas fa-key"></i> Primary Key{{end}}</td>
-            <td>{{.Name}}</td>
-            <td>{{.Type}}</td>
+            <td><span class="bare-value">{{ if .IsInPrimaryKey}}<i class="fas fa-key"></i> Primary Key{{end}}</span></td>
+            <td><span class="bare-value">{{.Name}}</span></td>
+            <td><span class="bare-value">{{.Type}}</span></td>
             <td>
             {{range .Fks }}
                 <a href="{{.DestinationTable}}?_rowLimit=100">{{.DestinationTable}}</a>
@@ -60,7 +60,7 @@
             {{end}}
             </td>
             {{if $.Database.Supports.Descriptions}}
-            <td>{{.Description}}</td>
+            <td><span class="bare-value">"{{.Description}}</span></td>
             {{end}}
         </tr>
         {{end}}
@@ -75,7 +75,7 @@
     <thead>
     <tr>
         {{if $.Database.Supports.FkNames}}
-            <td>Name</td>
+        <th>Name</th>
         {{end}}
         <th>From</th>
         <th>To</th>
@@ -85,13 +85,13 @@
     {{range .Table.Fks}}
     <tr>
         {{if $.Database.Supports.FkNames}}
-            <td>{{.Name}}</td>
+            <td><span class="bare-value">{{.Name}}</span></td>
         {{end}}
-        <td>
+        <td><span class="bare-value">
         {{range .SourceColumns}}
             {{.Name}}
         {{end}}
-        </td>
+        </span></td>
         <td>
             <a href="{{.DestinationTable}}?_rowLimit=100">{{.DestinationTable}}</a>
             ({{.DestinationColumns}})
@@ -110,7 +110,7 @@
     <thead>
     <tr>
         {{if $.Database.Supports.FkNames}}
-            <td>Name</td>
+        <td>Name</td>
         {{end}}
         <th>From</th>
         <th>To</th>
@@ -120,15 +120,15 @@
     {{range .Table.InboundFks}}
     <tr>
         {{if $.Database.Supports.FkNames}}
-            <td>{{.Name}}</td>
+        <td><span class="bare-value">{{.Name}}</span></td>
         {{end}}
         <td>
             <a href="{{.SourceTable}}?_rowLimit=100">{{.SourceTable}}</a>
             ({{.DestinationColumns}})
         </td>
-        <td>
+        <td><span class="bare-value">
             ({{.DestinationColumns}})
-        </td>
+        </span></td>
     </tr>
     {{end}}
     </tbody>
