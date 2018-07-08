@@ -139,7 +139,7 @@ td a:hover {
     background-color: #ccc;
 }
 
-td .parent-fks a:last-of-type {
+td a:last-of-type {
     margin-bottom: 0;
 }
 
