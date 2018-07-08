@@ -103,7 +103,7 @@ table.card-view{
 .sort-info{
     float:left;
     overflow: auto; /*clearfix*/
-    margin: 0.5em 2.5oem 1em -0.5em;
+    margin: 0.5em 2.5em 1em -0.5em;
 }
 .sort-filter-info {
     clear: both;
@@ -137,6 +137,10 @@ td .parent-fks{
 td .parent-fk-link:hover,
 td a:hover {
     background-color: #ccc;
+}
+
+td .parent-fks a:last-of-type {
+    margin-bottom: 0;
 }
 
 td .parent-fk-link{
