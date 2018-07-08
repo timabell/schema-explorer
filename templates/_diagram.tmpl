@@ -1,12 +1,12 @@
 {{define "_diagram"}}
 <div id="diagramWrapper">
 <div id="diagram-toolbar">
-    <button id="enable-zoom" class="action-button" onclick="toggleZoom(true)">
+    <button id="enable-zoom" class="action-button" onclick="toggleZoomPan(true)">
         <i class="fas fa-search-plus"></i>
-        enable zoom</button>
-    <button id="disable-zoom" class="action-button" onclick="toggleZoom(false)" style="display: none;">
+        enable zoom/pan</button>
+    <button id="disable-zoom" class="action-button" onclick="toggleZoomPan(false)" style="display: none;">
         <i class="fas fa-times"></i>
-        disable zoom</button>
+        disable zoom/pan</button>
 </div>
 <div id="table-diagram">
 </div>
@@ -104,6 +104,7 @@
         cy.ready(function(){
             fitDiagram();
             cy.zoomingEnabled(false);
+            cy.panningEnabled(false);
         });
         cy.on('tap','node',function(e){
             window.location = '/tables/' + e.target.data().id + '?_rowLimit=100';
@@ -117,10 +118,11 @@
         });
     });
 
-    function toggleZoom(enable){
+    function toggleZoomPan(enable){
         $('#enable-zoom').toggle(!enable);
         $('#disable-zoom').toggle(enable);
         cy.zoomingEnabled(enable);
+        cy.panningEnabled(enable);
     }
 </script>
 {{end}}
