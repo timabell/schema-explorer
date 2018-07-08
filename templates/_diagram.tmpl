@@ -7,6 +7,9 @@
     <button id="disable-zoom" class="action-button" onclick="toggleZoomPan(false)" style="display: none;">
         <i class="fas fa-times"></i>
         disable zoom/pan</button>
+    <button id="reset-diagram" class="action-button" onclick="resetZoomPan()">
+        <i class="fas fa-undo"></i>
+        reset</button>
 </div>
 <div id="table-diagram">
 </div>
@@ -118,6 +121,9 @@
         });
     });
 
+    function resetZoomPan(enable){
+        fitDiagram();
+    }
     function toggleZoomPan(enable){
         $('#enable-zoom').toggle(!enable);
         $('#disable-zoom').toggle(enable);
