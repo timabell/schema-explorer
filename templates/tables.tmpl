@@ -35,9 +35,9 @@
 {{range .Database.Tables}}
         <tr>
             <td><a href='tables/{{.}}?_rowLimit=100'>{{.}}</a></td>
-            <td>{{.RowCount}}</td>
+            <td><span class="bare-value">{{.RowCount}}</span></td>
             {{if $.Database.Supports.Descriptions}}
-            <td>{{.Description}}</td>
+            <td><span class="bare-value">{{.Description}}</span></td>
             {{end}}
         </tr>
 {{end}}
@@ -62,15 +62,11 @@
         {{end}}
         <td>
             <a href="tables/{{.SourceTable}}?_rowLimit=100">{{.SourceTable}}</a>
-            {{range .SourceColumns}}
-                {{.Name}}
-            {{end}}
+            ({{.SourceColumns}})
         </td>
         <td>
             <a href="tables/{{.DestinationTable}}?_rowLimit=100">{{.DestinationTable}}</a>
-        {{range .DestinationColumns}}
-            {{.Name}}
-        {{end}}
+            ({{.DestinationColumns}})
         </td>
     </tr>
     {{end}}

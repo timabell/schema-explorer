@@ -164,6 +164,7 @@ td .parent-fk-link,
 td a {
     background-color: #ddd;
 }
+.tableList a,
 td a.fk.single {
     width: 100%;
 }
