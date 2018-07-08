@@ -54,11 +54,6 @@ td {
     vertical-align: top;
 }
 
-.fk-list{
-    float: left;
-    margin: 0 2em 1em 0;
-}
-
 table.data-table-view{
     width: 100%;
     clear: both;
