@@ -75,9 +75,23 @@ func Test_ReadSchema(t *testing.T) {
 	checkTableRowCount(database, t)
 	checkInboundTableFkCount(database, t)
 	checkColumnFkCount(database, t)
+	checkNullable(database, t)
 	if database.Supports.Descriptions {
 		checkDescriptions(database, t)
 	}
+}
+
+func checkNullable(database *schema.Database, t *testing.T) {
+	table := findTable(schema.Table{Schema: database.DefaultSchemaName, Name: "DataTypeTest"}, database, t)
+	_, notNullCol := table.FindColumn("field_NotNullInt")
+	if notNullCol.Nullable {
+		t.Errorf("%s.%s should not be nullable", table, notNullCol)
+	}
+	_, nullCol := table.FindColumn("field_NullInt")
+	if !nullCol.Nullable {
+		t.Errorf("%s.%s should be nullable", table, nullCol)
+	}
+
 }
 func checkColumnFkCount(database *schema.Database, t *testing.T) {
 	table := findTable(schema.Table{Schema: database.DefaultSchemaName, Name: "pet"}, database, t)
