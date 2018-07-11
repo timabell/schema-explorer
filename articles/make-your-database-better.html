@@ -77,12 +77,12 @@ of them when reading data because they'll never happen</p>
   tests.  I suggest automating from the layer below the UI to keep the tests
   fast. There are many techniques for keeping the tests quick but still
   realistic: do end to end smoke tests instead of individual pieces, use an
-  in-memory database, use <a
-  href="https://gist.github.com/timabell/3164291#file-create-snapshot-sql">database
-snapshots</a> or the fancy sql-clone tool from redgate to make creation /
-rollback virtually instant. Can you pull realistic (anonymised) data from
-production? Better still, now you’ll catch a whole new class of bugs before
-they hit prod.</p>
+  in-memory database, use
+  <a href="https://gist.github.com/timabell/3164291#file-create-snapshot-sql">database snapshots</a>
+  or the fancy <a href="https://www.red-gate.com/products/dba/sql-clone/index">sql-clone</a>
+  tool from Redgate to make creation / rollback virtually instant. Can you pull
+  realistic (anonymised) data from production? Better still, now you’ll catch a
+  whole new class of bugs before they hit prod.</p>
 
 <ul>
   <li>
