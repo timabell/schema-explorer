@@ -7,7 +7,7 @@ title: 5 ways to make your database better
 
 <p class="by-line">by Tim Abell, 10th July 2018</p>
 
-<h2>Documentation!</h2>
+<h2><i class="fas fa-database"></i> Documentation</h2>
 
 <p>Shoot me okay, but maintenance of software is [insert large number here]
   times the cost of creation, especially with relational databases. You are a
@@ -16,7 +16,7 @@ title: 5 ways to make your database better
   that effort into figuring out why a column should exist and have that name,
 now share that knowledge before you move on to the next greenfield project</p>
 
-<h2>Refactor your database!</h2>
+<h2><i class="fas fa-database"></i> Refactor your database</h2>
 
 <p>Migrations are a thing now. use them. - you refactor your code, why wouldn't
   you refactor your database? stop leaving landmines for future people -
@@ -25,7 +25,7 @@ now share that knowledge before you move on to the next greenfield project</p>
   to deal with data, but it’s the exception not the rule that it’s going to
 take hours to run because of data volumes.</p>
 
-<h2>Enforce data integrity!</h2>
+<h2><i class="fas fa-database"></i> Enforce data integrity</h2>
 
 <p>Does your app fall over if the data is bad? databases have many powerful
   ways of enforcing the rules your code relies on. nullability, fks, check
@@ -33,7 +33,7 @@ take hours to run because of data volumes.</p>
 there. Now your database is enforcing these rules your code doesn't have to
 handle violations of them when reading data because they'll never happen</p>
 
-<h2>Integration testing!</h2>
+<h2><i class="fas fa-database"></i> Integration testing</h2>
 
 <p>You have an ORM. great. You have unit tests. Great. But where the rubber
   hits the road and your code sends SQL to a real database it breaks at runtime
@@ -48,7 +48,7 @@ rollback virtually instant. Can you pull realistic (anonymised) data from
 production? Better still, now you’ll catch a whole new class of bugs before
 they hit prod.</p>
 
-<h2>Make it visible!</h2>
+<h2><i class="fas fa-database"></i> Make it visible</h2>
 
 <p>Are the only people that can see the database structures the coders and
 dbas? do the business owners, support people, qa people find it a mystery? You
@@ -58,3 +58,10 @@ should be, not an embarrassing backwater. By sharing the database in an
 accessible form to the non-coders in your team you can help them be more
 effective in their jobs.</p>
 
+<h2><i class="fas fa-database"></i> Take action now!</h2>
+
+<p>Make a start on at least on of these improvements today. Document just one
+  table or column with a description; you know, that one you have to explain to
+  everyone who sees it for the first time, or that you can never quite remember
+  the exact meaning of. Add a check constraint to stop that random production
+  from bad data ever coming back.</p>
