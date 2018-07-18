@@ -203,7 +203,8 @@ th, td {
     padding-right: 0.8em;
 }
 
-.hint{
+.hint,
+.hint * {
     color: #666;
     font-size: smaller;
 }
