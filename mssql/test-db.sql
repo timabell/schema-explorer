@@ -114,7 +114,7 @@ insert into DataTypeTest (
 	field_NotNullInt
 ) values (
 	10, --intpk
-	9, --colCount
+	10, --colCount
 	20, --field_INT
 	1234.567, --field_money,
 	987.1234500, --field_numeric,
