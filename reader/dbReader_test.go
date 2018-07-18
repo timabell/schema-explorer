@@ -95,10 +95,18 @@ func Test_ReadSchema(t *testing.T) {
 func checkNullable(database *schema.Database, t *testing.T) {
 	table := findTable(schema.Table{Schema: database.DefaultSchemaName, Name: "DataTypeTest"}, database, t)
 	_, notNullCol := table.FindColumn("field_NotNullInt")
+	if notNullCol == nil {
+		t.Log(schema.TableDebug(table))
+		t.Fatal("Column field_NotNullInt not found")
+	}
 	if notNullCol.Nullable {
 		t.Errorf("%s.%s should not be nullable", table, notNullCol)
 	}
 	_, nullCol := table.FindColumn("field_NullInt")
+	if notNullCol == nil {
+		t.Log(schema.TableDebug(table))
+		t.Fatal("Column field_NullInt not found")
+	}
 	if !nullCol.Nullable {
 		t.Errorf("%s.%s should be nullable", table, nullCol)
 	}
