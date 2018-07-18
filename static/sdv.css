@@ -203,6 +203,11 @@ th, td {
     padding-right: 0.8em;
 }
 
+#column-info .nullable *,
+#column-info .notnull * {
+    color: #939191;
+}
+
 .hint,
 .hint * {
     color: #666;

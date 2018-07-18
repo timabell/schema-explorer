@@ -37,7 +37,7 @@
 <h2 id="diagram">Nearest Tables</h2>
 {{template "_diagram" .Diagram}}
 <h2 id="columns">Columns</h2>
-    <table>
+    <table id="column-info">
         <thead>
         <tr>
             <th></th>
@@ -55,15 +55,20 @@
             <td><span class="bare-value">{{ if .IsInPrimaryKey}}<i class="fas fa-key"></i> Primary Key{{end}}</span></td>
             <td><span class="bare-value">{{.Name}}</span></td>
             <td><span class="bare-value">{{.Type}}</span></td>
-            <td><span class="bare-value">
+            <td>
             {{if .Nullable}}
-                <i class="fas fa-chess-board"></i>
-                Nullable
+                <span class="bare-value nullable">
+                    <i class="fas fa-chess-board"></i>
+                    Nullable
+                </span>
             {{else}}
-                <i class="fas fa-square-full"></i>
-                NOT NULL
+                <span class="bare-value notnull">
+                    <i class="fas fa-square-full"></i>
+                    NOT NULL
+                </span>
             {{end}}
-            </span></td>
+            </span>
+            </td>
             <td>
             {{range .Fks }}
                 <a href="{{.DestinationTable}}?_rowLimit=100">{{.DestinationTable}}</a>
