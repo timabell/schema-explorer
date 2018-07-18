@@ -68,16 +68,27 @@ func Test_ReadSchema(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	t.Log("Checking fk count")
 	checkFkCount(database, t)
+	t.Log("Checking table pks")
 	checkTablePks(database, t)
+	t.Log("Checking table compound-pks")
 	checkTableCompoundPks(database, t)
+	t.Log("Checking table fks")
 	checkTableFks(database, t)
+	t.Log("Checking row count")
 	checkTableRowCount(database, t)
+	t.Log("Checking inbound fk count")
 	checkInboundTableFkCount(database, t)
+	t.Log("Checking column fk count")
 	checkColumnFkCount(database, t)
+	t.Log("Checking nullable info")
 	checkNullable(database, t)
 	if database.Supports.Descriptions {
+		t.Log("Checking descriptions")
 		checkDescriptions(database, t)
+	} else {
+		t.Log("Descriptions not supported")
 	}
 }
 
@@ -143,10 +154,12 @@ func checkTableCompoundPks(database *schema.Database, t *testing.T) {
 		t.Fatalf("Nil Pk in table %s", table)
 	}
 	pkLen := len(table.Pk.Columns)
+	t.Logf("%d Pk columns found in table %s", pkLen, table)
 	if pkLen != 2 {
 		t.Fatalf("Expected 2 Pk columns in table %s, found %d", table, pkLen)
 	}
 
+	t.Logf("%#v", table.Pk)
 	t.Logf("%s - %s", table.Pk.Name, table.Pk.Columns.String())
 	expectedPkCol1 := "colA"
 	pkColumn := table.Pk.Columns[0]
