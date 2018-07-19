@@ -32,7 +32,9 @@ create table DataTypeTest (
 	field_DECIMAL DECIMAL(10,5),
 	field_BOOLEAN BOOLEAN,
 	field_DATE DATE,
-	field_DATETIME DATETIME
+	field_DATETIME DATETIME,
+	field_NotNullInt int not null,
+	field_NullInt int null
 );
 
 insert into DataTypeTest(
@@ -65,10 +67,11 @@ insert into DataTypeTest(
 	field_DECIMAL,
 	field_BOOLEAN,
 	field_DATE,
-	field_DATETIME
+	field_DATETIME,
+	field_NotNullInt
 )values(
 	10, --intpk
-	29, --colCount
+	31, --colCount
 	20, --INT
 	30, --INTEGER
 	50, --TINYINT
@@ -95,7 +98,8 @@ insert into DataTypeTest(
 	'field_DECIMAL', --DECIMAL
 	1, --BOOLEAN
 	'field_DATE', --DATE
-	'field_DATETIME' --DATETIME'
+	'field_DATETIME', --DATETIME'
+	1984
 ),(
 	11, --intpk
 	0, --colCount
@@ -125,7 +129,8 @@ insert into DataTypeTest(
 	'field_DECIMAL', --DECIMAL
 	1, --BOOLEAN
 	'field_DATE', --DATE
-	'field_DATETIME' --DATETIME'
+	'field_DATETIME', --DATETIME'
+	1978
 );
 
 -- select * from DataTypeTest;

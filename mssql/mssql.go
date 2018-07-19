@@ -297,7 +297,7 @@ func (model mssqlModel) GetSqlRows(table *schema.Table, params *params.TablePara
 
 func (model mssqlModel) getColumns(dbc *sql.DB, table *schema.Table) (cols []*schema.Column, err error) {
 	// todo: parameterise
-	sqlText := `select c.name, type_name(c.system_type_id) from sys.columns c
+	sqlText := `select c.name, type_name(c.system_type_id), is_nullable from sys.columns c
 	inner join sys.tables t on t.object_id = c.object_id
 	inner join sys.schemas s on s.schema_id = t.schema_id
 	where s.name = '` + table.Schema + `' and t.name = '` + table.Name + `'
@@ -309,8 +309,9 @@ order by c.column_id`
 	colIndex := 0
 	for rows.Next() {
 		var name, typeName string
-		rows.Scan(&name, &typeName)
-		thisCol := schema.Column{Index: colIndex, Name: name, Type: typeName}
+		var nullable bool
+		rows.Scan(&name, &typeName, &nullable)
+		thisCol := schema.Column{Index: colIndex, Name: name, Type: typeName, Nullable: nullable}
 		cols = append(cols, &thisCol)
 		colIndex++
 	}

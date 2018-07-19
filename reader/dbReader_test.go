@@ -68,16 +68,49 @@ func Test_ReadSchema(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	t.Log("Checking fk count")
 	checkFkCount(database, t)
+	t.Log("Checking table pks")
 	checkTablePks(database, t)
+	t.Log("Checking table compound-pks")
 	checkTableCompoundPks(database, t)
+	t.Log("Checking table fks")
 	checkTableFks(database, t)
+	t.Log("Checking row count")
 	checkTableRowCount(database, t)
+	t.Log("Checking inbound fk count")
 	checkInboundTableFkCount(database, t)
+	t.Log("Checking column fk count")
 	checkColumnFkCount(database, t)
+	t.Log("Checking nullable info")
+	checkNullable(database, t)
 	if database.Supports.Descriptions {
+		t.Log("Checking descriptions")
 		checkDescriptions(database, t)
+	} else {
+		t.Log("Descriptions not supported")
 	}
+}
+
+func checkNullable(database *schema.Database, t *testing.T) {
+	table := findTable(schema.Table{Schema: database.DefaultSchemaName, Name: "DataTypeTest"}, database, t)
+	_, notNullCol := table.FindColumn("field_NotNullInt")
+	if notNullCol == nil {
+		t.Log(schema.TableDebug(table))
+		t.Fatal("Column field_NotNullInt not found")
+	}
+	if notNullCol.Nullable {
+		t.Errorf("%s.%s should not be nullable", table, notNullCol)
+	}
+	_, nullCol := table.FindColumn("field_NullInt")
+	if notNullCol == nil {
+		t.Log(schema.TableDebug(table))
+		t.Fatal("Column field_NullInt not found")
+	}
+	if !nullCol.Nullable {
+		t.Errorf("%s.%s should be nullable", table, nullCol)
+	}
+
 }
 func checkColumnFkCount(database *schema.Database, t *testing.T) {
 	table := findTable(schema.Table{Schema: database.DefaultSchemaName, Name: "pet"}, database, t)
@@ -129,10 +162,12 @@ func checkTableCompoundPks(database *schema.Database, t *testing.T) {
 		t.Fatalf("Nil Pk in table %s", table)
 	}
 	pkLen := len(table.Pk.Columns)
+	t.Logf("%d Pk columns found in table %s", pkLen, table)
 	if pkLen != 2 {
 		t.Fatalf("Expected 2 Pk columns in table %s, found %d", table, pkLen)
 	}
 
+	t.Logf("%#v", table.Pk)
 	t.Logf("%s - %s", table.Pk.Name, table.Pk.Columns.String())
 	expectedPkCol1 := "colA"
 	pkColumn := table.Pk.Columns[0]

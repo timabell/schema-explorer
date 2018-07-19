@@ -66,6 +66,7 @@ type Column struct {
 	Fks            []*Fk
 	Description    string
 	IsInPrimaryKey bool
+	Nullable       bool
 }
 
 type Fk struct {

@@ -1,17 +1,25 @@
 -- postgres example db for regression tests
 -- schema must match test code's expectations
 
-create table "DataTypeTest" ( intpk integer primary key, "colCount" int, "field_INT4" INT );
+create table "DataTypeTest" (
+  intpk integer primary key,
+	"colCount" int,
+	"field_INT4" INT,
+	"field_NotNullInt" int not null,
+	"field_NullInt" int null
+);
 
-insert into "DataTypeTest"( intpk, "colCount", "field_INT4"
+insert into "DataTypeTest"( intpk, "colCount", "field_INT4", "field_NotNullInt"
 )values(
 	10, --intpk
-	3, --colCount
-	20 --INT
+	5, --colCount
+	20, --INT
+	1984
 ),(
 	11, --intpk
 	0, --colCount
-	-33 --INT
+	-33, --INT
+	1978
 );
 
 create table toy (
