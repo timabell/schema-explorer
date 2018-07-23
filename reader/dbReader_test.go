@@ -178,9 +178,9 @@ func checkTableCompoundPks(database *schema.Database, t *testing.T) {
 		t.Fatalf("%s.%s not marked as primary key", table, pkColumn.Name)
 	}
 
-	expectedPkColIndex := 2
-	if pkColumn.Index != expectedPkColIndex {
-		t.Fatalf("Expected the first columnn in pk of %s to have index %d, found %d", table, expectedPkColIndex, pkColumn.Index)
+	expectedPkColPosition := 2
+	if pkColumn.Position != expectedPkColPosition {
+		t.Fatalf("Expected the first columnn in pk of %s to have position %d, found %d", table, expectedPkColPosition, pkColumn.Position)
 	}
 
 	expectedPkCol2 := "colB"

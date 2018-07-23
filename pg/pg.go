@@ -280,7 +280,7 @@ func (model pgModel) getColumns(dbc *sql.DB, table *schema.Table) (cols []*schem
 		var name, typeName string
 		var notNull bool
 		rows.Scan(&name, &len, &typeName, &notNull)
-		thisCol := schema.Column{Index: colIndex, Name: name, Type: typeName, Nullable: !notNull}
+		thisCol := schema.Column{Position: colIndex, Name: name, Type: typeName, Nullable: !notNull}
 		cols = append(cols, &thisCol)
 		colIndex++
 	}

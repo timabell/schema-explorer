@@ -311,7 +311,7 @@ order by c.column_id`
 		var name, typeName string
 		var nullable bool
 		rows.Scan(&name, &typeName, &nullable)
-		thisCol := schema.Column{Index: colIndex, Name: name, Type: typeName, Nullable: nullable}
+		thisCol := schema.Column{Position: colIndex, Name: name, Type: typeName, Nullable: nullable}
 		cols = append(cols, &thisCol)
 		colIndex++
 	}

@@ -60,7 +60,7 @@ func (tables TableList) Less(i, j int) bool {
 type ColumnList []*Column
 
 type Column struct {
-	Index          int
+	Position       int
 	Name           string
 	Type           string
 	Fks            []*Fk

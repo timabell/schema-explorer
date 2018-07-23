@@ -242,7 +242,7 @@ func buildInwardLink(fk *schema.Fk, rowData reader.RowData) string {
 	var queryData []string
 	for ix, fkCol := range fk.SourceColumns {
 		destinationCol := fk.DestinationColumns[ix]
-		fkCellData := rowData[destinationCol.Index]
+		fkCellData := rowData[destinationCol.Position]
 		escapedName := template.HTMLEscapeString(template.URLQueryEscaper(fkCol.String()))
 		escapedValue := template.HTMLEscapeString(template.URLQueryEscaper(reader.DbValueToString(fkCellData, fkCol.Type)))
 		queryData = append(queryData, fmt.Sprintf("%s=%s", escapedName, escapedValue))
@@ -301,7 +301,7 @@ func buildQueryData(fk *schema.Fk, rowData reader.RowData) string {
 	var queryData []string
 	for ix, fkCol := range fk.DestinationColumns {
 		sourceCol := fk.SourceColumns[ix]
-		fkCellData := rowData[sourceCol.Index]
+		fkCellData := rowData[sourceCol.Position]
 		fkStringValue := *reader.DbValueToString(fkCellData, fkCol.Type)
 		escapedValue := template.URLQueryEscaper(fkStringValue)
 		escapedValue = template.HTMLEscapeString(escapedValue)

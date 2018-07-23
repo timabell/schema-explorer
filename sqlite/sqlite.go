@@ -252,7 +252,7 @@ func (model sqliteModel) getColumns(dbc *sql.DB, table *schema.Table) (cols []*s
 		var defaultValue interface{}
 		rows.Scan(&cid, &name, &typeName, &notNull, &defaultValue, &pk)
 		thisCol := schema.Column{
-			Index:          colIndex,
+			Position:       colIndex,
 			Name:           name,
 			Type:           typeName,
 			IsInPrimaryKey: pk > 0,
