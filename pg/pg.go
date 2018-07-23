@@ -97,7 +97,7 @@ func (model pgModel) getRowCount(table *schema.Table) (rowCount int, err error) 
 }
 
 func (model pgModel) getTables(dbc *sql.DB) (tables []*schema.Table, err error) {
-	rows, err := dbc.Query("select schemaname, tablename from pg_catalog.pg_tables where schemaname not in ('pg_catalog','information_schema')")
+	rows, err := dbc.Query("select schemaname, tablename from pg_catalog.pg_tables where schemaname not in ('pg_catalog','information_schema') order by schemaname, tablename")
 	if err != nil {
 		return nil, err
 	}
