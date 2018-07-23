@@ -79,7 +79,7 @@ func (model sqliteModel) ReadSchema() (database *schema.Database, err error) {
 
 func (model sqliteModel) getTables(dbc *sql.DB) (tables []*schema.Table, err error) {
 	// todo: parameterise
-	rows, err := dbc.Query("SELECT name FROM sqlite_master WHERE type='table' AND name not like 'sqlite_%';")
+	rows, err := dbc.Query("SELECT name FROM sqlite_master WHERE type='table' AND name not like 'sqlite_%' order by name;")
 	if err != nil {
 		return nil, err
 	}
