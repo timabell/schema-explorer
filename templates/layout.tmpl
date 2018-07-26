@@ -53,11 +53,20 @@
     **template content block not defined**
 {{end}}
 <footer>
-    <p>Generated {{.LayoutData.Timestamp}}</p>
-    <p><a href="{{.LayoutData.About.Website}}" target="_blank">{{.LayoutData.About.ProductName}}</a> v{{.LayoutData.About.Version}}, {{.LayoutData.Copyright}}
-        <a href="/static/license.html">License</a>
-        <br/>{{.LayoutData.LicenseText}}</p>
-    <p>Feedback / support / contact: <a href="mailto:{{.LayoutData.About.Email}}">{{.LayoutData.About.Email}}</a> - please help improve Sql Schema Explorer
+    <p>
+        Generated {{.LayoutData.Timestamp}}
+    </p>
+    <p>
+        <a href="{{.LayoutData.About.Website}}" target="_blank">{{.LayoutData.About.ProductName}}</a>
+        v{{.LayoutData.About.Version}}, {{.LayoutData.Copyright}}
+        <br/>
+        {{.LayoutData.LicenseText}}
+        <br/>
+        <a href="/static/license.html">Terms of use</a>
+    </p>
+    <p>
+        Feedback / support / contact: <a href="mailto:{{.LayoutData.About.Email}}">{{.LayoutData.About.Email}}</a>
+        - please help improve Sql Schema Explorer
     <br/>
     Like it? Share the love with a  <a href="https://twitter.com/intent/tweet?text=I%20loved%20using%20Sql%20Schema%20Explorer%20today%21%20You%20should%20try%20it%20too%20%3A-%29%20Check%20it%20out%20at%3A%20http%3A//schemaexplorer.io/%20-%20made%20with%20love%20by%20@tim_abell" target="_blank">tweet</a>!</p>
 </footer>
