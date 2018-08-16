@@ -29,8 +29,6 @@ import (
 	"bitbucket.org/timabell/sql-data-viewer/params"
 	"bitbucket.org/timabell/sql-data-viewer/schema"
 	"fmt"
-	_ "github.com/denisenkom/go-mssqldb"
-	_ "github.com/mattn/go-sqlite3"
 	"log"
 	"reflect"
 	"strings"
