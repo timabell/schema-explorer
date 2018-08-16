@@ -1,2 +1,5 @@
 bin
 package
+
+# output of `go build`
+sql-data-viewer
