@@ -4,7 +4,7 @@ import (
 	"bitbucket.org/timabell/sql-data-viewer/params"
 	"bitbucket.org/timabell/sql-data-viewer/schema"
 	"database/sql"
-	_ "github.com/simnalamburt/go-mssqldb"
+	_ "github.com/denisenkom/go-mssqldb"
 	"log"
 	"strconv"
 	"strings"
