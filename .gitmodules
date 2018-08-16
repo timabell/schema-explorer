@@ -1,4 +1,4 @@
 [submodule "vendor/timabell/go-mssqldb"]
-	path = vendor/timabell/go-mssqldb
+	path = vendor/denisenkom/go-mssqldb
 	url = git@github.com:timabell/go-mssqldb
 	branch = named-pipes
