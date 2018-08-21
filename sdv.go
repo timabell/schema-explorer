@@ -12,44 +12,62 @@ defined in the database's schema.
 package main
 
 import (
-	"bitbucket.org/timabell/sql-data-viewer/about"
-	"bitbucket.org/timabell/sql-data-viewer/host"
-	"bitbucket.org/timabell/sql-data-viewer/licensing"
-	"github.com/namsral/flag"
 	"log"
 	"os"
+	"bitbucket.org/timabell/sql-data-viewer/reader"
+	"strings"
 )
 
 func main() {
-	var (
-		driver   = flag.String("driver", "", "Driver to use (mssql, pg or sqlite)")
-		db       = flag.String("db", "", "connection string for mssql and pg, filename for sqlite")
-		port     = flag.Int("port", 8080, "port to listen on")
-		listenOn = flag.String("listenOn", "localhost", "address to listen on") // secure by default, only listen for local connections
-		live     = flag.Bool("live", false, "update html templates & schema information from disk on every page load")
-		name     = flag.String("name", "", "A display name for this connection")
-	)
-	flag.Parse()
-	if *driver == "" {
-		log.Println("Driver argument required.")
-		flag.Usage()
+	// first arg is the driver type, then the params switch depending on that
+	if len(os.Args) < 2 {
+		log.Println("First argument must be one of the following: " + strings.Join(reader.SupportedDrivers(), " "))
 		Usage()
 		os.Exit(1)
+
 	}
+	driver := os.Args[1]
+	log.Print(driver)
+	os.Exit(0)
+	// todo: create a common flagset inc driver, then driver specific flagsets
+	// todo: chop off common flags with NFlags
+	// todo: create option structs for each driver
 
-	log.Printf("%s Viewer v%s, %s", about.About.ProductName, about.About.Version, licensing.CopyrightText())
-	log.Print(about.About.Website)
-	log.Printf("Feeback/support/contact: <%s>", about.About.Email)
-	log.Printf(licensing.LicenseText())
-	licensing.Licensing()
-	log.Printf("Connection: %s %s", *driver, *name)
-
-	// todo: cleanup way db info is passed to server & handler
-	host.RunServer(*driver, *db, *port, *listenOn, *live, *name)
+	//var (
+	//	name             = flag.String("name", "", "A display name for this connection")
+	//	listenOn         = flag.String("listenOn", "localhost", "address to listen on") // default to localhost because: secure by default, only listen for local connections
+	//	listenOnPort     = flag.Int("listenOnPort", 8080, "port to serve the web interface on")
+	//	live             = flag.Bool("live", false, "update html templates & schema information from disk on every page load")
+	//	driver           = flag.String("driver", "", "Driver to use (mssql, pg or sqlite)")
+	//	// sqlite
+	//	path             = flag.String("path", "", "path to sqlite file")
+	//	// sql server, pg
+	//	dbHost = flag.String("dbHost", "", "database host to connect to")
+	//	dbPort = flag.String("dbPort", "", "database port to connect to")
+	//	mssql = flag.String("dbPort", "", "database port to connect to")
+	//	connectionString = flag.String("connectionString", "", "full connection string for mssql and pg as an alternative to host etc")
+	//)
+	//flag.Parse()
+	//if *driver == "" {
+	//	log.Println("Driver argument required.")
+	//	flag.Usage()
+	//	Usage()
+	//	os.Exit(1)
+	//}
+	//
+	//log.Printf("%s Viewer v%s, %s", about.About.ProductName, about.About.Version, licensing.CopyrightText())
+	//log.Print(about.About.Website)
+	//log.Printf("Feeback/support/contact: <%s>", about.About.Email)
+	//log.Printf(licensing.LicenseText())
+	//licensing.Licensing()
+	//log.Printf("Connection: %s %s", *driver, *name)
+	//
+	//// todo: cleanup way connectionString info is passed to server & handler
+	//host.RunServer(*driver, *connectionString, *listenOnPort, *listenOn, *live, *name)
 }
 
 func Usage() {
-	log.Print("Run with Sql Server: -driver mssql -db \"connectiongstring\" # see https://github.com/simnalamburt/go-mssqldb for connection string options")
-	log.Print("Run with postgres: -driver pg -db \"connectiongstring\" # see https://godoc.org/github.com/lib/pq for connectionstring options")
-	log.Print("Run with sqlite: -driver sqlite -db \"path\" # see https://github.com/mattn/go-sqlite3 for more info")
+	log.Print("Run with Sql Server: mssql -db \"connectiongstring\" # see https://github.com/simnalamburt/go-mssqldb for connection string options")
+	log.Print("Run with postgres: pg -db \"connectiongstring\" # see https://godoc.org/github.com/lib/pq for connectionstring options")
+	log.Print("Run with sqlite: sqlite -db \"path\" # see https://github.com/mattn/go-sqlite3 for more info")
 }

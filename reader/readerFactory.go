@@ -7,6 +7,9 @@ import (
 )
 
 func GetDbReader(driver string, db string) DbReader {
+	// should this handle the arg parsing?
+	// pass in options interface, each driver has own concrete that it must be of that type
+	// something converts args to options object
 	var reader DbReader
 	switch driver {
 	case "mssql":
@@ -21,4 +24,9 @@ func GetDbReader(driver string, db string) DbReader {
 		panic("Unsupported driver choice " + driver)
 	}
 	return reader
+}
+
+func SupportedDrivers() (result []string){
+	result = []string{"mssql", "pg", "sqlite"}
+	return
 }
