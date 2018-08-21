@@ -13,13 +13,12 @@ package main
 
 import (
 	"bitbucket.org/timabell/sql-data-viewer/host"
-	"github.com/namsral/flag"
+	"github.com/jessevdk/go-flags"
 	"log"
 	"os"
 )
 
 func main() {
-	// todo: chop off common flags with NFlags
 	// todo: create option structs for each driver
 
 	//var (
@@ -52,16 +51,13 @@ func main() {
 	//log.Printf("Connection: %s %s", *driver, *name)
 	//
 	//// todo: cleanup way connectionString info is passed to server & handler
-	args := os.Args[1:] // strip exe name
-	mainFlags := flag.FlagSet{}
-	options := &host.SdvOptions{}
-	options.Driver = mainFlags.String("driver", "", "Driver to use (mssql, pg or sqlite)")
-	mainFlags.Parse(args)
-	log.Printf("%+v", args)
+	options := host.SdvOptions{}
+	_, err := flags.ParseArgs(&options, os.Args)
+	if err != nil{
+		os.Exit(1)
+	}
 	log.Printf("%s is the driver", *options.Driver)
-	log.Printf("%d flags parsed", mainFlags.NFlag())
 	os.Exit(0)
-
 	//host.RunServer(options, readerOptions)
 }
 
