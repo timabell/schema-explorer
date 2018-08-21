@@ -53,7 +53,7 @@ func main() {
 	//// todo: cleanup way connectionString info is passed to server & handler
 	options := host.SdvOptions{}
 	_, err := flags.ParseArgs(&options, os.Args)
-	if err != nil{
+	if err != nil {
 		os.Exit(1)
 	}
 	log.Printf("%s is the driver", *options.Driver)
