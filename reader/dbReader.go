@@ -15,6 +15,8 @@ type DbReader interface {
 	GetSqlRows(table *schema.Table, params *params.TableParams) (rows *sql.Rows, err error)
 }
 
+type DbReaderOptions interface{}
+
 // Single row of data
 type RowData []interface{}
 

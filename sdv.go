@@ -12,24 +12,13 @@ defined in the database's schema.
 package main
 
 import (
+	"bitbucket.org/timabell/sql-data-viewer/host"
+	"github.com/namsral/flag"
 	"log"
 	"os"
-	"bitbucket.org/timabell/sql-data-viewer/reader"
-	"strings"
 )
 
 func main() {
-	// first arg is the driver type, then the params switch depending on that
-	if len(os.Args) < 2 {
-		log.Println("First argument must be one of the following: " + strings.Join(reader.SupportedDrivers(), " "))
-		Usage()
-		os.Exit(1)
-
-	}
-	driver := os.Args[1]
-	log.Print(driver)
-	os.Exit(0)
-	// todo: create a common flagset inc driver, then driver specific flagsets
 	// todo: chop off common flags with NFlags
 	// todo: create option structs for each driver
 
@@ -63,7 +52,17 @@ func main() {
 	//log.Printf("Connection: %s %s", *driver, *name)
 	//
 	//// todo: cleanup way connectionString info is passed to server & handler
-	//host.RunServer(*driver, *connectionString, *listenOnPort, *listenOn, *live, *name)
+	args := os.Args[1:] // strip exe name
+	mainFlags := flag.FlagSet{}
+	options := &host.SdvOptions{}
+	options.Driver = mainFlags.String("driver", "", "Driver to use (mssql, pg or sqlite)")
+	mainFlags.Parse(args)
+	log.Printf("%+v", args)
+	log.Printf("%s is the driver", *options.Driver)
+	log.Printf("%d flags parsed", mainFlags.NFlag())
+	os.Exit(0)
+
+	//host.RunServer(options, readerOptions)
 }
 
 func Usage() {

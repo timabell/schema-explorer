@@ -23,11 +23,19 @@ var cachingEnabled bool
 var database *schema.Database
 var connectionName string
 
-func RunServer(driverInfo string, dbConn string, port int, listenOn string, live bool, name string) {
-	db = dbConn
-	driver = driverInfo
-	cachingEnabled = !live
-	connectionName = name
+type SdvOptions struct {
+	Driver                *string
+	Live                  *bool
+	ConnectionDisplayName *string
+	ListenOnAddress       *string
+	ListenOnPort          *int
+}
+
+func RunServer(options SdvOptions, readerOptions reader.DbReaderOptions) {
+	db = "todo"
+	driver = *options.Driver
+	cachingEnabled = !*options.Live
+	connectionName = *options.ConnectionDisplayName
 
 	render.SetupTemplate()
 
@@ -53,7 +61,7 @@ func RunServer(driverInfo string, dbConn string, port int, listenOn string, live
 	r.HandleFunc("/table-trail/clear", ClearTableTrailHandler)
 	r.HandleFunc("/tables/{tableName}", TableHandler)
 	r.Use(loggingHandler)
-	listenOnHostPort := fmt.Sprintf("%s:%d", listenOn, port) // e.g. localhost:8080 or 0.0.0.0:80
+	listenOnHostPort := fmt.Sprintf("%s:%d", options.ListenOnAddress, options.ListenOnPort) // e.g. localhost:8080 or 0.0.0.0:80
 	srv := &http.Server{
 		Handler:      r,
 		Addr:         listenOnHostPort,
