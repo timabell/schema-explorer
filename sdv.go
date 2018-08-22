@@ -21,12 +21,6 @@ import (
 func main() {
 	// todo: create option structs for each driver
 
-	//var (
-	//	name             = flag.String("name", "", "A display name for this connection")
-	//	listenOn         = flag.String("listenOn", "localhost", "address to listen on") // default to localhost because: secure by default, only listen for local connections
-	//	listenOnPort     = flag.Int("listenOnPort", 8080, "port to serve the web interface on")
-	//	live             = flag.Bool("live", false, "update html templates & schema information from disk on every page load")
-	//	driver           = flag.String("driver", "", "Driver to use (mssql, pg or sqlite)")
 	//	// sqlite
 	//	path             = flag.String("path", "", "path to sqlite file")
 	//	// sql server, pg
