@@ -27,14 +27,8 @@ type SdvOptions struct {
 	Driver                *string `short:"d" long:"driver" description:"Driver to use (mssql, pg or sqlite)"`
 	Live                  *bool   `short:"l" long:"live" description:"update html templates & schema information from disk on every page load"`
 	ConnectionDisplayName *string `short:"n" long:"display-name" description:"A display name for this connection"`
-	ListenOnAddress       *string `short:"a" long:"listen-on-address" description:"address to listen on"`
-	ListenOnPort          *int    `short:"p" long:"listen-on-port" description:"port to listen on"`
-	//driver   = flag.String("driver", "", "Driver to use (mssql, pg or sqlite)")
-	//db       = flag.String("db", "", "connection string for mssql and pg, filename for sqlite")
-	//port     = flag.Int("port", 8080, "port to listen on")
-	//listenOn = flag.String("listenOn", "localhost", "address to listen on") // secure by default, only listen for local connections
-	//live     = flag.Bool("live", false, "update html templates & schema information from disk on every page load")
-	//name     = flag.String("name", "", "A display name for this connection")
+	ListenOnAddress       *string `short:"a" long:"listen-on-address" description:"address to listen on" default:"localhost"` // localhost so that it's secure by default, only listen for local connections
+	ListenOnPort          *int    `short:"p" long:"listen-on-port" description:"port to listen on" default:"8080"`
 }
 
 func RunServer(options SdvOptions, readerOptions reader.DbReaderOptions) {
