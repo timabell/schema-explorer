@@ -14,6 +14,11 @@ type mssqlModel struct {
 	connectionString string
 }
 
+func init(){
+	// todo: add group to main argParser
+	// https://github.com/jessevdk/go-flags/blob/master/group_test.go#L33
+}
+
 func NewMssql(connectionString string) mssqlModel {
 	return mssqlModel{
 		connectionString: connectionString,
