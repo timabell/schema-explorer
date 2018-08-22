@@ -18,6 +18,9 @@ import (
 	"os"
 )
 
+var options = host.SdvOptions{}
+var argParser = flags.NewParser(&options, flags.Default)
+
 func main() {
 	// todo: create option structs for each driver
 
@@ -45,8 +48,7 @@ func main() {
 	//log.Printf("Connection: %s %s", *driver, *name)
 	//
 	//// todo: cleanup way connectionString info is passed to server & handler
-	options := host.SdvOptions{}
-	_, err := flags.ParseArgs(&options, os.Args)
+	_, err := argParser.ParseArgs(os.Args)
 	if err != nil {
 		os.Exit(1)
 	}
