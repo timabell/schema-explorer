@@ -5,9 +5,21 @@ import (
 	"bitbucket.org/timabell/sql-data-viewer/schema"
 	"database/sql"
 	"fmt"
+	"github.com/jessevdk/go-flags"
 	"log"
 	"strings"
 )
+
+type SdvOptions struct {
+	Driver                *string `short:"d" long:"driver" description:"Driver to use (mssql, pg or sqlite)" env:"schemaexplorer_driver"`
+	Live                  *bool   `short:"l" long:"live" description:"update html templates & schema information from disk on every page load" env:"schemaexplorer_live"`
+	ConnectionDisplayName *string `short:"n" long:"display-name" description:"A display name for this connection" env:"schemaexplorer_displayname"`
+	ListenOnAddress       *string `short:"a" long:"listen-on-address" description:"address to listen on" default:"localhost" env:"schemaexplorer_listenonaddress"` // localhost so that it's secure by default, only listen for local connections
+	ListenOnPort          *int    `short:"p" long:"listen-on-port" description:"port to listen on" default:"8080" env:"schemaexplorer_listenonport"`
+}
+
+var Options = SdvOptions{}
+var ArgParser = flags.NewParser(&Options, flags.Default)
 
 type DbReader interface {
 	CheckConnection() (err error)
@@ -19,6 +31,10 @@ type DbReaderOptions interface{}
 
 // Single row of data
 type RowData []interface{}
+
+func RegisterReader(){
+	// todo: self-registration of reader types
+}
 
 func GetRows(reader DbReader, table *schema.Table, params *params.TableParams) (rowsData []RowData, err error) {
 	rows, err := reader.GetSqlRows(table, params)

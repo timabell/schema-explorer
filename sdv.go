@@ -12,14 +12,10 @@ defined in the database's schema.
 package main
 
 import (
-	"bitbucket.org/timabell/sql-data-viewer/host"
-	"github.com/jessevdk/go-flags"
+	"bitbucket.org/timabell/sql-data-viewer/reader"
 	"log"
 	"os"
 )
-
-var options = host.SdvOptions{}
-var argParser = flags.NewParser(&options, flags.Default)
 
 func main() {
 	// todo: create option structs for each driver
@@ -48,11 +44,11 @@ func main() {
 	//log.Printf("Connection: %s %s", *driver, *name)
 	//
 	//// todo: cleanup way connectionString info is passed to server & handler
-	_, err := argParser.ParseArgs(os.Args)
+	_, err := reader.ArgParser.ParseArgs(os.Args)
 	if err != nil {
 		os.Exit(1)
 	}
-	log.Printf("%s is the driver", *options.Driver)
+	log.Printf("%s is the driver", *reader.Options.Driver)
 	os.Exit(0)
 	//host.RunServer(options, readerOptions)
 }

@@ -4,6 +4,7 @@ package sqlite
 
 import (
 	"bitbucket.org/timabell/sql-data-viewer/params"
+	"bitbucket.org/timabell/sql-data-viewer/reader"
 	"bitbucket.org/timabell/sql-data-viewer/schema"
 	"database/sql"
 	"fmt"
@@ -12,6 +13,17 @@ import (
 	"strconv"
 	"strings"
 )
+
+var opt = struct {
+	Path *string `short:"p" long:"path" description:"Path to sqlite db file"`
+}{}
+
+func init() {
+	// todo: add group to main argParser
+	// https://github.com/jessevdk/go-flags/blob/master/group_test.go#L33
+	reader.ArgParser.AddGroup("sqlite", "Options for sqlite database", &opt)
+	reader.RegisterReader(todo)
+}
 
 type sqliteModel struct {
 	path string
