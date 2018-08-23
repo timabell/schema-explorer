@@ -23,16 +23,16 @@ var opt = &sqliteOpts{}
 func init() {
 	// todo: add group to main argParser
 	// https://github.com/jessevdk/go-flags/blob/master/group_test.go#L33
-	reader.RegisterReader("sqlite", opt)
+	reader.RegisterReader("sqlite", opt, NewSqlite)
 }
 
 type sqliteModel struct {
 	path string
 }
 
-func NewSqlite(path string) sqliteModel {
+func NewSqlite() reader.DbReader {
 	return sqliteModel{
-		path: path,
+		path: *opt.Path,
 	}
 }
 

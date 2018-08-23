@@ -30,13 +30,21 @@ type DbReader interface {
 
 type DbReaderOptions interface{}
 
+type CreateReader func() DbReader
+
 // Single row of data
 type RowData []interface{}
 
-func RegisterReader(name string, opt interface{}) {
-	// todo: self-registration of reader types
-	log.Printf("%s capability locked and loaded", name)
+var creators map[string]CreateReader
+
+func RegisterReader(name string, opt interface{}, creator CreateReader) {
+	creators := append(creators, creator)
 	ArgParser.AddGroup(name, fmt.Sprintf("Options for %s database", name), opt)
+	log.Printf("%s capability locked and loaded", name)
+}
+
+func GetDbReader() DbReader{
+
 }
 
 func GetRows(reader DbReader, table *schema.Table, params *params.TableParams) (rowsData []RowData, err error) {

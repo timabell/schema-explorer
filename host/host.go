@@ -23,7 +23,7 @@ var cachingEnabled bool
 var database *schema.Database
 var connectionName string
 
-func RunServer(options SdvOptions, readerOptions reader.DbReaderOptions) {
+func RunServer(options reader.SdvOptions) {
 	db = "todo"
 	driver = *options.Driver
 	cachingEnabled = !*options.Live
@@ -31,7 +31,7 @@ func RunServer(options SdvOptions, readerOptions reader.DbReaderOptions) {
 
 	render.SetupTemplate()
 
-	dbReader := reader.GetDbReader(driver, db)
+	dbReader := reader.GetDbReader()
 	err := dbReader.CheckConnection()
 	if err != nil {
 		log.Println(err)

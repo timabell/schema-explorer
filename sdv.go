@@ -16,6 +16,7 @@ import (
 	_ "bitbucket.org/timabell/sql-data-viewer/sqlite"
 	"log"
 	"os"
+	"bitbucket.org/timabell/sql-data-viewer/host"
 )
 
 func main() {
@@ -57,7 +58,7 @@ func main() {
 	log.Printf("%s is the driver", *reader.Options.Driver)
 
 	os.Exit(0)
-	//host.RunServer(options, readerOptions)
+	host.RunServer(reader.Options)
 }
 
 func Usage() {
