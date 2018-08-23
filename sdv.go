@@ -15,6 +15,7 @@ import (
 	"bitbucket.org/timabell/sql-data-viewer/reader"
 	"log"
 	"os"
+	_ "bitbucket.org/timabell/sql-data-viewer/sqlite"
 )
 
 func main() {

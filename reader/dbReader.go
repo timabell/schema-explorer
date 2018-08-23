@@ -32,8 +32,10 @@ type DbReaderOptions interface{}
 // Single row of data
 type RowData []interface{}
 
-func RegisterReader(){
+func RegisterReader(name string){
 	// todo: self-registration of reader types
+	log.Printf("reader %s registered", name)
+	//ArgParser.AddGroup()
 }
 
 func GetRows(reader DbReader, table *schema.Table, params *params.TableParams) (rowsData []RowData, err error) {

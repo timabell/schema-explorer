@@ -22,7 +22,7 @@ func init() {
 	// todo: add group to main argParser
 	// https://github.com/jessevdk/go-flags/blob/master/group_test.go#L33
 	reader.ArgParser.AddGroup("sqlite", "Options for sqlite database", &opt)
-	reader.RegisterReader(todo)
+	reader.RegisterReader("sqlite")
 }
 
 type sqliteModel struct {
