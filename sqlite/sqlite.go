@@ -14,15 +14,16 @@ import (
 	"strings"
 )
 
-var opt = struct {
+type sqliteOpts struct {
 	Path *string `short:"p" long:"path" description:"Path to sqlite db file"`
-}{}
+}
+
+var opt = &sqliteOpts{}
 
 func init() {
 	// todo: add group to main argParser
 	// https://github.com/jessevdk/go-flags/blob/master/group_test.go#L33
-	reader.ArgParser.AddGroup("sqlite", "Options for sqlite database", &opt)
-	reader.RegisterReader("sqlite")
+	reader.RegisterReader("sqlite", opt)
 }
 
 type sqliteModel struct {

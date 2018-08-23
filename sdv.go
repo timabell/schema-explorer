@@ -13,9 +13,9 @@ package main
 
 import (
 	"bitbucket.org/timabell/sql-data-viewer/reader"
+	_ "bitbucket.org/timabell/sql-data-viewer/sqlite"
 	"log"
 	"os"
-	_ "bitbucket.org/timabell/sql-data-viewer/sqlite"
 )
 
 func main() {
@@ -49,7 +49,13 @@ func main() {
 	if err != nil {
 		os.Exit(1)
 	}
+	if reader.Options.Driver == nil{
+		log.Printf("Error: no driver specified")
+		reader.ArgParser.WriteHelp(os.Stdout)
+		os.Exit(1)
+	}
 	log.Printf("%s is the driver", *reader.Options.Driver)
+
 	os.Exit(0)
 	//host.RunServer(options, readerOptions)
 }

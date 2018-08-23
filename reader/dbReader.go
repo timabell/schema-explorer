@@ -18,6 +18,7 @@ type SdvOptions struct {
 	ListenOnPort          *int    `short:"p" long:"listen-on-port" description:"port to listen on" default:"8080" env:"schemaexplorer_listenonport"`
 }
 
+// todo: arg parsing and options shouldn't be here
 var Options = SdvOptions{}
 var ArgParser = flags.NewParser(&Options, flags.Default)
 
@@ -32,10 +33,10 @@ type DbReaderOptions interface{}
 // Single row of data
 type RowData []interface{}
 
-func RegisterReader(name string){
+func RegisterReader(name string, opt interface{}) {
 	// todo: self-registration of reader types
-	log.Printf("reader %s registered", name)
-	//ArgParser.AddGroup()
+	log.Printf("%s capability locked and loaded", name)
+	ArgParser.AddGroup(name, fmt.Sprintf("Options for %s database", name), opt)
 }
 
 func GetRows(reader DbReader, table *schema.Table, params *params.TableParams) (rowsData []RowData, err error) {
