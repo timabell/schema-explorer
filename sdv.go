@@ -48,10 +48,6 @@ func main() {
 	//// todo: cleanup way connectionString info is passed to server & handler
 	_, err := reader.ArgParser.ParseArgs(os.Args)
 	if err != nil {
-		os.Exit(1)
-	}
-	if reader.Options.Driver == nil {
-		log.Printf("Error: no driver specified")
 		reader.ArgParser.WriteHelp(os.Stdout)
 		os.Exit(1)
 	}
