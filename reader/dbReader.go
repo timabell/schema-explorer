@@ -8,6 +8,7 @@ import (
 	"github.com/jessevdk/go-flags"
 	"log"
 	"strings"
+	"os"
 )
 
 type SdvOptions struct {
@@ -35,16 +36,22 @@ type CreateReader func() DbReader
 // Single row of data
 type RowData []interface{}
 
-var creators map[string]CreateReader
+var creators = make(map[string]CreateReader)
 
 func RegisterReader(name string, opt interface{}, creator CreateReader) {
-	creators := append(creators, creator)
+	creators[name] = creator
 	ArgParser.AddGroup(name, fmt.Sprintf("Options for %s database", name), opt)
 	log.Printf("%s capability locked and loaded", name)
 }
 
-func GetDbReader() DbReader{
-
+func GetDbReader() DbReader {
+	log.Printf("Initializing %s reader", *Options.Driver)
+	createReader := creators[*Options.Driver]
+	if createReader == nil{
+		log.Printf("Unknown reader '%s'", *Options.Driver)
+		os.Exit(1)
+	}
+	return createReader()
 }
 
 func GetRows(reader DbReader, table *schema.Table, params *params.TableParams) (rowsData []RowData, err error) {

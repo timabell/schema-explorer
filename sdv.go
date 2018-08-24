@@ -12,11 +12,11 @@ defined in the database's schema.
 package main
 
 import (
+	"bitbucket.org/timabell/sql-data-viewer/host"
 	"bitbucket.org/timabell/sql-data-viewer/reader"
 	_ "bitbucket.org/timabell/sql-data-viewer/sqlite"
 	"log"
 	"os"
-	"bitbucket.org/timabell/sql-data-viewer/host"
 )
 
 func main() {
@@ -50,14 +50,13 @@ func main() {
 	if err != nil {
 		os.Exit(1)
 	}
-	if reader.Options.Driver == nil{
+	if reader.Options.Driver == nil {
 		log.Printf("Error: no driver specified")
 		reader.ArgParser.WriteHelp(os.Stdout)
 		os.Exit(1)
 	}
 	log.Printf("%s is the driver", *reader.Options.Driver)
 
-	os.Exit(0)
 	host.RunServer(reader.Options)
 }
 

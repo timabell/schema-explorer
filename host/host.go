@@ -26,8 +26,10 @@ var connectionName string
 func RunServer(options reader.SdvOptions) {
 	db = "todo"
 	driver = *options.Driver
-	cachingEnabled = !*options.Live
-	connectionName = *options.ConnectionDisplayName
+	cachingEnabled = options.Live == nil || !*options.Live
+	if options.ConnectionDisplayName != nil {
+		connectionName = *options.ConnectionDisplayName
+	}
 
 	render.SetupTemplate()
 
@@ -84,8 +86,6 @@ func loggingHandler(next http.Handler) http.Handler {
 func requestSetup() (layoutData render.PageTemplateModel, dbReader reader.DbReader, err error) {
 	licensing.Licensing()
 
-	dbReader = reader.GetDbReader(driver, db)
-
 	layoutData = render.PageTemplateModel{
 		Db:             db,
 		Title:          connectionName + "|" + about.About.ProductName,
@@ -99,6 +99,7 @@ func requestSetup() (layoutData render.PageTemplateModel, dbReader reader.DbRead
 	if !cachingEnabled {
 		render.SetupTemplate()
 		log.Print("Re-reading schema, this may take a while...")
+		dbReader = reader.GetDbReader()
 		database, err = dbReader.ReadSchema()
 		if err != nil {
 			fmt.Println("Error reading schema", err)
