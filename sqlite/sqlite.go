@@ -149,6 +149,10 @@ func (model sqliteModel) CheckConnection() (err error) {
 		panic("getConnection() returned nil")
 	}
 	defer dbc.Close()
+	err = dbc.Ping()
+	if err != nil {
+		panic(err)
+	}
 	tables, err := model.getTables(dbc)
 	if err != nil {
 		panic(err)
