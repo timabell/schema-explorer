@@ -15,13 +15,12 @@ import (
 )
 
 type sqliteOpts struct {
-	Path *string `short:"f" long:"file" required:"true" description:"Path to sqlite db file"`
+	Path *string `short:"f" long:"file" required:"true" description:"Path to sqlite db file" env:"schemaexplorer_file"`
 }
 
 var opt = &sqliteOpts{}
 
 func init() {
-	// todo: add group to main argParser
 	// https://github.com/jessevdk/go-flags/blob/master/group_test.go#L33
 	reader.RegisterReader("sqlite", opt, NewSqlite)
 }

@@ -7,4 +7,4 @@ echo "=================="
 (cd sqlite/ && ./setup.sh)
 
 # relative path hack with pwd, otherwise not resolved.
-go test ./... -driver sqlite -db "`pwd`/sqlite/db/test.db" # -test.v
+schemaexplorer_driver=sqlite schemaexplorer_file="`pwd`/sqlite/db/test.db" go test sdv_test.go # -test.v

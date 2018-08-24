@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"github.com/jessevdk/go-flags"
 	"log"
-	"strings"
 	"os"
+	"strings"
 )
 
 type SdvOptions struct {
@@ -47,7 +47,7 @@ func RegisterReader(name string, opt interface{}, creator CreateReader) {
 func GetDbReader() DbReader {
 	log.Printf("Initializing %s reader", *Options.Driver)
 	createReader := creators[*Options.Driver]
-	if createReader == nil{
+	if createReader == nil {
 		log.Printf("Unknown reader '%s'", *Options.Driver)
 		os.Exit(1)
 	}
