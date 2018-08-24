@@ -55,7 +55,7 @@ func RunServer(options reader.SdvOptions) {
 	r.HandleFunc("/table-trail/clear", ClearTableTrailHandler)
 	r.HandleFunc("/tables/{tableName}", TableHandler)
 	r.Use(loggingHandler)
-	listenOnHostPort := fmt.Sprintf("%s:%d", options.ListenOnAddress, options.ListenOnPort) // e.g. localhost:8080 or 0.0.0.0:80
+	listenOnHostPort := fmt.Sprintf("%s:%d", *options.ListenOnAddress, *options.ListenOnPort) // e.g. localhost:8080 or 0.0.0.0:80
 	srv := &http.Server{
 		Handler:      r,
 		Addr:         listenOnHostPort,
