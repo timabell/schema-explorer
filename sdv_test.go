@@ -23,7 +23,9 @@ aren't silently missing any of the supported data types.
 */
 
 import (
+	_ "bitbucket.org/timabell/sql-data-viewer/mssql"
 	"bitbucket.org/timabell/sql-data-viewer/params"
+	_ "bitbucket.org/timabell/sql-data-viewer/pg"
 	"bitbucket.org/timabell/sql-data-viewer/reader"
 	"bitbucket.org/timabell/sql-data-viewer/schema"
 	_ "bitbucket.org/timabell/sql-data-viewer/sqlite"
