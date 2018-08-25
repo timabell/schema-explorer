@@ -9,15 +9,29 @@ import (
 	"log"
 	"strconv"
 	"strings"
+	"bitbucket.org/timabell/sql-data-viewer/reader"
 )
 
 type pgModel struct {
 	connectionString string
 }
 
-func NewPg(connectionString string) pgModel {
+type pgOpts struct {
+	// todo: break down into host, port etc
+	Db *string `long:"db" required:"true" description:"Postgres connection string. # see https://godoc.org/github.com/lib/pq for connection-string options"`
+}
+
+var opt = &pgOpts{}
+
+func init() {
+	// https://github.com/jessevdk/go-flags/blob/master/group_test.go#L33
+	reader.RegisterReader("pg", opt, NewPg)
+}
+
+func NewPg() reader.DbReader {
+	log.Println("Connecting to pg db")
 	return pgModel{
-		connectionString: connectionString,
+		connectionString: *opt.Db,
 	}
 }
 
