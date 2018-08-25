@@ -15,7 +15,7 @@ import (
 )
 
 type sqliteOpts struct {
-	Path *string `short:"f" long:"file" required:"true" description:"Path to sqlite db file" env:"schemaexplorer_file"`
+	Path *string `short:"f" long:"file" description:"Path to sqlite db file" env:"schemaexplorer_file"`
 }
 
 var opt = &sqliteOpts{}
