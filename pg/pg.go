@@ -10,6 +10,7 @@ import (
 	"log"
 	"strconv"
 	"strings"
+	"os"
 )
 
 type pgModel struct {
@@ -29,6 +30,11 @@ func init() {
 }
 
 func NewPg() reader.DbReader {
+	if opt.Db == nil {
+		log.Printf("Error: connection string (db) is required")
+		reader.ArgParser.WriteHelp(os.Stdout)
+		os.Exit(1)
+	}
 	log.Println("Connecting to pg db")
 	return pgModel{
 		connectionString: *opt.Db,

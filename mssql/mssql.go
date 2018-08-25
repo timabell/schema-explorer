@@ -9,6 +9,7 @@ import (
 	"log"
 	"strconv"
 	"strings"
+	"os"
 )
 
 type mssqlModel struct {
@@ -28,6 +29,11 @@ func init() {
 }
 
 func NewMssql() reader.DbReader {
+	if opt.Db == nil {
+		log.Printf("Error: connection string (db) is required")
+		reader.ArgParser.WriteHelp(os.Stdout)
+		os.Exit(1)
+	}
 	log.Println("Connecting to mssql db")
 	return mssqlModel{
 		connectionString: *opt.Db,
