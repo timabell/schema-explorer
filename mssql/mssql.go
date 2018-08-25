@@ -2,6 +2,7 @@ package mssql
 
 import (
 	"bitbucket.org/timabell/sql-data-viewer/params"
+	"bitbucket.org/timabell/sql-data-viewer/reader"
 	"bitbucket.org/timabell/sql-data-viewer/schema"
 	"database/sql"
 	_ "github.com/denisenkom/go-mssqldb"
@@ -14,9 +15,22 @@ type mssqlModel struct {
 	connectionString string
 }
 
-func NewMssql(connectionString string) mssqlModel {
+type mssqlOpts struct {
+	// todo: break down into host, port etc
+	Db *string `long:"db" description:"Mssql connection string. # see https://godoc.org/github.com/lib/pq for connection-string options"`
+}
+
+var opt = &mssqlOpts{}
+
+func init() {
+	// https://github.com/jessevdk/go-flags/blob/master/group_test.go#L33
+	reader.RegisterReader("mssql", opt, NewMssql)
+}
+
+func NewMssql() reader.DbReader {
+	log.Println("Connecting to mssql db")
 	return mssqlModel{
-		connectionString: connectionString,
+		connectionString: *opt.Db,
 	}
 }
 
