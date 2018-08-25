@@ -4,4 +4,4 @@
 
 #go run sdv.go -name sqlite-chinook -driver sqlite -db "$HOME/Documents/projects/sql-data-viewer/Chinook_Sqlite_AutoIncrementPKs.sqlite" -port 8082 -live
 
-DRIVER=sqlite NAME=sqlite-chinook LIVE=true PORT=8082 DB="$HOME/Documents/projects/sql-data-viewer/Chinook_Sqlite_AutoIncrementPKs.sqlite" go run sdv.go
+schemaexplorer_driver=sqlite schemaexplorer_name=sqlite-chinook schemaexplorer_live=true schemaexplorer_listenonport=8082 schemaexplorer_file="$HOME/Documents/projects/sql-data-viewer/Chinook_Sqlite_AutoIncrementPKs.sqlite" go run sdv.go
