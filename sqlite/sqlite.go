@@ -10,6 +10,7 @@ import (
 	"fmt"
 	_ "github.com/mattn/go-sqlite3"
 	"log"
+	"os"
 	"strconv"
 	"strings"
 )
@@ -30,6 +31,11 @@ type sqliteModel struct {
 }
 
 func NewSqlite() reader.DbReader {
+	if opt.Path == nil {
+		log.Printf("Error: sqlite file is required")
+		reader.ArgParser.WriteHelp(os.Stdout)
+		os.Exit(1)
+	}
 	log.Printf("Connecting to sqlite file %s", *opt.Path)
 	return sqliteModel{
 		path: *opt.Path,

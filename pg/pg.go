@@ -2,6 +2,7 @@ package pg
 
 import (
 	"bitbucket.org/timabell/sql-data-viewer/params"
+	"bitbucket.org/timabell/sql-data-viewer/reader"
 	"bitbucket.org/timabell/sql-data-viewer/schema"
 	"database/sql"
 	"fmt"
@@ -9,7 +10,6 @@ import (
 	"log"
 	"strconv"
 	"strings"
-	"bitbucket.org/timabell/sql-data-viewer/reader"
 )
 
 type pgModel struct {

@@ -13,9 +13,9 @@ package main
 
 import (
 	"bitbucket.org/timabell/sql-data-viewer/host"
+	_ "bitbucket.org/timabell/sql-data-viewer/pg"
 	"bitbucket.org/timabell/sql-data-viewer/reader"
 	_ "bitbucket.org/timabell/sql-data-viewer/sqlite"
-	_ "bitbucket.org/timabell/sql-data-viewer/pg"
 	"log"
 	"os"
 )
