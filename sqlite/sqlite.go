@@ -30,6 +30,7 @@ type sqliteModel struct {
 }
 
 func NewSqlite() reader.DbReader {
+	log.Printf("Connecting to sqlite file %s", *opt.Path)
 	return sqliteModel{
 		path: *opt.Path,
 	}

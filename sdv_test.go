@@ -24,6 +24,7 @@ aren't silently missing any of the supported data types.
 
 import (
 	"bitbucket.org/timabell/sql-data-viewer/params"
+	"bitbucket.org/timabell/sql-data-viewer/reader"
 	"bitbucket.org/timabell/sql-data-viewer/schema"
 	_ "bitbucket.org/timabell/sql-data-viewer/sqlite"
 	"fmt"
@@ -32,7 +33,6 @@ import (
 	"reflect"
 	"strings"
 	"testing"
-	"bitbucket.org/timabell/sql-data-viewer/reader"
 )
 
 var testDb string
