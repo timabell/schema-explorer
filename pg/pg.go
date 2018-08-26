@@ -19,7 +19,7 @@ type pgModel struct {
 
 type pgOpts struct {
 	// todo: break down into host, port etc
-	Db *string `long:"db" description:"Postgres connection string. # see https://godoc.org/github.com/lib/pq for connection-string options"`
+	Db *string `long:"pg-db" description:"Postgres connection string. # see https://godoc.org/github.com/lib/pq for connection-string options" env:"schemaexplorer_pg_db"`
 }
 
 var opt = &pgOpts{}
@@ -31,7 +31,7 @@ func init() {
 
 func NewPg() reader.DbReader {
 	if opt.Db == nil {
-		log.Printf("Error: connection string (db) is required")
+		log.Printf("Error: connection string (pg-db) is required")
 		reader.ArgParser.WriteHelp(os.Stdout)
 		os.Exit(1)
 	}

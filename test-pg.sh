@@ -6,4 +6,4 @@ echo "=================="
 
 (cd pg/ && ./setup-ssetest.sh)
 
-schemaexplorer_driver=pg schemaexplorer_db="postgres://ssetestusr:ssetestusr@localhost/ssetest" go test sdv_test.go # -test.v
+schemaexplorer_driver=pg schemaexplorer_pg_db="postgres://ssetestusr:ssetestusr@localhost/ssetest" go test sdv_test.go # -test.v

@@ -18,7 +18,7 @@ type mssqlModel struct {
 
 type mssqlOpts struct {
 	// todo: break down into host, port etc
-	Db *string `long:"db" description:"Mssql connection string. # see https://godoc.org/github.com/lib/pq for connection-string options"`
+	Db *string `long:"mssql-db" description:"Mssql connection string. # see https://godoc.org/github.com/lib/pq for connection-string options" env:"schemaexplorer_mssql_db"`
 }
 
 var opt = &mssqlOpts{}
@@ -30,7 +30,7 @@ func init() {
 
 func NewMssql() reader.DbReader {
 	if opt.Db == nil {
-		log.Printf("Error: connection string (db) is required")
+		log.Printf("Error: connection string (mssql-db) is required")
 		reader.ArgParser.WriteHelp(os.Stdout)
 		os.Exit(1)
 	}

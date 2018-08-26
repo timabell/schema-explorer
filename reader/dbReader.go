@@ -14,9 +14,9 @@ import (
 type SdvOptions struct {
 	Driver                *string `short:"d" long:"driver" required:"true" description:"Driver to use (mssql, pg or sqlite)" env:"schemaexplorer_driver"`
 	Live                  *bool   `short:"l" long:"live" description:"update html templates & schema information from disk on every page load" env:"schemaexplorer_live"`
-	ConnectionDisplayName *string `short:"n" long:"display-name" description:"A display name for this connection" env:"schemaexplorer_displayname"`
-	ListenOnAddress       *string `short:"a" long:"listen-on-address" description:"address to listen on" default:"localhost" env:"schemaexplorer_listenonaddress"` // localhost so that it's secure by default, only listen for local connections
-	ListenOnPort          *int    `short:"p" long:"listen-on-port" description:"port to listen on" default:"8080" env:"schemaexplorer_listenonport"`
+	ConnectionDisplayName *string `short:"n" long:"display-name" description:"A display name for this connection" env:"schemaexplorer_display_name"`
+	ListenOnAddress       *string `short:"a" long:"listen-on-address" description:"address to listen on" default:"localhost" env:"schemaexplorer_listen_on_address"` // localhost so that it's secure by default, only listen for local connections
+	ListenOnPort          *int    `short:"p" long:"listen-on-port" description:"port to listen on" default:"8080" env:"schemaexplorer_listen_on_port"`
 }
 
 // todo: arg parsing and options shouldn't be here
