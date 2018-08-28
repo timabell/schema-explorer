@@ -38,7 +38,7 @@ type RowData []interface{}
 
 var creators = make(map[string]CreateReader)
 
-func init(){
+func init() {
 	ArgParser.EnvNamespace = "schemaexplorer"
 	ArgParser.NamespaceDelimiter = "-"
 }

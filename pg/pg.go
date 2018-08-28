@@ -10,7 +10,6 @@ import (
 	"log"
 	"strconv"
 	"strings"
-	"os"
 )
 
 type pgModel struct {
@@ -18,8 +17,11 @@ type pgModel struct {
 }
 
 type pgOpts struct {
-	// todo: break down into host, port etc
-	Db *string `long:"db" description:"Postgres connection string. # see https://godoc.org/github.com/lib/pq for connection-string options" env:"db"`
+	Host             *string `long:"host" env:"host"`
+	Database         *string `long:"database" env:"database"`
+	User             *string `long:"user" env:"user"`
+	Password         *string `long:"password" env:"password"`
+	ConnectionString *string `long:"connection-string" description:"Postgres connection string. Use this instead of host, port etc for advanced driver options. See https://godoc.org/github.com/lib/pq for connection-string options." env:"connection_string"`
 }
 
 var opt = &pgOpts{}
@@ -30,14 +32,20 @@ func init() {
 }
 
 func NewPg() reader.DbReader {
-	if opt.Db == nil {
-		log.Printf("Error: connection string (pg-db) is required")
-		reader.ArgParser.WriteHelp(os.Stdout)
-		os.Exit(1)
+	var cs string
+	if opt.ConnectionString == nil {
+		cs = fmt.Sprintf("postgre://%s:%s@%s/%s", opt.User, opt.Password, opt.Host, opt.Database)
+	} else {
+		cs = *opt.ConnectionString
 	}
+	//if opt.ConnectionString == nil {
+	//	log.Printf("Error: connection string is required")
+	//	reader.ArgParser.WriteHelp(os.Stdout)
+	//	os.Exit(1)
+	//}
 	log.Println("Connecting to pg db")
 	return pgModel{
-		connectionString: *opt.Db,
+		connectionString: cs,
 	}
 }
 

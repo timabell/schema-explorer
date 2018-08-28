@@ -7,9 +7,9 @@ import (
 	"database/sql"
 	_ "github.com/denisenkom/go-mssqldb"
 	"log"
+	"os"
 	"strconv"
 	"strings"
-	"os"
 )
 
 type mssqlModel struct {
