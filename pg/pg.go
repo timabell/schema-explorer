@@ -20,6 +20,7 @@ type pgModel struct {
 
 type pgOpts struct {
 	Host             *string `long:"host" env:"host"`
+	Port             *string `long:"port" env:"port"`
 	Database         *string `long:"database" env:"database"`
 	User             *string `long:"user" env:"user"`
 	Password         *string `long:"password" env:"password"`
@@ -38,6 +39,7 @@ func (opts pgOpts) validate() error {
 
 func (opts pgOpts) hasAnyDetails() bool {
 	return opts.Host != nil ||
+		opts.Port != nil ||
 		opts.Database != nil ||
 		opts.User != nil ||
 		opts.Password != nil
