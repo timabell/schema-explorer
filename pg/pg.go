@@ -27,13 +27,16 @@ type pgOpts struct {
 }
 
 func (opts pgOpts) validate() error {
-	if opts.hasDetails() && opts.ConnectionString != nil {
+	if opts.hasAnyDetails() && opts.ConnectionString != nil {
 		return errors.New("Specify either a connection string or host etc, not both.")
+	}
+	if !opts.hasAnyDetails() && opts.ConnectionString == nil {
+		return errors.New("Specify either a connection string or host etc.")
 	}
 	return nil
 }
 
-func (opts pgOpts) hasDetails() bool {
+func (opts pgOpts) hasAnyDetails() bool {
 	return opts.Host != nil ||
 		opts.Database != nil ||
 		opts.User != nil ||
