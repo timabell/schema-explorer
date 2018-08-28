@@ -51,6 +51,7 @@ func main() {
 	_, err := reader.ArgParser.ParseArgs(os.Args)
 	if err != nil {
 		reader.ArgParser.WriteHelp(os.Stdout)
+		log.Println("Tip: The \"[$name]\" entries in the above usage info are environment variable equivalents to command line args because we <3 https://12factor.net/")
 		os.Exit(1)
 	}
 	log.Printf("%s is the driver", *reader.Options.Driver)
