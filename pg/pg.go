@@ -5,9 +5,11 @@ import (
 	"bitbucket.org/timabell/sql-data-viewer/reader"
 	"bitbucket.org/timabell/sql-data-viewer/schema"
 	"database/sql"
+	"errors"
 	"fmt"
 	_ "github.com/lib/pq"
 	"log"
+	"os"
 	"strconv"
 	"strings"
 )
@@ -24,21 +26,41 @@ type pgOpts struct {
 	ConnectionString *string `long:"connection-string" description:"Postgres connection string. Use this instead of host, port etc for advanced driver options. See https://godoc.org/github.com/lib/pq for connection-string options." env:"connection_string"`
 }
 
-var opt = &pgOpts{}
+func (opts pgOpts) validate() error {
+	if opts.hasDetails() && opts.ConnectionString != nil {
+		return errors.New("Specify either a connection string or host etc, not both.")
+	}
+	return nil
+}
+
+func (opts pgOpts) hasDetails() bool {
+	return opts.Host != nil ||
+		opts.Database != nil ||
+		opts.User != nil ||
+		opts.Password != nil
+}
+
+var opts = &pgOpts{}
 
 func init() {
 	// https://github.com/jessevdk/go-flags/blob/master/group_test.go#L33
-	reader.RegisterReader("pg", opt, NewPg)
+	reader.RegisterReader("pg", opts, NewPg)
 }
 
 func NewPg() reader.DbReader {
-	var cs string
-	if opt.ConnectionString == nil {
-		cs = fmt.Sprintf("postgre://%s:%s@%s/%s", opt.User, opt.Password, opt.Host, opt.Database)
-	} else {
-		cs = *opt.ConnectionString
+	err := opts.validate()
+	if err != nil {
+		log.Printf("Pg args error: %s", err)
+		reader.ArgParser.WriteHelp(os.Stdout)
+		os.Exit(1)
 	}
-	//if opt.ConnectionString == nil {
+	var cs string
+	if opts.ConnectionString == nil {
+		cs = fmt.Sprintf("postgre://%s:%s@%s/%s", opts.User, opts.Password, opts.Host, opts.Database)
+	} else {
+		cs = *opts.ConnectionString
+	}
+	//if opts.ConnectionString == nil {
 	//	log.Printf("Error: connection string is required")
 	//	reader.ArgParser.WriteHelp(os.Stdout)
 	//	os.Exit(1)
