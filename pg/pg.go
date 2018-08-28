@@ -19,7 +19,7 @@ type pgModel struct {
 
 type pgOpts struct {
 	// todo: break down into host, port etc
-	Db *string `long:"pg-db" description:"Postgres connection string. # see https://godoc.org/github.com/lib/pq for connection-string options" env:"schemaexplorer_pg_db"`
+	Db *string `long:"db" description:"Postgres connection string. # see https://godoc.org/github.com/lib/pq for connection-string options" env:"db"`
 }
 
 var opt = &pgOpts{}

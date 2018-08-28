@@ -18,7 +18,7 @@ type mssqlModel struct {
 
 type mssqlOpts struct {
 	// todo: break down into host, port etc
-	Db *string `long:"mssql-db" description:"Mssql connection string. # see https://godoc.org/github.com/lib/pq for connection-string options" env:"schemaexplorer_mssql_db"`
+	Db *string `long:"db" description:"Mssql connection string. # see https://godoc.org/github.com/lib/pq for connection-string options" env:"db"`
 }
 
 var opt = &mssqlOpts{}

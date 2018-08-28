@@ -38,9 +38,19 @@ type RowData []interface{}
 
 var creators = make(map[string]CreateReader)
 
+func init(){
+	ArgParser.EnvNamespace = "schemaexplorer"
+	ArgParser.NamespaceDelimiter = "-"
+}
+
 func RegisterReader(name string, opt interface{}, creator CreateReader) {
 	creators[name] = creator
-	ArgParser.AddGroup(name, fmt.Sprintf("Options for %s database", name), opt)
+	group, err := ArgParser.AddGroup(name, fmt.Sprintf("Options for %s database", name), opt)
+	if err != nil {
+		panic(err)
+	}
+	group.Namespace = name
+	group.EnvNamespace = name
 	log.Printf("%s capability locked and loaded", name)
 }
 
