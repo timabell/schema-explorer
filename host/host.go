@@ -34,6 +34,7 @@ func RunServer(options reader.SdvOptions) {
 	render.SetupTemplate()
 
 	dbReader := reader.GetDbReader()
+	log.Println("Checking database connection...")
 	err := dbReader.CheckConnection()
 	if err != nil {
 		log.Println(err)
