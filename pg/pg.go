@@ -63,7 +63,7 @@ func NewPg() reader.DbReader {
 			optList["host"] = *opts.Host
 		}
 		if opts.Port != nil {
-			optList["port"] = fmt.Sprintf("%d", *opts.Port)
+			optList["port"] = strconv.Itoa(*opts.Port)
 		}
 		if opts.Database != nil {
 			optList["dbname"] = *opts.Database
