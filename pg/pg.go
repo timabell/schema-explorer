@@ -78,10 +78,8 @@ func NewPg() reader.DbReader {
 		for key, value := range optList {
 			pairs = append(pairs, fmt.Sprintf("%s='%s'", key, strings.Replace(value, "'", "\\'", -1)))
 		}
-		// todo: make slice of opt strings xx=yy,
-		// join with spaces
 		cs = strings.Join(pairs, " ")
-		log.Println(cs)
+		//log.Println(cs)
 	} else {
 		cs = *opts.ConnectionString
 	}
