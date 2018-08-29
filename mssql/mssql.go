@@ -11,6 +11,7 @@ import (
 	"strconv"
 	"strings"
 	"errors"
+	"fmt"
 )
 
 type mssqlModel struct {
@@ -20,18 +21,18 @@ type mssqlModel struct {
 type mssqlOpts struct {
 	Host             *string `long:"host" env:"host"`
 	Port             *int    `long:"port" env:"port"`
+	Instance         *string `long:"instance" env:"instance"`
 	Database         *string `long:"database" env:"database"`
-	IntegratedAuth   *bool   `long:"integrated-auth" env:"integrated_auth"`
 	User             *string `long:"user" env:"user"`
 	Password         *string `long:"password" env:"password"`
 	ConnectionString *string `long:"connection-string" description:"Sql Server connection string. Use this instead of host, port etc for advanced driver options. See https://github.com/simnalamburt/go-mssqldb#connection-parameters-and-dsn for connection-string options." env:"connection_string"`
 }
 
-var opt = &mssqlOpts{}
+var opts = &mssqlOpts{}
 
 func init() {
 	// https://github.com/jessevdk/go-flags/blob/master/group_test.go#L33
-	reader.RegisterReader("mssql", opt, NewMssql)
+	reader.RegisterReader("mssql", opts, NewMssql)
 }
 
 func (opts mssqlOpts) validate() error {
@@ -45,20 +46,46 @@ func (opts mssqlOpts) hasAnyDetails() bool {
 	return opts.Host != nil ||
 		opts.Port != nil ||
 		opts.Database != nil ||
-		opts.IntegratedAuth != nil ||
 		opts.User != nil ||
 		opts.Password != nil
 }
 
 func NewMssql() reader.DbReader {
-	if opt.Db == nil {
-		log.Printf("Error: connection string (mssql-db) is required")
+	err := opts.validate()
+	if err != nil {
+		log.Printf("Mssql args error: %s", err)
 		reader.ArgParser.WriteHelp(os.Stdout)
 		os.Exit(1)
 	}
+	var cs string
+	if opts.ConnectionString == nil {
+		optList := make(map[string]string)
+		if opts.Host != nil {
+			optList["server"] = *opts.Host
+		}
+		if opts.Port != nil {
+			optList["port"] = strconv.Itoa(*opts.Port)
+		}
+		if opts.Database != nil {
+			optList["database"] = *opts.Database
+		}
+		if opts.User != nil {
+			optList["user id"] = *opts.User
+		}
+		if opts.Password != nil {
+			optList["password"] = *opts.Password
+		}
+		pairs := []string{}
+		for key, value := range optList {
+			pairs = append(pairs, fmt.Sprintf("%s='%s'", key, value))
+		}
+		cs = strings.Join(pairs, ";")
+	} else {
+		cs = *opts.ConnectionString
+	}
 	log.Println("Connecting to mssql db")
 	return mssqlModel{
-		connectionString: *opt.Db,
+		connectionString: cs,
 	}
 }
 
