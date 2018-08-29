@@ -20,7 +20,7 @@ type pgModel struct {
 
 type pgOpts struct {
 	Host             *string `long:"host" env:"host"`
-	Port             *string `long:"port" env:"port"`
+	Port             *int    `long:"port" env:"port"`
 	Database         *string `long:"database" env:"database"`
 	User             *string `long:"user" env:"user"`
 	Password         *string `long:"password" env:"password"`
@@ -30,9 +30,6 @@ type pgOpts struct {
 func (opts pgOpts) validate() error {
 	if opts.hasAnyDetails() && opts.ConnectionString != nil {
 		return errors.New("Specify either a connection string or host etc, not both.")
-	}
-	if !opts.hasAnyDetails() && opts.ConnectionString == nil {
-		return errors.New("Specify either a connection string or host etc.")
 	}
 	return nil
 }
@@ -61,7 +58,30 @@ func NewPg() reader.DbReader {
 	}
 	var cs string
 	if opts.ConnectionString == nil {
-		cs = fmt.Sprintf("postgre://%s:%s@%s/%s", opts.User, opts.Password, opts.Host, opts.Database)
+		optList := make(map[string]string)
+		if opts.Host != nil {
+			optList["host"] = *opts.Host
+		}
+		if opts.Port != nil {
+			optList["port"] = fmt.Sprintf("%d", *opts.Port)
+		}
+		if opts.Database != nil {
+			optList["dbname"] = *opts.Database
+		}
+		if opts.User != nil {
+			optList["user"] = *opts.User
+		}
+		if opts.Password != nil {
+			optList["password"] = *opts.Password
+		}
+		pairs := []string{}
+		for key, value := range optList {
+			pairs = append(pairs, fmt.Sprintf("%s='%s'", key, strings.Replace(value, "'", "\\'", -1)))
+		}
+		// todo: make slice of opt strings xx=yy,
+		// join with spaces
+		cs = strings.Join(pairs, " ")
+		log.Println(cs)
 	} else {
 		cs = *opts.ConnectionString
 	}
