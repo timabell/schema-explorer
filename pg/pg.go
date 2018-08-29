@@ -185,7 +185,7 @@ func (model pgModel) getTables(dbc *sql.DB) (tables []*schema.Table, err error) 
 	for _, table := range tables {
 		rowCount, err := model.getRowCount(table)
 		if err != nil {
-			log.Printf("Failed to get row count for %d", table)
+			log.Printf("Failed to get row count for %s", table)
 		}
 		table.RowCount = &rowCount
 	}
