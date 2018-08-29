@@ -10,6 +10,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"errors"
 )
 
 type mssqlModel struct {
@@ -17,8 +18,13 @@ type mssqlModel struct {
 }
 
 type mssqlOpts struct {
-	// todo: break down into host, port etc
-	Db *string `long:"db" description:"Mssql connection string. # see https://godoc.org/github.com/lib/pq for connection-string options" env:"db"`
+	Host             *string `long:"host" env:"host"`
+	Port             *int    `long:"port" env:"port"`
+	Database         *string `long:"database" env:"database"`
+	IntegratedAuth   *bool   `long:"integrated-auth" env:"integrated_auth"`
+	User             *string `long:"user" env:"user"`
+	Password         *string `long:"password" env:"password"`
+	ConnectionString *string `long:"connection-string" description:"Sql Server connection string. Use this instead of host, port etc for advanced driver options. See https://github.com/simnalamburt/go-mssqldb#connection-parameters-and-dsn for connection-string options." env:"connection_string"`
 }
 
 var opt = &mssqlOpts{}
@@ -26,6 +32,22 @@ var opt = &mssqlOpts{}
 func init() {
 	// https://github.com/jessevdk/go-flags/blob/master/group_test.go#L33
 	reader.RegisterReader("mssql", opt, NewMssql)
+}
+
+func (opts mssqlOpts) validate() error {
+	if opts.hasAnyDetails() && opts.ConnectionString != nil {
+		return errors.New("Specify either a connection string or host etc, not both.")
+	}
+	return nil
+}
+
+func (opts mssqlOpts) hasAnyDetails() bool {
+	return opts.Host != nil ||
+		opts.Port != nil ||
+		opts.Database != nil ||
+		opts.IntegratedAuth != nil ||
+		opts.User != nil ||
+		opts.Password != nil
 }
 
 func NewMssql() reader.DbReader {

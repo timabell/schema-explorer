@@ -79,15 +79,9 @@ func NewPg() reader.DbReader {
 			pairs = append(pairs, fmt.Sprintf("%s='%s'", key, strings.Replace(value, "'", "\\'", -1)))
 		}
 		cs = strings.Join(pairs, " ")
-		//log.Println(cs)
 	} else {
 		cs = *opts.ConnectionString
 	}
-	//if opts.ConnectionString == nil {
-	//	log.Printf("Error: connection string is required")
-	//	reader.ArgParser.WriteHelp(os.Stdout)
-	//	os.Exit(1)
-	//}
 	log.Println("Connecting to pg db")
 	return pgModel{
 		connectionString: cs,
