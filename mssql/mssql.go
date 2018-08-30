@@ -1,17 +1,18 @@
 package mssql
 
 import (
+	"bitbucket.org/timabell/sql-data-viewer/about"
 	"bitbucket.org/timabell/sql-data-viewer/params"
 	"bitbucket.org/timabell/sql-data-viewer/reader"
 	"bitbucket.org/timabell/sql-data-viewer/schema"
 	"database/sql"
+	"errors"
+	"fmt"
 	_ "github.com/denisenkom/go-mssqldb"
 	"log"
 	"os"
 	"strconv"
 	"strings"
-	"errors"
-	"fmt"
 )
 
 type mssqlModel struct {
@@ -61,7 +62,15 @@ func NewMssql() reader.DbReader {
 	if opts.ConnectionString == nil {
 		optList := make(map[string]string)
 		if opts.Host != nil {
-			optList["server"] = *opts.Host
+			if opts.Instance != nil {
+				optList["server"] = fmt.Sprintf("%s\\%s", *opts.Host, *opts.Instance)
+			} else {
+				optList["server"] = *opts.Host
+			}
+		} else {
+			if opts.Instance != nil {
+				optList["server"] = fmt.Sprintf("localhost\\%s", *opts.Instance)
+			}
 		}
 		if opts.Port != nil {
 			optList["port"] = strconv.Itoa(*opts.Port)
@@ -75,9 +84,10 @@ func NewMssql() reader.DbReader {
 		if opts.Password != nil {
 			optList["password"] = *opts.Password
 		}
+		optList["app-name"] = about.About.Summary()
 		pairs := []string{}
 		for key, value := range optList {
-			pairs = append(pairs, fmt.Sprintf("%s='%s'", key, value))
+			pairs = append(pairs, fmt.Sprintf("%s=%s", key, value))
 		}
 		cs = strings.Join(pairs, ";")
 	} else {
