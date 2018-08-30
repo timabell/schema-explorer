@@ -41,8 +41,9 @@ var testDb string
 var testDbDriver string
 
 func init() {
-	_, err := reader.ArgParser.ParseArgs(os.Args)
+	_, err := reader.ArgParser.ParseArgs([]string{})
 	if err != nil {
+		os.Stderr.WriteString("Note that running sdv under test only supports environment variables because command line args clash with the go-test args.\n\n")
 		reader.ArgParser.WriteHelp(os.Stdout)
 		os.Exit(1)
 	}
