@@ -17,14 +17,12 @@ import (
 	"time"
 )
 
-var db string
 var driver string
 var cachingEnabled bool
 var database *schema.Database
 var connectionName string
 
 func RunServer(options reader.SdvOptions) {
-	db = "todo"
 	driver = *options.Driver
 	cachingEnabled = options.Live == nil || !*options.Live
 	if options.ConnectionDisplayName != nil {
@@ -89,7 +87,6 @@ func requestSetup() (layoutData render.PageTemplateModel, dbReader reader.DbRead
 	dbReader = reader.GetDbReader()
 
 	layoutData = render.PageTemplateModel{
-		Db:             db,
 		Title:          connectionName + "|" + about.About.ProductName,
 		ConnectionName: connectionName,
 		About:          about.About,

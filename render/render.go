@@ -17,7 +17,6 @@ import (
 type PageTemplateModel struct {
 	Title          string
 	ConnectionName string
-	Db             string
 	About          about.AboutType
 	Copyright      string
 	LicenseText    string
