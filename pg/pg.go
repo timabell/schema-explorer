@@ -19,11 +19,11 @@ type pgModel struct {
 }
 
 type pgOpts struct {
-	Host             *string `long:"host" env:"host"`
-	Port             *int    `long:"port" env:"port"`
-	Database         *string `long:"database" env:"database"`
-	User             *string `long:"user" env:"user"`
-	Password         *string `long:"password" env:"password"`
+	Host             *string `long:"host" description:"Postgres host" env:"host"`
+	Port             *int    `long:"port" description:"Postgres port" env:"port"`
+	Database         *string `long:"database" description:"Postgres database name" env:"database"`
+	User             *string `long:"user" description:"Postgres username" env:"user"`
+	Password         *string `long:"password" description:"Postgres password" env:"password"`
 	ConnectionString *string `long:"connection-string" description:"Postgres connection string. Use this instead of host, port etc for advanced driver options. See https://godoc.org/github.com/lib/pq for connection-string options." env:"connection_string"`
 }
 
