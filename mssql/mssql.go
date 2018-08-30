@@ -20,12 +20,12 @@ type mssqlModel struct {
 }
 
 type mssqlOpts struct {
-	Host             *string `long:"host" env:"host"`
-	Port             *int    `long:"port" env:"port"`
-	Instance         *string `long:"instance" env:"instance"`
-	Database         *string `long:"database" env:"database"`
-	User             *string `long:"user" env:"user"`
-	Password         *string `long:"password" env:"password"`
+	Host             *string `long:"host" description:"Sql Server host or address" env:"host"`
+	Port             *int    `long:"port" description:"Sql Server port" env:"port"`
+	Instance         *string `long:"instance" description:"Sql Server instance name" env:"instance"`
+	Database         *string `long:"database" description:"Sql Server database name" env:"database"`
+	User             *string `long:"user" description:"Sql Server username for sql-auth. Leave out to use integrated auth." env:"user"`
+	Password         *string `long:"password" description:"Sql Server password for sql-auth" env:"password"`
 	ConnectionString *string `long:"connection-string" description:"Sql Server connection string. Use this instead of host, port etc for advanced driver options. See https://github.com/simnalamburt/go-mssqldb#connection-parameters-and-dsn for connection-string options." env:"connection_string"`
 }
 
