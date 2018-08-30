@@ -12,7 +12,9 @@ defined in the database's schema.
 package main
 
 import (
+	"bitbucket.org/timabell/sql-data-viewer/about"
 	"bitbucket.org/timabell/sql-data-viewer/host"
+	"bitbucket.org/timabell/sql-data-viewer/licensing"
 	_ "bitbucket.org/timabell/sql-data-viewer/mssql"
 	_ "bitbucket.org/timabell/sql-data-viewer/pg"
 	"bitbucket.org/timabell/sql-data-viewer/reader"
@@ -22,32 +24,8 @@ import (
 )
 
 func main() {
-	// todo: create option structs for each driver
+	licensing.Licensing()
 
-	//	// sqlite
-	//	path             = flag.String("path", "", "path to sqlite file")
-	//	// sql server, pg
-	//	dbHost = flag.String("dbHost", "", "database host to connect to")
-	//	dbPort = flag.String("dbPort", "", "database port to connect to")
-	//	mssql = flag.String("dbPort", "", "database port to connect to")
-	//	connectionString = flag.String("connectionString", "", "full connection string for mssql and pg as an alternative to host etc")
-	//)
-	//flag.Parse()
-	//if *driver == "" {
-	//	log.Println("Driver argument required.")
-	//	flag.Usage()
-	//	Usage()
-	//	os.Exit(1)
-	//}
-	//
-	//log.Printf("%s Viewer v%s, %s", about.About.ProductName, about.About.Version, licensing.CopyrightText())
-	//log.Print(about.About.Website)
-	//log.Printf("Feeback/support/contact: <%s>", about.About.Email)
-	//log.Printf(licensing.LicenseText())
-	//licensing.Licensing()
-	//log.Printf("Connection: %s %s", *driver, *name)
-	//
-	//// todo: cleanup way connectionString info is passed to server & handler
 	_, err := reader.ArgParser.ParseArgs(os.Args)
 	if err != nil {
 		reader.ArgParser.WriteHelp(os.Stdout)
@@ -61,7 +39,14 @@ func main() {
 		os.Stdout.WriteString("\n")
 		os.Exit(1)
 	}
-	log.Printf("%s is the driver", *reader.Options.Driver)
+
+	log.Printf("%s\n  %s\n  %s\n  Feeback/support/contact: <%s>\n  Driver: %s, connection name: \"%s\"\n",
+		about.About.Summary(),
+		licensing.CopyrightText(),
+		licensing.LicenseText(),
+		about.About.Email,
+		*reader.Options.Driver,
+		*reader.Options.ConnectionDisplayName)
 
 	host.RunServer(reader.Options)
 }

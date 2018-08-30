@@ -51,11 +51,9 @@ func RegisterReader(name string, opt interface{}, creator CreateReader) {
 	}
 	group.Namespace = name
 	group.EnvNamespace = name
-	log.Printf("%s capability locked and loaded", name)
 }
 
 func GetDbReader() DbReader {
-	log.Printf("Initializing %s reader", *Options.Driver)
 	createReader := creators[*Options.Driver]
 	if createReader == nil {
 		log.Printf("Unknown reader '%s'", *Options.Driver)

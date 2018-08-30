@@ -61,7 +61,7 @@ func RunServer(options reader.SdvOptions) {
 		WriteTimeout: 300 * time.Second,
 		ReadTimeout:  300 * time.Second,
 	}
-	log.Printf("Starting server on http://%s/ - Press Ctrl-C to kill server.\n", listenOnHostPort)
+	log.Printf("Starting web-server, point your browser at http://%s/\nPress Ctrl-C to exit schemaexplorer.\n", listenOnHostPort)
 	log.Fatal(srv.ListenAndServe())
 }
 
