@@ -23,15 +23,18 @@ var cachingEnabled bool
 var database *schema.Database
 var connectionName string
 
-func RunServer(driverInfo string, dbConn string, port int, listenOn string, live bool, name string) {
-	db = dbConn
-	driver = driverInfo
-	cachingEnabled = !live
-	connectionName = name
+func RunServer(options reader.SdvOptions) {
+	db = "todo"
+	driver = *options.Driver
+	cachingEnabled = options.Live == nil || !*options.Live
+	if options.ConnectionDisplayName != nil {
+		connectionName = *options.ConnectionDisplayName
+	}
 
 	render.SetupTemplate()
 
-	dbReader := reader.GetDbReader(driver, db)
+	dbReader := reader.GetDbReader()
+	log.Println("Checking database connection...")
 	err := dbReader.CheckConnection()
 	if err != nil {
 		log.Println(err)
@@ -53,7 +56,7 @@ func RunServer(driverInfo string, dbConn string, port int, listenOn string, live
 	r.HandleFunc("/table-trail/clear", ClearTableTrailHandler)
 	r.HandleFunc("/tables/{tableName}", TableHandler)
 	r.Use(loggingHandler)
-	listenOnHostPort := fmt.Sprintf("%s:%d", listenOn, port) // e.g. localhost:8080 or 0.0.0.0:80
+	listenOnHostPort := fmt.Sprintf("%s:%d", *options.ListenOnAddress, *options.ListenOnPort) // e.g. localhost:8080 or 0.0.0.0:80
 	srv := &http.Server{
 		Handler:      r,
 		Addr:         listenOnHostPort,
@@ -83,8 +86,7 @@ func loggingHandler(next http.Handler) http.Handler {
 
 func requestSetup() (layoutData render.PageTemplateModel, dbReader reader.DbReader, err error) {
 	licensing.Licensing()
-
-	dbReader = reader.GetDbReader(driver, db)
+	dbReader = reader.GetDbReader()
 
 	layoutData = render.PageTemplateModel{
 		Db:             db,

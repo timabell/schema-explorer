@@ -5,9 +5,23 @@ import (
 	"bitbucket.org/timabell/sql-data-viewer/schema"
 	"database/sql"
 	"fmt"
+	"github.com/jessevdk/go-flags"
 	"log"
+	"os"
 	"strings"
 )
+
+type SdvOptions struct {
+	Driver                *string `short:"d" long:"driver" required:"true" description:"Driver to use" choice:"mssql" choice:"pg" choice:"sqlite" env:"schemaexplorer_driver"`
+	Live                  *bool   `short:"l" long:"live" description:"update html templates & schema information from disk on every page load" env:"schemaexplorer_live"`
+	ConnectionDisplayName *string `short:"n" long:"display-name" description:"A display name for this connection" env:"schemaexplorer_display_name"`
+	ListenOnAddress       *string `short:"a" long:"listen-on-address" description:"address to listen on" default:"localhost" env:"schemaexplorer_listen_on_address"` // localhost so that it's secure by default, only listen for local connections
+	ListenOnPort          *int    `short:"p" long:"listen-on-port" description:"port to listen on" default:"8080" env:"schemaexplorer_listen_on_port"`
+}
+
+// todo: arg parsing and options shouldn't be here
+var Options = SdvOptions{}
+var ArgParser = flags.NewParser(&Options, flags.Default)
 
 type DbReader interface {
 	CheckConnection() (err error)
@@ -15,8 +29,40 @@ type DbReader interface {
 	GetSqlRows(table *schema.Table, params *params.TableParams) (rows *sql.Rows, err error)
 }
 
+type DbReaderOptions interface{}
+
+type CreateReader func() DbReader
+
 // Single row of data
 type RowData []interface{}
+
+var creators = make(map[string]CreateReader)
+
+func init() {
+	ArgParser.EnvNamespace = "schemaexplorer"
+	ArgParser.NamespaceDelimiter = "-"
+}
+
+func RegisterReader(name string, opt interface{}, creator CreateReader) {
+	creators[name] = creator
+	group, err := ArgParser.AddGroup(name, fmt.Sprintf("Options for %s database", name), opt)
+	if err != nil {
+		panic(err)
+	}
+	group.Namespace = name
+	group.EnvNamespace = name
+	log.Printf("%s capability locked and loaded", name)
+}
+
+func GetDbReader() DbReader {
+	log.Printf("Initializing %s reader", *Options.Driver)
+	createReader := creators[*Options.Driver]
+	if createReader == nil {
+		log.Printf("Unknown reader '%s'", *Options.Driver)
+		os.Exit(1)
+	}
+	return createReader()
+}
 
 func GetRows(reader DbReader, table *schema.Table, params *params.TableParams) (rowsData []RowData, err error) {
 	rows, err := reader.GetSqlRows(table, params)

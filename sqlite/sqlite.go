@@ -4,22 +4,41 @@ package sqlite
 
 import (
 	"bitbucket.org/timabell/sql-data-viewer/params"
+	"bitbucket.org/timabell/sql-data-viewer/reader"
 	"bitbucket.org/timabell/sql-data-viewer/schema"
 	"database/sql"
 	"fmt"
 	_ "github.com/mattn/go-sqlite3"
 	"log"
+	"os"
 	"strconv"
 	"strings"
 )
+
+type sqliteOpts struct {
+	Path *string `short:"f" long:"file" description:"Path to sqlite db file" env:"file"`
+}
+
+var opt = &sqliteOpts{}
+
+func init() {
+	// https://github.com/jessevdk/go-flags/blob/master/group_test.go#L33
+	reader.RegisterReader("sqlite", opt, NewSqlite)
+}
 
 type sqliteModel struct {
 	path string
 }
 
-func NewSqlite(path string) sqliteModel {
+func NewSqlite() reader.DbReader {
+	if opt.Path == nil {
+		log.Printf("Error: sqlite file is required")
+		reader.ArgParser.WriteHelp(os.Stdout)
+		os.Exit(1)
+	}
+	log.Printf("Connecting to sqlite file %s", *opt.Path)
 	return sqliteModel{
-		path: path,
+		path: *opt.Path,
 	}
 }
 
@@ -136,6 +155,10 @@ func (model sqliteModel) CheckConnection() (err error) {
 		panic("getConnection() returned nil")
 	}
 	defer dbc.Close()
+	err = dbc.Ping()
+	if err != nil {
+		panic(err)
+	}
 	tables, err := model.getTables(dbc)
 	if err != nil {
 		panic(err)

@@ -1,4 +1,4 @@
-package reader
+package main
 
 /*
 Tests multiple rdbms implementations by way of test.sh shell script that repeatedly runs the same
@@ -23,36 +23,35 @@ aren't silently missing any of the supported data types.
 */
 
 import (
-	"flag"
-	"testing"
-
+	_ "bitbucket.org/timabell/sql-data-viewer/mssql"
 	"bitbucket.org/timabell/sql-data-viewer/params"
+	_ "bitbucket.org/timabell/sql-data-viewer/pg"
+	"bitbucket.org/timabell/sql-data-viewer/reader"
 	"bitbucket.org/timabell/sql-data-viewer/schema"
+	_ "bitbucket.org/timabell/sql-data-viewer/sqlite"
 	"fmt"
 	"log"
+	"os"
 	"reflect"
 	"strings"
+	"testing"
 )
 
 var testDb string
 var testDbDriver string
 
 func init() {
-	flag.StringVar(&testDbDriver, "driver", "", "Driver to use (mssql or sqlite)")
-	flag.StringVar(&testDb, "db", "", "connection string for mssql / filename for sqlite")
-	flag.Parse()
-	if testDbDriver == "" {
-		flag.Usage()
-		panic("Driver argument required.")
+	_, err := reader.ArgParser.ParseArgs([]string{})
+	if err != nil {
+		os.Stderr.WriteString("Note that running sdv under test only supports environment variables because command line args clash with the go-test args.\n\n")
+		reader.ArgParser.WriteHelp(os.Stdout)
+		os.Exit(1)
 	}
-	if testDb == "" {
-		flag.Usage()
-		panic("Db argument required.")
-	}
+	log.Printf("%s is the driver", *reader.Options.Driver)
 }
 
 func Test_CheckConnection(t *testing.T) {
-	reader := GetDbReader(testDbDriver, testDb)
+	reader := reader.GetDbReader()
 	err := reader.CheckConnection()
 	if err != nil {
 		t.Fatal(err)
@@ -60,7 +59,7 @@ func Test_CheckConnection(t *testing.T) {
 }
 
 func Test_ReadSchema(t *testing.T) {
-	reader := GetDbReader(testDbDriver, testDb)
+	reader := reader.GetDbReader()
 	database, err := reader.ReadSchema()
 	if err != nil {
 		t.Fatal(err)
@@ -277,8 +276,8 @@ var tests = []testCase{
 }
 
 func Test_FilterAndSort(t *testing.T) {
-	reader := GetDbReader(testDbDriver, testDb)
-	database, err := reader.ReadSchema()
+	dbReader := reader.GetDbReader()
+	database, err := dbReader.ReadSchema()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -295,7 +294,7 @@ func Test_FilterAndSort(t *testing.T) {
 		Sort:     []params.SortCol{{Column: colourCol, Descending: false}, {Column: sizeCol, Descending: true}},
 		RowLimit: 10,
 	}
-	rows, err := GetRows(reader, table, tableParams)
+	rows, err := reader.GetRows(dbReader, table, tableParams)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -333,8 +332,8 @@ func dbString(value interface{}) string {
 }
 
 func Test_GetRows(t *testing.T) {
-	reader := GetDbReader(testDbDriver, testDb)
-	database, err := reader.ReadSchema()
+	dbReader := reader.GetDbReader()
+	database, err := dbReader.ReadSchema()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -345,7 +344,7 @@ func Test_GetRows(t *testing.T) {
 	params := &params.TableParams{
 		RowLimit: 999,
 	}
-	rows, err := GetRows(reader, table, params)
+	rows, err := reader.GetRows(dbReader, table, params)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -376,7 +375,7 @@ func Test_GetRows(t *testing.T) {
 		if !strings.EqualFold(actualType, test.expectedType) {
 			t.Errorf("Incorrect column type %s %+v", actualType, test)
 		}
-		actualString := DbValueToString(rows[test.row][columnIndex], actualType)
+		actualString := reader.DbValueToString(rows[test.row][columnIndex], actualType)
 		if *actualString != test.expectedString {
 			t.Errorf("Incorrect string '%s' %+v", *actualString, test)
 		}

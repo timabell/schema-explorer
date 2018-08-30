@@ -2,11 +2,14 @@ package pg
 
 import (
 	"bitbucket.org/timabell/sql-data-viewer/params"
+	"bitbucket.org/timabell/sql-data-viewer/reader"
 	"bitbucket.org/timabell/sql-data-viewer/schema"
 	"database/sql"
+	"errors"
 	"fmt"
 	_ "github.com/lib/pq"
 	"log"
+	"os"
 	"strconv"
 	"strings"
 )
@@ -15,9 +18,73 @@ type pgModel struct {
 	connectionString string
 }
 
-func NewPg(connectionString string) pgModel {
+type pgOpts struct {
+	Host             *string `long:"host" description:"Postgres host" env:"host"`
+	Port             *int    `long:"port" description:"Postgres port" env:"port"`
+	Database         *string `long:"database" description:"Postgres database name" env:"database"`
+	User             *string `long:"user" description:"Postgres username" env:"user"`
+	Password         *string `long:"password" description:"Postgres password" env:"password"`
+	ConnectionString *string `long:"connection-string" description:"Postgres connection string. Use this instead of host, port etc for advanced driver options. See https://godoc.org/github.com/lib/pq for connection-string options." env:"connection_string"`
+}
+
+func (opts pgOpts) validate() error {
+	if opts.hasAnyDetails() && opts.ConnectionString != nil {
+		return errors.New("Specify either a connection string or host etc, not both.")
+	}
+	return nil
+}
+
+func (opts pgOpts) hasAnyDetails() bool {
+	return opts.Host != nil ||
+		opts.Port != nil ||
+		opts.Database != nil ||
+		opts.User != nil ||
+		opts.Password != nil
+}
+
+var opts = &pgOpts{}
+
+func init() {
+	// https://github.com/jessevdk/go-flags/blob/master/group_test.go#L33
+	reader.RegisterReader("pg", opts, NewPg)
+}
+
+func NewPg() reader.DbReader {
+	err := opts.validate()
+	if err != nil {
+		log.Printf("Pg args error: %s", err)
+		reader.ArgParser.WriteHelp(os.Stdout)
+		os.Exit(1)
+	}
+	var cs string
+	if opts.ConnectionString == nil {
+		optList := make(map[string]string)
+		if opts.Host != nil {
+			optList["host"] = *opts.Host
+		}
+		if opts.Port != nil {
+			optList["port"] = strconv.Itoa(*opts.Port)
+		}
+		if opts.Database != nil {
+			optList["dbname"] = *opts.Database
+		}
+		if opts.User != nil {
+			optList["user"] = *opts.User
+		}
+		if opts.Password != nil {
+			optList["password"] = *opts.Password
+		}
+		pairs := []string{}
+		for key, value := range optList {
+			pairs = append(pairs, fmt.Sprintf("%s='%s'", key, strings.Replace(value, "'", "\\'", -1)))
+		}
+		cs = strings.Join(pairs, " ")
+	} else {
+		cs = *opts.ConnectionString
+	}
+	log.Println("Connecting to pg db")
 	return pgModel{
-		connectionString: connectionString,
+		connectionString: cs,
 	}
 }
 
@@ -110,7 +177,8 @@ func (model pgModel) getTables(dbc *sql.DB) (tables []*schema.Table, err error) 
 	for _, table := range tables {
 		rowCount, err := model.getRowCount(table)
 		if err != nil {
-			log.Printf("Failed to get row count for %d", table)
+			log.Printf("Failed to get row count for %s", table)
+			log.Println(err)
 		}
 		table.RowCount = &rowCount
 	}
