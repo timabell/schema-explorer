@@ -86,6 +86,7 @@ func loggingHandler(next http.Handler) http.Handler {
 
 func requestSetup() (layoutData render.PageTemplateModel, dbReader reader.DbReader, err error) {
 	licensing.Licensing()
+	dbReader = reader.GetDbReader()
 
 	layoutData = render.PageTemplateModel{
 		Db:             db,
@@ -100,7 +101,6 @@ func requestSetup() (layoutData render.PageTemplateModel, dbReader reader.DbRead
 	if !cachingEnabled {
 		render.SetupTemplate()
 		log.Print("Re-reading schema, this may take a while...")
-		dbReader = reader.GetDbReader()
 		database, err = dbReader.ReadSchema()
 		if err != nil {
 			fmt.Println("Error reading schema", err)
