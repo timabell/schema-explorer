@@ -40,13 +40,17 @@ func main() {
 		os.Exit(1)
 	}
 
+	connectionName := ""
+	if reader.Options.ConnectionDisplayName != nil {
+		connectionName = *reader.Options.ConnectionDisplayName
+	}
 	log.Printf("%s\n  %s\n  %s\n  Feeback/support/contact: <%s>\n  Driver: %s, connection name: \"%s\"\n",
 		about.About.Summary(),
 		licensing.CopyrightText(),
 		licensing.LicenseText(),
 		about.About.Email,
 		*reader.Options.Driver,
-		*reader.Options.ConnectionDisplayName)
+		connectionName)
 
 	host.RunServer(reader.Options)
 }
