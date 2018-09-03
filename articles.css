@@ -134,3 +134,6 @@ iframe {
 .live-demo {
   margin-top: 3em;
 }
+code{
+  font-family: monospace;
+}
