@@ -129,3 +129,13 @@ iframe {
 .live-demo {
   margin-top: 3em;
 }
+.screenshots{
+  overflow: auto; /* clearfix */
+}
+.screenshot-block{
+  float: left;
+  margin-right: 2em;
+}
+h3 {
+  margin: 0 0 0.5em 0;
+}
