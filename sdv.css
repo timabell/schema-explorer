@@ -97,8 +97,8 @@ a.button {
   line-height: 2em;
 }
 blockquote {
-  font-size: 2em;
-  background-color: #ccc;
+  font-size: 1.25em;
+  background-color: #eee;
   padding: 1em;
   margin: 1em 0;
   quotes: "\201C""\201D""\2018""\2019";
@@ -109,6 +109,7 @@ blockquote .attribution {
   color: #823331;
   display: block;
   text-align: right;
+  margin-top: 0.5em;
 }
 blockquote .quote:before {
   content: open-quote;
