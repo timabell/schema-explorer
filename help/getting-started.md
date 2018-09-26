@@ -80,7 +80,7 @@ Sql Express listens on named pipes by default:
 
 ### Sqlite
 
-	sql-data-viewer.exe --driver sqlite --sqlite-path your/sqlitefile.db
+	sql-data-viewer.exe --driver sqlite --sqlite-file your/sqlitefile.db
 
 ### Postgres
 
