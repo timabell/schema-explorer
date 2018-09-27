@@ -4,13 +4,14 @@
   line-height: 1.5em;
 }
 body{background-color: #f8f8f8;margin: 16px 32px;}
-h1 img{
-  max-width: 100%;
+.layout-default h1 img{
+  /* centered */
   margin: 0 auto;
   display: block;
 }
-#home h1 img{
+h1 img{
   margin-left: -33px; /* make up for whitespace in image */
+  max-width: 100%;
 }
 .encore{font-size: 60%;}
 a{color:#338;}
