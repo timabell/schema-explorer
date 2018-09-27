@@ -89,23 +89,6 @@ a.button {
   max-width: 58em;
   margin: 0 auto;
 }
-#pricing {
-  overflow: auto; /* clearfix */
-  margin: 1em auto;
-  max-width: 38em;
-}
-#pricing li {
-  display: block;
-  border: 2px solid #823331;
-  margin: 1em;
-  padding: 1em;
-  float: left;
-  height: 8em;
-  width: 8em;
-  text-align: center;
-  vertical-align: middle;
-  line-height: 2em;
-}
 blockquote {
   font-size: 1.25em;
   background-color: #eee;
