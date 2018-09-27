@@ -5,8 +5,12 @@
 }
 body{background-color: #f8f8f8;margin: 16px 32px;}
 h1 img{
-  margin-left: -33px; /* make up for whitespace in image */
   max-width: 100%;
+  margin: 0 auto;
+  display: block;
+}
+#home h1 img{
+  margin-left: -33px; /* make up for whitespace in image */
 }
 .encore{font-size: 60%;}
 a{color:#338;}
@@ -102,8 +106,8 @@ a.button {
   line-height: 2em;
 }
 blockquote {
-  font-size: 2em;
-  background-color: #ccc;
+  font-size: 1.25em;
+  background-color: #eee;
   padding: 1em;
   margin: 1em 0;
   quotes: "\201C""\201D""\2018""\2019";
@@ -114,6 +118,7 @@ blockquote .attribution {
   color: #823331;
   display: block;
   text-align: right;
+  margin-top: 0.5em;
 }
 blockquote .quote:before {
   content: open-quote;
@@ -136,4 +141,14 @@ iframe {
 }
 code{
   font-family: monospace;
+}
+.screenshots{
+  overflow: auto; /* clearfix */
+}
+.screenshot-block{
+  float: left;
+  margin-right: 2em;
+}
+h3 {
+  margin: 0 0 0.5em 0;
 }
