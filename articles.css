@@ -151,5 +151,8 @@ code{
   margin-right: 2em;
 }
 h3 {
-  margin: 0 0 0.5em 0;
+  margin: 1em 0 0.25em 0;
+}
+h4 {
+  margin: 0.5em 0 0.25em 0;
 }
