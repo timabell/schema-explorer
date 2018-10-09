@@ -11,10 +11,10 @@ echo -n "$(tput setaf 9)"
 echo "http://localhost:8082/ - sqlite test"
 echo -n "$(tput setaf 14)"
 echo "http://localhost:8085/ - pg test"
-echo -n "$(tput setaf 12)"
-echo "http://localhost:8083/ - mssql adventureworks"
-echo -n "$(tput setaf 13)"
-echo "http://localhost:8084/ - mssql test"
+# echo -n "$(tput setaf 12)"
+# echo "http://localhost:8083/ - mssql adventureworks"
+# echo -n "$(tput setaf 13)"
+# echo "http://localhost:8084/ - mssql test"
 # echo "http://localhost:8086/ - wwi (broken)"
 echo -n "$(tput sgr0)"
 echo "Ctrl-C to tear them all down again."
@@ -24,8 +24,8 @@ sleep 0.5
 ./run-sqlite-test.sh &
 sleep 0.5
 ./run-pg.sh &
-sleep 0.5
-./run-mssql.sh &
-sleep 0.5
-./run-mssql-test.sh &
+# sleep 0.5
+# ./run-mssql.sh &
+# sleep 0.5
+# ./run-mssql-test.sh &
 wait
