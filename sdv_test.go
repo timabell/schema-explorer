@@ -214,10 +214,23 @@ func checkFks(database *schema.Database, t *testing.T) {
 	pass := true
 	childTable := findTable(schema.Table{Schema: database.DefaultSchemaName, Name: "FkChild"}, database, t)
 	parentTable := findTable(schema.Table{Schema: database.DefaultSchemaName, Name: "FkParent"}, database, t)
+	// check at table level
 	pass = pass && check(len(childTable.Fks), 1, "Fks in "+childTable.String(), t)
 	pass = pass && check(len(parentTable.Fks), 0, "Fks in "+parentTable.String(), t)
 	pass = pass && check(len(childTable.InboundFks), 0, "InboundFks in "+childTable.String(), t)
 	pass = pass && check(len(parentTable.InboundFks), 1, "InboundFks in "+parentTable.String(), t)
+	// check at database level
+	found := false
+	for _, fk := range database.Fks {
+		if fk.SourceTable.Name == childTable.Name {
+			found = true
+		}
+	}
+	if !found {
+		t.Log("Didn't find fk from childTable in database.Fks")
+		pass = false
+	}
+	// check at column level
 	if !pass {
 		t.Fatal("Fk checks failed")
 	}
