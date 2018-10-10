@@ -65,14 +65,13 @@ func Test_ReadSchema(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	t.Log("Checking fk count")
-	checkFkCount(database, t)
+	t.Log("Checking table fks")
+	checkFks(database, t)
+
 	t.Log("Checking table pks")
 	checkTablePks(database, t)
 	t.Log("Checking table compound-pks")
 	checkTableCompoundPks(database, t)
-	t.Log("Checking table fks")
-	checkTableFks(database, t)
 	t.Log("Checking row count")
 	checkTableRowCount(database, t)
 	t.Log("Checking inbound fk count")
@@ -121,14 +120,6 @@ func checkColumnFkCount(database *schema.Database, t *testing.T) {
 		t.Logf("%#v", col)
 		t.Log(col.Fks)
 		t.Errorf("Fks entry missing from column %s.%s", table, col)
-	}
-}
-
-func checkFkCount(database *schema.Database, t *testing.T) {
-	expectedCount := 6
-	fkCount := len(database.Fks)
-	if fkCount != expectedCount {
-		t.Fatalf("Expected %d fks across whole db, found %d", expectedCount, fkCount)
 	}
 }
 
@@ -219,13 +210,27 @@ func checkTablePks(database *schema.Database, t *testing.T) {
 	}
 }
 
-func checkTableFks(database *schema.Database, t *testing.T) {
-	expectedFkCount := 2
-	table := findTable(schema.Table{Schema: database.DefaultSchemaName, Name: "pet"}, database, t)
-	fkCount := len(table.Fks)
-	if fkCount != expectedFkCount {
-		t.Fatalf("Expected %d fks in table %s, found %d", expectedFkCount, table, fkCount)
+func checkFks(database *schema.Database, t *testing.T) {
+	pass := true
+	childTable := findTable(schema.Table{Schema: database.DefaultSchemaName, Name: "FkChild"}, database, t)
+	parentTable := findTable(schema.Table{Schema: database.DefaultSchemaName, Name: "FkParent"}, database, t)
+	pass = pass && check(len(childTable.Fks), 1, "Fks in "+childTable.String(), t)
+	pass = pass && check(len(parentTable.Fks), 0, "Fks in "+parentTable.String(), t)
+	pass = pass && check(len(childTable.InboundFks), 0, "InboundFks in "+childTable.String(), t)
+	pass = pass && check(len(parentTable.InboundFks), 1, "InboundFks in "+parentTable.String(), t)
+	if !pass {
+		t.Fatal("Fk checks failed")
 	}
+}
+
+// [actual] [subject], expected [expected]
+// e.g. 4 foos in bar, expected 3
+func check(expected int, actual int, subject string, t *testing.T) bool {
+	if expected != actual {
+		t.Logf("%d %s expected %d", actual, subject, expected)
+		return false
+	}
+	return true
 }
 
 type descriptionCase struct {
