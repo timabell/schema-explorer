@@ -231,6 +231,15 @@ func checkFks(database *schema.Database, t *testing.T) {
 		pass = false
 	}
 	// check at column level
+	colName := "fkParentId"
+	colFullname := fmt.Sprintf("%s.%s", childTable.String(), colName)
+	_, fkCol := childTable.FindColumn(colName)
+	if fkCol == nil {
+		t.Logf("Checking column fks, column %s not found", colFullname)
+		pass = false
+	}
+	pass = pass && check(len(fkCol.Fks), 1, "Fks in "+colFullname, t)
+
 	if !pass {
 		t.Fatal("Fk checks failed")
 	}
