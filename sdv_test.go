@@ -221,13 +221,13 @@ func checkFks(database *schema.Database, t *testing.T) {
 	parentTableInboundFk := parentTable.InboundFks[0]
 	check(len(parentTable.InboundFks), 1, "InboundFks in "+parentTable.String(), t)
 	// check at database level
-	found := false
+	var dbFk *schema.Fk
 	for _, fk := range database.Fks {
 		if fk.SourceTable.Name == childTable.Name {
-			found = true
+			dbFk = fk
 		}
 	}
-	if !found {
+	if dbFk == nil {
 		t.Error("Didn't find fk from childTable in database.Fks")
 	}
 	// check at column level
@@ -241,6 +241,9 @@ func checkFks(database *schema.Database, t *testing.T) {
 	colFk := fkCol.Fks[0]
 	if childTableFk != parentTableInboundFk {
 		t.Error("child/parent fks pointers didn't match")
+	}
+	if childTableFk != dbFk {
+		t.Error("table/database fks pointers didn't match")
 	}
 	if childTableFk != colFk {
 		t.Error("col fk pointer didn't match table fk pointer")
