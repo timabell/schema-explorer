@@ -211,14 +211,15 @@ func checkTablePks(database *schema.Database, t *testing.T) {
 }
 
 func checkFks(database *schema.Database, t *testing.T) {
-	pass := true
 	childTable := findTable(schema.Table{Schema: database.DefaultSchemaName, Name: "FkChild"}, database, t)
 	parentTable := findTable(schema.Table{Schema: database.DefaultSchemaName, Name: "FkParent"}, database, t)
 	// check at table level
-	pass = pass && check(len(childTable.Fks), 1, "Fks in "+childTable.String(), t)
-	pass = pass && check(len(parentTable.Fks), 0, "Fks in "+parentTable.String(), t)
-	pass = pass && check(len(childTable.InboundFks), 0, "InboundFks in "+childTable.String(), t)
-	pass = pass && check(len(parentTable.InboundFks), 1, "InboundFks in "+parentTable.String(), t)
+	check(len(childTable.Fks), 1, "Fks in "+childTable.String(), t)
+	childTableFk := childTable.Fks[0]
+	check(len(parentTable.Fks), 0, "Fks in "+parentTable.String(), t)
+	check(len(childTable.InboundFks), 0, "InboundFks in "+childTable.String(), t)
+	parentTableInboundFk := parentTable.InboundFks[0]
+	check(len(parentTable.InboundFks), 1, "InboundFks in "+parentTable.String(), t)
 	// check at database level
 	found := false
 	for _, fk := range database.Fks {
@@ -227,32 +228,31 @@ func checkFks(database *schema.Database, t *testing.T) {
 		}
 	}
 	if !found {
-		t.Log("Didn't find fk from childTable in database.Fks")
-		pass = false
+		t.Error("Didn't find fk from childTable in database.Fks")
 	}
 	// check at column level
 	colName := "fkParentId"
 	colFullname := fmt.Sprintf("%s.%s", childTable.String(), colName)
 	_, fkCol := childTable.FindColumn(colName)
 	if fkCol == nil {
-		t.Logf("Checking column fks, column %s not found", colFullname)
-		pass = false
+		t.Errorf("Checking column fks, column %s not found", colFullname)
 	}
-	pass = pass && check(len(fkCol.Fks), 1, "Fks in "+colFullname, t)
-
-	if !pass {
-		t.Fatal("Fk checks failed")
+	check(len(fkCol.Fks), 1, "Fks in "+colFullname, t)
+	colFk := fkCol.Fks[0]
+	if childTableFk != parentTableInboundFk {
+		t.Error("child/parent fks pointers didn't match")
+	}
+	if childTableFk != colFk {
+		t.Error("col fk pointer didn't match table fk pointer")
 	}
 }
 
 // [actual] [subject], expected [expected]
 // e.g. 4 foos in bar, expected 3
-func check(expected int, actual int, subject string, t *testing.T) bool {
+func check(expected int, actual int, subject string, t *testing.T) {
 	if expected != actual {
-		t.Logf("%d %s expected %d", actual, subject, expected)
-		return false
+		t.Errorf("%d %s expected %d", actual, subject, expected)
 	}
-	return true
 }
 
 type descriptionCase struct {
