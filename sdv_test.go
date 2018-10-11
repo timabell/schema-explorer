@@ -257,9 +257,6 @@ func checkFks(database *schema.Database, t *testing.T) {
 	checkStr("FkParent", fk.DestinationTable.Name, "fk destination table", t)
 	checkInt(1, len(fk.DestinationColumns), "destination cols in fk", t)
 	checkStr("fkParentId", fk.DestinationColumns[0].Name, "fk destination col name", t)
-	if fk.SourceTable.Name != "FkChild" {
-		t.Errorf("")
-	}
 }
 
 // [actual] [subject], expected [expected]
