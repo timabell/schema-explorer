@@ -277,5 +277,5 @@ fkParentId int primary key
 );
 create table FkChild(
   id int primary key,
-  fkParentId int references FkParent(fkParentId)
+  fkParentIdSrc int references FkParent(fkParentId)
 );

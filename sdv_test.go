@@ -231,7 +231,7 @@ func checkFks(database *schema.Database, t *testing.T) {
 		t.Error("Didn't find fk from childTable in database.Fks")
 	}
 	// check at column level
-	colName := "fkParentId"
+	colName := "fkParentIdSrc"
 	colFullname := fmt.Sprintf("%s.%s", childTable.String(), colName)
 	_, fkCol := childTable.FindColumn(colName)
 	if fkCol == nil {
@@ -252,6 +252,11 @@ func checkFks(database *schema.Database, t *testing.T) {
 	fk := childTableFk
 	// check contents of fk
 	checkStr("FkChild", fk.SourceTable.Name, "fk source table", t)
+	checkInt(1, len(fk.SourceColumns), "source cols in fk", t)
+	checkStr("fkParentIdSrc", fk.SourceColumns[0].Name, "fk source col name", t)
+	checkStr("FkParent", fk.DestinationTable.Name, "fk destination table", t)
+	checkInt(1, len(fk.DestinationColumns), "destination cols in fk", t)
+	checkStr("fkParentId", fk.DestinationColumns[0].Name, "fk destination col name", t)
 	if fk.SourceTable.Name != "FkChild" {
 		t.Errorf("")
 	}
