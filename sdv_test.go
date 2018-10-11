@@ -232,12 +232,12 @@ func checkFks(database *schema.Database, t *testing.T) {
 	}
 	// check at column level
 	colName := "fkParentIdSrc"
-	colFullname := fmt.Sprintf("%s.%s", childTable.String(), colName)
+	colFullName := fmt.Sprintf("%s.%s", childTable.String(), colName)
 	_, fkCol := childTable.FindColumn(colName)
 	if fkCol == nil {
-		t.Errorf("Checking column fks, column %s not found", colFullname)
+		t.Errorf("Checking column fks, column %s not found", colFullName)
 	}
-	checkInt(len(fkCol.Fks), 1, "Fks in "+colFullname, t)
+	checkInt(len(fkCol.Fks), 1, "Fks in "+colFullName, t)
 	colFk := fkCol.Fks[0]
 	if childTableFk != parentTableInboundFk {
 		t.Error("child/parent fks pointers didn't match")
