@@ -214,12 +214,12 @@ func checkFks(database *schema.Database, t *testing.T) {
 	childTable := findTable(schema.Table{Schema: database.DefaultSchemaName, Name: "FkChild"}, database, t)
 	parentTable := findTable(schema.Table{Schema: database.DefaultSchemaName, Name: "FkParent"}, database, t)
 	// check at table level
-	check(len(childTable.Fks), 1, "Fks in "+childTable.String(), t)
+	checkInt(len(childTable.Fks), 1, "Fks in "+childTable.String(), t)
 	childTableFk := childTable.Fks[0]
-	check(len(parentTable.Fks), 0, "Fks in "+parentTable.String(), t)
-	check(len(childTable.InboundFks), 0, "InboundFks in "+childTable.String(), t)
+	checkInt(len(parentTable.Fks), 0, "Fks in "+parentTable.String(), t)
+	checkInt(len(childTable.InboundFks), 0, "InboundFks in "+childTable.String(), t)
 	parentTableInboundFk := parentTable.InboundFks[0]
-	check(len(parentTable.InboundFks), 1, "InboundFks in "+parentTable.String(), t)
+	checkInt(len(parentTable.InboundFks), 1, "InboundFks in "+parentTable.String(), t)
 	// check at database level
 	var dbFk *schema.Fk
 	for _, fk := range database.Fks {
@@ -237,7 +237,7 @@ func checkFks(database *schema.Database, t *testing.T) {
 	if fkCol == nil {
 		t.Errorf("Checking column fks, column %s not found", colFullname)
 	}
-	check(len(fkCol.Fks), 1, "Fks in "+colFullname, t)
+	checkInt(len(fkCol.Fks), 1, "Fks in "+colFullname, t)
 	colFk := fkCol.Fks[0]
 	if childTableFk != parentTableInboundFk {
 		t.Error("child/parent fks pointers didn't match")
@@ -248,13 +248,28 @@ func checkFks(database *schema.Database, t *testing.T) {
 	if childTableFk != colFk {
 		t.Error("col fk pointer didn't match table fk pointer")
 	}
+	// now that we know everything has pointers to the same fk...
+	fk := childTableFk
+	// check contents of fk
+	checkStr("FkChild", fk.SourceTable.Name, "fk source table", t)
+	if fk.SourceTable.Name != "FkChild" {
+		t.Errorf("")
+	}
 }
 
 // [actual] [subject], expected [expected]
 // e.g. 4 foos in bar, expected 3
-func check(expected int, actual int, subject string, t *testing.T) {
+func checkInt(expected int, actual int, subject string, t *testing.T) {
 	if expected != actual {
 		t.Errorf("%d %s expected %d", actual, subject, expected)
+	}
+}
+
+// [actual] [subject], expected [expected]
+// e.g. 4 foos in bar, expected 3
+func checkStr(expected string, actual string, subject string, t *testing.T) {
+	if expected != actual {
+		t.Errorf("%s %s expected %s", actual, subject, expected)
 	}
 }
 
