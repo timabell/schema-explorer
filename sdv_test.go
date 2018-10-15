@@ -65,28 +65,27 @@ func Test_ReadSchema(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	t.Log("Checking fk count")
-	checkFkCount(database, t)
+	t.Log("Checking table fks")
+	checkFks(database, t)
+
 	t.Log("Checking table pks")
 	checkTablePks(database, t)
+
 	t.Log("Checking table compound-pks")
 	checkTableCompoundPks(database, t)
-	t.Log("Checking table fks")
-	checkTableFks(database, t)
-	t.Log("Checking row count")
-	checkTableRowCount(database, t)
-	t.Log("Checking inbound fk count")
-	checkInboundTableFkCount(database, t)
-	t.Log("Checking column fk count")
-	checkColumnFkCount(database, t)
+
 	t.Log("Checking nullable info")
 	checkNullable(database, t)
+
 	if database.Supports.Descriptions {
 		t.Log("Checking descriptions")
 		checkDescriptions(database, t)
 	} else {
 		t.Log("Descriptions not supported")
 	}
+
+	t.Log("Checking row count")
+	checkTableRowCount(database, t)
 }
 
 func checkNullable(database *schema.Database, t *testing.T) {
@@ -108,37 +107,6 @@ func checkNullable(database *schema.Database, t *testing.T) {
 		t.Errorf("%s.%s should be nullable", table, nullCol)
 	}
 
-}
-func checkColumnFkCount(database *schema.Database, t *testing.T) {
-	table := findTable(schema.Table{Schema: database.DefaultSchemaName, Name: "pet"}, database, t)
-	_, col := table.FindColumn("ownerId")
-	if col == nil {
-		t.Log(schema.TableDebug(table))
-		t.Fatal("Column ownderId not found while checking col fk count")
-	}
-	if col.Fks == nil {
-		t.Log(schema.TableDebug(table))
-		t.Logf("%#v", col)
-		t.Log(col.Fks)
-		t.Errorf("Fks entry missing from column %s.%s", table, col)
-	}
-}
-
-func checkFkCount(database *schema.Database, t *testing.T) {
-	expectedCount := 6
-	fkCount := len(database.Fks)
-	if fkCount != expectedCount {
-		t.Fatalf("Expected %d fks across whole db, found %d", expectedCount, fkCount)
-	}
-}
-
-func checkInboundTableFkCount(database *schema.Database, t *testing.T) {
-	expectedInboundCount := 2
-	table := findTable(schema.Table{Schema: database.DefaultSchemaName, Name: "person"}, database, t)
-	fkCount := len(table.InboundFks)
-	if fkCount != expectedInboundCount {
-		t.Fatalf("Expected %d inboundFks in table %s, found %d", expectedInboundCount, table, fkCount)
-	}
 }
 
 func checkTableRowCount(database *schema.Database, t *testing.T) {
@@ -219,12 +187,68 @@ func checkTablePks(database *schema.Database, t *testing.T) {
 	}
 }
 
-func checkTableFks(database *schema.Database, t *testing.T) {
-	expectedFkCount := 2
-	table := findTable(schema.Table{Schema: database.DefaultSchemaName, Name: "pet"}, database, t)
-	fkCount := len(table.Fks)
-	if fkCount != expectedFkCount {
-		t.Fatalf("Expected %d fks in table %s, found %d", expectedFkCount, table, fkCount)
+func checkFks(database *schema.Database, t *testing.T) {
+	childTable := findTable(schema.Table{Schema: database.DefaultSchemaName, Name: "FkChild"}, database, t)
+	parentTable := findTable(schema.Table{Schema: database.DefaultSchemaName, Name: "FkParent"}, database, t)
+	// check at table level
+	checkInt(len(childTable.Fks), 1, "Fks in "+childTable.String(), t)
+	childTableFk := childTable.Fks[0]
+	checkInt(len(parentTable.Fks), 0, "Fks in "+parentTable.String(), t)
+	checkInt(len(childTable.InboundFks), 0, "InboundFks in "+childTable.String(), t)
+	parentTableInboundFk := parentTable.InboundFks[0]
+	checkInt(len(parentTable.InboundFks), 1, "InboundFks in "+parentTable.String(), t)
+	// check at database level
+	var dbFk *schema.Fk
+	for _, fk := range database.Fks {
+		if fk.SourceTable.Name == childTable.Name {
+			dbFk = fk
+		}
+	}
+	if dbFk == nil {
+		t.Error("Didn't find fk from childTable in database.Fks")
+	}
+	// check at column level
+	colName := "fkParentIdSrc"
+	colFullName := fmt.Sprintf("%s.%s", childTable.String(), colName)
+	_, fkCol := childTable.FindColumn(colName)
+	if fkCol == nil {
+		t.Errorf("Checking column fks, column %s not found", colFullName)
+	}
+	checkInt(len(fkCol.Fks), 1, "Fks in "+colFullName, t)
+	colFk := fkCol.Fks[0]
+	if childTableFk != parentTableInboundFk {
+		t.Error("child/parent fks pointers didn't match")
+	}
+	if childTableFk != dbFk {
+		t.Error("table/database fks pointers didn't match")
+	}
+	if childTableFk != colFk {
+		t.Error("col fk pointer didn't match table fk pointer")
+	}
+	// now that we know everything has pointers to the same fk...
+	fk := childTableFk
+	// check contents of fk
+	checkStr("FkChild", fk.SourceTable.Name, "fk source table", t)
+	checkInt(1, len(fk.SourceColumns), "source cols in fk", t)
+	checkStr("fkParentIdSrc", fk.SourceColumns[0].Name, "fk source col name", t)
+	checkStr("FkParent", fk.DestinationTable.Name, "fk destination table", t)
+	checkInt(1, len(fk.DestinationColumns), "destination cols in fk", t)
+	checkStr("fkParentId", fk.DestinationColumns[0].Name, "fk destination col name", t)
+}
+
+// [actual] [subject], expected [expected]
+// e.g. 4 foos in bar, expected 3
+func checkInt(expected int, actual int, subject string, t *testing.T) {
+	if expected != actual {
+		t.Errorf("%d %s expected %d", actual, subject, expected)
+	}
+}
+
+// [actual] [subject], expected [expected]
+// e.g. 4 foos in bar, expected 3
+func checkStr(expected string, actual string, subject string, t *testing.T) {
+	if expected != actual {
+		t.Errorf("%s %s expected %s", actual, subject, expected)
 	}
 }
 
