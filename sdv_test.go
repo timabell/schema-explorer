@@ -70,22 +70,22 @@ func Test_ReadSchema(t *testing.T) {
 
 	t.Log("Checking table pks")
 	checkTablePks(database, t)
+
 	t.Log("Checking table compound-pks")
 	checkTableCompoundPks(database, t)
-	t.Log("Checking row count")
-	checkTableRowCount(database, t)
-	t.Log("Checking inbound fk count")
-	checkInboundTableFkCount(database, t)
-	t.Log("Checking column fk count")
-	checkColumnFkCount(database, t)
+
 	t.Log("Checking nullable info")
 	checkNullable(database, t)
+
 	if database.Supports.Descriptions {
 		t.Log("Checking descriptions")
 		checkDescriptions(database, t)
 	} else {
 		t.Log("Descriptions not supported")
 	}
+
+	t.Log("Checking row count")
+	checkTableRowCount(database, t)
 }
 
 func checkNullable(database *schema.Database, t *testing.T) {
@@ -107,29 +107,6 @@ func checkNullable(database *schema.Database, t *testing.T) {
 		t.Errorf("%s.%s should be nullable", table, nullCol)
 	}
 
-}
-func checkColumnFkCount(database *schema.Database, t *testing.T) {
-	table := findTable(schema.Table{Schema: database.DefaultSchemaName, Name: "pet"}, database, t)
-	_, col := table.FindColumn("ownerId")
-	if col == nil {
-		t.Log(schema.TableDebug(table))
-		t.Fatal("Column ownderId not found while checking col fk count")
-	}
-	if col.Fks == nil {
-		t.Log(schema.TableDebug(table))
-		t.Logf("%#v", col)
-		t.Log(col.Fks)
-		t.Errorf("Fks entry missing from column %s.%s", table, col)
-	}
-}
-
-func checkInboundTableFkCount(database *schema.Database, t *testing.T) {
-	expectedInboundCount := 2
-	table := findTable(schema.Table{Schema: database.DefaultSchemaName, Name: "person"}, database, t)
-	fkCount := len(table.InboundFks)
-	if fkCount != expectedInboundCount {
-		t.Fatalf("Expected %d inboundFks in table %s, found %d", expectedInboundCount, table, fkCount)
-	}
 }
 
 func checkTableRowCount(database *schema.Database, t *testing.T) {
