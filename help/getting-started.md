@@ -98,5 +98,7 @@ Connect with explicit host/port
 
 Connect with advanced options in connection string
 
+If you are getting "panic: pq: SSL is not enabled on the server" then you'll need sslmode=disable in a connection string as follows:
+
 	sql-data-viewer.exe --driver pg --pg-connection-string "postgres://postgres:postgres@localhost/manage?sslmode=disable"
 
