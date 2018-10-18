@@ -1,3 +1,5 @@
+// +build !darwin
+
 package sqlite
 
 // Sqlite doesn't support schema so table.schema is ignored throughout
