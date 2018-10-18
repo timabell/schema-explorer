@@ -1,5 +1,8 @@
 // +build !darwin
 
+// This package depends on go-sqlite3 which wraps the C library which I can't
+// get to build for mac so it is excluded with the above build tag.
+
 package sqlite
 
 // Sqlite doesn't support schema so table.schema is ignored throughout
