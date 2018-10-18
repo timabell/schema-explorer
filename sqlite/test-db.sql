@@ -279,3 +279,13 @@ create table FkChild(
   id int primary key,
   fkParentIdSrc int references FkParent(fkParentId)
 );
+
+insert into FkParent(fkParentId) values(10);
+insert into FkParent(fkParentId) values(11);
+insert into FkParent(fkParentId) values(12);
+insert into FkChild(id, fkParentIdSrc) values(100,10);
+insert into FkChild(id, fkParentIdSrc) values(101,10);
+insert into FkChild(id, fkParentIdSrc) values(102,10);
+insert into FkChild(id, fkParentIdSrc) values(110,11);
+insert into FkChild(id, fkParentIdSrc) values(111,11);
+insert into FkChild(id, fkParentIdSrc) values(112,11);
