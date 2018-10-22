@@ -3,6 +3,10 @@
 
 -- todo: drop sql doesn't cope with schema.
 
+create database [sdv-regression-test];
+GO
+use [sdv-regression-test];
+GO
 -- use [sdv-regression-test]; -- not supported on azure sql
 
 -- ###################################
