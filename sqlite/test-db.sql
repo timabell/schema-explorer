@@ -273,19 +273,19 @@ insert into CompoundKeyChild(id, colA, colB, noise)values
 
 
 create table FkParent(
-fkParentId int primary key
+  parentPk int primary key
 );
 create table FkChild(
   id int primary key,
-  fkParentIdSrc int references FkParent(fkParentId)
+  parentId int references FkParent(parentPk)
 );
 
-insert into FkParent(fkParentId) values(10);
-insert into FkParent(fkParentId) values(11);
-insert into FkParent(fkParentId) values(12);
-insert into FkChild(id, fkParentIdSrc) values(100,10);
-insert into FkChild(id, fkParentIdSrc) values(101,10);
-insert into FkChild(id, fkParentIdSrc) values(102,10);
-insert into FkChild(id, fkParentIdSrc) values(110,11);
-insert into FkChild(id, fkParentIdSrc) values(111,11);
-insert into FkChild(id, fkParentIdSrc) values(112,11);
+insert into FkParent(parentPk) values(10);
+insert into FkParent(parentPk) values(11);
+insert into FkParent(parentPk) values(12);
+insert into FkChild(id, parentId) values(100,10);
+insert into FkChild(id, parentId) values(101,10);
+insert into FkChild(id, parentId) values(102,10);
+insert into FkChild(id, parentId) values(110,11);
+insert into FkChild(id, parentId) values(111,11);
+insert into FkChild(id, parentId) values(112,11);

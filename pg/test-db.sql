@@ -111,9 +111,9 @@ insert into "CompoundKeyChild"("id", "colA", "colB", "noise") values
 	(4,'a<&''2\6', 'b2', 'does it blend?');
 
 create table "FkParent"(
-"fkParentId" int primary key
+  "parentPk" int primary key
 );
 create table "FkChild"(
   id int primary key,
-  "fkParentIdSrc" int references "FkParent"("fkParentId")
+  "parentId" int references "FkParent"("parentPk")
 );
