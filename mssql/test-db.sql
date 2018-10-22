@@ -246,3 +246,20 @@ insert into CompoundKeyChild(id, colA, colB, noise)values
 	(3,'a2', 'b2', 'horse'),
 	(4,'a<&''2\6', 'b2', 'does it blend?');
 
+create table FkParent(
+  parentPk int primary key
+);
+create table FkChild(
+  id int primary key,
+  parentId int references FkParent(parentPk)
+);
+
+insert into FkParent(parentPk) values(10);
+insert into FkParent(parentPk) values(11);
+insert into FkParent(parentPk) values(12);
+insert into FkChild(id, parentId) values(100,10);
+insert into FkChild(id, parentId) values(101,10);
+insert into FkChild(id, parentId) values(102,10);
+insert into FkChild(id, parentId) values(110,11);
+insert into FkChild(id, parentId) values(111,11);
+insert into FkChild(id, parentId) values(112,11);
