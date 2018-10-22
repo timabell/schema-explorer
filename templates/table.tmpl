@@ -1,35 +1,33 @@
-{{define "nav"}}
-<li>
-    <a href='#diagram'>
-        <i class="fas fa-project-diagram"></i>
-        Diagram
-    </a>
-</li>
-<li>
-    <a href='#columns'>
-        <i class="fas fa-columns"></i>
-        Columns</a>
-</li>
-<li>
-    <a href='#foreignKeys'>
-        <i class="fas fa-exchange-alt"></i>
-        Foreign Keys</a>
-</li>
-<li>
-    <a href='#data'>
-        <i class="fas fa-table"></i>
-        Data</a>
-</li>
-{{end}}
-
-{{define "subheading"}}
-<h2>
-{{.Table.Name}}
-    <i class="fas fa-table"></i>
-</h2>
-{{end}}
-
 {{define "content"}}
+<h2>
+    <i class="fas fa-table"></i>
+    {{.Table.Name}}
+</h2>
+<nav>
+    <ul>
+        <li>
+            <a href='#diagram'>
+                <i class="fas fa-project-diagram"></i>
+                Diagram
+            </a>
+        </li>
+        <li>
+            <a href='#columns'>
+                <i class="fas fa-columns"></i>
+                Columns</a>
+        </li>
+        <li>
+            <a href='#foreignKeys'>
+                <i class="fas fa-exchange-alt"></i>
+                Foreign Keys</a>
+        </li>
+        <li>
+            <a href='#data'>
+                <i class="fas fa-table"></i>
+                Data</a>
+        </li>
+    </ul>
+</nav>
 {{if $.Database.Supports.Descriptions}}
 <h2 id="description">Description</h2>
 <p>{{.Table.Description}}</p>
