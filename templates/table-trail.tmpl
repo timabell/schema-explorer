@@ -1,23 +1,21 @@
-{{define "nav"}}
-    {{if .Trail.Dynamic}}
-    <li>
-        <a class="action-button button" href="/table-trail/clear">
-            <i class="fas fa-eraser"></i>
-            Reset Trail</a>
-    </li>
-    {{end}}
-    {{if .Trail.Dynamic}}
-        <li>
-                <a href="/table-trail?tables={{.Trail.AsCsv}}">
-                    <i class="fas fa-link"></i>
-                    Permalink</a>
-        </li>
-    {{end}}
-{{end}}
-
 {{define "content"}}
     {{if .Trail.Dynamic}}
         <h2 id="tableList">Tables You've Visited</h2>
+        <nav>
+            <ul>
+                <li>
+                    <a href="/table-trail?tables={{.Trail.AsCsv}}">
+                        <i class="fas fa-link"></i>
+                        Permalink</a>
+                </li>
+                <li>
+                    <a class="action-button button" href="/table-trail/clear">
+                        <i class="fas fa-eraser"></i>
+                        Reset Trail</a>
+                </li>
+            </ul>
+        </nav>
+        <br/>
     {{else}}
         <h2 id="tableList">Custom Diagram</h2>
     {{end}}
