@@ -42,7 +42,8 @@
             <th>Name</th>
             <th>Type</th>
             <th>Nulls</th>
-            <th>Foreign Key</th>
+            <th>Outbound Foreign Key</th>
+            <th>Inbound Foreign Keys</th>
             {{if $.Database.Supports.Descriptions}}
             <th>Description</th>
             {{end}}
@@ -71,6 +72,12 @@
             {{range .Fks }}
                 <a href="{{.DestinationTable}}?_rowLimit=100">{{.DestinationTable}}</a>
                 ({{.DestinationColumns}})
+            {{end}}
+            </td>
+            <td>
+            {{range .InboundFks }}
+                <a href="{{.SourceTable}}?_rowLimit=100">{{.SourceTable}}</a>
+                ({{.SourceColumns}})
             {{end}}
             </td>
             {{if $.Database.Supports.Descriptions}}

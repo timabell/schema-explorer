@@ -216,6 +216,16 @@ func checkFks(database *schema.Database, t *testing.T) {
 	}
 	checkInt(len(fkCol.Fks), 1, "Fks in "+colFullName, t)
 	colFk := fkCol.Fks[0]
+	// check inbound column fks
+	targetColName := "fkParentId"
+	targetColFullName := fmt.Sprintf("%s.%s", parentTable.String(), targetColName)
+	_, targetFkCol := parentTable.FindColumn(targetColName)
+	if targetFkCol == nil {
+		t.Errorf("Checking inbound column fks, column %s not found", targetColFullName)
+	}
+	checkInt(len(targetFkCol.InboundFks), 1, "InboundFks in "+targetColFullName, t)
+	targetColInboundFk := targetFkCol.InboundFks[0]
+	// check fk pointers are all pointing to the same thing
 	if childTableFk != parentTableInboundFk {
 		t.Error("child/parent fks pointers didn't match")
 	}
@@ -223,6 +233,9 @@ func checkFks(database *schema.Database, t *testing.T) {
 		t.Error("table/database fks pointers didn't match")
 	}
 	if childTableFk != colFk {
+		t.Error("col fk pointer didn't match table fk pointer")
+	}
+	if childTableFk != targetColInboundFk {
 		t.Error("col fk pointer didn't match table fk pointer")
 	}
 	// now that we know everything has pointers to the same fk...

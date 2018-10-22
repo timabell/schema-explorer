@@ -96,6 +96,9 @@ func (model sqliteModel) ReadSchema() (database *schema.Database, err error) {
 			err = fmt.Errorf("failed to find destination table for fk %s", fk)
 		}
 		destination.InboundFks = append(destination.InboundFks, fk)
+		for _, destCol := range fk.DestinationColumns {
+			destCol.InboundFks = append(destCol.InboundFks, fk)
+		}
 	}
 	//log.Print(database.DebugString())
 	return

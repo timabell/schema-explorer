@@ -64,6 +64,7 @@ type Column struct {
 	Name           string
 	Type           string
 	Fks            []*Fk
+	InboundFks     []*Fk
 	Description    string
 	IsInPrimaryKey bool
 	Nullable       bool
