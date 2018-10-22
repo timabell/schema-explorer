@@ -135,6 +135,13 @@ func (model mssqlModel) ReadSchema() (database *schema.Database, err error) {
 		return
 	}
 
+	// attach fks to inbound columns
+	for _, fk := range database.Fks {
+		for _, col := range fk.DestinationColumns {
+			col.InboundFks = append(col.InboundFks, fk)
+		}
+	}
+
 	model.getPks(dbc, database)
 
 	addDescriptions(dbc, database)
