@@ -26,6 +26,7 @@ var ArgParser = flags.NewParser(&Options, flags.Default)
 type DbReader interface {
 	CheckConnection() (err error)
 	ReadSchema() (database *schema.Database, err error)
+	UpdateRowCounts(database *schema.Database) (err error)
 	GetSqlRows(table *schema.Table, params *params.TableParams) (rows *sql.Rows, err error)
 }
 

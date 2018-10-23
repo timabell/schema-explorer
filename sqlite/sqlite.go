@@ -68,6 +68,11 @@ func (model sqliteModel) ReadSchema() (database *schema.Database, err error) {
 		return
 	}
 
+	err = model.UpdateRowCounts(database)
+	if err != nil {
+		return
+	}
+
 	// add table columns
 	for _, table := range database.Tables {
 		var cols []*schema.Column
@@ -104,6 +109,17 @@ func (model sqliteModel) ReadSchema() (database *schema.Database, err error) {
 	return
 }
 
+func (model sqliteModel) UpdateRowCounts(database *schema.Database) (err error) {
+	for _, table := range database.Tables {
+		rowCount, err := model.getRowCount(table)
+		if err != nil {
+			log.Printf("Failed to get row count for %s", table)
+		}
+		table.RowCount = &rowCount
+	}
+	return err
+}
+
 func (model sqliteModel) getTables(dbc *sql.DB) (tables []*schema.Table, err error) {
 	// todo: parameterise
 	rows, err := dbc.Query("SELECT name FROM sqlite_master WHERE type='table' AND name not like 'sqlite_%' order by name;")
@@ -115,13 +131,6 @@ func (model sqliteModel) getTables(dbc *sql.DB) (tables []*schema.Table, err err
 		var name string
 		rows.Scan(&name)
 		tables = append(tables, &schema.Table{Name: name, Pk: &schema.Pk{}})
-	}
-	for _, table := range tables {
-		rowCount, err := model.getRowCount(table)
-		if err != nil {
-			log.Printf("Failed to get row count for %d", table)
-		}
-		table.RowCount = &rowCount
 	}
 	return tables, nil
 }

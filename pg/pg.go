@@ -110,6 +110,11 @@ func (model pgModel) ReadSchema() (database *schema.Database, err error) {
 		return
 	}
 
+	err = model.UpdateRowCounts(database)
+	if err != nil {
+		return
+	}
+
 	// add table columns
 	for _, table := range database.Tables {
 		var cols []*schema.Column
@@ -144,6 +149,17 @@ func (model pgModel) ReadSchema() (database *schema.Database, err error) {
 	return
 }
 
+func (model pgModel) UpdateRowCounts(database *schema.Database) (err error) {
+	for _, table := range database.Tables {
+		rowCount, err := model.getRowCount(table)
+		if err != nil {
+			log.Printf("Failed to get row count for %s", table)
+		}
+		table.RowCount = &rowCount
+	}
+	return err
+}
+
 func (model pgModel) getRowCount(table *schema.Table) (rowCount int, err error) {
 	// todo: parameterise where possible
 	// todo: whitelist-sanitize unparameterizable parts
@@ -176,14 +192,6 @@ func (model pgModel) getTables(dbc *sql.DB) (tables []*schema.Table, err error) 
 		var name, schemaName string
 		rows.Scan(&schemaName, &name)
 		tables = append(tables, &schema.Table{Schema: schemaName, Name: name, Pk: &schema.Pk{}})
-	}
-	for _, table := range tables {
-		rowCount, err := model.getRowCount(table)
-		if err != nil {
-			log.Printf("Failed to get row count for %s", table)
-			log.Println(err)
-		}
-		table.RowCount = &rowCount
 	}
 	return tables, nil
 }

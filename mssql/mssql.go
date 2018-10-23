@@ -120,6 +120,11 @@ func (model mssqlModel) ReadSchema() (database *schema.Database, err error) {
 		return
 	}
 
+	err = model.UpdateRowCounts(database)
+	if err != nil {
+		return
+	}
+	
 	// columns
 	for tableIndex, table := range database.Tables {
 		var cols []*schema.Column
@@ -199,14 +204,18 @@ func (model mssqlModel) getTables(dbc *sql.DB) (tables []*schema.Table, err erro
 		rows.Scan(&schemaName, &name)
 		tables = append(tables, &schema.Table{Schema: schemaName, Name: name})
 	}
-	for _, table := range tables {
+	return tables, nil
+}
+
+func (model mssqlModel) UpdateRowCounts(database *schema.Database) (err error) {
+	for _, table := range database.Tables {
 		rowCount, err := model.getRowCount(table)
 		if err != nil {
-			log.Printf("Failed to get row count for %d", table)
+			log.Printf("Failed to get row count for %s", table)
 		}
 		table.RowCount = &rowCount
 	}
-	return tables, nil
+	return err
 }
 
 func (model mssqlModel) getRowCount(table *schema.Table) (rowCount int, err error) {
