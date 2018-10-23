@@ -120,11 +120,6 @@ func (model mssqlModel) ReadSchema() (database *schema.Database, err error) {
 		return
 	}
 
-	err = model.UpdateRowCounts(database)
-	if err != nil {
-		return
-	}
-
 	// columns
 	for tableIndex, table := range database.Tables {
 		var cols []*schema.Column

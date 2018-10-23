@@ -85,7 +85,7 @@ func Test_ReadSchema(t *testing.T) {
 	}
 
 	t.Log("Checking row count")
-	checkTableRowCount(database, t)
+	checkTableRowCount(reader, database, t)
 }
 
 func checkNullable(database *schema.Database, t *testing.T) {
@@ -109,10 +109,22 @@ func checkNullable(database *schema.Database, t *testing.T) {
 
 }
 
-func checkTableRowCount(database *schema.Database, t *testing.T) {
+func checkTableRowCount(reader reader.DbReader, database *schema.Database, t *testing.T) {
+	table := findTable(schema.Table{Schema: database.DefaultSchemaName, Name: "SortFilterTest"}, database, t)
+
+	// before load should be nil
+	if table.RowCount != nil {
+		t.Fatalf("Non-nil row count for table %s before UpdateRowCounts() has been run", table)
+	}
+
+	// act
+	if err := reader.UpdateRowCounts(database); err != nil{
+		t.Error("UpdateRowCounts failed", err)
+	}
+
+	// after load should have a value
 	var expectRowCountVal = int(7)
 	var expectedRowCount = &expectRowCountVal
-	table := findTable(schema.Table{Schema: database.DefaultSchemaName, Name: "SortFilterTest"}, database, t)
 	if table.RowCount == nil {
 		t.Fatalf("Nil row count for table %s", table)
 	}

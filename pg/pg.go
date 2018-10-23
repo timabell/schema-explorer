@@ -110,11 +110,6 @@ func (model pgModel) ReadSchema() (database *schema.Database, err error) {
 		return
 	}
 
-	err = model.UpdateRowCounts(database)
-	if err != nil {
-		return
-	}
-
 	// add table columns
 	for _, table := range database.Tables {
 		var cols []*schema.Column
