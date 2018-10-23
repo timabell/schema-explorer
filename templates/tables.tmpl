@@ -61,12 +61,14 @@
         <td>{{.Name}}</td>
         {{end}}
         <td>
-            <a href="tables/{{.SourceTable}}?_rowLimit=100">{{.SourceTable}}</a>
-            ({{.SourceColumns}})
+            <a href="tables/{{.SourceTable}}?_rowLimit=100">
+                {{.SourceTable}}({{.SourceColumns}})
+            </a>
         </td>
         <td>
-            <a href="tables/{{.DestinationTable}}?_rowLimit=100">{{.DestinationTable}}</a>
-            ({{.DestinationColumns}})
+            <a href="tables/{{.DestinationTable}}?_rowLimit=100">
+                {{.DestinationTable}}({{.DestinationColumns}})
+            </a>
         </td>
     </tr>
     {{end}}
