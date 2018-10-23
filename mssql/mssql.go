@@ -124,7 +124,7 @@ func (model mssqlModel) ReadSchema() (database *schema.Database, err error) {
 	if err != nil {
 		return
 	}
-	
+
 	// columns
 	for tableIndex, table := range database.Tables {
 		var cols []*schema.Column

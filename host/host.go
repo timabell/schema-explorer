@@ -177,10 +177,16 @@ func TableHandler(resp http.ResponseWriter, req *http.Request) {
 }
 
 func TableListHandler(resp http.ResponseWriter, req *http.Request) {
-	layoutData, _, err := requestSetup()
+	layoutData, dbReader, err := requestSetup()
 	if err != nil {
 		// todo: client error
 		fmt.Println("setup error rendering table list: ", err)
+		return
+	}
+	err = dbReader.UpdateRowCounts(database)
+	if err != nil {
+		// todo: client error
+		fmt.Println("error getting row counts for table list: ", err)
 		return
 	}
 	render.ShowTableList(resp, database, layoutData)
