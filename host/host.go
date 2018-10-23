@@ -120,13 +120,6 @@ func TableTrailHandler(resp http.ResponseWriter, req *http.Request) {
 		fmt.Println("setup error rendering table: ", err)
 		return
 	}
-
-	urlEndsWithClear := false // todo
-	if urlEndsWithClear {
-		ClearTrailCookie(resp)
-		http.Redirect(resp, req, "/table-trail", http.StatusFound)
-		return
-	}
 	// get from querystring if populated, otherwise use cookies
 	tablesCsv := req.URL.Query().Get("tables")
 	var trail *trail.TrailLog
