@@ -11,7 +11,7 @@ const trailCookieName = "table-trail"
 
 func ReadTrail(req *http.Request) *trail.TrailLog {
 	trailCookie, _ := req.Cookie(trailCookieName)
-	if trailCookie != nil {
+	if trailCookie != nil && trailCookie.Value != "" {
 		return trailFromCsv(trailCookie.Value)
 	}
 	return &trail.TrailLog{}
