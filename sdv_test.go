@@ -151,7 +151,9 @@ func checkIndexes(database *schema.Database, t *testing.T) {
 	if index.Table != table {
 		log.Fatal("Index not pointing to parent table")
 	}
-	// todo: cols etc
+	if index.IsUnique {
+		t.Fatalf("%s should not be a unique index", indexName)
+	}
 }
 
 func checkNullable(database *schema.Database, t *testing.T) {
