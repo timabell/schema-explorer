@@ -77,6 +77,9 @@ func Test_ReadSchema(t *testing.T) {
 	t.Log("Checking nullable info")
 	checkNullable(database, t)
 
+	t.Log("Checking indexes")
+	checkIndexes(database, t)
+
 	if database.Supports.Descriptions {
 		t.Log("Checking descriptions")
 		checkDescriptions(database, t)
@@ -86,6 +89,69 @@ func Test_ReadSchema(t *testing.T) {
 
 	t.Log("Checking row count")
 	checkTableRowCount(reader, database, t)
+}
+
+func checkIndexes(database *schema.Database, t *testing.T) {
+	tableName := "index_test"
+	indexName := "IX_on_has_index"
+
+	// check at database level
+	if database.Indexes == nil {
+		t.Fatal("database.Indexes is nil")
+	}
+	var databaseIndex *schema.Index
+	for _, thisIndex := range database.Indexes {
+		if thisIndex.Name == indexName {
+			databaseIndex = thisIndex
+			break
+		}
+	}
+	if databaseIndex == nil {
+		t.Fatalf("Index %s on table %s not found in database.Indexes", indexName, tableName)
+	}
+
+	// check at table level
+	table := findTable(schema.Table{Schema: database.DefaultSchemaName, Name: tableName}, database, t)
+	if table.Indexes == nil {
+		t.Fatalf("table.Indexes is nil  on table %s", tableName)
+	}
+	var tableIndex *schema.Index
+	for _, thisIndex := range table.Indexes {
+		if thisIndex.Name == indexName {
+			tableIndex = thisIndex
+			break
+		}
+	}
+	if tableIndex == nil {
+		t.Fatalf("Index %s not found on table %s", indexName, tableName)
+	}
+
+	// check at column level
+	colName := "has_index"
+	_, col := table.FindColumn(colName)
+	if col == nil {
+		t.Fatalf("Couldn't find column %s on table %s", colName, tableName)
+	}
+	if col.Indexes == nil {
+		t.Fatalf("Column %s on table %s has nil indexes", colName, tableName)
+	}
+	checkInt(1, len(col.Indexes), fmt.Sprintf("indexes on %s.%s", tableName, colName), t)
+	colIndex := col.Indexes[0]
+
+	// check fk pointers are all pointing to the same thing
+	if databaseIndex != tableIndex {
+		t.Error("database/table index pointers didn't match")
+	}
+	if colIndex != tableIndex {
+		t.Error("col/table index pointers didn't match")
+	}
+
+	// now that we know they are all the same thing...
+	index := tableIndex
+	if index.Table != table {
+		log.Fatal("Index not pointing to parent table")
+	}
+	// todo: cols etc
 }
 
 func checkNullable(database *schema.Database, t *testing.T) {
@@ -118,7 +184,7 @@ func checkTableRowCount(reader reader.DbReader, database *schema.Database, t *te
 	}
 
 	// act
-	if err := reader.UpdateRowCounts(database); err != nil{
+	if err := reader.UpdateRowCounts(database); err != nil {
 		t.Error("UpdateRowCounts failed", err)
 	}
 

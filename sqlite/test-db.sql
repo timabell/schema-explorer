@@ -289,3 +289,9 @@ insert into FkChild(id, parentId) values(102,10);
 insert into FkChild(id, parentId) values(110,11);
 insert into FkChild(id, parentId) values(111,11);
 insert into FkChild(id, parentId) values(112,11);
+
+create table index_test(
+  id int primary key,
+  has_index varchar(10)
+);
+create index IX_on_has_index on index_test (has_index);

@@ -18,8 +18,10 @@
 {{end}}
 
 {{define "content"}}
+
 <h2 id="diagram">Database Diagram</h2>
 {{template "_diagram" .Diagram}}
+
 <h2 id="tableList">Table List</h2>
 <table class="tableList">
     <thead>
@@ -43,6 +45,7 @@
 {{end}}
     </tbody>
 </table>
+
 <h2 id="foreignKeys">Foreign Keys</h2>
 <table>
     <thead>
@@ -74,4 +77,33 @@
     {{end}}
     </tbody>
 </table>
+
+<h2 id="indexes">Indexes</h2>
+
+<div class="fk-list">
+{{if .Database.Indexes}}
+    <table>
+        <thead>
+        <tr>
+            <th>Name</th>
+            <th>Columns</th>
+            <th>Unique</th>
+        </tr>
+        </thead>
+        <tbody>
+        {{range .Database.Indexes}}
+        <tr>
+            <td><span class="bare-value">{{.Name}}</span></td>
+            <td><span class="bare-value">{{.Columns.String}}</span></td>
+            <td>
+            {{if .IsUnique }}
+                <span class="bare-value">Unique</span>
+            {{end}}
+            </td>
+        </tr>
+        {{end}}
+        </tbody>
+    </table>
+</div>
+{{end}}
 {{end}}
