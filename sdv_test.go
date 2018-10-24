@@ -154,6 +154,10 @@ func checkIndexes(database *schema.Database, t *testing.T) {
 	if index.IsUnique {
 		t.Fatalf("%s should not be a unique index", indexName)
 	}
+	checkInt(1, len(index.Columns), fmt.Sprintf("columns in index %s", indexName), t)
+	if index.Columns[0] != col {
+		t.Fatalf("col pointer on index %s didn't match", indexName)
+	}
 }
 
 func checkNullable(database *schema.Database, t *testing.T) {
