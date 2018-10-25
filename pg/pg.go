@@ -120,26 +120,12 @@ func (model pgModel) ReadSchema() (database *schema.Database, err error) {
 		table.Columns = append(table.Columns, cols...)
 	}
 
-	// fks
-	for _, table := range database.Tables {
-		err = readConstraints(dbc, table, database)
-		if err != nil {
-			return
-		}
-		database.Fks = append(database.Fks, table.Fks...)
+	// fks and other constraints
+	err = readConstraints(dbc, database)
+	if err != nil {
+		return
 	}
 
-	// hook-up inbound fks
-	for _, fk := range database.Fks {
-		destination := database.FindTable(fk.DestinationTable)
-		if destination == nil {
-			err = fmt.Errorf("failed to find destination table for fk %s", fk)
-		}
-		destination.InboundFks = append(destination.InboundFks, fk)
-		for _, destCol := range fk.DestinationColumns {
-			destCol.InboundFks = append(destCol.InboundFks, fk)
-		}
-	}
 	//log.Print(database.DebugString())
 	return
 }
@@ -217,11 +203,13 @@ func (model pgModel) CheckConnection() (err error) {
 	return
 }
 
-func readConstraints(dbc *sql.DB, sourceTable *schema.Table, database *schema.Database) (err error) {
-	// todo: parameterise
-	// todo: support multi-column FKs
+func readConstraints(dbc *sql.DB, database *schema.Database) (err error) {
 	// null-proof unnest: https://stackoverflow.com/a/49736694
-	sql := fmt.Sprintf(`select con.oid, con.contype, col.attname column_name, ftbl.relname, fcol.attname foreign_column, con.conname
+	sql := fmt.Sprintf(`
+		select
+			con.oid, ns.nspname, con.conname, con.contype,
+			tns.nspname, tbl.relname, col.attname column_name,
+			fns.nspname foreign_namespace_name, ftbl.relname foreign_table_name, fcol.attname foreign_column_name
 		from
 			(
 				select pgc.oid, pgc.connamespace, pgc.conrelid, pgc.confrelid, pgc.contype, pgc.conname,
@@ -231,33 +219,47 @@ func readConstraints(dbc *sql.DB, sourceTable *schema.Table, database *schema.Da
 			) as con
 			inner join pg_namespace ns on con.connamespace = ns.oid
 			inner join pg_class tbl on tbl.oid = con.conrelid
+			inner join pg_namespace tns on tbl.relnamespace = tns.oid
 			inner join pg_attribute col on col.attrelid = tbl.oid and col.attnum = con.conkey
 			left outer join pg_class ftbl on ftbl.oid = con.confrelid
-			left outer join pg_attribute fcol on fcol.attrelid = ftbl.oid and fcol.attnum = con.confkey
-		where ns.nspname = '%s' and tbl.relname = '%s';`,
-		sourceTable.Schema, sourceTable.Name)
+			left outer join pg_namespace fns on ftbl.relnamespace = fns.oid
+			left outer join pg_attribute fcol on fcol.attrelid = ftbl.oid and fcol.attnum = con.confkey;`)
 
 	rows, err := dbc.Query(sql)
 	if err != nil {
 		return
 	}
 	defer rows.Close()
-	var fks []*schema.Fk
 	for rows.Next() {
-		var oid, conType, sourceColumnName, destinationTableName, destinationColumnName, name string
-		rows.Scan(&oid, &conType, &sourceColumnName, &destinationTableName, &destinationColumnName, &name)
+		var oid, conType, namespace, name,
+			sourceNamespace, sourceTableName, sourceColumnName,
+			destinationNamespace, destinationTableName, destinationColumnName string
+		rows.Scan(&oid, &namespace, &name, &conType,
+			&sourceNamespace, &sourceTableName, &sourceColumnName,
+			&destinationNamespace, &destinationTableName, &destinationColumnName)
+		tableToFind := &schema.Table{Schema: sourceNamespace, Name: sourceTableName}
+		sourceTable := database.FindTable(tableToFind)
+		if sourceTable == nil {
+			err = errors.New(fmt.Sprintf("Table %s not found, source of constraint %s", tableToFind.String(), name))
+			return
+		}
 		_, sourceColumn := sourceTable.FindColumn(sourceColumnName)
+		if sourceColumn == nil {
+			err = errors.New(fmt.Sprintf("Column %s not found on table %s, source of constraint %s", sourceColumnName, tableToFind.String(), name))
+			return
+		}
 		switch conType {
 		case "f": // f = foreign key
-			destinationTable := database.FindTable(&schema.Table{Schema: database.DefaultSchemaName, Name: destinationTableName})
+			destinationTable := database.FindTable(&schema.Table{Schema: destinationNamespace, Name: destinationTableName})
 			if destinationTable == nil {
-				log.Print(database.DebugString())
+				//log.Print(database.DebugString())
 				panic(fmt.Sprintf("couldn't find table %s in database object while hooking up fks", destinationTableName))
 			}
 			_, destinationColumn := destinationTable.FindColumn(destinationColumnName)
 			// see if we are adding columns to an existing fk
+
 			var fk *schema.Fk
-			for _, existingFk := range fks {
+			for _, existingFk := range database.Fks {
 				if existingFk.Name == name {
 					existingFk.SourceColumns = append(existingFk.SourceColumns, sourceColumn)
 					existingFk.DestinationColumns = append(existingFk.DestinationColumns, destinationColumn)
@@ -265,21 +267,27 @@ func readConstraints(dbc *sql.DB, sourceTable *schema.Table, database *schema.Da
 					break
 				}
 			}
-			if fk == nil {
+			if fk == nil { // then this is a never-before-seen fk
 				fk = schema.NewFk(name, sourceTable, sourceColumn, destinationTable, destinationColumn)
-				fks = append(fks, fk)
+				database.Fks = append(database.Fks, fk)
+				sourceTable.Fks = append(sourceTable.Fks, fk)
+				sourceColumn.Fks = append(sourceColumn.Fks, fk)
+				destinationTable.InboundFks = append(destinationTable.InboundFks, fk)
+				destinationColumn.InboundFks = append(destinationColumn.InboundFks, fk)
 			}
-			sourceColumn.Fks = append(sourceColumn.Fks, fk)
 			//log.Printf("fk: %+v - oid %+v", fk, oid)
-		case "p":
+		case "p": // primary key
 			//log.Printf("pk: %s.%s", sourceTable, sourceColumn)
 			sourceTable.Pk.Columns = append(sourceTable.Pk.Columns, sourceColumn)
 			sourceColumn.IsInPrimaryKey = true
-			//default:
-			//	log.Printf("?? %s", conType)
+		case "c": // todo: check constraint
+		case "u": // todo: unique constraint
+		case "t": // todo: constraint
+		case "x": // todo: exclusion constraint
+		default:
+			log.Printf("?? %s", conType)
 		}
 	}
-	sourceTable.Fks = fks
 	return
 }
 

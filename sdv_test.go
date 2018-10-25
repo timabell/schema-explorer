@@ -211,13 +211,13 @@ func checkTableCompoundPks(database *schema.Database, t *testing.T) {
 		t.Fatalf("Nil Pk in table %s", table)
 	}
 	pkLen := len(table.Pk.Columns)
-	t.Logf("%d Pk columns found in table %s", pkLen, table)
+	//t.Logf("%d Pk columns found in table %s", pkLen, table)
 	if pkLen != 2 {
 		t.Fatalf("Expected 2 Pk columns in table %s, found %d", table, pkLen)
 	}
 
-	t.Logf("%#v", table.Pk)
-	t.Logf("%s - %s", table.Pk.Name, table.Pk.Columns.String())
+	//t.Logf("%#v", table.Pk)
+	//t.Logf("%s - %s", table.Pk.Name, table.Pk.Columns.String())
 	expectedPkCol1 := "colA"
 	pkColumn := table.Pk.Columns[0]
 	if pkColumn.Name != expectedPkCol1 {
@@ -249,7 +249,7 @@ func checkTableCompoundPks(database *schema.Database, t *testing.T) {
 
 func checkTablePks(database *schema.Database, t *testing.T) {
 	table := findTable(schema.Table{Schema: database.DefaultSchemaName, Name: "pet"}, database, t)
-	t.Logf("%#v", schema.TableDebug(table))
+	//t.Logf("%#v", schema.TableDebug(table))
 	if table.Pk == nil {
 		t.Fatalf("Nil Pk in table %s", table)
 	}
@@ -275,12 +275,12 @@ func checkFks(database *schema.Database, t *testing.T) {
 	childTable := findTable(schema.Table{Schema: database.DefaultSchemaName, Name: "FkChild"}, database, t)
 	parentTable := findTable(schema.Table{Schema: database.DefaultSchemaName, Name: "FkParent"}, database, t)
 	// check at table level
-	checkInt(len(childTable.Fks), 1, "Fks in "+childTable.String(), t)
+	checkInt(1, len(childTable.Fks), "Fks in "+childTable.String(), t)
 	childTableFk := childTable.Fks[0]
-	checkInt(len(parentTable.Fks), 0, "Fks in "+parentTable.String(), t)
-	checkInt(len(childTable.InboundFks), 0, "InboundFks in "+childTable.String(), t)
+	checkInt(0, len(parentTable.Fks), "Fks in "+parentTable.String(), t)
+	checkInt(0, len(childTable.InboundFks), "InboundFks in "+childTable.String(), t)
 	parentTableInboundFk := parentTable.InboundFks[0]
-	checkInt(len(parentTable.InboundFks), 1, "InboundFks in "+parentTable.String(), t)
+	checkInt(1, len(parentTable.InboundFks), "InboundFks in "+parentTable.String(), t)
 	// check at database level
 	var dbFk *schema.Fk
 	for _, fk := range database.Fks {
@@ -298,7 +298,7 @@ func checkFks(database *schema.Database, t *testing.T) {
 	if fkCol == nil {
 		t.Errorf("Checking column fks, column %s not found", colFullName)
 	}
-	checkInt(len(fkCol.Fks), 1, "Fks in "+colFullName, t)
+	checkInt(1, len(fkCol.Fks), "Fks in "+colFullName, t)
 	colFk := fkCol.Fks[0]
 	// check inbound column fks
 	targetColName := "parentPk"
@@ -307,7 +307,7 @@ func checkFks(database *schema.Database, t *testing.T) {
 	if targetFkCol == nil {
 		t.Errorf("Checking inbound column fks, column %s not found", targetColFullName)
 	}
-	checkInt(len(targetFkCol.InboundFks), 1, "InboundFks in "+targetColFullName, t)
+	checkInt(1, len(targetFkCol.InboundFks), "InboundFks in "+targetColFullName, t)
 	targetColInboundFk := targetFkCol.InboundFks[0]
 	// check fk pointers are all pointing to the same thing
 	if childTableFk != parentTableInboundFk {
