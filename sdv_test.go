@@ -174,6 +174,25 @@ func checkIndexes(database *schema.Database, t *testing.T) {
 	if index.Columns[1] != colB {
 		t.Fatalf("col pointer for %s on index %s didn't match", colB, indexName)
 	}
+
+	// unique index
+	uniqueIndexName := "IX_unique"
+	var uniqueIndex *schema.Index
+	for _, thisIndex := range table.Indexes {
+		if thisIndex.Name == uniqueIndexName {
+			uniqueIndex = thisIndex
+			break
+		}
+	}
+	if uniqueIndex == nil {
+		log.Fatalf("Didn't find unique index %s", uniqueIndexName)
+	}
+	if index.IsUnique {
+		log.Fatalf("Non-unique index %s was incorrectly flagged as unique", index.Name)
+	}
+	if !uniqueIndex.IsUnique {
+		log.Fatalf("Unique index %s wasn't flagged as unique", uniqueIndexName)
+	}
 }
 
 func checkNullable(database *schema.Database, t *testing.T) {
