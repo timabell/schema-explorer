@@ -39,7 +39,7 @@ func (index Index) String() string {
 	if index.IsUnique {
 		unique = "Unique "
 	}
-	return fmt.Sprintf("%sIndex %s on (%s)", unique, index.Name, index.Columns.String())
+	return fmt.Sprintf("%sIndex %s on %s(%s)", unique, index.Name, index.Table.String(), index.Columns.String())
 }
 
 type Table struct {

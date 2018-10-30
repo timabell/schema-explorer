@@ -126,6 +126,12 @@ func (model pgModel) ReadSchema() (database *schema.Database, err error) {
 		return
 	}
 
+	// indexes
+	err = readIndexes(dbc, database)
+	if err != nil {
+		return
+	}
+
 	//log.Print(database.DebugString())
 	return
 }
@@ -287,6 +293,73 @@ func readConstraints(dbc *sql.DB, database *schema.Database) (err error) {
 		default:
 			log.Printf("?? %s", conType)
 		}
+	}
+	return
+}
+
+func readIndexes(dbc *sql.DB, database *schema.Database) (err error) {
+	sql := `
+		select
+			oc.relname,
+			tns.nspname, tbl.relname table_relname,
+			col.attname colname,
+			ix.indisunique,
+			ix.indisclustered
+		from (
+			select *, unnest(indkey) colnum from pg_index
+		) ix
+		left outer join pg_class oc on oc.oid = ix.indexrelid
+		left outer join pg_class tbl on tbl.oid = ix.indrelid
+		left outer join pg_namespace tns on tbl.relnamespace = tns.oid
+		left outer join pg_attribute col on col.attrelid = ix.indrelid and col.attnum = ix.colnum
+		where tns.nspname not like 'pg_%'
+			and not ix.indisprimary;
+	`
+
+	//log.Println(sql)
+	rows, err := dbc.Query(sql)
+	if err != nil {
+		return
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var name, tableNamespace, tableName, colName string
+		var isUnique, isClustered bool
+		rows.Scan(&name, &tableNamespace, &tableName, &colName, &isUnique, &isClustered)
+		tableToFind := &schema.Table{Schema: tableNamespace, Name: tableName}
+		table := database.FindTable(tableToFind)
+		if table == nil {
+			err = errors.New(fmt.Sprintf("Table %s not found, owner of index %s", tableToFind.String(), name))
+			return
+		}
+		var index *schema.Index
+		for _, existingIndex := range table.Indexes {
+			if existingIndex.Name == name {
+				index = existingIndex
+				break
+			}
+		}
+		if index == nil {
+			index = &schema.Index{
+				Name:        name,
+				Columns:     []*schema.Column{},
+				IsUnique:    isUnique,
+				Table:       table,
+				IsClustered: isClustered,
+			}
+			database.Indexes = append(database.Indexes, index)
+			table.Indexes = append(table.Indexes, index)
+		}
+		if colName != "" { // more complex indexes don't link back to their columns. See pg_index.indkey https://www.postgresql.org/docs/current/static/catalog-pg-index.html
+			_, col := table.FindColumn(colName)
+			if col == nil {
+				err = errors.New(fmt.Sprintf("Column %s in table %s not found, for index %s", colName, tableToFind.String(), name))
+				return
+			}
+			index.Columns = append(index.Columns, col)
+			col.Indexes = append(col.Indexes, index)
+		}
+		//log.Printf(index.String())
 	}
 	return
 }

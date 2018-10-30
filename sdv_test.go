@@ -93,7 +93,7 @@ func Test_ReadSchema(t *testing.T) {
 
 func checkIndexes(database *schema.Database, t *testing.T) {
 	tableName := "index_test"
-	indexName := "IX_on_has_index"
+	indexName := "IX_compound"
 
 	// check at database level
 	if database.Indexes == nil {
@@ -127,23 +127,36 @@ func checkIndexes(database *schema.Database, t *testing.T) {
 	}
 
 	// check at column level
-	colName := "has_index"
-	_, col := table.FindColumn(colName)
-	if col == nil {
-		t.Fatalf("Couldn't find column %s on table %s", colName, tableName)
+	colAName := "compound_a"
+	_, colA := table.FindColumn(colAName)
+	if colA == nil {
+		t.Fatalf("Couldn't find column %s on table %s", colAName, tableName)
 	}
-	if col.Indexes == nil {
-		t.Fatalf("Column %s on table %s has nil indexes", colName, tableName)
+	if colA.Indexes == nil {
+		t.Fatalf("Column %s on table %s has nil indexes", colAName, tableName)
 	}
-	checkInt(1, len(col.Indexes), fmt.Sprintf("indexes on %s.%s", tableName, colName), t)
-	colIndex := col.Indexes[0]
+	checkInt(1, len(colA.Indexes), fmt.Sprintf("indexes on %s.%s", tableName, colAName), t)
+	colAIndex := colA.Indexes[0]
+	colBName := "compound_b"
+	_, colB := table.FindColumn(colBName)
+	if colB == nil {
+		t.Fatalf("Couldn't find column %s on table %s", colBName, tableName)
+	}
+	if colB.Indexes == nil {
+		t.Fatalf("Column %s on table %s has nil indexes", colBName, tableName)
+	}
+	checkInt(1, len(colB.Indexes), fmt.Sprintf("indexes on %s.%s", tableName, colBName), t)
+	colBIndex := colB.Indexes[0]
 
-	// check fk pointers are all pointing to the same thing
+	// check index pointers are all pointing to the same thing
 	if databaseIndex != tableIndex {
 		t.Error("database/table index pointers didn't match")
 	}
-	if colIndex != tableIndex {
+	if colAIndex != tableIndex {
 		t.Error("col/table index pointers didn't match")
+	}
+	if colAIndex != colBIndex {
+		t.Error("col index pointers on the two columns in the index didn't match")
 	}
 
 	// now that we know they are all the same thing...
@@ -154,9 +167,12 @@ func checkIndexes(database *schema.Database, t *testing.T) {
 	if index.IsUnique {
 		t.Fatalf("%s should not be a unique index", indexName)
 	}
-	checkInt(1, len(index.Columns), fmt.Sprintf("columns in index %s", indexName), t)
-	if index.Columns[0] != col {
-		t.Fatalf("col pointer on index %s didn't match", indexName)
+	checkInt(2, len(index.Columns), fmt.Sprintf("columns in index %s", indexName), t)
+	if index.Columns[0] != colA {
+		t.Fatalf("col pointer for %s on index %s didn't match", colA, indexName)
+	}
+	if index.Columns[1] != colB {
+		t.Fatalf("col pointer for %s on index %s didn't match", colB, indexName)
 	}
 }
 
