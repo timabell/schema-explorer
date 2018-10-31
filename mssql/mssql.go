@@ -115,7 +115,7 @@ func (model mssqlModel) ReadSchema() (database *schema.Database, err error) {
 		DefaultSchemaName: "dbo",
 	}
 
-	database.Tables, err = model.getTables(dbc)
+	database.Tables, err = getTables(dbc)
 	if err != nil {
 		return
 	}
@@ -123,14 +123,14 @@ func (model mssqlModel) ReadSchema() (database *schema.Database, err error) {
 	// columns
 	for tableIndex, table := range database.Tables {
 		var cols []*schema.Column
-		cols, err = model.getColumns(dbc, table)
+		cols, err = getColumns(dbc, table)
 		if err != nil {
 			return
 		}
 		database.Tables[tableIndex].Columns = append(table.Columns, cols...)
 	}
 
-	database.Fks, err = model.allFks(dbc, database)
+	database.Fks, err = allFks(dbc, database)
 	if err != nil {
 		return
 	}
@@ -142,7 +142,7 @@ func (model mssqlModel) ReadSchema() (database *schema.Database, err error) {
 		}
 	}
 
-	model.getPks(dbc, database)
+	getPks(dbc, database)
 
 	addDescriptions(dbc, database)
 
@@ -186,7 +186,7 @@ func addDescriptions(dbc *sql.DB, database *schema.Database) error {
 	return nil
 }
 
-func (model mssqlModel) getTables(dbc *sql.DB) (tables []*schema.Table, err error) {
+func getTables(dbc *sql.DB) (tables []*schema.Table, err error) {
 
 	rows, err := dbc.Query("select sch.name, tbl.name from sys.tables tbl inner join sys.schemas sch on sch.schema_id = tbl.schema_id order by sch.name, tbl.name;")
 	if err != nil {
@@ -270,7 +270,7 @@ func showVersion(dbc *sql.DB) {
 	log.Print("Successfully connected to MSSQL. @@version: " + serverVersion)
 }
 
-func (model mssqlModel) allFks(dbc *sql.DB, database *schema.Database) (allFks []*schema.Fk, err error) {
+func allFks(dbc *sql.DB, database *schema.Database) (allFks []*schema.Fk, err error) {
 	rows, err := dbc.Query(`
 		select fk.name,
 			parent_sch.name parent_sch_name,
@@ -385,7 +385,7 @@ func (model mssqlModel) GetSqlRows(table *schema.Table, params *params.TablePara
 	return
 }
 
-func (model mssqlModel) getColumns(dbc *sql.DB, table *schema.Table) (cols []*schema.Column, err error) {
+func getColumns(dbc *sql.DB, table *schema.Table) (cols []*schema.Column, err error) {
 	// todo: parameterise
 	sqlText := `select c.name, type_name(c.system_type_id), is_nullable from sys.columns c
 	inner join sys.tables t on t.object_id = c.object_id
@@ -408,7 +408,7 @@ order by c.column_id`
 	return
 }
 
-func (model mssqlModel) getPks(dbc *sql.DB, database *schema.Database) {
+func getPks(dbc *sql.DB, database *schema.Database) {
 	rows, err := dbc.Query(`
 		select
 			ix.name index_name,
