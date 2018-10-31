@@ -244,6 +244,9 @@ func getIndexes(dbc *sql.DB, table *schema.Table, database *schema.Database) (in
 		var name, origin string
 		var unique, partial bool
 		rows.Scan(&seq, &name, &unique, &origin, &partial)
+		if strings.HasPrefix(name, "sqlite_autoindex") {
+			continue
+		}
 		thisIndex := schema.Index{
 			Name:     name,
 			Table:    table,
@@ -267,15 +270,17 @@ func getIndexInfo(dbc *sql.DB, index *schema.Index, table *schema.Table) (err er
 	defer rows.Close()
 	for rows.Next() {
 		var seqno, cid int
-		var name string
-		rows.Scan(&seqno, &cid, &name)
-		_, col := table.FindColumn(name)
-		if col == nil {
-			err = errors.New(fmt.Sprintf("can't find col '%s' specified in index %s", name, index.String()))
-			return
+		var colName string
+		rows.Scan(&seqno, &cid, &colName)
+		if colName != "" {
+			_, col := table.FindColumn(colName)
+			if col == nil {
+				err = errors.New(fmt.Sprintf("can't find col '%s' specified in index %s", colName, index.String()))
+				return
+			}
+			col.Indexes = append(col.Indexes, index)
+			index.Columns = append(index.Columns, col)
 		}
-		col.Indexes = append(col.Indexes, index)
-		index.Columns = append(index.Columns, col)
 	}
 	return
 }
