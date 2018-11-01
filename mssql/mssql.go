@@ -121,13 +121,13 @@ func (model mssqlModel) ReadSchema() (database *schema.Database, err error) {
 	}
 
 	// columns
-	for tableIndex, table := range database.Tables {
+	for tableNumber, table := range database.Tables {
 		var cols []*schema.Column
 		cols, err = getColumns(dbc, table)
 		if err != nil {
 			return
 		}
-		database.Tables[tableIndex].Columns = append(table.Columns, cols...)
+		database.Tables[tableNumber].Columns = append(table.Columns, cols...)
 	}
 
 	database.Fks, err = allFks(dbc, database)
@@ -142,14 +142,13 @@ func (model mssqlModel) ReadSchema() (database *schema.Database, err error) {
 		}
 	}
 
-	getPks(dbc, database)
+	getIndexes(dbc, database)
 
 	addDescriptions(dbc, database)
 
 	//log.Print(database.DebugString())
 	return
 }
-
 func addDescriptions(dbc *sql.DB, database *schema.Database) error {
 	rows, err := dbc.Query(`
 		select
@@ -408,40 +407,84 @@ order by c.column_id`
 	return
 }
 
-func getPks(dbc *sql.DB, database *schema.Database) {
+func getIndexes(dbc *sql.DB, database *schema.Database) {
 	rows, err := dbc.Query(`
 		select
 			ix.name index_name,
 			s.name schema_name,
 			t.name table_name,
+			ix.is_primary_key,
+			ix.is_disabled,
+			ix.is_unique,
+			ix.type_desc,
 			col.name colname
 		from sys.indexes ix
-		inner join sys.index_columns ic on ic.object_id = ix.object_id and ic.index_id = ix.index_id
-		inner join sys.tables t on t.object_id = ix.object_id
-		inner join sys.columns col on col.object_id = ix.object_id and col.column_id = ic.column_id
-		inner join sys.schemas s on s.schema_id = t.schema_id
-		where ix.is_primary_key = 1`)
+			inner join sys.index_columns ic on ic.object_id = ix.object_id and ic.index_id = ix.index_id
+			inner join sys.tables t on t.object_id = ix.object_id
+			inner join sys.columns col on col.object_id = ix.object_id and col.column_id = ic.column_id
+			inner join sys.schemas s on s.schema_id = t.schema_id
+		where s.name <> 'sys';
+`)
 
 	if err != nil {
-		log.Fatal("error running query to find pks: ", err)
+		log.Fatal("error running query to find indexes: ", err)
 		return
 	}
 	if rows == nil {
-		log.Fatal("pk rows was nil")
+		log.Fatal("index rows was nil")
 		return
 	}
 	defer rows.Close()
 
 	for rows.Next() {
-		var pkName, schemaName, tableName, columnName string
-		rows.Scan(&pkName, &schemaName, &tableName, &columnName)
+		var name, schemaName, tableName, typeDesc, columnName string
+		var isPrimaryKey, isDisabled, isUnique bool
+		rows.Scan(&name, &schemaName, &tableName, &isPrimaryKey, &isDisabled, &isUnique, &typeDesc, &columnName)
+		isClustered := typeDesc == "CLUSTERED"
 		table := database.FindTable(&schema.Table{Schema: schemaName, Name: tableName})
+		if table == nil {
+			log.Fatalf("Failed to find table %s for index %s", tableName, name)
+		}
 		_, col := table.FindColumn(columnName)
-		col.IsInPrimaryKey = true
-		if table.Pk == nil {
-			table.Pk = &schema.Pk{Name: pkName, Columns: schema.ColumnList{col}}
-		} else {
-			table.Pk.Columns = append(table.Pk.Columns, col)
+		if col == nil {
+			log.Fatalf("Failed to find col %s in table %s for index %s", columnName, tableName, name)
+		}
+		if isPrimaryKey {
+			col.IsInPrimaryKey = true
+			if table.Pk == nil {
+				table.Pk = &schema.Pk{Name: name, Columns: schema.ColumnList{col}}
+			} else {
+				table.Pk.Columns = append(table.Pk.Columns, col)
+			}
+		} else { // normal index
+			var index *schema.Index
+			for _, existingIndex := range table.Indexes {
+				if existingIndex.Name == name {
+					index = existingIndex
+					break
+				}
+			}
+			if index == nil {
+				index = &schema.Index{
+					Name:        name,
+					Columns:     []*schema.Column{},
+					IsUnique:    isUnique,
+					Table:       table,
+					IsClustered: isClustered,
+				}
+				database.Indexes = append(database.Indexes, index)
+				table.Indexes = append(table.Indexes, index)
+			}
+			if columnName != "" {
+				_, col := table.FindColumn(columnName)
+				if col == nil {
+					err = errors.New(fmt.Sprintf("Column %s in table %s not found, for index %s", columnName, table.String(), name))
+					return
+				}
+				index.Columns = append(index.Columns, col)
+				col.Indexes = append(col.Indexes, index)
+			}
+			log.Printf(index.String())
 		}
 	}
 }

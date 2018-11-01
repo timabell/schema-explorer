@@ -31,6 +31,7 @@ type Index struct {
 	Columns     ColumnList
 	IsUnique    bool
 	IsClustered bool
+	IsDisabled  bool
 	Table       *Table
 }
 
