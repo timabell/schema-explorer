@@ -44,6 +44,7 @@
             <th>Nulls</th>
             <th>Outbound Foreign Key</th>
             <th>Inbound Foreign Keys</th>
+            <th>Indexes</th>
             {{if $.Database.Supports.Descriptions}}
             <th>Description</th>
             {{end}}
@@ -80,6 +81,11 @@
                 <a href="{{.SourceTable}}?_rowLimit=100">
                     {{.SourceTable}}({{.SourceColumns}})
                 </a>
+            {{end}}
+            </td>
+            <td>
+            {{range .Indexes }}
+                {{.Name}}
             {{end}}
             </td>
             {{if $.Database.Supports.Descriptions}}
