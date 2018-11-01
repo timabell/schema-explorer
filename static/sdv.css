@@ -208,6 +208,10 @@ th, td {
     color: #939191;
 }
 
+.notnull {
+    white-space: nowrap;
+}
+
 .hint,
 .hint * {
     color: #666;
