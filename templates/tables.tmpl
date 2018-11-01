@@ -85,6 +85,7 @@
     <table>
         <thead>
         <tr>
+            <th>Table</th>
             <th>Name</th>
             <th>Columns</th>
             <th>Unique</th>
@@ -93,6 +94,7 @@
         <tbody>
         {{range .Database.Indexes}}
         <tr>
+            <td><span class="bare-value">{{.Table}}</span></td>
             <td><span class="bare-value">{{.Name}}</span></td>
             <td><span class="bare-value">{{.Columns.String}}</span></td>
             <td>
