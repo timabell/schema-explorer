@@ -12,6 +12,7 @@ import (
 	"bitbucket.org/timabell/sql-data-viewer/reader"
 	"bitbucket.org/timabell/sql-data-viewer/schema"
 	"database/sql"
+	"errors"
 	"fmt"
 	_ "github.com/mattn/go-sqlite3"
 	"log"
@@ -100,6 +101,18 @@ func (model sqliteModel) ReadSchema() (database *schema.Database, err error) {
 			destCol.InboundFks = append(destCol.InboundFks, fk)
 		}
 	}
+
+	// indexes
+	for _, table := range database.Tables {
+		var indexes []*schema.Index
+		indexes, err = getIndexes(dbc, table, database)
+		if err != nil {
+			return
+		}
+		table.Indexes = indexes
+		database.Indexes = append(database.Indexes, indexes...)
+	}
+
 	//log.Print(database.DebugString())
 	return
 }
@@ -215,6 +228,59 @@ func getFks(dbc *sql.DB, sourceTable *schema.Table, database *schema.Database) (
 		}
 
 		sourceColumn.Fks = append(sourceColumn.Fks, fk)
+	}
+	return
+}
+
+func getIndexes(dbc *sql.DB, table *schema.Table, database *schema.Database) (indexes []*schema.Index, err error) {
+	rows, err := dbc.Query("PRAGMA index_list('" + table.Name + "');")
+	if err != nil {
+		return
+	}
+	defer rows.Close()
+	indexes = []*schema.Index{}
+	for rows.Next() {
+		var seq int
+		var name, origin string
+		var unique, partial bool
+		rows.Scan(&seq, &name, &unique, &origin, &partial)
+		if strings.HasPrefix(name, "sqlite_autoindex") {
+			continue
+		}
+		thisIndex := schema.Index{
+			Name:     name,
+			Table:    table,
+			IsUnique: unique,
+		}
+		err = getIndexInfo(dbc, &thisIndex, table)
+		if err != nil {
+			return
+		}
+		indexes = append(indexes, &thisIndex)
+	}
+	database.Indexes = append(database.Indexes, indexes...)
+	return
+}
+
+func getIndexInfo(dbc *sql.DB, index *schema.Index, table *schema.Table) (err error) {
+	rows, err := dbc.Query("PRAGMA index_info('" + index.Name + "');")
+	if err != nil {
+		return
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var seqno, cid int
+		var colName string
+		rows.Scan(&seqno, &cid, &colName)
+		if colName != "" {
+			_, col := table.FindColumn(colName)
+			if col == nil {
+				err = errors.New(fmt.Sprintf("can't find col '%s' specified in index %s", colName, index.String()))
+				return
+			}
+			col.Indexes = append(col.Indexes, index)
+			index.Columns = append(index.Columns, col)
+		}
 	}
 	return
 }

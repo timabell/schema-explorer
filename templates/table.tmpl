@@ -161,6 +161,35 @@
 </div>
 {{end}}
 
+<h2 id="indexes">Indexes</h2>
+
+<div class="fk-list">
+{{if .Table.Indexes}}
+    <table>
+        <thead>
+        <tr>
+            <th>Name</th>
+            <th>Columns</th>
+            <th>Unique</th>
+        </tr>
+        </thead>
+        <tbody>
+        {{range .Table.Indexes}}
+        <tr>
+            <td><span class="bare-value">{{.Name}}</span></td>
+            <td><span class="bare-value">{{.Columns.String}}</span></td>
+            <td>
+            {{if .IsUnique }}
+                <span class="bare-value">Unique</span>
+            {{end}}
+            </td>
+        </tr>
+        {{end}}
+        </tbody>
+    </table>
+</div>
+{{end}}
+
 <h2 id="data">Data</h2>
 
 {{if .TableParams.CardView}}

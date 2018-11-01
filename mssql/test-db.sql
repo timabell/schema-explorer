@@ -263,3 +263,18 @@ insert into FkChild(id, parentId) values(102,10);
 insert into FkChild(id, parentId) values(110,11);
 insert into FkChild(id, parentId) values(111,11);
 insert into FkChild(id, parentId) values(112,11);
+
+-- drop table index_test;
+create table index_test(
+  id int primary key,
+  has_index varchar(10),
+  compound_a varchar(10),
+  compound_b varchar(10),
+  complex_index varchar(10),
+  unique_index varchar(10),
+  lower_complex as lower(complex_index) persisted
+);
+create index "IX_on_has_index" on index_test (has_index);
+create index "IX_compound" on index_test (compound_a, compound_b);
+create index "IX_complex" on index_test (lower_complex);
+create unique index "IX_unique" on index_test (unique_index);

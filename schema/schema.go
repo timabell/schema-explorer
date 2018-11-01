@@ -15,6 +15,7 @@ type SupportedFeatures struct {
 type Database struct {
 	Tables            []*Table
 	Fks               []*Fk
+	Indexes           []*Index
 	Supports          SupportedFeatures
 	Description       string
 	DefaultSchemaName string
@@ -30,6 +31,16 @@ type Index struct {
 	Columns     ColumnList
 	IsUnique    bool
 	IsClustered bool
+	IsDisabled  bool
+	Table       *Table
+}
+
+func (index Index) String() string {
+	unique := ""
+	if index.IsUnique {
+		unique = "Unique "
+	}
+	return fmt.Sprintf("%sIndex %s on %s(%s)", unique, index.Name, index.Table.String(), index.Columns.String())
 }
 
 type Table struct {
@@ -65,6 +76,7 @@ type Column struct {
 	Type           string
 	Fks            []*Fk
 	InboundFks     []*Fk
+	Indexes        []*Index
 	Description    string
 	IsInPrimaryKey bool
 	Nullable       bool
