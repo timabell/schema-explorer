@@ -484,7 +484,7 @@ func getIndexes(dbc *sql.DB, database *schema.Database) {
 				index.Columns = append(index.Columns, col)
 				col.Indexes = append(col.Indexes, index)
 			}
-			log.Printf(index.String())
+			//log.Printf(index.String())
 		}
 	}
 }
