@@ -22,7 +22,7 @@ var cachingEnabled bool
 var database *schema.Database
 var connectionName string
 
-func RunServer(options reader.SdvOptions) {
+func RunServer(options reader.SseOptions) {
 	driver = *options.Driver
 	cachingEnabled = options.Live == nil || !*options.Live
 	if options.ConnectionDisplayName != nil {

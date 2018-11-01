@@ -11,7 +11,7 @@ import (
 	"strings"
 )
 
-type SdvOptions struct {
+type SseOptions struct {
 	Driver                *string `short:"d" long:"driver" required:"true" description:"Driver to use" choice:"mssql" choice:"pg" choice:"sqlite" env:"schemaexplorer_driver"`
 	Live                  *bool   `short:"l" long:"live" description:"update html templates & schema information from disk on every page load" env:"schemaexplorer_live"`
 	ConnectionDisplayName *string `short:"n" long:"display-name" description:"A display name for this connection" env:"schemaexplorer_display_name"`
@@ -20,7 +20,7 @@ type SdvOptions struct {
 }
 
 // todo: arg parsing and options shouldn't be here
-var Options = SdvOptions{}
+var Options = SseOptions{}
 var ArgParser = flags.NewParser(&Options, flags.Default)
 
 type DbReader interface {

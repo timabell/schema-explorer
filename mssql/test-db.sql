@@ -3,11 +3,12 @@
 
 -- todo: drop sql doesn't cope with schema.
 
-create database [sdv-regression-test];
+-- drop database [sse-regression-test];
+create database [sse-regression-test];
 GO
-use [sdv-regression-test];
+use [sse-regression-test];
 GO
--- use [sdv-regression-test]; -- not supported on azure sql
+-- use [sse-regression-test]; -- not supported on azure sql
 
 -- ###################################
 -- Clear out the db.

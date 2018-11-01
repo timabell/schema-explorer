@@ -9,4 +9,4 @@ echo "=================="
 export schemaexplorer_driver=pg
 export schemaexplorer_pg_connection_string="postgres://ssetestusr:ssetestusr@localhost/ssetest"
 go clean -testcache
-go test sdv_test.go # -test.v
+go test sse_test.go # -test.v

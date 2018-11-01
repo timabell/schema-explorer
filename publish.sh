@@ -2,7 +2,6 @@
 ./test.sh
 ./package.sh
 
-# for manual downloads from https://blog.timwise.co.uk/sdv/sdv-download/
-mv -v package/sdv.zip ~/Dropbox/share/sdv/
+mv -v package/sse.zip ~/Dropbox/share/sse/
 
 echo "Make sure dropbox is running!"
