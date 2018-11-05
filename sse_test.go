@@ -89,6 +89,9 @@ func Test_ReadSchema(t *testing.T) {
 
 	t.Log("Checking row count")
 	checkTableRowCount(reader, database, t)
+
+	t.Log("Checking sort/filter")
+	checkFilterAndSort(reader, database, t)
 }
 
 func checkIndexes(database *schema.Database, t *testing.T) {
@@ -431,13 +434,7 @@ var tests = []testCase{
 	{colName: "field_uniqueidentifier", row: 0, expectedType: "uniqueidentifier", expectedString: "b7a16c7a-a718-4ed8-97cb-20ccbadcc339"},
 }
 
-func Test_FilterAndSort(t *testing.T) {
-	dbReader := reader.GetDbReader()
-	database, err := dbReader.ReadSchema()
-	if err != nil {
-		t.Fatal(err)
-	}
-
+func checkFilterAndSort(dbReader reader.DbReader, database *schema.Database, t *testing.T) {
 	table := findTable(schema.Table{Schema: database.DefaultSchemaName, Name: "SortFilterTest"}, database, t)
 
 	_, patternCol := table.FindColumn("pattern")
