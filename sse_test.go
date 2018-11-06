@@ -500,8 +500,8 @@ func checkPaging(dbReader reader.DbReader, database *schema.Database, t *testing
 		t.Errorf("Expected %d limited rows, got %d", expectedRowCount, len(rows))
 	}
 	_, idCol := table.FindColumn("id")
-	checkInt(4, int(rows[0][idCol.Position].(int64)), "4th row id", t)
-	checkInt(5, int(rows[1][idCol.Position].(int64)), "5th row id", t)
+	checkInt(4, int(rows[0][idCol.Position].(int64)), "for skip/take row 1 id", t)
+	checkInt(5, int(rows[1][idCol.Position].(int64)), "for skip/take row 2 id", t)
 }
 
 func dbString(value interface{}) string {
