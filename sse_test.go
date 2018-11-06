@@ -92,6 +92,9 @@ func Test_ReadSchema(t *testing.T) {
 
 	t.Log("Checking sort/filter")
 	checkFilterAndSort(reader, database, t)
+
+	t.Log("Checking paging")
+	checkPaging(reader, database, t)
 }
 
 func checkIndexes(database *schema.Database, t *testing.T) {
@@ -478,6 +481,27 @@ func checkFilterAndSort(dbReader reader.DbReader, database *schema.Database, t *
 		}
 		t.Fatal("sort-filter fail")
 	}
+}
+
+func checkPaging(dbReader reader.DbReader, database *schema.Database, t *testing.T) {
+	table := findTable(schema.Table{Schema: database.DefaultSchemaName, Name: "SortFilterTest"}, database, t)
+
+	expectedRowCount := 2
+	tableParams := &params.TableParams{
+		RowLimit: expectedRowCount,
+		SkipRows: 3,
+	}
+	rows, err := reader.GetRows(dbReader, table, tableParams)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(rows) != expectedRowCount {
+		t.Errorf("Expected %d limited rows, got %d", expectedRowCount, len(rows))
+	}
+	_, idCol := table.FindColumn("id")
+	checkInt(4, int(rows[0][idCol.Position].(int64)), "4th row id", t)
+	checkInt(5, int(rows[1][idCol.Position].(int64)), "5th row id", t)
 }
 
 func dbString(value interface{}) string {

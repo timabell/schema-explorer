@@ -16,6 +16,7 @@ type SortCol struct {
 
 type TableParams struct {
 	RowLimit int
+	SkipRows int
 	CardView bool
 	Filter   FieldFilterList
 	Sort     []SortCol
