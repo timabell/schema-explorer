@@ -485,10 +485,12 @@ func checkFilterAndSort(dbReader reader.DbReader, database *schema.Database, t *
 
 func checkPaging(dbReader reader.DbReader, database *schema.Database, t *testing.T) {
 	table := findTable(schema.Table{Schema: database.DefaultSchemaName, Name: "SortFilterTest"}, database, t)
+	_, idCol := table.FindColumn("id")
 
 	expectedRowCount := 2
 	tableParams := &params.TableParams{
 		RowLimit: expectedRowCount,
+		Sort:     []params.SortCol{{Column: idCol}}, // have to sort to use paging for sql server
 		SkipRows: 3,
 	}
 	rows, err := reader.GetRows(dbReader, table, tableParams)
@@ -499,7 +501,6 @@ func checkPaging(dbReader reader.DbReader, database *schema.Database, t *testing
 	if len(rows) != expectedRowCount {
 		t.Errorf("Expected %d limited rows, got %d", expectedRowCount, len(rows))
 	}
-	_, idCol := table.FindColumn("id")
 	checkInt(4, int(rows[0][idCol.Position].(int64)), "for skip/take row 1 id", t)
 	checkInt(5, int(rows[1][idCol.Position].(int64)), "for skip/take row 2 id", t)
 }
