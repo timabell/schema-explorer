@@ -97,9 +97,10 @@ func (model pgModel) ReadSchema() (database *schema.Database, err error) {
 
 	database = &schema.Database{
 		Supports: schema.SupportedFeatures{
-			Schema:       true,
-			Descriptions: false,
-			FkNames:      true,
+			Schema:               true,
+			Descriptions:         false,
+			FkNames:              true,
+			PagingWithoutSorting: true,
 		},
 		DefaultSchemaName: "public",
 	}

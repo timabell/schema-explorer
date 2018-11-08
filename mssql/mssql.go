@@ -108,9 +108,10 @@ func (model mssqlModel) ReadSchema() (database *schema.Database, err error) {
 
 	database = &schema.Database{
 		Supports: schema.SupportedFeatures{
-			Schema:       true,
-			Descriptions: true,
-			FkNames:      true,
+			Schema:               true,
+			Descriptions:         true,
+			FkNames:              true,
+			PagingWithoutSorting: false,
 		},
 		DefaultSchemaName: "dbo",
 	}
