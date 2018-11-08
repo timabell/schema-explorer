@@ -16,6 +16,7 @@ type SortCol struct {
 
 type TableParams struct {
 	RowLimit int
+	SkipRows int
 	CardView bool
 	Filter   FieldFilterList
 	Sort     []SortCol
@@ -71,6 +72,20 @@ func (tableParams TableParams) SortPosition(col *schema.Column) int {
 	return -1
 }
 
+func (tableParams TableParams) PrevPage() TableParams {
+	skip := tableParams.SkipRows - tableParams.RowLimit
+	if skip < 0 {
+		skip = 0
+	}
+	tableParams.SkipRows = tableParams.SkipRows - tableParams.RowLimit
+	return tableParams
+}
+
+func (tableParams TableParams) NextPage() TableParams {
+	tableParams.SkipRows = tableParams.SkipRows + tableParams.RowLimit
+	return tableParams
+}
+
 func (tableParams TableParams) IsSortedAsc(col *schema.Column) bool {
 	for _, c := range tableParams.Sort {
 		if c.Column.Name == col.Name && !c.Descending {
@@ -122,6 +137,10 @@ func (tableParams TableParams) AsQueryString() template.URL {
 		parts = append(parts, fmt.Sprintf("%s=%d", rowLimitKey, tableParams.RowLimit))
 	}
 
+	if tableParams.SkipRows > 0 {
+		parts = append(parts, fmt.Sprintf("%s=%d", skipKey, tableParams.SkipRows))
+	}
+
 	return template.URL(strings.Join(parts, "&"))
 }
 
@@ -157,17 +176,20 @@ func BuildFilterParts(filterList FieldFilterList) []string {
 
 // todo: more robust separation of query param keys
 const rowLimitKey = "_rowLimit" // this should be reasonably safe from clashes with column names
+const skipKey = "_skip"
 const cardViewKey = "_cardView"
 const sortKey = "_sort"
 
 func ParseTableParams(raw url.Values, table *schema.Table) (tableParams *TableParams) {
 	tableParams = &TableParams{}
 	ParseRowLimit(raw, tableParams)
+	ParseSkip(raw, tableParams)
 	ParseSortParams(raw, tableParams, table)
 	ParseCardView(raw, tableParams)
 
 	// exclude special params from column filters
 	raw.Del(rowLimitKey)
+	raw.Del(skipKey)
 	raw.Del(sortKey)
 	raw.Del(cardViewKey)
 
@@ -204,6 +226,19 @@ func ParseRowLimit(raw url.Values, tableParams *TableParams) {
 	tableParams.RowLimit, err = strconv.Atoi(rowLimitString)
 	if err != nil {
 		fmt.Println("error converting rows querystring value to int: ", err)
+		panic(err)
+	}
+}
+
+func ParseSkip(raw url.Values, tableParams *TableParams) {
+	skipString := raw.Get(skipKey)
+	if skipString == "" {
+		return
+	}
+	var err error
+	tableParams.SkipRows, err = strconv.Atoi(skipString)
+	if err != nil {
+		fmt.Println("error converting skip querystring value to int: ", err)
 		panic(err)
 	}
 }

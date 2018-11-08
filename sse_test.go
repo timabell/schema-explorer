@@ -89,6 +89,12 @@ func Test_ReadSchema(t *testing.T) {
 
 	t.Log("Checking row count")
 	checkTableRowCount(reader, database, t)
+
+	t.Log("Checking sort/filter")
+	checkFilterAndSort(reader, database, t)
+
+	t.Log("Checking paging")
+	checkPaging(reader, database, t)
 }
 
 func checkIndexes(database *schema.Database, t *testing.T) {
@@ -431,13 +437,7 @@ var tests = []testCase{
 	{colName: "field_uniqueidentifier", row: 0, expectedType: "uniqueidentifier", expectedString: "b7a16c7a-a718-4ed8-97cb-20ccbadcc339"},
 }
 
-func Test_FilterAndSort(t *testing.T) {
-	dbReader := reader.GetDbReader()
-	database, err := dbReader.ReadSchema()
-	if err != nil {
-		t.Fatal(err)
-	}
-
+func checkFilterAndSort(dbReader reader.DbReader, database *schema.Database, t *testing.T) {
 	table := findTable(schema.Table{Schema: database.DefaultSchemaName, Name: "SortFilterTest"}, database, t)
 
 	_, patternCol := table.FindColumn("pattern")
@@ -481,6 +481,28 @@ func Test_FilterAndSort(t *testing.T) {
 		}
 		t.Fatal("sort-filter fail")
 	}
+}
+
+func checkPaging(dbReader reader.DbReader, database *schema.Database, t *testing.T) {
+	table := findTable(schema.Table{Schema: database.DefaultSchemaName, Name: "SortFilterTest"}, database, t)
+	_, idCol := table.FindColumn("id")
+
+	expectedRowCount := 2
+	tableParams := &params.TableParams{
+		RowLimit: expectedRowCount,
+		Sort:     []params.SortCol{{Column: idCol}}, // have to sort to use paging for sql server
+		SkipRows: 3,
+	}
+	rows, err := reader.GetRows(dbReader, table, tableParams)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(rows) != expectedRowCount {
+		t.Errorf("Expected %d limited rows, got %d", expectedRowCount, len(rows))
+	}
+	checkInt(4, int(rows[0][idCol.Position].(int64)), "for skip/take row 1 id", t)
+	checkInt(5, int(rows[1][idCol.Position].(int64)), "for skip/take row 2 id", t)
 }
 
 func dbString(value interface{}) string {

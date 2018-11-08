@@ -97,9 +97,10 @@ func (model pgModel) ReadSchema() (database *schema.Database, err error) {
 
 	database = &schema.Database{
 		Supports: schema.SupportedFeatures{
-			Schema:       true,
-			Descriptions: false,
-			FkNames:      true,
+			Schema:               true,
+			Descriptions:         false,
+			FkNames:              true,
+			PagingWithoutSorting: true,
 		},
 		DefaultSchemaName: "public",
 	}
@@ -397,8 +398,8 @@ func (model pgModel) GetSqlRows(table *schema.Table, params *params.TableParams)
 		sql = sql + " order by " + strings.Join(sortParts, ", ")
 	}
 
-	if params.RowLimit > 0 {
-		sql = sql + " limit " + strconv.Itoa(params.RowLimit)
+	if params.RowLimit > 0 || params.SkipRows > 0 {
+		sql = sql + fmt.Sprintf(" limit %d offset %d", params.RowLimit, params.SkipRows)
 	}
 
 	dbc, err := getConnection(model.connectionString)

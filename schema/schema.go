@@ -7,9 +7,10 @@ import (
 )
 
 type SupportedFeatures struct {
-	Schema       bool
-	Descriptions bool
-	FkNames      bool
+	Schema               bool
+	Descriptions         bool
+	FkNames              bool
+	PagingWithoutSorting bool
 }
 
 type Database struct {

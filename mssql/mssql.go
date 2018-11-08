@@ -108,9 +108,10 @@ func (model mssqlModel) ReadSchema() (database *schema.Database, err error) {
 
 	database = &schema.Database{
 		Supports: schema.SupportedFeatures{
-			Schema:       true,
-			Descriptions: true,
-			FkNames:      true,
+			Schema:               true,
+			Descriptions:         true,
+			FkNames:              true,
+			PagingWithoutSorting: false,
 		},
 		DefaultSchemaName: "dbo",
 	}
@@ -333,10 +334,17 @@ func allFks(dbc *sql.DB, database *schema.Database) (allFks []*schema.Fk, err er
 }
 
 func (model mssqlModel) GetSqlRows(table *schema.Table, params *params.TableParams) (rows *sql.Rows, err error) {
-	// todo: sql parameters instead of string concatenation
+	// Limitation: we can't support paging (offset/skip) without a sort order so
+	// 		params.SkipRows will be ignored if there is no sorting supplied.
+
 	sql := "select"
 
-	if params.RowLimit > 0 {
+	if params.SkipRows > 0 && len(params.Sort) == 0 {
+		log.Printf("Warning, row offset not supported in mssql without sort order")
+	}
+
+	// use top when we have a row limit but not an offset (or can't use offset because there's no sort)
+	if params.RowLimit > 0 && (params.SkipRows == 0 || len(params.Sort) == 0) {
 		sql = sql + " top " + strconv.Itoa(params.RowLimit)
 	}
 
@@ -366,6 +374,13 @@ func (model mssqlModel) GetSqlRows(table *schema.Table, params *params.TablePara
 			sortParts = append(sortParts, sortString)
 		}
 		sql = sql + " order by " + strings.Join(sortParts, ", ")
+
+		if params.SkipRows > 0 {
+			sql = sql + fmt.Sprintf(" offset %d rows", params.SkipRows)
+			if params.RowLimit > 0 {
+				sql = sql + fmt.Sprintf(" fetch next %d rows only", params.RowLimit)
+			}
+		}
 	}
 
 	dbc, err := getConnection(model.connectionString)

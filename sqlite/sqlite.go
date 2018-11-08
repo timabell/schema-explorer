@@ -17,7 +17,6 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 	"log"
 	"os"
-	"strconv"
 	"strings"
 )
 
@@ -57,9 +56,10 @@ func (model sqliteModel) ReadSchema() (database *schema.Database, err error) {
 
 	database = &schema.Database{
 		Supports: schema.SupportedFeatures{
-			Schema:       true,
-			Descriptions: false,
-			FkNames:      false, // todo: Get sqlite fk names https://stackoverflow.com/a/42365021/10245
+			Schema:               true,
+			Descriptions:         false,
+			FkNames:              false, // todo: Get sqlite fk names https://stackoverflow.com/a/42365021/10245
+			PagingWithoutSorting: true,
 		},
 	}
 
@@ -316,9 +316,8 @@ func (model sqliteModel) GetSqlRows(table *schema.Table, params *params.TablePar
 		sql = sql + " order by " + strings.Join(sortParts, ", ")
 	}
 
-	rowLimit := params.RowLimit
-	if rowLimit > 0 {
-		sql = sql + " limit " + strconv.Itoa(rowLimit)
+	if params.RowLimit > 0 || params.SkipRows > 0 {
+		sql = sql + fmt.Sprintf(" limit %d, %d", params.SkipRows, params.RowLimit)
 	}
 
 	dbc, err := getConnection(model.path)

@@ -286,12 +286,6 @@
 {{end}}
 </div>
 
-{{ if .TableParams.RowLimit }}
-<p class='row-limit-info'>First {{.TableParams.RowLimit}} rows
-    <small class="hint" style="margin-left: 0.75em;">
-        <i class="fas fa-info-circle"></i>
-        You can change the row limit in the address bar.</small><p>
-{{end}}
 
 {{if .TableParams.CardView}}
     <div class="cards">
@@ -360,6 +354,27 @@
             </tr>
         {{end}}
     </table>
+{{end}}
+
+{{ if .TableParams.RowLimit }}
+    <p class='row-limit-info'>First {{.TableParams.RowLimit}} rows
+        <small class="hint" style="margin-left: 0.75em;">
+            <i class="fas fa-info-circle"></i>
+            You can change the row limit in the address bar.</small>
+    </p>
+    <p>
+    {{if or $.Database.Supports.PagingWithoutSorting $.TableParams.Sort}}
+        {{if gt .TableParams.PrevPage.SkipRows 0}}
+            <a class="action-button button" href="?{{.TableParams.PrevPage.AsQueryString}}#data">&lt; Previous Page</a>
+        {{end}}
+        <a class="action-button button" href="?{{.TableParams.NextPage.AsQueryString}}#data">Next Page &gt;</a>
+    {{else}}
+        <small class="hint" style="margin-left: 0.75em;">
+            <i class="fas fa-info-circle"></i>
+            Choose a sort order to enable paging</small>
+
+    {{end}}
+    </p>
 {{end}}
 
 {{end}}
