@@ -338,8 +338,12 @@ func (model mssqlModel) GetSqlRows(table *schema.Table, params *params.TablePara
 
 	sql := "select"
 
-	// can't do offset with top, but can't also can't do offset without order by so only use TOP when there's no order by
-	if params.RowLimit > 0 && len(params.Sort) == 0 {
+	if params.SkipRows > 0 && len(params.Sort) == 0 {
+		log.Printf("Warning, row offset not supported in mssql without sort order")
+	}
+
+	// use top when we have a row limit but not an offset (or can't use offset because there's no sort)
+	if params.RowLimit > 0 && (params.SkipRows == 0 || len(params.Sort) == 0) {
 		sql = sql + " top " + strconv.Itoa(params.RowLimit)
 	}
 
@@ -370,8 +374,11 @@ func (model mssqlModel) GetSqlRows(table *schema.Table, params *params.TablePara
 		}
 		sql = sql + " order by " + strings.Join(sortParts, ", ")
 
-		if params.RowLimit > 0 || params.SkipRows > 0 {
-			sql = sql + fmt.Sprintf(" offset %d rows fetch next %d rows only", params.SkipRows, params.RowLimit)
+		if params.SkipRows > 0 {
+			sql = sql + fmt.Sprintf(" offset %d rows", params.SkipRows)
+			if params.RowLimit > 0 {
+				sql = sql + fmt.Sprintf(" fetch next %d rows only", params.RowLimit)
+			}
 		}
 	}
 
