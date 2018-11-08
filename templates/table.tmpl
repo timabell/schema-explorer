@@ -364,7 +364,7 @@
     </p>
     <p>
     {{if or $.Database.Supports.PagingWithoutSorting $.TableParams.Sort}}
-        {{if gt .TableParams.PrevPage.SkipRows 0}}
+        {{if ge .TableParams.PrevPage.SkipRows 0}}
             <a class="action-button button" href="?{{.TableParams.PrevPage.AsQueryString}}#data">&lt; Previous Page</a>
         {{end}}
         <a class="action-button button" href="?{{.TableParams.NextPage.AsQueryString}}#data">Next Page &gt;</a>
