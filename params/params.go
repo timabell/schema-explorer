@@ -72,6 +72,20 @@ func (tableParams TableParams) SortPosition(col *schema.Column) int {
 	return -1
 }
 
+func (tableParams TableParams) PrevPage() TableParams {
+	skip := tableParams.SkipRows - tableParams.RowLimit
+	if skip < 0 {
+		skip = 0
+	}
+	tableParams.SkipRows = tableParams.SkipRows - tableParams.RowLimit
+	return tableParams
+}
+
+func (tableParams TableParams) NextPage() TableParams {
+	tableParams.SkipRows = tableParams.SkipRows + tableParams.RowLimit
+	return tableParams
+}
+
 func (tableParams TableParams) IsSortedAsc(col *schema.Column) bool {
 	for _, c := range tableParams.Sort {
 		if c.Column.Name == col.Name && !c.Descending {
@@ -121,6 +135,10 @@ func (tableParams TableParams) AsQueryString() template.URL {
 
 	if tableParams.RowLimit > 0 {
 		parts = append(parts, fmt.Sprintf("%s=%d", rowLimitKey, tableParams.RowLimit))
+	}
+
+	if tableParams.SkipRows > 0 {
+		parts = append(parts, fmt.Sprintf("%s=%d", skipKey, tableParams.SkipRows))
 	}
 
 	return template.URL(strings.Join(parts, "&"))
