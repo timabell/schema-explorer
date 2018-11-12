@@ -243,12 +243,15 @@ nav li{
     margin: 0.5em 0.5em 0 0;
     list-style-type: none;
 }
-a.button {
+button{
+    font-size: 1em;
+}
+.button {
     display: inline-block;
     text-decoration: none;
 }
-a.button:hover,
-a.button:visited{
+.button:hover,
+.button:visited{
     color: #f8f8f8;
 }
 .action-button:hover {
