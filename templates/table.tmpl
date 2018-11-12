@@ -357,21 +357,24 @@
 {{end}}
 
 {{ if .TableParams.RowLimit }}
-    <p>
     {{if or $.Database.Supports.PagingWithoutSorting $.TableParams.Sort}}
-        {{if ge .TableParams.PrevPage.SkipRows 0}}
-            <a class="action-button button" href="?{{.TableParams.PrevPage.AsQueryString}}#data">&lt; Previous Page</a>
-        {{end}}
-        <a class="action-button button" href="?{{.TableParams.NextPage.AsQueryString}}#data">Next Page &gt;</a>
+        <p>
+            {{if ge .TableParams.PrevPage.SkipRows 0}}
+                <a class="action-button button" href="?{{.TableParams.PrevPage.AsQueryString}}#data">&lt; Previous Page</a>
+            {{end}}
+            <a class="action-button button" href="?{{.TableParams.NextPage.AsQueryString}}#data">Next Page &gt;</a>
+        </p>
     {{else}}
-        <small class="hint" style="margin-left: 0.75em;">
-            <i class="fas fa-info-circle"></i>
-            Choose a sort order to enable paging</small>
+        <p>
+            <small class="hint" style="margin-left: 0.75em;">
+                <i class="fas fa-info-circle"></i>
+                Choose a sort order to enable paging
+            </small>
+        </p>
     {{end}}
-    </p>
 {{end}}
 
-<form method="post">
+<form method="post" id="pageSizeForm">
     <h3>
         <label for="rowLimitInput">
             Page size
