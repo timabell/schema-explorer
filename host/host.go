@@ -172,7 +172,7 @@ func TableHandler(resp http.ResponseWriter, req *http.Request) {
 			return
 		}
 		params.RowLimit = newLimit
-		http.Redirect(resp, req, fmt.Sprintf("%s?%s", tableName, params.AsQueryString()), http.StatusFound)
+		http.Redirect(resp, req, fmt.Sprintf("%s?%s#data", tableName, params.AsQueryString()), http.StatusFound)
 		return
 	}
 
