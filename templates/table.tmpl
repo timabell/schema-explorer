@@ -356,16 +356,6 @@
     </table>
 {{end}}
 
-<p>
-    <form method="post">
-        <label>
-        Page size
-        <input type="number" name="_rowLimit" value="{{$.TableParams.RowLimit}}"/>
-        </label>
-        <button class="action-button button">Update page size</button>
-    </form>
-</p>
-
 {{ if .TableParams.RowLimit }}
     <p>
     {{if or $.Database.Supports.PagingWithoutSorting $.TableParams.Sort}}
@@ -380,5 +370,19 @@
     {{end}}
     </p>
 {{end}}
+
+<form method="post">
+    <h3>
+        <label for="rowLimitInput">
+            Page size
+        </label>
+    </h3>
+    <p>
+        <input type="number" name="_rowLimit" id="rowLimitInput" value="{{$.TableParams.RowLimit}}"/>
+        <br/>
+        <br/>
+        <button class="action-button button">Update page size</button>
+    </p>
+</form>
 
 {{end}}
