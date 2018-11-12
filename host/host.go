@@ -13,6 +13,7 @@ import (
 	"log"
 	"net/http"
 	"net/http/httputil"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -157,6 +158,23 @@ func TableHandler(resp http.ResponseWriter, req *http.Request) {
 		return
 	}
 	params := params.ParseTableParams(req.URL.Query(), table)
+
+	const rowLimitKey = "_rowLimit"
+	err = req.ParseForm()
+	if err != nil {
+		fmt.Sprintln("http form parse failed", err)
+		return
+	}
+	if len(req.PostForm[rowLimitKey]) >= 1 && req.PostForm[rowLimitKey][0] != "" {
+		newLimit, err := strconv.Atoi(req.PostForm[rowLimitKey][0])
+		if err != nil {
+			fmt.Sprintln("failed to read new row limit from form", err)
+			return
+		}
+		params.RowLimit = newLimit
+		http.Redirect(resp, req, fmt.Sprintf("%s?%s", tableName, params.AsQueryString()), http.StatusFound)
+		return
+	}
 
 	trail := ReadTrail(req)
 	trail.AddTable(table)

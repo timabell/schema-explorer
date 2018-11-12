@@ -356,12 +356,17 @@
     </table>
 {{end}}
 
+<p>
+    <form method="post">
+        <label>
+        Page size
+        <input type="number" name="_rowLimit" value="{{$.TableParams.RowLimit}}"/>
+        </label>
+        <button>Update page size</button>
+    </form>
+</p>
+
 {{ if .TableParams.RowLimit }}
-    <p class='row-limit-info'>First {{.TableParams.RowLimit}} rows
-        <small class="hint" style="margin-left: 0.75em;">
-            <i class="fas fa-info-circle"></i>
-            You can change the row limit in the address bar.</small>
-    </p>
     <p>
     {{if or $.Database.Supports.PagingWithoutSorting $.TableParams.Sort}}
         {{if ge .TableParams.PrevPage.SkipRows 0}}
@@ -372,7 +377,6 @@
         <small class="hint" style="margin-left: 0.75em;">
             <i class="fas fa-info-circle"></i>
             Choose a sort order to enable paging</small>
-
     {{end}}
     </p>
 {{end}}
