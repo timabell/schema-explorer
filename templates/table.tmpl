@@ -375,7 +375,9 @@
             {{if ge .TableParams.PrevPage.SkipRows 0}}
                 <a class="action-button button" href="?{{.TableParams.PrevPage.AsQueryString}}#data">&lt; Previous Page</a>
             {{end}}
-            <a class="action-button button" href="?{{.TableParams.NextPage.AsQueryString}}#data">Next Page &gt;</a>
+            {{if len .Rows | le .TableParams.RowLimit}}
+                <a class="action-button button" href="?{{.TableParams.NextPage.AsQueryString}}#data">Next Page &gt;</a>
+            {{end}}
         </p>
     {{else}}
         <p>
