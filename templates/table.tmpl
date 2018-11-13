@@ -286,6 +286,14 @@
 {{end}}
 </div>
 
+<p>
+    Rows {{.TableParams.FromRow}}
+    {{if .TableParams.RowLimit}}
+        up to {{.TableParams.ToRow}}
+    {{else}}
+        onwards
+    {{end}}
+</p>
 
 {{if .TableParams.CardView}}
     <div class="cards">
@@ -357,6 +365,7 @@
 {{end}}
 
 {{ if .TableParams.RowLimit }}
+    {{/* mssql doesn't support paging without a sort order */}}
     {{if or $.Database.Supports.PagingWithoutSorting $.TableParams.Sort}}
         <p>
             {{if ge .TableParams.PrevPage.SkipRows 0}}
