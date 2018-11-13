@@ -289,7 +289,11 @@
 <p>
     Rows {{.TableParams.FromRow}}
     {{if .TableParams.RowLimit}}
-        up to {{.TableParams.ToRow}}
+        {{if len .Rows | gt .TableParams.RowLimit}}
+            to end
+        {{else}}
+            up to {{.TableParams.ToRow}}
+        {{end}}
     {{else}}
         onwards
     {{end}}
