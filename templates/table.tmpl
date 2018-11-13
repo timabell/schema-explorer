@@ -253,36 +253,35 @@
             </tbody>
         </table>
     {{end}}
-    {{if .TableParams.CardView}}
-        {{if .TableParams.Sort}}
-            <table class="sort-info">
-                <thead>
-                <tr>
-                    <th colspan="2">
-                        Sort
-                    </th>
-                </tr>
-                </thead>
-                <tbody>
-                {{ range .TableParams.Sort }}
-                <tr>
-                    <td>
-                    {{.Column}}
-                    </td>
-                    <td>
-                    {{if .Descending}}
-                        <i class="fas fa-sort-down"> </i>
-                        Descending
-                    {{else}}
-                        <i class="fas fa-sort-up"> </i>
-                        Ascending
-                    {{end}}
-                    </td>
-                </tr>
+
+    {{if .TableParams.Sort}}
+        <table class="sort-info">
+            <thead>
+            <tr>
+                <th colspan="2">
+                    Sort
+                </th>
+            </tr>
+            </thead>
+            <tbody>
+            {{ range .TableParams.Sort }}
+            <tr>
+                <td>
+                {{.Column}}
+                </td>
+                <td>
+                {{if .Descending}}
+                    <i class="fas fa-sort-down"> </i>
+                    Descending
+                {{else}}
+                    <i class="fas fa-sort-up"> </i>
+                    Ascending
                 {{end}}
-                </tbody>
-            </table>
-        {{end}}
+                </td>
+            </tr>
+            {{end}}
+            </tbody>
+        </table>
     {{end}}
 
     <table class="page-info">
