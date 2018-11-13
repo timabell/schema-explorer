@@ -91,19 +91,14 @@ table.card-view{
     display: block;
 }
 
-.filter-info {
-}
-
 .filter-info,
+.page-info,
 .sort-info{
     float:left;
     overflow: auto; /*clearfix*/
     margin: 0.5em 2.5em 1em -0.5em;
 }
 .sort-filter-info {
-    clear: both;
-}
-.row-limit-info {
     clear: both;
 }
 

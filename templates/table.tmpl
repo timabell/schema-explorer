@@ -228,48 +228,48 @@
 {{end}}
 
 <div class="sort-filter-info">
-{{ if .TableParams.Filter }}
-    <table class='filter-info'>
-        <thead>
-        <tr>
-            <th colspan="2">
-                Filter
-            </th>
-        </tr>
-        </thead>
-        <tbody>
-        {{ range .TableParams.Filter }}
-        <tr>
-            <th>
-                {{.Field}}
-            </th>
-            <td>
-                {{ range .Values }}
-                {{.}}
-                {{end}}
-            </td>
-        </tr>
-        {{end}}
-        </tbody>
-    </table>
-{{end}}
-{{if .TableParams.CardView}}
-    {{if .TableParams.Sort}}
-        <table class="sort-info">
+    {{ if .TableParams.Filter }}
+        <table class='filter-info'>
             <thead>
             <tr>
                 <th colspan="2">
-                    Sort
+                    Filter
                 </th>
             </tr>
             </thead>
             <tbody>
-            {{ range .TableParams.Sort }}
+            {{ range .TableParams.Filter }}
             <tr>
+                <th>
+                {{.Field}}
+                </th>
                 <td>
-                    {{.Column}}
+                {{ range .Values }}
+                  {{.}}
+                {{end}}
                 </td>
-                <td>
+            </tr>
+            {{end}}
+            </tbody>
+        </table>
+    {{end}}
+    {{if .TableParams.CardView}}
+        {{if .TableParams.Sort}}
+            <table class="sort-info">
+                <thead>
+                <tr>
+                    <th colspan="2">
+                        Sort
+                    </th>
+                </tr>
+                </thead>
+                <tbody>
+                {{ range .TableParams.Sort }}
+                <tr>
+                    <td>
+                    {{.Column}}
+                    </td>
+                    <td>
                     {{if .Descending}}
                         <i class="fas fa-sort-down"> </i>
                         Descending
@@ -277,27 +277,39 @@
                         <i class="fas fa-sort-up"> </i>
                         Ascending
                     {{end}}
-                </td>
-            </tr>
-            {{end}}
-            </tbody>
-        </table>
-    {{end}}
-{{end}}
-</div>
-
-<p>
-    Rows {{.TableParams.FromRow}}
-    {{if .TableParams.RowLimit}}
-        {{if len .Rows | gt .TableParams.RowLimit}}
-            to end
-        {{else}}
-            up to {{.TableParams.ToRow}}
+                    </td>
+                </tr>
+                {{end}}
+                </tbody>
+            </table>
         {{end}}
-    {{else}}
-        onwards
     {{end}}
-</p>
+
+    <table class="page-info">
+        <thead>
+        <tr>
+            <th>
+                Page
+            </th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td>
+                Rows {{.TableParams.FromRow}}
+            {{if .TableParams.RowLimit}}
+            {{if len .Rows | gt .TableParams.RowLimit}}
+                to end
+            {{else}}
+                up to {{.TableParams.ToRow}}
+            {{end}}
+            {{else}}
+                onwards
+            {{end}}
+            </td>
+        </tr>
+    </table>
+</div>
 
 {{if .TableParams.CardView}}
     <div class="cards">
