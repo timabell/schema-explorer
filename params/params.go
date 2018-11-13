@@ -144,6 +144,16 @@ func (tableParams TableParams) AsQueryString() template.URL {
 	return template.URL(strings.Join(parts, "&"))
 }
 
+// Get the 1-based start row number for display in templates
+func (tableParams TableParams) FromRow() int {
+	return tableParams.SkipRows + 1
+}
+
+// Get the highest row number for display in templates
+func (tableParams TableParams) ToRow() int {
+	return tableParams.SkipRows + tableParams.RowLimit
+}
+
 func BuildSortParts(tableParams TableParams) []string {
 	var sort []string
 	for _, sortCol := range tableParams.Sort {

@@ -286,6 +286,18 @@
 {{end}}
 </div>
 
+<p>
+    Rows {{.TableParams.FromRow}}
+    {{if .TableParams.RowLimit}}
+        {{if len .Rows | gt .TableParams.RowLimit}}
+            to end
+        {{else}}
+            up to {{.TableParams.ToRow}}
+        {{end}}
+    {{else}}
+        onwards
+    {{end}}
+</p>
 
 {{if .TableParams.CardView}}
     <div class="cards">
@@ -357,24 +369,36 @@
 {{end}}
 
 {{ if .TableParams.RowLimit }}
-    <p class='row-limit-info'>First {{.TableParams.RowLimit}} rows
-        <small class="hint" style="margin-left: 0.75em;">
-            <i class="fas fa-info-circle"></i>
-            You can change the row limit in the address bar.</small>
-    </p>
-    <p>
+    {{/* mssql doesn't support paging without a sort order */}}
     {{if or $.Database.Supports.PagingWithoutSorting $.TableParams.Sort}}
-        {{if ge .TableParams.PrevPage.SkipRows 0}}
-            <a class="action-button button" href="?{{.TableParams.PrevPage.AsQueryString}}#data">&lt; Previous Page</a>
-        {{end}}
-        <a class="action-button button" href="?{{.TableParams.NextPage.AsQueryString}}#data">Next Page &gt;</a>
+        <p>
+            {{if ge .TableParams.PrevPage.SkipRows 0}}
+                <a class="action-button button" href="?{{.TableParams.PrevPage.AsQueryString}}#data">&lt; Previous Page</a>
+            {{end}}
+            <a class="action-button button" href="?{{.TableParams.NextPage.AsQueryString}}#data">Next Page &gt;</a>
+        </p>
     {{else}}
-        <small class="hint" style="margin-left: 0.75em;">
-            <i class="fas fa-info-circle"></i>
-            Choose a sort order to enable paging</small>
-
+        <p>
+            <small class="hint" style="margin-left: 0.75em;">
+                <i class="fas fa-info-circle"></i>
+                Choose a sort order to enable paging
+            </small>
+        </p>
     {{end}}
-    </p>
 {{end}}
+
+<form method="post" id="pageSizeForm">
+    <h3>
+        <label for="rowLimitInput">
+            Page size
+        </label>
+    </h3>
+    <p>
+        <input type="number" name="_rowLimit" id="rowLimitInput" value="{{$.TableParams.RowLimit}}"/>
+        <br/>
+        <br/>
+        <button class="action-button button">Update page size</button>
+    </p>
+</form>
 
 {{end}}
