@@ -198,117 +198,6 @@
 
 <h2 id="data">Data</h2>
 
-{{if .TableParams.CardView}}
-<div class="table-button">
-{{/*todo: need a url builder to avoid ending up with ?& if there's no query*/}}
-    <a class="action-button button" href="?{{.TableParams.CardViewOff.AsQueryString}}#data">
-        <i class="fas fa-table"> </i>
-        Switch to table view</a>
-</div>
-{{else}}
-<div class="table-button">
-    <a class="action-button button" href="?{{.TableParams.CardViewOn.AsQueryString}}#data">
-        <i class="fas fa-list"> </i>
-        Switch to card view</a>
-</div>
-{{end}}
-{{ if .TableParams.Filter }}
-<div class="table-button">
-    <a class="action-button button" href="?{{.TableParams.ClearFilter.AsQueryString}}#data">
-        <i class="fas fa-times"></i>
-        Clear Filter</a>
-</div>
-{{end}}
-{{if .TableParams.Sort}}
-<div class="table-button">
-    <a class="action-button button" href="?{{.TableParams.ClearSort.AsQueryString}}#data">
-        <i class="fas fa-sort"> </i>
-        Reset Sort Order</a>
-</div>
-{{end}}
-
-<div class="sort-filter-info">
-    {{ if .TableParams.Filter }}
-        <table class='filter-info'>
-            <thead>
-            <tr>
-                <th colspan="2">
-                    Filter
-                </th>
-            </tr>
-            </thead>
-            <tbody>
-            {{ range .TableParams.Filter }}
-            <tr>
-                <th>
-                {{.Field}}
-                </th>
-                <td>
-                {{ range .Values }}
-                  {{.}}
-                {{end}}
-                </td>
-            </tr>
-            {{end}}
-            </tbody>
-        </table>
-    {{end}}
-
-    {{if .TableParams.Sort}}
-        <table class="sort-info">
-            <thead>
-            <tr>
-                <th colspan="2">
-                    Sort
-                </th>
-            </tr>
-            </thead>
-            <tbody>
-            {{ range .TableParams.Sort }}
-            <tr>
-                <td>
-                {{.Column}}
-                </td>
-                <td>
-                {{if .Descending}}
-                    <i class="fas fa-sort-down"> </i>
-                    Descending
-                {{else}}
-                    <i class="fas fa-sort-up"> </i>
-                    Ascending
-                {{end}}
-                </td>
-            </tr>
-            {{end}}
-            </tbody>
-        </table>
-    {{end}}
-
-    <table class="page-info">
-        <thead>
-        <tr>
-            <th>
-                Page
-            </th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr>
-            <td>
-                Rows {{.TableParams.FromRow}}
-            {{if .TableParams.RowLimit}}
-            {{if len .Rows | gt .TableParams.RowLimit}}
-                to end
-            {{else}}
-                up to {{.TableParams.ToRow}}
-            {{end}}
-            {{else}}
-                onwards
-            {{end}}
-            </td>
-        </tr>
-    </table>
-</div>
 
 {{if .TableParams.CardView}}
     <div class="cards">
@@ -379,39 +268,172 @@
     </table>
 {{end}}
 
-{{ if .TableParams.RowLimit }}
-    {{/* mssql doesn't support paging without a sort order */}}
-    {{if or $.Database.Supports.PagingWithoutSorting $.TableParams.Sort}}
-        <p>
-            {{if ge .TableParams.PrevPage.SkipRows 0}}
-                <a class="action-button button" href="?{{.TableParams.PrevPage.AsQueryString}}#data">&lt; Previous Page</a>
-            {{end}}
-            {{if len .Rows | le .TableParams.RowLimit}}
-                <a class="action-button button" href="?{{.TableParams.NextPage.AsQueryString}}#data">Next Page &gt;</a>
-            {{end}}
-        </p>
-    {{else}}
-        <p>
-            <small class="hint" style="margin-left: 0.75em;">
-                <i class="fas fa-info-circle"></i>
-                Choose a sort order to enable paging
-            </small>
-        </p>
-    {{end}}
+<div class="sort-filter-info">
+
+{{ if .TableParams.Filter }}
+    <table class='filter-info'>
+        <thead>
+        <tr>
+            <th colspan="2">
+                Filter
+            </th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td colspan="2">
+                <a class="action-button button table-button" href="?{{$.TableParams.ClearFilter.AsQueryString}}#data">
+                    <i class="fas fa-times"></i>
+                    Clear Filter</a>
+            </td>
+        </tr>
+        {{ range .TableParams.Filter }}
+        <tr>
+            <th>
+            {{.Field}}
+            </th>
+            <td>
+            {{ range .Values }}
+                  {{.}}
+                {{end}}
+            </td>
+        </tr>
+        {{end}}
+        </tbody>
+    </table>
 {{end}}
 
-<form method="post" id="pageSizeForm">
-    <h3>
-        <label for="rowLimitInput">
-            Page size
-        </label>
-    </h3>
-    <p>
-        <input type="number" name="_rowLimit" id="rowLimitInput" value="{{$.TableParams.RowLimit}}"/>
-        <br/>
-        <br/>
-        <button class="action-button button">Update page size</button>
-    </p>
-</form>
+{{if .TableParams.Sort}}
+    <table class='filter-info'>
+        <thead>
+        <tr>
+            <th colspan="2">
+                Sort
+            </th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td colspan="2">
+                <a class="action-button button table-button" href="?{{.TableParams.ClearSort.AsQueryString}}#data">
+                    <i class="fas fa-sort"> </i>
+                    Reset Sort Order</a>
+            </td>
+        </tr>
+        {{ range .TableParams.Sort }}
+        <tr>
+            <td>
+            {{.Column}}
+            </td>
+            <td>
+            {{if .Descending}}
+                <i class="fas fa-sort-down"> </i>
+                Descending
+            {{else}}
+                <i class="fas fa-sort-up"> </i>
+                Ascending
+            {{end}}
+            </td>
+        </tr>
+        {{end}}
+        </tbody>
+    </table>
+{{end}}
+
+    <form method="post" id="pageSizeForm">
+    <table class='filter-info'>
+        <thead>
+        <tr>
+            <th>
+                Page
+            </th>
+        </tr>
+        </thead>
+        <tbody>
+            {{ if .TableParams.RowLimit }}
+            {{/* mssql doesn't support paging without a sort order */}}
+            {{if or $.Database.Supports.PagingWithoutSorting $.TableParams.Sort}}
+            {{if ge .TableParams.PrevPage.SkipRows 0}}
+            <tr>
+            <td>
+                <a class="action-button button" href="?{{.TableParams.PrevPage.AsQueryString}}#data">&lt; Previous Page</a>
+            </td>
+            </tr>
+            {{end}}
+            {{if len .Rows | le .TableParams.RowLimit}}
+            <tr>
+                <td>
+                <a class="action-button button" href="?{{.TableParams.NextPage.AsQueryString}}#data">Next Page &gt;</a>
+                </td>
+                </tr>
+            {{end}}
+            {{else}}
+            <tr>
+            <td>
+                <small class="hint" style="margin-left: 0.75em;">
+                    <i class="fas fa-info-circle"></i>
+                    Choose a sort order to enable paging
+                </small>
+            </td>
+            </tr>
+            {{end}}
+            {{end}}
+        <tr>
+            <td>
+                <button class="action-button button">Update page size</button>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Rows {{.TableParams.FromRow}}
+            {{if .TableParams.RowLimit}}
+            {{if len .Rows | gt .TableParams.RowLimit}}
+                to end
+            {{else}}
+                up to {{.TableParams.ToRow}}
+            {{end}}
+            {{else}}
+                onwards
+            {{end}}
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <input type="number" name="_rowLimit" id="rowLimitInput" value="{{$.TableParams.RowLimit}}" size="5"/>
+                    <br/>
+                <label for="rowLimitInput">
+                rows per page
+                </label>
+            </td>
+        </tr>
+    </table>
+    </form>
+
+    <table class='filter-info'>
+        <thead>
+        <tr>
+            <th>
+                Display
+            </th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td>
+            {{if .TableParams.CardView}}
+            {{/*todo: need a url builder to avoid ending up with ?& if there's no query*/}}
+                <a class="action-button button table-button" href="?{{.TableParams.CardViewOff.AsQueryString}}#data">
+                    <i class="fas fa-table"> </i>
+                    Switch to table view</a>
+            {{else}}
+                <a class="action-button button table-button" href="?{{.TableParams.CardViewOn.AsQueryString}}#data">
+                    <i class="fas fa-list"> </i>
+                    Switch to card view</a>
+            {{end}}
+            </td>
+        </tr>
+    </table>
+
+</div>
 
 {{end}}

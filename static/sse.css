@@ -100,6 +100,7 @@ table.card-view{
 }
 .sort-filter-info {
     clear: both;
+    overflow: auto; /*clearfix*/
 }
 
 .sort-markers{
@@ -188,10 +189,6 @@ th, td {
     position: relative;
 }
 
-.table-button{
-    float: left;
-    margin: 0.5em 1em 0 0;
-}
 .hint .fas {
     margin-left: 1em;
     margin-right: 0.8em;
@@ -241,9 +238,10 @@ nav li{
 button{
     font-size: 1em;
 }
-.button {
+.button, button {
     display: inline-block;
     text-decoration: none;
+    margin: 0.25em 0.5em 0.25em 0;
 }
 .button:hover,
 .button:visited{
