@@ -353,7 +353,7 @@
             {{ if .TableParams.RowLimit }}
             {{/* mssql doesn't support paging without a sort order */}}
             {{if or $.Database.Supports.PagingWithoutSorting $.TableParams.Sort}}
-            {{if ge .TableParams.PrevPage.SkipRows 0}}
+            {{if gt .TableParams.FromRow 1}}
             <tr>
             <td>
                 <a class="action-button button" href="?{{.TableParams.PrevPage.AsQueryString}}#data">&lt; Previous Page</a>
