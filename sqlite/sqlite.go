@@ -144,8 +144,6 @@ func (model sqliteModel) getTables(dbc *sql.DB) (tables []*schema.Table, err err
 }
 
 func (model sqliteModel) getRowCount(table *schema.Table) (rowCount int, err error) {
-	// todo: parameterise where possible
-	// todo: whitelist-sanitize unparameterizable parts
 	sql := "select count(*) from \"" + table.Name + "\""
 
 	dbc, err := getConnection(model.path)
@@ -286,11 +284,51 @@ func getIndexInfo(dbc *sql.DB, index *schema.Index, table *schema.Table) (err er
 }
 
 func (model sqliteModel) GetSqlRows(table *schema.Table, params *params.TableParams) (rows *sql.Rows, err error) {
-	// todo: parameterise where possible
-	// todo: whitelist-sanitize unparameterizable parts
-	sql := "select * from " + table.Name
+	dbc, err := getConnection(model.path)
+	if err != nil {
+		log.Print("GetRows failed to get connection")
+		return
+	}
+	defer dbc.Close()
 
-	var values []interface{}
+	sql, values := buildQuery(table, params)
+	rows, err = dbc.Query(sql, values...)
+	if err != nil {
+		log.Print("GetRows failed to get query")
+		log.Println(sql)
+		log.Println(err)
+	}
+	return
+}
+
+func (model sqliteModel) GetRowCount(table *schema.Table, params *params.TableParams) (rowCount int, err error) {
+	dbc, err := getConnection(model.path)
+	if err != nil {
+		log.Print("GetRows failed to get connection")
+		return
+	}
+	defer dbc.Close()
+
+	sql, values := buildQuery(table, params)
+	sql = "select count(*) from (" + sql + ")"
+	rows, err := dbc.Query(sql, values...)
+	if err != nil {
+		log.Print("GetRowCount failed to get query")
+		log.Println(sql)
+		log.Println(err)
+		return
+	}
+	if !rows.Next() {
+		err = errors.New("GetRowCount query returned no rows")
+		return
+	}
+	rows.Scan(&rowCount)
+	return
+}
+
+func buildQuery(table *schema.Table, params *params.TableParams) (sql string, values []interface{}) {
+	sql = "select * from " + table.Name
+
 	query := params.Filter
 	if len(query) > 0 {
 		sql = sql + " where "
@@ -319,21 +357,7 @@ func (model sqliteModel) GetSqlRows(table *schema.Table, params *params.TablePar
 	if params.RowLimit > 0 || params.SkipRows > 0 {
 		sql = sql + fmt.Sprintf(" limit %d, %d", params.SkipRows, params.RowLimit)
 	}
-
-	dbc, err := getConnection(model.path)
-	if err != nil {
-		log.Print("GetRows failed to get connection")
-		return
-	}
-	defer dbc.Close()
-
-	rows, err = dbc.Query(sql, values...)
-	if err != nil {
-		log.Print("GetRows failed to get query")
-		log.Println(sql)
-		log.Println(err)
-	}
-	return
+	return sql, values
 }
 
 func (model sqliteModel) getColumns(dbc *sql.DB, table *schema.Table) (cols []*schema.Column, err error) {
