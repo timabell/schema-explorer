@@ -123,6 +123,12 @@ func (tableParams TableParams) ClearFilter() TableParams {
 	return tableParams
 }
 
+func (tableParams TableParams) ClearPaging() TableParams {
+	tableParams.RowLimit = 0
+	tableParams.SkipRows = 0
+	return tableParams
+}
+
 func (tableParams TableParams) AsQueryString() template.URL {
 	parts := BuildFilterParts(tableParams.Filter)
 

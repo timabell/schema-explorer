@@ -341,72 +341,90 @@
 {{end}}
 
     <form method="post" id="pageSizeForm">
-    <table class='filter-info'>
-        <thead>
-        <tr>
-            <th>
-                Page
-            </th>
-        </tr>
-        </thead>
-        <tbody>
-            {{ if .TableParams.RowLimit }}
-            {{/* mssql doesn't support paging without a sort order */}}
-            {{if or $.Database.Supports.PagingWithoutSorting $.TableParams.Sort}}
-            {{if gt .TableParams.FromRow 1}}
+        <table class='filter-info'>
+            <thead>
             <tr>
-            <td>
-                <a class="action-button button" href="?{{.TableParams.PrevPage.AsQueryString}}#data">&lt; Previous Page</a>
-            </td>
+                <th>
+                    Page
+                </th>
             </tr>
+            </thead>
+            <tbody>
+            {{ if .TableParams.RowLimit }}
+                {{/* mssql doesn't support paging without a sort order */}}
+                {{if or $.Database.Supports.PagingWithoutSorting $.TableParams.Sort}}
+                    {{if .HasPrevPage}}
+                        <tr>
+                            <td>
+                                <a class="action-button button" href="?{{.TableParams.PrevPage.AsQueryString}}#data">&lt; Previous
+                                    Page</a>
+                            </td>
+                        </tr>
+                    {{end}}
+                    {{if .HasNextPage}}
+                    <tr>
+                        <td>
+                            <a class="action-button button" href="?{{.TableParams.NextPage.AsQueryString}}#data">Next Page
+                                &gt;</a>
+                        </td>
+                    </tr>
+                    {{end}}
+                {{else}}
+                <tr>
+                    <td>
+                        <small class="hint" style="margin-left: 0.75em;">
+                            <i class="fas fa-info-circle"></i>
+                            Choose a sort order to enable paging
+                        </small>
+                    </td>
+                </tr>
+                {{end}}
             {{end}}
-            {{if len .Rows | le .TableParams.RowLimit}}
             <tr>
                 <td>
-                <a class="action-button button" href="?{{.TableParams.NextPage.AsQueryString}}#data">Next Page &gt;</a>
+                    <button class="action-button button">Update page size</button>
                 </td>
-                </tr>
-            {{end}}
-            {{else}}
-            <tr>
-            <td>
-                <small class="hint" style="margin-left: 0.75em;">
-                    <i class="fas fa-info-circle"></i>
-                    Choose a sort order to enable paging
-                </small>
-            </td>
             </tr>
-            {{end}}
-            {{end}}
-        <tr>
-            <td>
-                <button class="action-button button">Update page size</button>
-            </td>
-        </tr>
-        <tr>
-            <td>
-                Rows {{.TableParams.FromRow}}
-            {{if .TableParams.RowLimit}}
-            {{if len .Rows | gt .TableParams.RowLimit}}
-                to end
-            {{else}}
-                to {{.TableParams.ToRow}}
-            {{end}}
-            {{else}}
-                onwards
-            {{end}}
-            </td>
-        </tr>
-        <tr>
-            <td>
-                <input type="number" name="_rowLimit" id="rowLimitInput" value="{{$.TableParams.RowLimit}}" size="5"/>
+            <tr>
+                <td>
+                {{ .TotalRowCount }} row{{if ne .TotalRowCount 1}}s{{end}} in table
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    {{ .FilteredRowCount }} row{{if ne .FilteredRowCount 1}}s{{end}} for this filter
+                </td>
+            </tr>
+            <tr>
+                <td>
+                {{ .DisplayedRowCount }} row{{if ne .DisplayedRowCount 1}}s{{end}} shown
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Showing rows {{.TableParams.FromRow}}
+                    {{if .TableParams.RowLimit}}
+                        {{if not .HasNextPage}}
+                            to end
+                        {{else}}
+                            to {{.TableParams.ToRow}}
+                        {{end}}
+                    {{else}}
+                        onwards
+                    {{end}}
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <input type="number" name="_rowLimit" id="rowLimitInput" value="{{$.TableParams.RowLimit}}"
+                           size="5"/>
                     <br/>
-                <label for="rowLimitInput">
-                rows per page
-                </label>
-            </td>
-        </tr>
-    </table>
+                    <label for="rowLimitInput">
+                        rows per page
+                    </label>
+                </td>
+            </tr>
+        </table>
     </form>
 
     <table class='filter-info'>

@@ -49,12 +49,17 @@ type trailViewModel struct {
 	Trail      *trail.TrailLog
 }
 type tableDataViewModel struct {
-	LayoutData  PageTemplateModel
-	Database    *schema.Database
-	Table       *schema.Table
-	TableParams *params.TableParams
-	Rows        []cells
-	Diagram     diagramViewModel
+	LayoutData        PageTemplateModel
+	Database          *schema.Database
+	Table             *schema.Table
+	TableParams       *params.TableParams
+	Rows              []cells
+	TotalRowCount     int
+	FilteredRowCount  int
+	DisplayedRowCount int
+	HasPrevPage       bool
+	HasNextPage       bool
+	Diagram           diagramViewModel
 }
 
 var tablesTemplate *template.Template
@@ -109,6 +114,9 @@ func ShowTableList(resp http.ResponseWriter, database *schema.Database, layoutDa
 }
 
 func ShowTable(resp http.ResponseWriter, dbReader reader.DbReader, database *schema.Database, table *schema.Table, tableParams *params.TableParams, layoutData PageTemplateModel) error {
+	unfilteredParams := tableParams.ClearPaging()
+	filteredRowCount, err := dbReader.GetRowCount(table, &unfilteredParams)
+	totalRowCount, err := dbReader.GetRowCount(table, &params.TableParams{})
 	rowsData, err := reader.GetRows(dbReader, table, tableParams)
 	if err != nil {
 		return err
@@ -132,12 +140,17 @@ func ShowTable(resp http.ResponseWriter, dbReader reader.DbReader, database *sch
 	}
 
 	viewModel := tableDataViewModel{
-		LayoutData:  layoutData,
-		Database:    database,
-		Table:       table,
-		TableParams: tableParams,
-		Rows:        rows,
-		Diagram:     diagramViewModel{Tables: diagramTables, TableLinks: tableLinks},
+		LayoutData:        layoutData,
+		Database:          database,
+		Table:             table,
+		TableParams:       tableParams,
+		Rows:              rows,
+		TotalRowCount:     totalRowCount,
+		FilteredRowCount:  filteredRowCount,
+		DisplayedRowCount: len(rows),
+		HasPrevPage:       tableParams.SkipRows > 0,
+		HasNextPage:       tableParams.ToRow() < filteredRowCount,
+		Diagram:           diagramViewModel{Tables: diagramTables, TableLinks: tableLinks},
 	}
 
 	viewModel.LayoutData.Title = fmt.Sprintf("%s | %s", table.String(), viewModel.LayoutData.Title)
