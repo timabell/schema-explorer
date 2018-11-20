@@ -334,10 +334,53 @@ func allFks(dbc *sql.DB, database *schema.Database) (allFks []*schema.Fk, err er
 }
 
 func (model mssqlModel) GetSqlRows(table *schema.Table, params *params.TableParams) (rows *sql.Rows, err error) {
+	dbc, err := getConnection(model.connectionString)
+	if dbc == nil {
+		log.Println(err)
+		panic("getConnection() returned nil")
+	}
+	defer dbc.Close()
+
+	sql, values := buildQuery(table, params)
+	rows, err = dbc.Query(sql, values...)
+	if rows == nil {
+		log.Println(sql)
+		log.Println(err)
+		panic("Query returned nil for rows")
+	}
+	return
+}
+
+func (model mssqlModel) GetRowCount(table *schema.Table, params *params.TableParams) (rowCount int, err error) {
+	dbc, err := getConnection(model.connectionString)
+	if err != nil {
+		log.Print("GetRows failed to get connection")
+		return
+	}
+	defer dbc.Close()
+
+	sql, values := buildQuery(table, params)
+	sql = "select count(*) from (" + sql + ") as x"
+	rows, err := dbc.Query(sql, values...)
+	if err != nil {
+		log.Print("GetRowCount failed to get query")
+		log.Println(sql)
+		log.Println(err)
+		return
+	}
+	if !rows.Next() {
+		err = errors.New("GetRowCount query returned no rows")
+		return
+	}
+	rows.Scan(&rowCount)
+	return
+}
+
+func buildQuery(table *schema.Table, params *params.TableParams) (sql string, values []interface{}) {
 	// Limitation: we can't support paging (offset/skip) without a sort order so
 	// 		params.SkipRows will be ignored if there is no sorting supplied.
 
-	sql := "select"
+	sql = "select"
 
 	if params.SkipRows > 0 && len(params.Sort) == 0 {
 		log.Printf("Warning, row offset not supported in mssql without sort order")
@@ -350,7 +393,6 @@ func (model mssqlModel) GetSqlRows(table *schema.Table, params *params.TablePara
 
 	sql = sql + " * from " + table.String()
 
-	var values []interface{}
 	query := params.Filter
 	if len(query) > 0 {
 		sql = sql + " where "
@@ -381,20 +423,6 @@ func (model mssqlModel) GetSqlRows(table *schema.Table, params *params.TablePara
 				sql = sql + fmt.Sprintf(" fetch next %d rows only", params.RowLimit)
 			}
 		}
-	}
-
-	dbc, err := getConnection(model.connectionString)
-	if dbc == nil {
-		log.Println(err)
-		panic("getConnection() returned nil")
-	}
-	defer dbc.Close()
-
-	rows, err = dbc.Query(sql, values...)
-	if rows == nil {
-		log.Println(sql)
-		log.Println(err)
-		panic("Query returned nil for rows")
 	}
 	return
 }

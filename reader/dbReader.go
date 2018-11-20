@@ -24,10 +24,20 @@ var Options = SseOptions{}
 var ArgParser = flags.NewParser(&Options, flags.Default)
 
 type DbReader interface {
+	// does select or something to make sure we have a working db connection
 	CheckConnection() (err error)
+
+	// parse the whole schema info into memory
 	ReadSchema() (database *schema.Database, err error)
+
+	// populate the table row counts
 	UpdateRowCounts(database *schema.Database) (err error)
+
+	// get some data, obeying sorting, filtering etc in the table params
 	GetSqlRows(table *schema.Table, params *params.TableParams) (rows *sql.Rows, err error)
+
+	// get a count for the supplied filters, for use with paging and overview info
+	GetRowCount(table *schema.Table, params *params.TableParams) (rowCount int, err error)
 }
 
 type DbReaderOptions interface{}

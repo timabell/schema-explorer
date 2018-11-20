@@ -256,6 +256,9 @@ button{
     color: #f8f8f8;
 }
 
+.action-button.disabled {
+    background-color: #666;
+}
 .action-button{
     background-color: #823331;
     color: #f8f8f8;

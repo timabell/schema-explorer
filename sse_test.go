@@ -95,6 +95,9 @@ func Test_ReadSchema(t *testing.T) {
 
 	t.Log("Checking paging")
 	checkPaging(reader, database, t)
+
+	t.Log("Checking filtered row count")
+	checkFilteredRowCount(reader, database, t)
 }
 
 func checkIndexes(database *schema.Database, t *testing.T) {
@@ -507,6 +510,20 @@ func checkPaging(dbReader reader.DbReader, database *schema.Database, t *testing
 
 func dbString(value interface{}) string {
 	return fmt.Sprintf("%s", value)
+}
+
+func checkFilteredRowCount(dbReader reader.DbReader, database *schema.Database, t *testing.T) {
+	table := findTable(schema.Table{Schema: database.DefaultSchemaName, Name: "SortFilterTest"}, database, t)
+	_, colourCol := table.FindColumn("colour")
+	filter := params.FieldFilter{Field: colourCol, Values: []string{"blue"}}
+	tableParams := &params.TableParams{
+		Filter: params.FieldFilterList{filter},
+	}
+	rowCount, err := dbReader.GetRowCount(table, tableParams)
+	if err != nil {
+		t.Fatal(err)
+	}
+	checkInt(3, rowCount, "blue rows", t)
 }
 
 func Test_GetRows(t *testing.T) {
