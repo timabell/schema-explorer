@@ -353,22 +353,26 @@
             {{ if .TableParams.RowLimit }}
                 {{/* mssql doesn't support paging without a sort order */}}
                 {{if or $.Database.Supports.PagingWithoutSorting $.TableParams.Sort}}
-                    {{if .HasPrevPage}}
-                        <tr>
-                            <td>
-                                <a class="action-button button" href="?{{.TableParams.PrevPage.AsQueryString}}#data">&lt; Previous
-                                    Page</a>
-                            </td>
-                        </tr>
-                    {{end}}
-                    {{if .HasNextPage}}
                     <tr>
                         <td>
-                            <a class="action-button button" href="?{{.TableParams.NextPage.AsQueryString}}#data">Next Page
-                                &gt;</a>
+                        {{if .HasPrevPage}}
+                            <a class="action-button button" href="?{{.TableParams.PrevPage.AsQueryString}}#data">&lt; Previous
+                                Page</a>
+                        {{else}}
+                            <span class="action-button button disabled">No earlier pages</span>
+                        {{end}}
                         </td>
                     </tr>
-                    {{end}}
+                    <tr>
+                        <td>
+                        {{if .HasNextPage}}
+                            <a class="action-button button" href="?{{.TableParams.NextPage.AsQueryString}}#data">Next Page
+                                &gt;</a>
+                        {{else}}
+                            <span class="action-button button disabled">No more pages</span>
+                        {{end}}
+                        </td>
+                    </tr>
                 {{else}}
                 <tr>
                     <td>
