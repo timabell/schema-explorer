@@ -394,11 +394,13 @@
                 {{ .TotalRowCount }} row{{if ne .TotalRowCount 1}}s{{end}} in table
                 </td>
             </tr>
+            {{ if .TableParams.Filter }}
             <tr>
                 <td>
                     {{ .FilteredRowCount }} row{{if ne .FilteredRowCount 1}}s{{end}} for this filter
                 </td>
             </tr>
+            {{end}}
             <tr>
                 <td>
                 {{ .DisplayedRowCount }} row{{if ne .DisplayedRowCount 1}}s{{end}} shown
