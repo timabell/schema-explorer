@@ -20,9 +20,10 @@
         </tr>
         </thead>
         <tbody>
+    {{$col := .Column}}
     {{range .ValueCounts}}
         <tr>
-            <td>{{.Value}}</td>
+            <td><a href="../{{$.Table}}?_rowLimit=100&{{$col}}={{.Value}}#data">{{.Value}}</a></td>
             <td>{{.Quantity}}</td>
         </tr>
     {{end}}
