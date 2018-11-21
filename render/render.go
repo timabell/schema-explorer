@@ -61,9 +61,16 @@ type tableDataViewModel struct {
 	HasNextPage       bool
 	Diagram           diagramViewModel
 }
+type tableAnalysisDataViewModel struct {
+	LayoutData PageTemplateModel
+	Database   *schema.Database
+	Table      *schema.Table
+	Analysis   []schema.ColumnAnalysis
+}
 
 var tablesTemplate *template.Template
 var tableTemplate *template.Template
+var tableAnalysisTemplate *template.Template
 var tableTrailTemplate *template.Template
 
 // Make minus available in templates to be able to convert len to slice index
@@ -90,6 +97,10 @@ func SetupTemplate() {
 		log.Fatal(err)
 	}
 	tableTemplate, err = template.Must(templates.Clone()).ParseGlob("templates/table.tmpl")
+	if err != nil {
+		log.Fatal(err)
+	}
+	tableAnalysisTemplate, err = template.Must(templates.Clone()).ParseGlob("templates/table-analysis.tmpl")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -191,6 +202,29 @@ func ShowTableTrail(resp http.ResponseWriter, database *schema.Database, trailIn
 	if err != nil {
 		log.Print("template execution error", err)
 		panic(err)
+	}
+
+	return nil
+}
+
+func ShowTableAnalysis(resp http.ResponseWriter, dbReader reader.DbReader, database *schema.Database, table *schema.Table, layoutData PageTemplateModel) error {
+	analysis, err := dbReader.GetAnalysis(table)
+	if err != nil {
+		return err
+	}
+
+	viewModel := tableAnalysisDataViewModel{
+		LayoutData: layoutData,
+		Database:   database,
+		Table:      table,
+		Analysis:   analysis,
+	}
+
+	viewModel.LayoutData.Title = fmt.Sprintf("%s analysis | %s", table.String(), viewModel.LayoutData.Title)
+
+	err = tableAnalysisTemplate.ExecuteTemplate(resp, "layout", viewModel)
+	if err != nil {
+		log.Print("template execution error ", err)
 	}
 
 	return nil

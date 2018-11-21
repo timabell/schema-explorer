@@ -92,6 +92,16 @@ type Fk struct {
 	DestinationColumns ColumnList
 }
 
+type ColumnAnalysis struct {
+	Column      *Column
+	ValueCounts []ValueInfo
+}
+
+type ValueInfo struct {
+	Value    interface{}
+	Quantity int
+}
+
 // Simplified fk constructor for single-column foreign keys
 func NewFk(name string, sourceTable *Table, sourceColumn *Column, destinationTable *Table, destinationColumn *Column) *Fk {
 	return &Fk{Name: name, SourceTable: sourceTable, SourceColumns: ColumnList{sourceColumn}, DestinationTable: destinationTable, DestinationColumns: ColumnList{destinationColumn}}

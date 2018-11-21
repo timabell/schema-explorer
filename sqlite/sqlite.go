@@ -326,6 +326,10 @@ func (model sqliteModel) GetRowCount(table *schema.Table, params *params.TablePa
 	return
 }
 
+func (model sqliteModel) GetAnalysis(table *schema.Table) (analysis []schema.ColumnAnalysis, err error) {
+	return nil, nil
+}
+
 func buildQuery(table *schema.Table, params *params.TableParams) (sql string, values []interface{}) {
 	sql = "select * from " + table.Name
 

@@ -376,6 +376,10 @@ func (model mssqlModel) GetRowCount(table *schema.Table, params *params.TablePar
 	return
 }
 
+func (model mssqlModel) GetAnalysis(table *schema.Table) (analysis []schema.ColumnAnalysis, err error) {
+	return nil, nil
+}
+
 func buildQuery(table *schema.Table, params *params.TableParams) (sql string, values []interface{}) {
 	// Limitation: we can't support paging (offset/skip) without a sort order so
 	// 		params.SkipRows will be ignored if there is no sorting supplied.

@@ -38,6 +38,9 @@ type DbReader interface {
 
 	// get a count for the supplied filters, for use with paging and overview info
 	GetRowCount(table *schema.Table, params *params.TableParams) (rowCount int, err error)
+
+	// get breakdown of most common values in each column
+	GetAnalysis(table *schema.Table) (analysis []schema.ColumnAnalysis, err error)
 }
 
 type DbReaderOptions interface{}
