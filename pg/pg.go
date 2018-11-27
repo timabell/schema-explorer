@@ -418,8 +418,8 @@ func (model pgModel) GetAnalysis(table *schema.Table) (analysis []schema.ColumnA
 	defer dbc.Close()
 
 	analysis = []schema.ColumnAnalysis{}
-	for _, col := range table.Columns{
-		sql := "select \"" + col.Name + "\", count(*) qty from \""+ table.Schema + "\".\""+ table.Name + "\" group by \"" + col.Name + "\" order by count(*) desc, \"" + col.Name + "\" limit 100;"
+	for _, col := range table.Columns {
+		sql := "select \"" + col.Name + "\", count(*) qty from \"" + table.Schema + "\".\"" + table.Name + "\" group by \"" + col.Name + "\" order by count(*) desc, \"" + col.Name + "\" limit 100;"
 		rows, err := dbc.Query(sql)
 		if err != nil {
 			log.Print("GetAnalysis failed to get query")
