@@ -1,174 +1,179 @@
 {{define "content"}}
+
 <h2>
     <i class="fas fa-table"></i>
-    {{.Table.Name}}
+{{.Table.Name}}
 </h2>
 <nav>
     <ul>
         <li>
-            <a href='#diagram'>
+            <a href='#diagram' class='jump-link'>
                 <i class="fas fa-project-diagram"></i>
                 Diagram
             </a>
         </li>
         <li>
-            <a href='#columns'>
+            <a href='#columns' class='jump-link'>
                 <i class="fas fa-columns"></i>
-                Columns</a>
+                Columns
+            </a>
         </li>
         <li>
-            <a href='#foreignKeys'>
+            <a href='#foreignKeys' class='jump-link'>
                 <i class="fas fa-exchange-alt"></i>
-                Foreign Keys</a>
+                Foreign Keys
+            </a>
         </li>
         <li>
-            <a href='#data'>
+            <a href='#data' class='jump-link'>
                 <i class="fas fa-table"></i>
-                Data</a>
+                Data
+            </a>
         </li>
         <li>
-            <a href='{{.Table}}/analyse-data' class="action-button button">
+            <a href='{{.Table}}/analyse-data' class="button">
                 <i class="fas fa-table"></i>
                 Analyse Data</a>
         </li>
     </ul>
 </nav>
 {{if $.Database.Supports.Descriptions}}
-<h2 id="description">Description</h2>
-<p>{{.Table.Description}}</p>
+    <h2 id="description">Description</h2>
+    <p>{{.Table.Description}}</p>
 {{end}}
+
 <h2 id="diagram">Nearest Tables</h2>
 {{template "_diagram" .Diagram}}
+
 <h2 id="columns">Columns</h2>
-    <table id="column-info">
-        <thead>
-        <tr>
-            <th></th>
-            <th>Name</th>
-            <th>Type</th>
-            <th>Nulls</th>
-            <th>Outbound Foreign Key</th>
-            <th>Inbound Foreign Keys</th>
-            <th>Indexes</th>
-            {{if $.Database.Supports.Descriptions}}
-            <th>Description</th>
-            {{end}}
-        </tr>
-        </thead>
-        {{ range .Table.Columns }}
-        <tr>
-            <td><span class="bare-value">{{ if .IsInPrimaryKey}}<i class="fas fa-key"></i> Primary Key{{end}}</span></td>
-            <td><span class="bare-value">{{.Name}}</span></td>
-            <td><span class="bare-value">{{.Type}}</span></td>
-            <td>
-            {{if .Nullable}}
-                <span class="bare-value nullable">
-                    <i class="fas fa-chess-board"></i>
-                    Nullable
-                </span>
-            {{else}}
-                <span class="bare-value notnull">
-                    <i class="fas fa-square-full"></i>
-                    NOT NULL
-                </span>
-            {{end}}
+<table id="column-info" class="clicky-cells">
+    <thead>
+    <tr>
+        <th></th>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Nulls</th>
+        <th>Outbound Foreign Key</th>
+        <th>Inbound Foreign Keys</th>
+        <th>Indexes</th>
+    {{if $.Database.Supports.Descriptions}}
+        <th>Description</th>
+    {{end}}
+    </tr>
+    </thead>
+{{ range .Table.Columns }}
+    <tr>
+        <td><span class="bare-value">{{ if .IsInPrimaryKey}}<i class="fas fa-key"></i> Primary Key{{end}}</span></td>
+        <td><span class="bare-value">{{.Name}}</span></td>
+        <td><span class="bare-value">{{.Type}}</span></td>
+        <td>
+        {{if .Nullable}}
+            <span class="bare-value nullable">
+                <i class="fas fa-chess-board"></i>
+                Nullable
             </span>
-            </td>
-            <td>
-            {{range .Fks }}
-                <a href="{{.DestinationTable}}?_rowLimit=100">
-                    {{.DestinationTable}}({{.DestinationColumns}})
-                </a>
-            {{end}}
-            </td>
-            <td>
-            {{range .InboundFks }}
-                <a href="{{.SourceTable}}?_rowLimit=100">
-                    {{.SourceTable}}({{.SourceColumns}})
-                </a>
-            {{end}}
-            </td>
-            <td>
-            {{range .Indexes }}
+        {{else}}
+            <span class="bare-value notnull">
+                <i class="fas fa-square-full"></i>
+                NOT NULL
+            </span>
+        {{end}}
+        </td>
+        <td>
+        {{range .Fks }}
+            <a href="{{.DestinationTable}}?_rowLimit=100">
+            {{.DestinationTable}}({{.DestinationColumns}})
+            </a>
+        {{end}}
+        </td>
+        <td>
+        {{range .InboundFks }}
+            <a href="{{.SourceTable}}?_rowLimit=100">
+            {{.SourceTable}}({{.SourceColumns}})
+            </a>
+        {{end}}
+        </td>
+        <td>
+        {{range .Indexes }}
                 {{.Name}}
             {{end}}
-            </td>
-            {{if $.Database.Supports.Descriptions}}
-            <td><span class="bare-value">{{.Description}}</span></td>
-            {{end}}
-        </tr>
-        {{end}}
-    </table>
+        </td>
+    {{if $.Database.Supports.Descriptions}}
+        <td><span class="bare-value">{{.Description}}</span></td>
+    {{end}}
+    </tr>
+{{end}}
+</table>
 
 <h2 id="foreignKeys">Foreign Keys</h2>
 
 <div class="fk-list">
 {{if .Table.Fks}}
-<h3>Outbound</h3>
-<table>
-    <thead>
-    <tr>
+    <h3>Outbound</h3>
+    <table class="clicky-cells">
+        <thead>
+        <tr>
         {{if $.Database.Supports.FkNames}}
-        <th>Name</th>
+            <th>Name</th>
         {{end}}
-        <th>From</th>
-        <th>To</th>
-    </tr>
-    </thead>
-    <tbody>
-    {{range .Table.Fks}}
-    <tr>
+            <th>From</th>
+            <th>To</th>
+        </tr>
+        </thead>
+        <tbody>
+        {{range .Table.Fks}}
+        <tr>
         {{if $.Database.Supports.FkNames}}
             <td><span class="bare-value">{{.Name}}</span></td>
         {{end}}
-        <td><span class="bare-value">
-        {{range .SourceColumns}}
+            <td><span class="bare-value">
+            {{range .SourceColumns}}
             {{.Name}}
         {{end}}
-        </span></td>
-        <td>
-            <a href="{{.DestinationTable}}?_rowLimit=100">
+            </span></td>
+            <td>
+                <a href="{{.DestinationTable}}?_rowLimit=100">
                 {{.DestinationTable}}({{.DestinationColumns}})
-            </a>
-        </td>
-    </tr>
-    {{end}}
-    </tbody>
-</table>
+                </a>
+            </td>
+        </tr>
+        {{end}}
+        </tbody>
+    </table>
 </div>
 {{end}}
 
 {{if .Table.InboundFks}}
 <div class="fk-list">
-<h3>Inbound</h3>
-<table>
-    <thead>
-    <tr>
+    <h3>Inbound</h3>
+    <table class="clicky-cells">
+        <thead>
+        <tr>
         {{if $.Database.Supports.FkNames}}
-        <td>Name</td>
+            <td>Name</td>
         {{end}}
-        <th>From</th>
-        <th>To</th>
-    </tr>
-    </thead>
-    <tbody>
-    {{range .Table.InboundFks}}
-    <tr>
+            <th>From</th>
+            <th>To</th>
+        </tr>
+        </thead>
+        <tbody>
+        {{range .Table.InboundFks}}
+        <tr>
         {{if $.Database.Supports.FkNames}}
-        <td><span class="bare-value">{{.Name}}</span></td>
+            <td><span class="bare-value">{{.Name}}</span></td>
         {{end}}
-        <td>
-            <a href="{{.SourceTable}}?_rowLimit=100">
+            <td>
+                <a href="{{.SourceTable}}?_rowLimit=100">
                 {{.SourceTable}}({{.SourceColumns}})
-            </a>
-        </td>
-        <td><span class="bare-value">
+                </a>
+            </td>
+            <td><span class="bare-value">
             {{.DestinationColumns}}
-        </span></td>
-    </tr>
-    {{end}}
-    </tbody>
-</table>
+            </span></td>
+        </tr>
+        {{end}}
+        </tbody>
+    </table>
 </div>
 {{end}}
 
@@ -176,7 +181,7 @@
 
 <div class="fk-list">
 {{if .Table.Indexes}}
-    <table>
+    <table class="clicky-cells">
         <thead>
         <tr>
             <th>Name</th>
@@ -205,72 +210,72 @@
 
 
 {{if .TableParams.CardView}}
-    <div class="cards">
-    {{ range .Rows }}
-        {{$val := .}}
-        {{$refsLen := len .}}
-        {{$refsIndex := minus $refsLen 1}}
-        <table class="card-view">
-            {{ range $i, $col :=  $.Table.Columns }}
-                <tr>
-                    <th title='type: {{.Type}}'>
-                        {{ if .IsInPrimaryKey}}<i class="fas fa-key" title="Primary Key"></i>{{end}}
-                        {{.Name}}
-                    </th>
-                    <td>{{index $val $i}}</td>
-                </tr>
-            {{end}}
-            {{if $.Table.InboundFks}}
-            <tr>
-                <th class='references'>Referenced by</th>
-                <td>{{index $val $refsIndex}}</td>
-            </tr>
-            {{end}}
-        </table>
-    {{end}}
-    </div>
-{{else}}
-    <table class="data-table-view">
-        <thead>
+<div class="cards">
+{{ range .Rows }}
+{{$val := .}}
+{{$refsLen := len .}}
+{{$refsIndex := minus $refsLen 1}}
+    <table class="card-view clicky-cells">
+    {{ range $i, $col :=  $.Table.Columns }}
         <tr>
-            {{ range .Table.Columns }}
-                <th title='Field data type: {{.Type}}' class="sortable">
-                    <a href="?{{($.TableParams.AddSort .).AsQueryString}}#data" class="fk">
+            <th title='type: {{.Type}}'>
+            {{ if .IsInPrimaryKey}}<i class="fas fa-key" title="Primary Key"></i>{{end}}
+            {{.Name}}
+            </th>
+            <td>{{index $val $i}}</td>
+        </tr>
+    {{end}}
+    {{if $.Table.InboundFks}}
+        <tr>
+            <th class='references'>Referenced by</th>
+            <td>{{index $val $refsIndex}}</td>
+        </tr>
+    {{end}}
+    </table>
+{{end}}
+</div>
+{{else}}
+<table class="data-table-view clicky-cells">
+    <thead>
+    <tr>
+    {{ range .Table.Columns }}
+        <th title='Field data type: {{.Type}}' class="sortable">
+            <a href="?{{($.TableParams.AddSort .).AsQueryString}}#data" class="fk">
                         <span class="sort-markers">
-                            {{ if $.TableParams.IsSorted . }}
-                                {{ if $.TableParams.IsSortedAsc . }}
-                                    <i class="fas fa-sort-up"> </i>
-                                    asc
-                                {{end}}
-                                {{ if $.TableParams.IsSortedDesc . }}
-                                    <i class="fas fa-sort-down"> </i>
-                                    desc
-                                {{end}}
-                                {{ $.TableParams.SortPosition . }}
-                            {{else}}
-                                <i class="fas fa-sort"> </i> sort
+                        {{ if $.TableParams.IsSorted . }}
+                            {{ if $.TableParams.IsSortedAsc . }}
+                                <i class="fas fa-sort-up"> </i>
+                                        asc
                             {{end}}
+                            {{ if $.TableParams.IsSortedDesc . }}
+                                <i class="fas fa-sort-down"> </i>
+                                        desc
+                            {{end}}
+                            {{ $.TableParams.SortPosition . }}
+                        {{else}}
+                            <i class="fas fa-sort"> </i> sort
+                        {{end}}
                         </span>
-                        <span class="column-name">
+                <span class="column-name">
                             {{.Name}}
                             {{ if .IsInPrimaryKey}}<i class="fas fa-key" title="Primary Key"></i>{{end}}
                         </span>
-                    </a>
-                </th>
-            {{end}}
-            {{if $.Table.InboundFks}}
-                <th class='references'>Referenced by</th>
-            {{end}}
-        </tr>
-        </thead>
-        {{ range .Rows }}
-            <tr>
-                {{ range . }}
-                <td>{{.}}</td>
-                {{end}}
-            </tr>
-        {{end}}
-    </table>
+            </a>
+        </th>
+    {{end}}
+    {{if $.Table.InboundFks}}
+        <th class='references'>Referenced by</th>
+    {{end}}
+    </tr>
+    </thead>
+{{ range .Rows }}
+    <tr>
+    {{ range . }}
+        <td>{{.}}</td>
+    {{end}}
+    </tr>
+{{end}}
+</table>
 {{end}}
 
 <div class="sort-filter-info">
@@ -287,7 +292,7 @@
         <tbody>
         <tr>
             <td colspan="2">
-                <a class="action-button button table-button" href="?{{$.TableParams.ClearFilter.AsQueryString}}#data">
+                <a class="button table-button" href="?{{$.TableParams.ClearFilter.AsQueryString}}#data">
                     <i class="fas fa-times"></i>
                     Clear Filter</a>
             </td>
@@ -320,7 +325,7 @@
         <tbody>
         <tr>
             <td colspan="2">
-                <a class="action-button button table-button" href="?{{.TableParams.ClearSort.AsQueryString}}#data">
+                <a class="button table-button" href="?{{.TableParams.ClearSort.AsQueryString}}#data">
                     <i class="fas fa-sort"> </i>
                     Reset Sort Order</a>
             </td>
@@ -355,43 +360,33 @@
             </tr>
             </thead>
             <tbody>
-            {{ if .TableParams.RowLimit }}
-                {{/* mssql doesn't support paging without a sort order */}}
-                {{if or $.Database.Supports.PagingWithoutSorting $.TableParams.Sort}}
-                    <tr>
-                        <td>
-                        {{if .HasPrevPage}}
-                            <a class="action-button button" href="?{{.TableParams.PrevPage.AsQueryString}}#data">&lt; Previous
-                                Page</a>
-                        {{else}}
-                            <span class="action-button button disabled">No earlier pages</span>
-                        {{end}}
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                        {{if .HasNextPage}}
-                            <a class="action-button button" href="?{{.TableParams.NextPage.AsQueryString}}#data">Next Page
-                                &gt;</a>
-                        {{else}}
-                            <span class="action-button button disabled">No more pages</span>
-                        {{end}}
-                        </td>
-                    </tr>
-                {{else}}
-                <tr>
-                    <td>
-                        <small class="hint" style="margin-left: 0.75em;">
-                            <i class="fas fa-info-circle"></i>
-                            Choose a sort order to enable paging
-                        </small>
-                    </td>
-                </tr>
-                {{end}}
-            {{end}}
             <tr>
                 <td>
-                    <button class="action-button button">Update page size</button>
+                    {{ if .TableParams.RowLimit }}
+                    {{/* mssql doesn't support paging without a sort order */}}
+                        {{if or $.Database.Supports.PagingWithoutSorting $.TableParams.Sort}}
+                            {{if .HasPrevPage}}
+                                <a class="button" href="?{{.TableParams.PrevPage.AsQueryString}}#data">&lt; Previous
+                                    Page</a>
+                            {{else}}
+                                <span class="button disabled">No earlier pages</span>
+                            {{end}}
+                            <br/>
+                            {{if .HasNextPage}}
+                                <a class="button" href="?{{.TableParams.NextPage.AsQueryString}}#data">Next Page
+                                    &gt;</a>
+                            {{else}}
+                                <span class="button disabled">No more pages</span>
+                            {{end}}
+                        {{else}}
+                            <small class="hint" style="margin-left: 0.75em;">
+                                <i class="fas fa-info-circle"></i>
+                                Choose a sort order to enable paging
+                            </small>
+                        {{end}}
+                    {{end}}
+                    <br/>
+                    <button>Update page size</button>
                 </td>
             </tr>
             <tr>
@@ -402,7 +397,7 @@
             {{ if .TableParams.Filter }}
             <tr>
                 <td>
-                    {{ .FilteredRowCount }} row{{if ne .FilteredRowCount 1}}s{{end}} for this filter
+                {{ .FilteredRowCount }} row{{if ne .FilteredRowCount 1}}s{{end}} for this filter
                 </td>
             </tr>
             {{end}}
@@ -414,15 +409,15 @@
             <tr>
                 <td>
                     Showing rows {{.TableParams.FromRow}}
-                    {{if .TableParams.RowLimit}}
-                        {{if not .HasNextPage}}
-                            to end
-                        {{else}}
-                            to {{.TableParams.ToRow}}
-                        {{end}}
+                {{if .TableParams.RowLimit}}
+                    {{if not .HasNextPage}}
+                        to end
                     {{else}}
-                        onwards
+                        to {{.TableParams.ToRow}}
                     {{end}}
+                {{else}}
+                    onwards
+                {{end}}
                 </td>
             </tr>
             <tr>
@@ -451,11 +446,11 @@
             <td>
             {{if .TableParams.CardView}}
             {{/*todo: need a url builder to avoid ending up with ?& if there's no query*/}}
-                <a class="action-button button table-button" href="?{{.TableParams.CardViewOff.AsQueryString}}#data">
+                <a class="button table-button" href="?{{.TableParams.CardViewOff.AsQueryString}}#data">
                     <i class="fas fa-table"> </i>
                     Switch to table view</a>
             {{else}}
-                <a class="action-button button table-button" href="?{{.TableParams.CardViewOn.AsQueryString}}#data">
+                <a class="button table-button" href="?{{.TableParams.CardViewOn.AsQueryString}}#data">
                     <i class="fas fa-list"> </i>
                     Switch to card view</a>
             {{end}}

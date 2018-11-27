@@ -3,16 +3,15 @@
         <p>Limited to most common 100 values per table</p>
 
     <p>
-        Jump to:
 {{range .Analysis}}
-<a href="#col_{{.Column}}">{{.Column}}</a>
+<a href="#col_{{.Column}}" class="button jump-link">{{.Column}}</a>
 {{end}}
     </p>
 
 <div>
 {{range .Analysis}}
     <h3 id="col_{{.Column}}">{{.Column}}</h3>
-    <table class="data-table-view">
+    <table class="data-table-view clicky-cells">
         <thead>
         <tr>
             <th>Value</td>
