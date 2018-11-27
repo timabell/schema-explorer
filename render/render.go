@@ -76,7 +76,8 @@ var tableTrailTemplate *template.Template
 // Make minus available in templates to be able to convert len to slice index
 // https://stackoverflow.com/a/24838050/10245
 var funcMap = template.FuncMap{
-	"minus": minus,
+	"minus":           minus,
+	"DbValueToString": reader.DbValueToString,
 }
 
 func minus(x, y int) int {

@@ -531,13 +531,14 @@ func checkFilteredRowCount(dbReader reader.DbReader, database *schema.Database, 
 
 func checkTableAnalysis(dbReader reader.DbReader, database *schema.Database, t *testing.T) {
 	table := findTable(schema.Table{Schema: database.DefaultSchemaName, Name: "analysis_test"}, database, t)
+	colName := "colour"
+	_, col := table.FindColumn(colName)
 	analysis, err := dbReader.GetAnalysis(table)
 	if err != nil {
 		t.Fatal(err)
 	}
 	checkInt(1, len(analysis), "columns analysed in "+table.String(), t)
 	colourAnalysis := analysis[0]
-	colName := "colour"
 	checkStr(colName, colourAnalysis.Column.Name, "only col in "+table.String(), t)
 	checkInt(4, len(colourAnalysis.ValueCounts), "groups in "+colName+" col in "+table.String(), t)
 
@@ -551,7 +552,12 @@ func checkTableAnalysis(dbReader reader.DbReader, database *schema.Database, t *
 		if v.Quantity != colourAnalysis.ValueCounts[i].Quantity {
 			t.Errorf("expected row %d to have quanty %d, found %d", i, v.Quantity, colourAnalysis.ValueCounts[i].Quantity)
 		}
-		if v.Value != colourAnalysis.ValueCounts[i].Value {
+		// Have to convert to string because sqlite returns byte array. Use the canonical conversion from the main codebase
+		if v.Value == nil {
+			if colourAnalysis.ValueCounts[i].Value != nil {
+				t.Errorf("expected row %d to have value %s, found %s", i, v.Value, colourAnalysis.ValueCounts[i].Value)
+			}
+		} else if v.Value != *reader.DbValueToString(colourAnalysis.ValueCounts[i].Value, col.Type) {
 			t.Errorf("expected row %d to have value %s, found %s", i, v.Value, colourAnalysis.ValueCounts[i].Value)
 		}
 	}
