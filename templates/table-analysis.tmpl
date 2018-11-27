@@ -22,8 +22,16 @@
     {{$col := .Column}}
     {{range .ValueCounts}}
         <tr>
-            <td><a href="../{{$.Table}}?_rowLimit=100&{{$col}}={{.Value}}#data">{{.Value}}</a></td>
-            <td>{{.Quantity}}</td>
+        <td>
+            {{if .Value}}
+                <a href="../{{$.Table}}?_rowLimit=100&{{$col}}={{.Value}}#data">{{.Value}}</a>
+            {{else}}
+                <span class='null bare-value'>[null]</span>
+            {{end}}
+            </td>
+            <td>
+                <span class='bare-value'>{{.Quantity}}</span>
+            </td>
         </tr>
     {{end}}
         </tbody>
