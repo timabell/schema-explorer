@@ -408,6 +408,43 @@ func (model pgModel) GetRowCount(table *schema.Table, params *params.TableParams
 	return
 }
 
+func (model pgModel) GetAnalysis(table *schema.Table) (analysis []schema.ColumnAnalysis, err error) {
+	// todo, might be good to stream this all the way to the http response
+	dbc, err := getConnection(model.connectionString)
+	if err != nil {
+		log.Print("GetAnalysis failed to get connection")
+		return
+	}
+	defer dbc.Close()
+
+	analysis = []schema.ColumnAnalysis{}
+	for _, col := range table.Columns {
+		sql := "select \"" + col.Name + "\", count(*) qty from \"" + table.Schema + "\".\"" + table.Name + "\" group by \"" + col.Name + "\" order by count(*) desc, \"" + col.Name + "\" limit 100;"
+		rows, err := dbc.Query(sql)
+		if err != nil {
+			log.Print("GetAnalysis failed to get query")
+			log.Println(sql)
+			log.Println(err)
+			return nil, err
+		}
+		var valueInfos []schema.ValueInfo
+		for rows.Next() {
+			var value interface{}
+			var quantity int
+			rows.Scan(&value, &quantity)
+			valueInfos = append(valueInfos, schema.ValueInfo{
+				Value:    value,
+				Quantity: quantity,
+			})
+		}
+		analysis = append(analysis, schema.ColumnAnalysis{
+			Column:      col,
+			ValueCounts: valueInfos,
+		})
+	}
+	return
+}
+
 func buildQuery(table *schema.Table, params *params.TableParams) (sql string, values []interface{}) {
 	sql = "select * from \"" + table.Name + "\""
 	query := params.Filter

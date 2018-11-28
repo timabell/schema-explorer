@@ -54,6 +54,7 @@ func RunServer(options reader.SseOptions) {
 	r.HandleFunc("/table-trail", TableTrailHandler)
 	r.HandleFunc("/table-trail/clear", ClearTableTrailHandler)
 	r.HandleFunc("/tables/{tableName}", TableHandler)
+	r.HandleFunc("/tables/{tableName}/analyse-data", AnalyseTableHandler)
 	r.Use(loggingHandler)
 	listenOnHostPort := fmt.Sprintf("%s:%d", *options.ListenOnAddress, *options.ListenOnPort) // e.g. localhost:8080 or 0.0.0.0:80
 	srv := &http.Server{
@@ -201,6 +202,30 @@ func TableListHandler(resp http.ResponseWriter, req *http.Request) {
 		return
 	}
 	render.ShowTableList(resp, database, layoutData)
+}
+
+func AnalyseTableHandler(resp http.ResponseWriter, req *http.Request) {
+	layoutData, dbReader, err := requestSetup()
+	if err != nil {
+		// todo: client error
+		fmt.Println("setup error rendering table: ", err)
+		return
+	}
+
+	tableName := mux.Vars(req)["tableName"]
+	requestedTable := parseTableName(tableName)
+	table := database.FindTable(&requestedTable)
+	if table == nil {
+		resp.WriteHeader(http.StatusNotFound)
+		fmt.Fprint(resp, "Alas, thy table hast not been seen of late. 404 my friend.")
+		return
+	}
+
+	err = render.ShowTableAnalysis(resp, dbReader, database, table, layoutData)
+	if err != nil {
+		fmt.Println("error rendering table analysis: ", err)
+		return
+	}
 }
 
 // Split dot-separated name into schema + table name

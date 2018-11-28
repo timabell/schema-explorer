@@ -279,3 +279,12 @@ create index "IX_on_has_index" on index_test (has_index);
 create index "IX_compound" on index_test (compound_a, compound_b);
 create index "IX_complex" on index_test (lower_complex);
 create unique index "IX_unique" on index_test (unique_index);
+
+create table analysis_test(
+  colour varchar(50)
+);
+insert into analysis_test(colour)values
+('red'), ('red'), ('red'),
+('blue'), ('blue'),
+('green'),
+(null), (null), (null), (null);

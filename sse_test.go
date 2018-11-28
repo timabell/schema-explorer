@@ -98,6 +98,9 @@ func Test_ReadSchema(t *testing.T) {
 
 	t.Log("Checking filtered row count")
 	checkFilteredRowCount(reader, database, t)
+
+	t.Log("Checking table analysis")
+	checkTableAnalysis(reader, database, t)
 }
 
 func checkIndexes(database *schema.Database, t *testing.T) {
@@ -524,6 +527,40 @@ func checkFilteredRowCount(dbReader reader.DbReader, database *schema.Database, 
 		t.Fatal(err)
 	}
 	checkInt(3, rowCount, "blue rows", t)
+}
+
+func checkTableAnalysis(dbReader reader.DbReader, database *schema.Database, t *testing.T) {
+	table := findTable(schema.Table{Schema: database.DefaultSchemaName, Name: "analysis_test"}, database, t)
+	colName := "colour"
+	_, col := table.FindColumn(colName)
+	analysis, err := dbReader.GetAnalysis(table)
+	if err != nil {
+		t.Fatal(err)
+	}
+	checkInt(1, len(analysis), "columns analysed in "+table.String(), t)
+	colourAnalysis := analysis[0]
+	checkStr(colName, colourAnalysis.Column.Name, "only col in "+table.String(), t)
+	checkInt(4, len(colourAnalysis.ValueCounts), "groups in "+colName+" col in "+table.String(), t)
+
+	expected := []schema.ValueInfo{
+		{Quantity: 4, Value: nil},
+		{Quantity: 3, Value: "red"},
+		{Quantity: 2, Value: "blue"},
+		{Quantity: 1, Value: "green"},
+	}
+	for i, v := range expected {
+		if v.Quantity != colourAnalysis.ValueCounts[i].Quantity {
+			t.Errorf("expected row %d to have quanty %d, found %d", i, v.Quantity, colourAnalysis.ValueCounts[i].Quantity)
+		}
+		// Have to convert to string because sqlite returns byte array. Use the canonical conversion from the main codebase
+		if v.Value == nil {
+			if colourAnalysis.ValueCounts[i].Value != nil {
+				t.Errorf("expected row %d to have value %s, found %s", i, v.Value, colourAnalysis.ValueCounts[i].Value)
+			}
+		} else if v.Value != *reader.DbValueToString(colourAnalysis.ValueCounts[i].Value, col.Type) {
+			t.Errorf("expected row %d to have value %s, found %s", i, v.Value, colourAnalysis.ValueCounts[i].Value)
+		}
+	}
 }
 
 func Test_GetRows(t *testing.T) {

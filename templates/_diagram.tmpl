@@ -1,13 +1,13 @@
 {{define "_diagram"}}
 <div id="diagramWrapper">
 <div id="diagram-toolbar">
-    <button id="enable-zoom" class="action-button" onclick="toggleZoomPan(true)">
+    <button id="enable-zoom" onclick="toggleZoomPan(true)">
         <i class="fas fa-search-plus"></i>
         enable zoom/pan</button>
-    <button id="disable-zoom" class="action-button" onclick="toggleZoomPan(false)" style="display: none;">
+    <button id="disable-zoom" onclick="toggleZoomPan(false)" style="display: none;">
         <i class="fas fa-times"></i>
         disable zoom/pan</button>
-    <button id="reset-diagram" class="action-button" onclick="resetZoomPan()">
+    <button id="reset-diagram" onclick="resetZoomPan()">
         <i class="fas fa-undo"></i>
         reset zoom/pan</button>
 </div>

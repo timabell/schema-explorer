@@ -10,7 +10,6 @@ h1{
 }
 .encore{font-size: 60%;}
 a{color:#333;}
-a:hover{text-decoration: underline !important;}
 a:visited{color:#333;}
 
 h2{
@@ -68,7 +67,7 @@ table.card-view th{
     overflow: auto; /*clearfix*/
 }
 table.card-view tr:hover{
-    background-color: #ddd;
+    background-color: #e6e6e6;
 }
 table.card-view td{
     vertical-align: middle;
@@ -130,10 +129,6 @@ td a:hover {
     background-color: #ccc;
 }
 
-td a:last-of-type {
-    margin-bottom: 0;
-}
-
 td .parent-fk-link{
     display: inline-block;
     padding: 0.5em;
@@ -146,11 +141,15 @@ td .bare-value{
     padding: 0.5em 0;
 }
 
-td a {
+.clicky-cells a {
     display: inline-block;
     padding: 0.5em;
     margin: 0 0 0.5em 0;
 }
+.clicky-cells td a:last-of-type {
+    margin-bottom: 0;
+}
+
 td .compound-value{
     padding: 0.5em;
 }
@@ -219,53 +218,55 @@ nav ul {
     padding: 0;
 }
 nav a:hover{
-    text-decoration: none;
-    background-color: #ccc;
 }
 nav a{
-    display: inline-block;
-    padding: 0.5em 1em;
-    min-width: 7.5em;
-    text-align: center;
-    text-decoration: none;
     background-color: #ddd;
+    color:#333;
 }
 nav li{
     float: left;
-    margin: 0.5em 0.5em 0 0;
     list-style-type: none;
+    margin: 0;
 }
-button{
-    font-size: 1em;
-}
-.button, button {
+
+button, .button, nav a, nav a:visited, .button:visited {
     display: inline-block;
     text-decoration: none;
-    margin: 0.25em 0.5em 0.25em 0;
-}
-.button:hover,
-.button:visited{
-    color: #f8f8f8;
-}
-.action-button:hover {
-    background-color: #88308d;
-}
-.action-button * {
-    /* for font-awesome colouring */
+    margin: 0 0.75rem 0.75rem 0;
+    min-width: 10.5rem;
     background-color: #823331;
+    color: #f8f8f8;
+    padding: 0.5rem 1rem;
+    border-style: none;
+    font-size: 1rem;
+    text-align: left;
+    box-sizing: content-box; /* make span & button behave the same */
+    cursor: pointer;
+}
+.button:hover, button:hover, nav a:hover {
+    text-decoration: none;
+    background-color: #984e4c;
+}
+.button.disabled {
+    background-color: #666;
+}
+a.jump-link:hover {
+    background-color: #ddd;
+}
+.jump-link,
+.jump-link:visited {
+    background-color: #ccc;
+    color: #333;
+}
+.jump-link *{
+    color: #333;
+}
+
+/* children of button for font-awesome colouring */
+.button *, nav a *, button * {
     color: #f8f8f8;
 }
 
-.action-button.disabled {
-    background-color: #666;
-}
-.action-button{
-    background-color: #823331;
-    color: #f8f8f8;
-    padding: 0.5em 1em;
-    min-width: 7.5em;
-    border-style: none;
-}
 footer h2 {
     border-bottom-color: #f8f8f8;
 }
@@ -283,9 +284,9 @@ footer *, footer a, footer a:visited{
     #diagram-toolbar,
     nav,
     .hint,
-    .action-button,
+    .button,
+    button,
     footer,
-    .table-button,
     .trail-info
     { display: none; }
 }

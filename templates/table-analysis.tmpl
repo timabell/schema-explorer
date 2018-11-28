@@ -1,0 +1,41 @@
+{{define "content"}}
+<h2>{{.Table}} Data Analysis</h2>
+        <p>Limited to most common 100 values per table</p>
+
+    <p>
+{{range .Analysis}}
+<a href="#col_{{.Column}}" class="button jump-link">{{.Column}}</a>
+{{end}}
+    </p>
+
+<div>
+{{range .Analysis}}
+    <h3 id="col_{{.Column}}">{{.Column}}</h3>
+    <table class="data-table-view clicky-cells">
+        <thead>
+        <tr>
+            <th>Value</td>
+            <th>Count</td>
+        </tr>
+        </thead>
+        <tbody>
+    {{$col := .Column}}
+    {{range .ValueCounts}}
+        <tr>
+        <td>
+            {{if .Value}}
+                <a href="../{{$.Table}}?_rowLimit=100&{{$col}}={{DbValueToString .Value $col.Type}}#data">{{DbValueToString .Value $col.Type}}</a>
+            {{else}}
+                <span class='null bare-value'>[null]</span>
+            {{end}}
+            </td>
+            <td>
+                <span class='bare-value'>{{.Quantity}}</span>
+            </td>
+        </tr>
+    {{end}}
+        </tbody>
+    </table>
+{{end}}
+</div>
+{{end}}
