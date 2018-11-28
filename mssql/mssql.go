@@ -343,6 +343,15 @@ func (model mssqlModel) GetSqlRows(table *schema.Table, params *params.TablePara
 
 	sql, values := buildQuery(table, params)
 	rows, err = dbc.Query(sql, values...)
+	if params.SkipRows > 0 && len(params.Sort) == 0 {
+		// Can't use offset or row_number without a sort order so use a hack.
+		// buildQuery has given us rowlimit+skip rows so now we just need to discard the unwanted leading rows
+		for i := 0; i < params.SkipRows; i++ {
+			if !rows.Next() {
+				break // reached end of dataset
+			}
+		}
+	}
 	if rows == nil {
 		log.Println(sql)
 		log.Println(err)
@@ -415,16 +424,13 @@ func (model mssqlModel) GetAnalysis(table *schema.Table) (analysis []schema.Colu
 func buildQuery(table *schema.Table, params *params.TableParams) (sql string, values []interface{}) {
 	// Limitation: we can't support paging (offset/skip) without a sort order so
 	// 		params.SkipRows will be ignored if there is no sorting supplied.
+	// As a less performant alternative to keep things consistent we'll fetch the preceding rows and throw them away
 
 	sql = "select"
 
-	if params.SkipRows > 0 && len(params.Sort) == 0 {
-		log.Printf("Warning, row offset not supported in mssql without sort order")
-	}
-
-	// use top when we have a row limit but not an offset (or can't use offset because there's no sort)
-	if params.RowLimit > 0 && (params.SkipRows == 0 || len(params.Sort) == 0) {
-		sql = sql + " top " + strconv.Itoa(params.RowLimit)
+	// use top when we have a row limit but now sorting (or can't use offset because there's no sort)
+	if params.RowLimit > 0 && len(params.Sort) == 0 {
+		sql = sql + " top " + strconv.Itoa(params.RowLimit+params.SkipRows)
 	}
 
 	sql = sql + " * from " + table.String()

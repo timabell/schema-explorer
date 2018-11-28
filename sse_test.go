@@ -493,22 +493,27 @@ func checkPaging(dbReader reader.DbReader, database *schema.Database, t *testing
 	table := findTable(schema.Table{Schema: database.DefaultSchemaName, Name: "SortFilterTest"}, database, t)
 	_, idCol := table.FindColumn("id")
 
-	expectedRowCount := 2
 	tableParams := &params.TableParams{
-		RowLimit: expectedRowCount,
-		Sort:     []params.SortCol{{Column: idCol}}, // have to sort to use paging for sql server
+		RowLimit: 2,
 		SkipRows: 3,
 	}
+	// check without sort (to check mssql hack for lack of offset capability)
+	pagingChecker(dbReader, table, tableParams, t, idCol)
+	tableParams.Sort = []params.SortCol{{Column: idCol}} // have to sort to use paging for sql server
+	// check with sort
+	pagingChecker(dbReader, table, tableParams, t, idCol)
+}
+
+func pagingChecker(dbReader reader.DbReader, table *schema.Table, tableParams *params.TableParams, t *testing.T, idCol *schema.Column) {
 	rows, err := reader.GetRows(dbReader, table, tableParams)
 	if err != nil {
 		t.Fatal(err)
 	}
-
-	if len(rows) != expectedRowCount {
-		t.Errorf("Expected %d limited rows, got %d", expectedRowCount, len(rows))
+	if len(rows) != tableParams.RowLimit {
+		t.Errorf("Expected %d limited rows, got %d", tableParams.RowLimit, len(rows))
 	}
-	checkInt(4, int(rows[0][idCol.Position].(int64)), "for skip/take row 1 id", t)
-	checkInt(5, int(rows[1][idCol.Position].(int64)), "for skip/take row 2 id", t)
+	checkInt(4, int(rows[0][idCol.Position].(int64)), fmt.Sprintf("for skip %d take %d row 1 id", tableParams.SkipRows, tableParams.RowLimit), t)
+	checkInt(5, int(rows[1][idCol.Position].(int64)), fmt.Sprintf("for skip %d take %d row 2 id", tableParams.SkipRows, tableParams.RowLimit), t)
 }
 
 func dbString(value interface{}) string {

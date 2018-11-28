@@ -363,27 +363,18 @@
             <tr>
                 <td>
                     {{ if .TableParams.RowLimit }}
-                    {{/* mssql doesn't support paging without a sort order */}}
-                        {{if or $.Database.Supports.PagingWithoutSorting $.TableParams.Sort}}
-                            {{if .HasPrevPage}}
-                                <a class="button" href="?{{.TableParams.PrevPage.AsQueryString}}#data">&lt; Previous
-                                    Page</a>
-                            {{else}}
-                                <span class="button disabled">No earlier pages</span>
-                            {{end}}
-                            <br/>
-                            {{if .HasNextPage}}
-                                <a class="button" href="?{{.TableParams.NextPage.AsQueryString}}#data">Next Page
-                                    &gt;</a>
-                            {{else}}
-                                <span class="button disabled">No more pages</span>
-                            {{end}}
+                        {{if .HasPrevPage}}
+                            <a class="button" href="?{{.TableParams.PrevPage.AsQueryString}}#data">&lt; Previous
+                                Page</a>
                         {{else}}
-                            <small class="hint" style="margin-left: 0.75em;">
-                                <i class="fas fa-info-circle"></i>
-                                Choose a sort order to enable paging
-                            </small>
-                            <br/>
+                            <span class="button disabled">No earlier pages</span>
+                        {{end}}
+                        <br/>
+                        {{if .HasNextPage}}
+                            <a class="button" href="?{{.TableParams.NextPage.AsQueryString}}#data">Next Page
+                                &gt;</a>
+                        {{else}}
+                            <span class="button disabled">No more pages</span>
                         {{end}}
                     {{end}}
                     <br/>
@@ -431,6 +422,18 @@
                     </label>
                 </td>
             </tr>
+            {{if or $.Database.Supports.PagingWithoutSorting $.TableParams.Sort}}
+            {{else}}
+            <tr>
+                <td>
+                    <small class="hint" style="margin-left: 0.75em;"
+                           title="Sql Server doesn't support skipping rows in SQL without a sort order. :-(">
+                        <i class="fas fa-info-circle"></i>
+                        Choose a sort order to speed up paging
+                    </small>
+                </td>
+            </tr>
+            {{end}}
         </table>
     </form>
 
