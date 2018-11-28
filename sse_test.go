@@ -512,8 +512,8 @@ func pagingChecker(dbReader reader.DbReader, table *schema.Table, tableParams *p
 	if len(rows) != tableParams.RowLimit {
 		t.Errorf("Expected %d limited rows, got %d", tableParams.RowLimit, len(rows))
 	}
-	checkInt(4, int(rows[0][idCol.Position].(int64)), "for skip/take row 1 id", t)
-	checkInt(5, int(rows[1][idCol.Position].(int64)), "for skip/take row 2 id", t)
+	checkInt(4, int(rows[0][idCol.Position].(int64)), fmt.Sprintf("for skip %d take %d row 1 id", tableParams.SkipRows, tableParams.RowLimit), t)
+	checkInt(5, int(rows[1][idCol.Position].(int64)), fmt.Sprintf("for skip %d take %d row 2 id", tableParams.SkipRows, tableParams.RowLimit), t)
 }
 
 func dbString(value interface{}) string {
