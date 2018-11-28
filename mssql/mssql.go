@@ -377,7 +377,39 @@ func (model mssqlModel) GetRowCount(table *schema.Table, params *params.TablePar
 }
 
 func (model mssqlModel) GetAnalysis(table *schema.Table) (analysis []schema.ColumnAnalysis, err error) {
-	return nil, nil
+	dbc, err := getConnection(model.connectionString)
+	if err != nil {
+		log.Print("GetAnalysis failed to get connection")
+		return
+	}
+	defer dbc.Close()
+
+	analysis = []schema.ColumnAnalysis{}
+	for _, col := range table.Columns {
+		sql := "select top 100 " + col.Name + ", count(*) qty from [" + table.Schema + "].[" + table.Name + "] group by [" + col.Name + "] order by count(*) desc, [" + col.Name + "];"
+		rows, err := dbc.Query(sql)
+		if err != nil {
+			log.Print("GetAnalysis failed to get query")
+			log.Println(sql)
+			log.Println(err)
+			return nil, err
+		}
+		var valueInfos []schema.ValueInfo
+		for rows.Next() {
+			var value interface{}
+			var quantity int
+			rows.Scan(&value, &quantity)
+			valueInfos = append(valueInfos, schema.ValueInfo{
+				Value:    value,
+				Quantity: quantity,
+			})
+		}
+		analysis = append(analysis, schema.ColumnAnalysis{
+			Column:      col,
+			ValueCounts: valueInfos,
+		})
+	}
+	return
 }
 
 func buildQuery(table *schema.Table, params *params.TableParams) (sql string, values []interface{}) {
