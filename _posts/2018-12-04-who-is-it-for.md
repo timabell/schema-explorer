@@ -5,52 +5,50 @@ description: A guide to people and usages for Sql Schema Explorer
 category: blog
 ---
 
-# Hello, is it me you're looking for?
+# Is Schema Explorer for you?
 
-I've been told repeatedly I need to "define my avatar" or "find my niche", and I've struggled. I think the reason is that lots of different people can use Schema Explorer for lots of different reasons. This has made creating content that any one of theses people can relate to challenging, so partly for my own edification I lay out here who I think it might be for.
+If you are one of the following (or similar) you should give Schema Explorer a try.
 
-## The db-guru coder
+## The database-guru coder
 
-Always seem to end up with the database bits of the codebase.
+You always seem to work on the database side of the project more than the rest of your programmer colleagues.
 
-Can use Schema Explorer to better explain what they've done to less db-loving team members, and to help the rest of the team code against the database with more self-serve and less mistakes.
+Use Schema Explorer to better explain the schema to less db-loving team members. Share it with your team to help them code against the database with more self-serve and with less mistakes and misunderstandings.
 
-## The team lead with new team member(s)
+## The team lead / CTO / founder
 
-Eye on the time/cost for bringing someone up to speed.
+You have an eye on the time/cost for bringing someone up to speed. You want your team to use the best tools available because they pay for themselves.
 
-Schema Explorer will cut the amount time the new team member spends not able to contribute meaningfully while they learn the system. This will help the team member be happier and more quickly be able to solve the important problems they were hired to help with.
+Schema Explorer will cut the amount time a new team member spends unable to contribute while they learn the system. Having Schema Explorer will make the team member happier and allow them to more quickly move on to solving the important problems you hired them to help with.
 
-## The high-brow team lead
-
-Believes their team should have the best tools available.
-
-If it makes your team even 0.01% better/stronger/faster then they need it. End of.
+If a new tool makes your team even 1% better/stronger/faster then they need it. End of.
 
 ## The newbie on a team
 
-Wants to not feel out of depth and unproductive, needs to understand schema fast.
+You want to not feel out of depth and unproductive. You need to understand this team's schema fast.
+
+Use Schema Explorer to get a feel for the database faster. Use Schema Explore as a regular reference so you don't have to memorize every detail of the database you're now working with.
 
 ## The systems integrator
 
-Regularly encounters big legacy databases, has to work out how they work.
+You regularly encounters big legacy databases and have to work out how they work. You're an expert at doing so but it's such a time-sink that isn't moving the project forward. You can never get hold of anyone who knows anything about the database, and of course the documentation is non-existent / out of date / misleading.
 
-Use Schema Explorer to shine a light on the spaghetti, stand a hope in hell of getting it right.
+Use Schema Explorer to shine a light on the spaghetti and more quickly move on to building the integrations. Use it as a fast reference while you work through the details of integrating.
 
 ## The architect
 
-Wants to see that their plan has been correctly implemented.
+You want to see that your plan has been correctly implemented.
 
 Use Schema Exporer to inspect what the developer's ORM actually produced.
 
 ## The consultant
 
-Wants to impress the client with how quickly they can master the client's software & db.
+You wants to impress the client with how quickly you can master the client's software & database.
 
-Buys tools, goes faster.
+Use Schema Explorer as your secret weapon to make you seem like you must have worked on this database for years by having a better understanding of their database than the client does.
 
 ## The database administrator (DBA)
 
-Lives and breathes the database. Knows much dark magic and has seen many horrors (mostly induced by ignorant developers).
+You live and breath the database. You know much dark magic and have seen many horrors (mostly induced by ignorant developers). You are fed up with having to explain to the developers the basics of relational databases. You get pestered to answer trivial questions about the database by people who can't or won't look at the schema definition or write basic SQL themselves.
 
-Fed up with having to explain to the developers the basics of relational databases. Wouldn't be caught dead using this noddy web interface but happy to give it to everyone else so they can self serve and they can go back to saving the company from its own short-sighted stupidity (hey boss can I have the purchase order for the backup system yet?).
+Give access to Schema Explorer to everyone else so they can answer questions about the database themselves instead of distracting you. You can now go back to more important matters like saving the company from its own short-sighted stupidity (hey boss can I have the purchase order for the backup system yet?). You might even find it a useful addition to your SQL skills occasionally.
