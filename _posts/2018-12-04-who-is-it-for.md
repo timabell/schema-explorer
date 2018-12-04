@@ -15,23 +15,25 @@ You always seem to work on the database side of the project more than the rest o
 
 Use Schema Explorer to better explain the schema to less db-loving team members. Share it with your team to help them code against the database with more self-serve and with less mistakes and misunderstandings.
 
+Use it to answer your own questions faster and with less impact on your mental stack while coding.
+
 ## The team lead / CTO / founder
 
 You have an eye on the time/cost for bringing someone up to speed. You want your team to use the best tools available because they pay for themselves.
 
-Schema Explorer will cut the amount time a new team member spends unable to contribute while they learn the system. Having Schema Explorer will make the team member happier and allow them to more quickly move on to solving the important problems you hired them to help with.
+Schema Explorer will cut the amount time a new team member spends unable to contribute while they learn the system. Having Schema Explorer will make new team members happier and allow them to more quickly move on to solving the important problems you hired them to help with.
 
-If a new tool makes your team even 1% better/stronger/faster then they need it. End of.
+If a new tool makes your team even 1% better/stronger/faster then they must have it! End of.
 
 ## The newbie on a team
 
 You want to not feel out of depth and unproductive. You need to understand this team's schema fast.
 
-Use Schema Explorer to get a feel for the database faster. Use Schema Explore as a regular reference so you don't have to memorize every detail of the database you're now working with.
+Use Schema Explorer to get a feel for the database faster. Use Schema Explorer as a regular reference so you don't have to memorize every detail of the database you're now working with.
 
 ## The systems integrator
 
-You regularly encounters big legacy databases and have to work out how they work. You're an expert at doing so but it's such a time-sink that isn't moving the project forward. You can never get hold of anyone who knows anything about the database, and of course the documentation is non-existent / out of date / misleading.
+You regularly encounter big legacy databases and have to work out how they work. You're an expert at doing so but it's such a time-sink that doesn't move the project forward. You can never get hold of anyone who knows anything about the database, and of course the documentation is non-existent / out of date / misleading.
 
 Use Schema Explorer to shine a light on the spaghetti and more quickly move on to building the integrations. Use it as a fast reference while you work through the details of integrating.
 
