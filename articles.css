@@ -73,17 +73,24 @@ th, td {
     padding: 1em;
 }
 
-a.button {
+body .standalone-button, #signup-fields {
+  margin: 1em auto;
+  width: 13em;
+}
+#signup-fields input{
+  margin-bottom: 0.5em;
+}
+body .button {
+  width: 13em;
   padding: 1em;
   background-color: #4CAF50;
   color: #fff;
   text-decoration: none;
   font-weight: bold;
   display: block;
-  width: 13em;
-  margin: 1em auto;
   white-space: nowrap;
   text-align: center;
+  border: none;
 }
 #container{
   max-width: 58em;
