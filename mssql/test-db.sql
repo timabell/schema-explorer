@@ -85,9 +85,13 @@ drop table SortFilterTest
 drop table CompoundKeyChild
 drop table CompoundKeyParent
 drop table CompoundKeyAunty
+drop table [identity].[select];
 
 GO
 create SCHEMA kitchen;
+
+-- user had a schema named the same as a keyword. good test for escaping correctly
+create SCHEMA [identity];
 GO
 --------
 
@@ -288,3 +292,12 @@ insert into analysis_test(colour)values
 ('blue'), ('blue'),
 ('green'),
 (null), (null), (null), (null);
+
+-- check keywords are escaped by making a nasty schema/table/column name
+create table [identity].[select] (
+  id int primary key identity,
+  [table] varchar(50)
+);
+insert into [identity].[select] ([table]) values ('times');
+
+select * from [identity].[select];
