@@ -451,7 +451,7 @@ func buildQuery(table *schema.Table, params *params.TableParams) (sql string, va
 	if len(params.Sort) > 0 {
 		var sortParts []string
 		for _, sortCol := range params.Sort {
-			sortString := sortCol.Column.Name
+			sortString := "[" + sortCol.Column.Name + "]"
 			if sortCol.Descending {
 				sortString = sortString + " desc"
 			}
