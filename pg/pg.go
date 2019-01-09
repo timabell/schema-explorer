@@ -446,7 +446,7 @@ func (model pgModel) GetAnalysis(table *schema.Table) (analysis []schema.ColumnA
 }
 
 func buildQuery(table *schema.Table, params *params.TableParams) (sql string, values []interface{}) {
-	sql = "select * from \"" + table.Name + "\""
+	sql = "select * from \"" + table.Schema + "\".\"" + table.Name + "\""
 	query := params.Filter
 	if len(query) > 0 {
 		sql = sql + " where "
