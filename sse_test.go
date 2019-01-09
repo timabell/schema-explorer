@@ -101,6 +101,9 @@ func Test_ReadSchema(t *testing.T) {
 
 	t.Log("Checking table analysis")
 	checkTableAnalysis(reader, database, t)
+
+	t.Log("Checking keyword escaping")
+	checkKeywordEscaping(reader, database, t)
 }
 
 func checkIndexes(database *schema.Database, t *testing.T) {
@@ -565,6 +568,23 @@ func checkTableAnalysis(dbReader reader.DbReader, database *schema.Database, t *
 		} else if v.Value != *reader.DbValueToString(colourAnalysis.ValueCounts[i].Value, col.Type) {
 			t.Errorf("expected row %d to have value %s, found %s", i, v.Value, colourAnalysis.ValueCounts[i].Value)
 		}
+	}
+}
+
+// Poke all the things that might fall over if a bit of escaping has been missed.
+// The names in here are necessarily confusing and misleading because the table has sql keywords for names.
+func checkKeywordEscaping(dbReader reader.DbReader, database *schema.Database, t *testing.T) {
+	schemaName := database.DefaultSchemaName
+	if database.Supports.Schema {
+		schemaName = "identity"
+	}
+	// test 1 - did it get into the database object at all
+	table := findTable(schema.Table{Schema: schemaName, Name: "select"}, database, t)
+	// test 2 - did the column show up
+	colName := "table"
+	_, col := table.FindColumn(colName)
+	if col == nil {
+		t.Fatalf("Column '%s' not found in keyword table '%s'.", colName, table.String())
 	}
 }
 
