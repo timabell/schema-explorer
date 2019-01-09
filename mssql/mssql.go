@@ -216,7 +216,7 @@ func (model mssqlModel) UpdateRowCounts(database *schema.Database) (err error) {
 func (model mssqlModel) getRowCount(table *schema.Table) (rowCount int, err error) {
 	// todo: parameterise where possible
 	// todo: whitelist-sanitize unparameterizable parts
-	sql := "select count(*) from " + table.String()
+	sql := "select count(*) from [" + table.Schema + "].[" + table.Name + "]"
 
 	dbc, err := getConnection(model.connectionString)
 	if dbc == nil {
@@ -395,7 +395,7 @@ func (model mssqlModel) GetAnalysis(table *schema.Table) (analysis []schema.Colu
 
 	analysis = []schema.ColumnAnalysis{}
 	for _, col := range table.Columns {
-		sql := "select top 100 " + col.Name + ", count(*) qty from [" + table.Schema + "].[" + table.Name + "] group by [" + col.Name + "] order by count(*) desc, [" + col.Name + "];"
+		sql := "select top 100 [" + col.Name + "], count(*) qty from [" + table.Schema + "].[" + table.Name + "] group by [" + col.Name + "] order by count(*) desc, [" + col.Name + "];"
 		rows, err := dbc.Query(sql)
 		if err != nil {
 			log.Print("GetAnalysis failed to get query")
@@ -433,7 +433,7 @@ func buildQuery(table *schema.Table, params *params.TableParams) (sql string, va
 		sql = sql + " top " + strconv.Itoa(params.RowLimit+params.SkipRows)
 	}
 
-	sql = sql + " * from " + table.String()
+	sql = sql + " * from [" + table.Schema + "].[" + table.Name + "]"
 
 	query := params.Filter
 	if len(query) > 0 {
@@ -442,7 +442,7 @@ func buildQuery(table *schema.Table, params *params.TableParams) (sql string, va
 		values = make([]interface{}, 0, len(query))
 		for _, v := range query {
 			col := v.Field
-			clauses = append(clauses, col.Name+" = ?")
+			clauses = append(clauses, "["+col.Name+"] = ?")
 			values = append(values, v.Values[0]) // todo: maybe support multiple values
 		}
 		sql = sql + strings.Join(clauses, " and ")
