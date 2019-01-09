@@ -586,6 +586,11 @@ func checkKeywordEscaping(dbReader reader.DbReader, database *schema.Database, t
 	if col == nil {
 		t.Fatalf("Column '%s' not found in keyword table '%s'.", colName, table.String())
 	}
+	// test 3 - did we get a row count?
+	dbReader.UpdateRowCounts(database)
+	checkInt(1, *table.RowCount, "row count for keyword table", t)
+	// test 4 - can we get the data out?
+	// test 5 - can we run a filter/sort on a keyword col?
 }
 
 func Test_GetRows(t *testing.T) {
