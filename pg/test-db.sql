@@ -149,3 +149,13 @@ insert into analysis_test(colour)values
 ('blue'), ('blue'),
 ('green'),
 (null), (null), (null), (null);
+
+create schema "identity";
+-- check keywords are escaped by making a nasty schema/table/column name
+create table "identity"."select" (
+  id int primary key,
+  "table" varchar(50)
+);
+insert into "identity"."select" (id, "table") values (1, 'times');
+
+-- select * from "identity"."select";
