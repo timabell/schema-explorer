@@ -41,9 +41,11 @@
             <td><a href='tables/{{.}}?_rowLimit=100'>{{.}}</a></td>
             <td><span class="bare-value">{{.RowCount}}</span></td>
             <td><span class="bare-value">{{len .Columns}}</span></td>
+            <td>
             {{if .Fks}}
-                <td><span class="bare-value">{{len .Fks}}</span></td>
+                <span class="bare-value">{{len .Fks}}</span>
             {{end}}
+            </td>
             {{if $.Database.Supports.Descriptions}}
             <td><span class="bare-value">{{.Description}}</span></td>
             {{end}}
