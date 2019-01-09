@@ -590,6 +590,17 @@ func checkKeywordEscaping(dbReader reader.DbReader, database *schema.Database, t
 	dbReader.UpdateRowCounts(database)
 	checkInt(1, *table.RowCount, "row count for keyword table", t)
 	// test 4 - can we get the data out?
+	// read the data from it
+	params := &params.TableParams{
+		RowLimit: 999,
+	}
+	rows, err := reader.GetRows(dbReader, table, params)
+	if err != nil {
+		t.Fatal(err)
+	}
+	checkInt(1, len(rows), "expected one row in keyword table", t)
+	val := fmt.Sprintf("%s", rows[0][1])
+	checkStr("times", val, "incorrect value in keyword row", t)
 	// test 5 - can we run a filter/sort on a keyword col?
 }
 
