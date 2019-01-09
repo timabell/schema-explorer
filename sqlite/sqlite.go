@@ -364,7 +364,7 @@ func (model sqliteModel) GetAnalysis(table *schema.Table) (analysis []schema.Col
 }
 
 func buildQuery(table *schema.Table, params *params.TableParams) (sql string, values []interface{}) {
-	sql = "select * from " + table.Name
+	sql = "select * from [" + table.Name + "]"
 
 	query := params.Filter
 	if len(query) > 0 {
@@ -373,7 +373,7 @@ func buildQuery(table *schema.Table, params *params.TableParams) (sql string, va
 		values = make([]interface{}, 0, len(query))
 		for _, v := range query {
 			col := v.Field
-			clauses = append(clauses, col.Name+" = ?")
+			clauses = append(clauses, "["+col.Name+"] = ?")
 			values = append(values, v.Values[0]) // todo: maybe support multiple values
 		}
 		sql = sql + strings.Join(clauses, " and ")
@@ -382,7 +382,7 @@ func buildQuery(table *schema.Table, params *params.TableParams) (sql string, va
 	if len(params.Sort) > 0 {
 		var sortParts []string
 		for _, sortCol := range params.Sort {
-			sortString := sortCol.Column.Name
+			sortString := "[" + sortCol.Column.Name + "]"
 			if sortCol.Descending {
 				sortString = sortString + " desc"
 			}

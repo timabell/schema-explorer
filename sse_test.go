@@ -578,19 +578,36 @@ func checkKeywordEscaping(dbReader reader.DbReader, database *schema.Database, t
 	if database.Supports.Schema {
 		schemaName = "identity"
 	}
+
 	// test 1 - did it get into the database object at all
 	table := findTable(schema.Table{Schema: schemaName, Name: "select"}, database, t)
+
 	// test 2 - did the column show up
 	colName := "table"
 	_, col := table.FindColumn(colName)
 	if col == nil {
 		t.Fatalf("Column '%s' not found in keyword table '%s'.", colName, table.String())
 	}
+
 	// test 3 - did we get a row count?
 	dbReader.UpdateRowCounts(database)
 	checkInt(1, *table.RowCount, "row count for keyword table", t)
-	// test 4 - can we get the data out?
-	// test 5 - can we run a filter/sort on a keyword col?
+
+	// test 4 - can we get the data out with a filter?
+	// read the data from it
+	filter := params.FieldFilter{Field: col, Values: []string{"times"}}
+	params := &params.TableParams{
+		RowLimit: 999,
+		Filter:   params.FieldFilterList{filter},
+		Sort:     []params.SortCol{{Column: col, Descending: false}},
+	}
+	rows, err := reader.GetRows(dbReader, table, params)
+	if err != nil {
+		t.Fatal(err)
+	}
+	checkInt(1, len(rows), "expected one row in keyword table", t)
+	val := fmt.Sprintf("%s", rows[0][1])
+	checkStr("times", val, "incorrect value in keyword row", t)
 }
 
 func Test_GetRows(t *testing.T) {
