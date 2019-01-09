@@ -151,7 +151,7 @@ func (model pgModel) UpdateRowCounts(database *schema.Database) (err error) {
 func (model pgModel) getRowCount(table *schema.Table) (rowCount int, err error) {
 	// todo: parameterise where possible
 	// todo: whitelist-sanitize unparameterizable parts
-	sql := "select count(*) from \"" + table.Name + "\""
+	sql := "select count(*) from \"" + table.Schema + "\".\"" + table.Name + "\""
 
 	dbc, err := getConnection(model.connectionString)
 	if dbc == nil {
