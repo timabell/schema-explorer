@@ -1,7 +1,7 @@
 #!/bin/sh
 usr=ssetestusr
 db=ssetest
-echo "removing old test db"
+# echo "removing old test db"
 dropdb $db
 dropuser $usr
 createuser $usr
@@ -13,4 +13,4 @@ psql -d $db -q < test-db.sql
 psql -d $db -q -c "GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO $usr;";
 psql -d $db -q -c "GRANT ALL PRIVILEGES ON SCHEMA \"identity\" TO $usr;";
 psql -d $db -q -c "GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA \"identity\" TO $usr;";
-echo "test postgres db $db and user $usr created"
+# echo "test postgres db $db and user $usr created"
