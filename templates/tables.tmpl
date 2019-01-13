@@ -1,23 +1,30 @@
-{{define "nav"}}
-<li>
-    <a href='#diagram'>
-        <i class="fas fa-project-diagram"></i>
-        Diagram
-    </a>
-</li>
-<li>
-    <a href='#tableList'>
-        <i class="fas fa-list"></i>
-        Table List</a>
-</li>
-<li>
-    <a href='#foreignKeys'>
-        <i class="fas fa-exchange-alt"></i>
-        Foreign Keys</a>
-</li>
-{{end}}
-
 {{define "content"}}
+<nav>
+    <ul>
+        <li>
+            <a href='#diagram' class='jump-link'>
+                <i class="fas fa-project-diagram"></i>
+                Diagram
+            </a>
+        </li>
+        <li>
+            <a href='#tableList' class='jump-link'>
+                <i class="fas fa-list"></i>
+                Table List</a>
+        </li>
+        <li>
+            <a href='#foreignKeys' class='jump-link'>
+                <i class="fas fa-exchange-alt"></i>
+                Foreign Keys</a>
+        </li>
+        <li>
+            <a href='#indexes' class='jump-link'>
+                <i class="fas fa-map-signs"></i>
+                Indexes</a>
+        </li>
+    </ul>
+</nav>
+
 
 <h2 id="diagram">Database Diagram</h2>
 {{template "_diagram" .Diagram}}
