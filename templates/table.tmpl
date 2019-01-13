@@ -117,7 +117,7 @@
 <div class="fk-list">
 {{if .Table.Fks}}
     <h3>Outbound</h3>
-    <table class="clicky-cells">
+    <table class="clicky-cells tablesorter">
         <thead>
         <tr>
         {{if $.Database.Supports.FkNames}}
@@ -153,7 +153,7 @@
 {{if .Table.InboundFks}}
 <div class="fk-list">
     <h3>Inbound</h3>
-    <table class="clicky-cells">
+    <table class="clicky-cells tablesorter">
         <thead>
         <tr>
         {{if $.Database.Supports.FkNames}}
@@ -188,7 +188,7 @@
 
 <div class="fk-list">
 {{if .Table.Indexes}}
-    <table class="clicky-cells">
+    <table class="clicky-cells tablesorter">
         <thead>
         <tr>
             <th>Name</th>
