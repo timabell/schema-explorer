@@ -12,6 +12,8 @@
     <script src="/static/vendor/cytoscape-dagre/dagre.min.js"></script>
     <script src="/static/vendor/cytoscape-dagre/cytoscape-dagre.js"></script>
     <script defer src="/static/vendor/fontawesome/fontawesome-all.min.js"></script>
+    <script type="text/javascript" src="/static/vendor/tablesorter/jquery.tablesorter.combined.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="/static/vendor/tablesorter/sse-theme.css"/>
 </head>
 <body>
     <h1>
@@ -65,6 +67,11 @@
     <br/>
     Like it? Share the love with a  <a href="https://twitter.com/intent/tweet?text=I%20loved%20using%20Sql%20Schema%20Explorer%20today%21%20You%20should%20try%20it%20too%20%3A-%29%20Check%20it%20out%20at%3A%20http%3A//schemaexplorer.io/%20-%20made%20with%20love%20by%20@tim_abell" target="_blank">tweet</a>!</p>
 </footer>
+<script>
+    $(document).ready(function() {
+        $(".tablesorter").tablesorter();
+    });
+</script>
 </body>
 </html>
 {{end}}

@@ -51,7 +51,7 @@
 {{template "_diagram" .Diagram}}
 
 <h2 id="columns">Columns</h2>
-<table id="column-info" class="clicky-cells">
+<table id="column-info" class="clicky-cells tablesorter">
     <thead>
     <tr>
         <th></th>
@@ -66,6 +66,7 @@
     {{end}}
     </tr>
     </thead>
+    <tbody>
 {{ range .Table.Columns }}
     <tr id="col_{{.Name}}">
         <td><span class="bare-value">{{ if .IsInPrimaryKey}}<i class="fas fa-key"></i> Primary Key{{end}}</span></td>
@@ -108,6 +109,7 @@
     {{end}}
     </tr>
 {{end}}
+    </tbody>
 </table>
 
 <h2 id="foreignKeys">Foreign Keys</h2>
