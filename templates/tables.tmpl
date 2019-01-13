@@ -40,16 +40,16 @@
 {{range .Database.Tables}}
         <tr>
             <td><a href='tables/{{.}}?_rowLimit=100'>{{.}}</a></td>
-            <td><span class="bare-value">{{.RowCount}}</span></td>
-            <td><span class="bare-value">{{len .Columns}}</span></td>
+            <td><a href='tables/{{.}}?_rowLimit=100#data'>{{.RowCount}}</a></td>
+            <td><a href='tables/{{.}}?_rowLimit=100#columns'>{{len .Columns}}</a></td>
             <td>
             {{if .Fks}}
-                <span class="bare-value">{{len .Fks}}</span>
+                <a href='tables/{{.}}?_rowLimit=100#foreignKeys'>{{len .Fks}}</a>
             {{end}}
             </td>
             <td>
             {{if .Indexes}}
-                <span class="bare-value">{{len .Indexes}}</span>
+                <a href='tables/{{.}}?_rowLimit=100#indexes'>{{len .Indexes}}</a>
             {{end}}
             </td>
             {{if $.Database.Supports.Descriptions}}
