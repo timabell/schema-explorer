@@ -213,6 +213,10 @@
 
 <h2 id="data">Data</h2>
 
+<a href='#dataControls' class='jump-link button'>
+    <i class="fas fa-angle-double-down"></i>
+    Skip to Data Controls
+</a>
 
 {{if .TableParams.CardView}}
 <div class="cards">
@@ -284,6 +288,7 @@
 {{end}}
 
 <div class="sort-filter-info">
+<span id="dataControls"></span>
 
 {{ if .TableParams.Filter }}
     <table class='filter-info'>

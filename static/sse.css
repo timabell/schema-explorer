@@ -259,7 +259,7 @@ a.jump-link:hover {
     color: #333;
 }
 .jump-link *{
-    color: #333;
+    color: #333 !important;
 }
 
 /* children of button for font-awesome colouring */
