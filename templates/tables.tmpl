@@ -30,6 +30,7 @@
         <th>Rows</th>
         <th>Columns</th>
         <th>Fks</th>
+        <th>Indexes</th>
         {{if $.Database.Supports.Descriptions}}
         <th>Description</th>
         {{end}}
@@ -44,6 +45,11 @@
             <td>
             {{if .Fks}}
                 <span class="bare-value">{{len .Fks}}</span>
+            {{end}}
+            </td>
+            <td>
+            {{if .Indexes}}
+                <span class="bare-value">{{len .Indexes}}</span>
             {{end}}
             </td>
             {{if $.Database.Supports.Descriptions}}
