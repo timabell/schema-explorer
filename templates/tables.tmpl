@@ -22,6 +22,11 @@
                 <i class="fas fa-map-signs"></i>
                 Indexes</a>
         </li>
+        <li>
+            <a href='#columns' class='jump-link'>
+                <i class="fas fa-map-signs"></i>
+                Columns</a>
+        </li>
     </ul>
 </nav>
 
@@ -128,5 +133,72 @@
         </tbody>
     </table>
 </div>
+
+<h2 id="columns">Columns</h2>
+<table id="column-info" class="clicky-cells">
+    <thead>
+    <tr>
+        <th>Table</th>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Primary</th>
+        <th>Nulls</th>
+        <th>Outbound Foreign Key</th>
+        <th>Inbound Foreign Keys</th>
+        <th>Indexes</th>
+    {{if $.Database.Supports.Descriptions}}
+        <th>Description</th>
+    {{end}}
+    </tr>
+    </thead>
+    <tbody>
+    {{range .Database.Tables}}
+        {{$table := .}}
+        {{ range .Columns }}
+            <tr>
+                <td><span class="bare-value">{{$table}}</span></td>
+                <td><span class="bare-value">{{.Name}}</span></td>
+                <td><span class="bare-value">{{.Type}}</span></td>
+                <td><span class="bare-value">{{ if .IsInPrimaryKey}}<i class="fas fa-key"></i> Primary Key{{end}}</span></td>
+                <td>
+                {{if .Nullable}}
+                    <span class="bare-value nullable">
+                        <i class="fas fa-chess-board"></i>
+                        Nullable
+                    </span>
+                {{else}}
+                    <span class="bare-value notnull">
+                        <i class="fas fa-square-full"></i>
+                        NOT NULL
+                    </span>
+                {{end}}
+                </td>
+                <td>
+                {{range .Fks }}
+                    <a href="tables/{{.DestinationTable}}?_rowLimit=100">
+                    {{.DestinationTable}}({{.DestinationColumns}})
+                    </a>
+                {{end}}
+                </td>
+                <td>
+                {{range .InboundFks }}
+                    <a href="tables/{{.SourceTable}}?_rowLimit=100">
+                    {{.SourceTable}}({{.SourceColumns}})
+                    </a>
+                {{end}}
+                </td>
+                <td>
+                {{range .Indexes }}
+                        {{.Name}}
+                    {{end}}
+                </td>
+            {{if $.Database.Supports.Descriptions}}
+                <td><span class="bare-value">{{.Description}}</span></td>
+            {{end}}
+            </tr>
+        {{end}}
+    {{end}}
+    </tbody>
+</table>
 {{end}}
 {{end}}
