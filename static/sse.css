@@ -290,3 +290,6 @@ footer *, footer a, footer a:visited{
     .trail-info
     { display: none; }
 }
+:target {
+    background-color: #e6dada;
+}
