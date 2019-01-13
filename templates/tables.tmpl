@@ -87,7 +87,11 @@
     {{range .Database.Fks}}
     <tr>
         {{if $.Database.Supports.FkNames}}
-        <td>{{.Name}}</td>
+        <td>
+            <a href="tables/{{.SourceTable}}?_rowLimit=100#fk_{{.Name}}">
+                {{.Name}}
+            </a>
+        </td>
         {{end}}
         <td>
             <a href="tables/{{.SourceTable}}?_rowLimit=100">
@@ -120,8 +124,16 @@
         <tbody>
         {{range .Database.Indexes}}
         <tr>
-            <td><span class="bare-value">{{.Table}}</span></td>
-            <td><span class="bare-value">{{.Name}}</span></td>
+            <td>
+                <a href="tables/{{.Table}}?_rowLimit=100">
+                {{.Table}}
+                </a>
+            </td>
+            <td>
+                <a href="tables/{{.Table}}?_rowLimit=100#index_{{.Name}}">
+                {{.Name}}
+                </a>
+            </td>
             <td><span class="bare-value">{{.Columns.String}}</span></td>
             <td>
             {{if .IsUnique }}
@@ -156,8 +168,16 @@
         {{$table := .}}
         {{ range .Columns }}
             <tr>
-                <td><span class="bare-value">{{$table}}</span></td>
-                <td><span class="bare-value">{{.Name}}</span></td>
+                <td>
+                    <a href="tables/{{$table}}?_rowLimit=100">
+                    {{$table}}
+                    </a>
+                </td>
+                <td>
+                    <a href="tables/{{$table}}?_rowLimit=100#col_{{.Name}}">
+                    {{.Name}}
+                    </a>
+                </td>
                 <td><span class="bare-value">{{.Type}}</span></td>
                 <td><span class="bare-value">{{ if .IsInPrimaryKey}}<i class="fas fa-key"></i> Primary Key{{end}}</span></td>
                 <td>

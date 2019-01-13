@@ -67,7 +67,7 @@
     </tr>
     </thead>
 {{ range .Table.Columns }}
-    <tr>
+    <tr id="col_{{.Name}}">
         <td><span class="bare-value">{{ if .IsInPrimaryKey}}<i class="fas fa-key"></i> Primary Key{{end}}</span></td>
         <td><span class="bare-value">{{.Name}}</span></td>
         <td><span class="bare-value">{{.Type}}</span></td>
@@ -127,7 +127,7 @@
         </thead>
         <tbody>
         {{range .Table.Fks}}
-        <tr>
+        <tr id="fk_{{.Name}}">
         {{if $.Database.Supports.FkNames}}
             <td><span class="bare-value">{{.Name}}</span></td>
         {{end}}
@@ -196,7 +196,7 @@
         </thead>
         <tbody>
         {{range .Table.Indexes}}
-        <tr>
+        <tr id="index_{{.Name}}">
             <td><span class="bare-value">{{.Name}}</span></td>
             <td><span class="bare-value">{{.Columns.String}}</span></td>
             <td>
