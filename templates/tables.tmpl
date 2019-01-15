@@ -208,8 +208,10 @@
                 {{end}}
                 </td>
                 <td>
-                {{range .Indexes }}
-                        {{.Name}}
+                    {{range .Indexes }}
+                        <a href="tables/{{$table}}?_rowLimit=100#index_{{.Name}}">
+                            {{.Name}}
+                        </a>
                     {{end}}
                 </td>
             {{if $.Database.Supports.Descriptions}}
