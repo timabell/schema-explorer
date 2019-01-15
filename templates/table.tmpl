@@ -100,9 +100,11 @@
         {{end}}
         </td>
         <td>
-        {{range .Indexes }}
+            <span class="bare-value">
+            {{range .Indexes }}
                 {{.Name}}
             {{end}}
+            </span>
         </td>
     {{if $.Database.Supports.Descriptions}}
         <td><span class="bare-value">{{.Description}}</span></td>
