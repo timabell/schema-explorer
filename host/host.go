@@ -106,6 +106,16 @@ func requestSetup() (layoutData render.PageTemplateModel, dbReader reader.DbRead
 			// todo: send 500 error to client
 			return
 		}
+
+		// todo: move this somewhere sensible and allow the user to configure it
+		for _, tbl := range database.Tables {
+			for _, col := range tbl.Columns {
+				if col.Name == "Name" {
+					tbl.PeekColumns = append(tbl.PeekColumns, col)
+				}
+			}
+		}
+
 	}
 	return
 }
