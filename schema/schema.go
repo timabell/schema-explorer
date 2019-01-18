@@ -53,7 +53,8 @@ type Table struct {
 	InboundFks  []*Fk
 	Indexes     []*Index
 	Description string
-	RowCount    *int // pointer to allow us to tell the difference between zero and unknown
+	RowCount    *int       // pointer to allow us to tell the difference between zero and unknown
+	PeekColumns ColumnList // list of columns to show as a preview when this is a target for a join, e.g. the "Name" column. The schema readers are not expected to populate this field.
 }
 
 type TableList []*Table
