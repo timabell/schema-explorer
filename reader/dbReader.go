@@ -76,7 +76,11 @@ func GetDbReader() DbReader {
 	return createReader()
 }
 
-func GetRows(reader DbReader, table *schema.Table, params *params.TableParams) (rowsData []RowData, err error) {
+type PeekLookup struct {
+}
+
+// peek index is how to find the extra cols with data from the other side of a fk
+func GetRows(reader DbReader, table *schema.Table, params *params.TableParams) (rowsData []RowData, peekFinder *PeekLookup, err error) {
 	rows, err := reader.GetSqlRows(table, params)
 	if rows == nil {
 		panic("GetSqlRows() returned nil")
@@ -87,7 +91,7 @@ func GetRows(reader DbReader, table *schema.Table, params *params.TableParams) (
 	}
 	rowsData, err = GetAllData(len(table.Columns), rows)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	return
 }

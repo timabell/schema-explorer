@@ -129,14 +129,14 @@ func ShowTable(resp http.ResponseWriter, dbReader reader.DbReader, database *sch
 	unfilteredParams := tableParams.ClearPaging()
 	filteredRowCount, err := dbReader.GetRowCount(table, &unfilteredParams)
 	totalRowCount, err := dbReader.GetRowCount(table, &params.TableParams{})
-	rowsData, err := reader.GetRows(dbReader, table, tableParams)
+	rowsData, peekFinder, err := reader.GetRows(dbReader, table, tableParams)
 	if err != nil {
 		return err
 	}
 
 	rows := []cells{}
 	for _, rowData := range rowsData {
-		row := buildRow(rowData, table)
+		row := buildRow(rowData, peekFinder, table)
 		rows = append(rows, row)
 	}
 
@@ -231,11 +231,11 @@ func ShowTableAnalysis(resp http.ResponseWriter, dbReader reader.DbReader, datab
 	return nil
 }
 
-func buildRow(rowData reader.RowData, table *schema.Table) cells {
+func buildRow(rowData reader.RowData, peekFinder reader.PeekLookup, table *schema.Table) cells {
 	row := cells{}
 	for colIndex, col := range table.Columns {
 		cellData := rowData[colIndex]
-		valueHTML := buildCell(col, cellData, rowData)
+		valueHTML := buildCell(col, cellData, rowData, peekFinder)
 		row = append(row, template.HTML(valueHTML))
 	}
 	parentHTML := buildInwardCell(table.InboundFks, rowData, table.Columns)
@@ -300,7 +300,7 @@ func buildInwardLink(fk *schema.Fk, rowData reader.RowData) string {
 	return linkHTML
 }
 
-func buildCell(col *schema.Column, cellData interface{}, rowData reader.RowData) string {
+func buildCell(col *schema.Column, cellData interface{}, rowData reader.RowData, peekFinder *reader.PeekLookup) string {
 	if cellData == nil {
 		return "<span class='null bare-value'>[null]</span>"
 	}
