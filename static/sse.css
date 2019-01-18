@@ -292,3 +292,7 @@ footer *, footer a, footer a:visited{
 :target {
     background-color: #e6dada;
 }
+.peek {
+    color: #666;
+    margin-left: 0.75em;
+}
