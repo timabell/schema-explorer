@@ -325,7 +325,8 @@ func buildCell(col *schema.Column, cellData interface{}, rowData reader.RowData)
 		} else {
 			// otherwise put it in the link
 			fk := col.Fks[0]
-			valueHTML = valueHTML + buildCompleteFkHref(fk, multiFk, rowData, stringValue)
+			displayText := stringValue
+			valueHTML = valueHTML + buildCompleteFkHref(fk, multiFk, rowData, displayText)
 		}
 	} else {
 		valueHTML = "<span class='bare-value'>" + template.HTMLEscapeString(stringValue) + "</span> "
