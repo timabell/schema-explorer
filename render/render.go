@@ -314,7 +314,6 @@ func buildCell(col *schema.Column, cellData interface{}, rowData reader.RowData)
 		//  valueHTML = fmt.Sprintf("%s=", col.Fks.DestinationTable, col.Fks.DestinationColumns[0].Name)
 		//  valueHTML = valueHTML + template.HTMLEscapeString(stringValue)
 		//}else{
-		suffix := "&_rowLimit=100#data"
 		if len(col.Fks) > 1 {
 			valueHTML = "<span class='compound-value'>" + template.HTMLEscapeString(stringValue) + "</span> "
 			for _, fk := range col.Fks {
@@ -325,7 +324,8 @@ func buildCell(col *schema.Column, cellData interface{}, rowData reader.RowData)
 					cssClass = "fk multi"
 				}
 				joinedQueryData := buildQueryData(fk, rowData)
-				valueHTML = valueHTML + fmt.Sprintf("<a href='%s?%s%s' class='%s'>%s(%s)</a> ", fk.DestinationTable, joinedQueryData, suffix, cssClass, fk.DestinationTable, fk.DestinationColumns)
+				displayText := fmt.Sprintf("%s(%s)", fk.DestinationTable, fk.DestinationColumns)
+				valueHTML = valueHTML + buildFkHref(fk.DestinationTable, joinedQueryData, cssClass, displayText)
 			}
 		} else {
 			fk := col.Fks[0]
@@ -336,12 +336,17 @@ func buildCell(col *schema.Column, cellData interface{}, rowData reader.RowData)
 				cssClass = "fk single"
 			}
 			joinedQueryData := buildQueryData(fk, rowData)
-			valueHTML = valueHTML + fmt.Sprintf("<a href='%s?%s%s' class='%s'>%s</a> ", fk.DestinationTable, joinedQueryData, suffix, cssClass, template.HTMLEscapeString(stringValue))
+			valueHTML = valueHTML + buildFkHref(fk.DestinationTable, joinedQueryData, cssClass, stringValue)
 		}
 	} else {
 		valueHTML = "<span class='bare-value'>" + template.HTMLEscapeString(stringValue) + "</span> "
 	}
 	return valueHTML
+}
+
+func buildFkHref(table *schema.Table, query string, cssClass string, displayText string) string{
+	suffix := "&_rowLimit=100#data"
+	return fmt.Sprintf("<a href='%s?%s%s' class='%s'>%s</a> ", table, query, suffix, cssClass, template.HTMLEscapeString(displayText))
 }
 
 func buildQueryData(fk *schema.Fk, rowData reader.RowData) string {
