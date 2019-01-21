@@ -336,7 +336,8 @@ func buildCell(col *schema.Column, cellData interface{}, rowData reader.RowData)
 				cssClass = "fk single"
 			}
 			joinedQueryData := buildQueryData(fk, rowData)
-			valueHTML = valueHTML + buildFkHref(fk.DestinationTable, joinedQueryData, cssClass, stringValue)
+			displayText := stringValue
+			valueHTML = valueHTML + buildFkHref(fk.DestinationTable, joinedQueryData, cssClass, displayText)
 		}
 	} else {
 		valueHTML = "<span class='bare-value'>" + template.HTMLEscapeString(stringValue) + "</span> "
