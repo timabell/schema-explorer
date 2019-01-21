@@ -333,7 +333,7 @@ func allFks(dbc *sql.DB, database *schema.Database) (allFks []*schema.Fk, err er
 	return
 }
 
-func (model mssqlModel) GetSqlRows(table *schema.Table, params *params.TableParams) (rows *sql.Rows, err error) {
+func (model mssqlModel) GetSqlRows(table *schema.Table, params *params.TableParams, peekFinder *reader.PeekLookup) (rows *sql.Rows, err error) {
 	dbc, err := getConnection(model.connectionString)
 	if dbc == nil {
 		log.Println(err)

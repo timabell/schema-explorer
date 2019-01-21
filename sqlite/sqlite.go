@@ -283,7 +283,7 @@ func getIndexInfo(dbc *sql.DB, index *schema.Index, table *schema.Table) (err er
 	return
 }
 
-func (model sqliteModel) GetSqlRows(table *schema.Table, params *params.TableParams) (rows *sql.Rows, err error) {
+func (model sqliteModel) GetSqlRows(table *schema.Table, params *params.TableParams, peekFinder *reader.PeekLookup) (rows *sql.Rows, err error) {
 	dbc, err := getConnection(model.path)
 	if err != nil {
 		log.Print("GetRows failed to get connection")
@@ -291,7 +291,7 @@ func (model sqliteModel) GetSqlRows(table *schema.Table, params *params.TablePar
 	}
 	defer dbc.Close()
 
-	sql, values := buildQuery(table, params)
+	sql, values := buildQuery(table, params, peekFinder)
 	rows, err = dbc.Query(sql, values...)
 	if err != nil {
 		log.Print("GetRows failed to get query")
@@ -309,7 +309,7 @@ func (model sqliteModel) GetRowCount(table *schema.Table, params *params.TablePa
 	}
 	defer dbc.Close()
 
-	sql, values := buildQuery(table, params)
+	sql, values := buildQuery(table, params, nil)
 	sql = "select count(*) from (" + sql + ")"
 	rows, err := dbc.Query(sql, values...)
 	if err != nil {
@@ -363,8 +363,30 @@ func (model sqliteModel) GetAnalysis(table *schema.Table) (analysis []schema.Col
 	return
 }
 
-func buildQuery(table *schema.Table, params *params.TableParams) (sql string, values []interface{}) {
-	sql = "select * from [" + table.Name + "]"
+func buildQuery(table *schema.Table, params *params.TableParams, peekFinder *reader.PeekLookup) (sql string, values []interface{}) {
+	sql = "select t.*"
+
+	// peek cols
+	for fkIndex, fk := range table.Fks {
+		for _, peekCol := range fk.DestinationTable.PeekColumns {
+			sql = sql + fmt.Sprintf(", fk%d.[%s] fk%d_%s", fkIndex, peekCol, fkIndex, peekCol)
+		}
+	}
+
+	sql = sql + " from [" + table.Name + "] t"
+	// peek tables
+	for fkIndex, fk := range table.Fks {
+		if len(fk.DestinationTable.PeekColumns) == 0 {
+			continue
+		}
+		sql = sql + fmt.Sprintf(" left outer join [%s] fk%d on ", fk.DestinationTable.String(), fkIndex)
+		onPredicates := []string{}
+		for ix, sourceCol := range fk.SourceColumns {
+			onPredicates = append(onPredicates, fmt.Sprintf("t.[%s] = fk%d.[%s]", sourceCol, fkIndex, fk.DestinationColumns[ix]))
+		}
+		onString := strings.Join(onPredicates, " and ")
+		sql = sql + onString
+	}
 
 	query := params.Filter
 	if len(query) > 0 {
@@ -373,7 +395,7 @@ func buildQuery(table *schema.Table, params *params.TableParams) (sql string, va
 		values = make([]interface{}, 0, len(query))
 		for _, v := range query {
 			col := v.Field
-			clauses = append(clauses, "["+col.Name+"] = ?")
+			clauses = append(clauses, "t.["+col.Name+"] = ?")
 			values = append(values, v.Values[0]) // todo: maybe support multiple values
 		}
 		sql = sql + strings.Join(clauses, " and ")
@@ -382,7 +404,7 @@ func buildQuery(table *schema.Table, params *params.TableParams) (sql string, va
 	if len(params.Sort) > 0 {
 		var sortParts []string
 		for _, sortCol := range params.Sort {
-			sortString := "[" + sortCol.Column.Name + "]"
+			sortString := "t.[" + sortCol.Column.Name + "]"
 			if sortCol.Descending {
 				sortString = sortString + " desc"
 			}
@@ -394,6 +416,7 @@ func buildQuery(table *schema.Table, params *params.TableParams) (sql string, va
 	if params.RowLimit > 0 || params.SkipRows > 0 {
 		sql = sql + fmt.Sprintf(" limit %d, %d", params.SkipRows, params.RowLimit)
 	}
+	log.Println(sql)
 	return sql, values
 }
 

@@ -34,7 +34,7 @@ type DbReader interface {
 	UpdateRowCounts(database *schema.Database) (err error)
 
 	// get some data, obeying sorting, filtering etc in the table params
-	GetSqlRows(table *schema.Table, params *params.TableParams) (rows *sql.Rows, err error)
+	GetSqlRows(table *schema.Table, params *params.TableParams, peekFinder *PeekLookup) (rows *sql.Rows, err error)
 
 	// get a count for the supplied filters, for use with paging and overview info
 	GetRowCount(table *schema.Table, params *params.TableParams) (rowCount int, err error)
@@ -99,7 +99,8 @@ func (peekFinder PeekLookup) Find(peekFk *schema.Fk, peekCol *schema.Column) (pe
 }
 
 func GetRows(reader DbReader, table *schema.Table, params *params.TableParams) (rowsData []RowData, peekFinder *PeekLookup, err error) {
-	rows, err := reader.GetSqlRows(table, params)
+	peekFinder = &PeekLookup{}
+	rows, err := reader.GetSqlRows(table, params, peekFinder)
 	if rows == nil {
 		panic("GetSqlRows() returned nil")
 	}

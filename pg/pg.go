@@ -365,7 +365,7 @@ func readIndexes(dbc *sql.DB, database *schema.Database) (err error) {
 	return
 }
 
-func (model pgModel) GetSqlRows(table *schema.Table, params *params.TableParams) (rows *sql.Rows, err error) {
+func (model pgModel) GetSqlRows(table *schema.Table, params *params.TableParams, peekFinder *reader.PeekLookup) (rows *sql.Rows, err error) {
 	dbc, err := getConnection(model.connectionString)
 	if err != nil {
 		log.Print("GetRows failed to get connection")
