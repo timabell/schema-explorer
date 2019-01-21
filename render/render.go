@@ -231,7 +231,7 @@ func ShowTableAnalysis(resp http.ResponseWriter, dbReader reader.DbReader, datab
 	return nil
 }
 
-func buildRow(rowData reader.RowData, peekFinder reader.PeekLookup, table *schema.Table) cells {
+func buildRow(rowData reader.RowData, peekFinder *reader.PeekLookup, table *schema.Table) cells {
 	row := cells{}
 	for colIndex, col := range table.Columns {
 		cellData := rowData[colIndex]

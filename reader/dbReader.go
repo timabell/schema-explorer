@@ -76,10 +76,28 @@ func GetDbReader() DbReader {
 	return createReader()
 }
 
+// GetRows adds extra columns for peeking over foreign keys in the selected table,
+// which then need to be known about by the renderer. This class is the bridge between
+// the two sides.
 type PeekLookup struct {
+	fks []*schema.Fk // foreign keys referenced in this table/query
 }
 
-// peek index is how to find the extra cols with data from the other side of a fk
+// Figures out the index of the peek column in the returned dataset for the given fk & column.
+// Intended to be used by the renderer to get the data it needs for peeking.
+func (peekFinder PeekLookup) Find(peekFk *schema.Fk, peekCol *schema.Column) (peekDataIndex int){
+	peekDataIndex = 0
+	for _, storedFk := range peekFinder.fks{
+		for _, col := range storedFk.DestinationTable.PeekColumns{
+			if peekFk == storedFk && peekCol == col{
+				return
+			}
+			peekDataIndex++
+		}
+	}
+	panic("didn't find peek fk/col in PeekLookup data")
+}
+
 func GetRows(reader DbReader, table *schema.Table, params *params.TableParams) (rowsData []RowData, peekFinder *PeekLookup, err error) {
 	rows, err := reader.GetSqlRows(table, params)
 	if rows == nil {
