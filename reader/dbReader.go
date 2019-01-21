@@ -80,14 +80,14 @@ func GetDbReader() DbReader {
 // which then need to be known about by the renderer. This class is the bridge between
 // the two sides.
 type PeekLookup struct {
-	fks []*schema.Fk // foreign keys referenced in this table/query
+	Fks []*schema.Fk // foreign keys referenced in this table/query
 }
 
 // Figures out the index of the peek column in the returned dataset for the given fk & column.
 // Intended to be used by the renderer to get the data it needs for peeking.
 func (peekFinder PeekLookup) Find(peekFk *schema.Fk, peekCol *schema.Column) (peekDataIndex int){
 	peekDataIndex = 0
-	for _, storedFk := range peekFinder.fks{
+	for _, storedFk := range peekFinder.Fks{
 		for _, col := range storedFk.DestinationTable.PeekColumns{
 			if peekFk == storedFk && peekCol == col{
 				return
@@ -99,7 +99,16 @@ func (peekFinder PeekLookup) Find(peekFk *schema.Fk, peekCol *schema.Column) (pe
 }
 
 func GetRows(reader DbReader, table *schema.Table, params *params.TableParams) (rowsData []RowData, peekFinder *PeekLookup, err error) {
+
+	// load up all the fks that we have peek info for
 	peekFinder = &PeekLookup{}
+	for _, fk := range table.Fks {
+		if len(fk.DestinationTable.PeekColumns) == 0 {
+			continue
+		}
+		peekFinder.Fks = append(peekFinder.Fks, fk)
+	}
+
 	rows, err := reader.GetSqlRows(table, params, peekFinder)
 	if rows == nil {
 		panic("GetSqlRows() returned nil")

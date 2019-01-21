@@ -367,18 +367,16 @@ func buildQuery(table *schema.Table, params *params.TableParams, peekFinder *rea
 	sql = "select t.*"
 
 	// peek cols
-	for fkIndex, fk := range table.Fks {
+	for fkIndex, fk := range peekFinder.Fks {
 		for _, peekCol := range fk.DestinationTable.PeekColumns {
 			sql = sql + fmt.Sprintf(", fk%d.[%s] fk%d_%s", fkIndex, peekCol, fkIndex, peekCol)
 		}
 	}
 
 	sql = sql + " from [" + table.Name + "] t"
+
 	// peek tables
-	for fkIndex, fk := range table.Fks {
-		if len(fk.DestinationTable.PeekColumns) == 0 {
-			continue
-		}
+	for fkIndex, fk := range peekFinder.Fks {
 		sql = sql + fmt.Sprintf(" left outer join [%s] fk%d on ", fk.DestinationTable.String(), fkIndex)
 		onPredicates := []string{}
 		for ix, sourceCol := range fk.SourceColumns {
