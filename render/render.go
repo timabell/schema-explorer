@@ -317,16 +317,18 @@ func buildCell(col *schema.Column, cellData interface{}, rowData reader.RowData)
 		if len(col.Fks) > 1 {
 			valueHTML = "<span class='compound-value'>" + template.HTMLEscapeString(stringValue) + "</span> "
 			for _, fk := range col.Fks {
-				cssClass := buildFkCss(fk, true)
-				joinedQueryData := buildQueryData(fk, rowData)
+				multiCol := true
 				displayText := fmt.Sprintf("%s(%s)", fk.DestinationTable, fk.DestinationColumns)
+				cssClass := buildFkCss(fk, multiCol)
+				joinedQueryData := buildQueryData(fk, rowData)
 				valueHTML = valueHTML + buildFkHref(fk.DestinationTable, joinedQueryData, cssClass, displayText)
 			}
 		} else {
 			fk := col.Fks[0]
-			cssClass := buildFkCss(fk, false)
-			joinedQueryData := buildQueryData(fk, rowData)
+			multiCol := false
 			displayText := stringValue
+			cssClass := buildFkCss(fk, multiCol)
+			joinedQueryData := buildQueryData(fk, rowData)
 			valueHTML = valueHTML + buildFkHref(fk.DestinationTable, joinedQueryData, cssClass, displayText)
 		}
 	} else {
