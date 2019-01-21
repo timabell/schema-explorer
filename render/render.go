@@ -304,28 +304,27 @@ func buildCell(col *schema.Column, cellData interface{}, rowData reader.RowData)
 	if cellData == nil {
 		return "<span class='null bare-value'>[null]</span>"
 	}
-	var valueHTML string
 	hasFk := col.Fks != nil
 	stringValue := *reader.DbValueToString(cellData, col.Type)
 	if hasFk {
 		multiFk := len(col.Fks) > 1
 		if multiFk {
 			// if multiple fks on this col, put val first
-			valueHTML = "<span class='compound-value'>" + template.HTMLEscapeString(stringValue) + "</span> "
+			valueHTML := "<span class='compound-value'>" + template.HTMLEscapeString(stringValue) + "</span> "
 			for _, fk := range col.Fks {
 				displayText := fmt.Sprintf("%s(%s)", fk.DestinationTable, fk.DestinationColumns)
 				valueHTML = valueHTML + buildCompleteFkHref(fk, multiFk, rowData, displayText)
 			}
+			return valueHTML
 		} else {
 			// otherwise put it in the link
 			fk := col.Fks[0]
 			displayText := stringValue
-			valueHTML = valueHTML + buildCompleteFkHref(fk, multiFk, rowData, displayText)
+			return buildCompleteFkHref(fk, multiFk, rowData, displayText)
 		}
 	} else {
-		valueHTML = "<span class='bare-value'>" + template.HTMLEscapeString(stringValue) + "</span> "
+		return "<span class='bare-value'>" + template.HTMLEscapeString(stringValue) + "</span> "
 	}
-	return valueHTML
 }
 
 func buildCompleteFkHref(fk *schema.Fk, multiFk bool, rowData reader.RowData, displayText string)string{
