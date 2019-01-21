@@ -153,7 +153,6 @@ td .bare-value{
 td .compound-value{
     padding: 0.5em;
 }
-td .compound-value,
 td .parent-fk-link,
 td a {
     background-color: #ddd;

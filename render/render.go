@@ -304,44 +304,49 @@ func buildCell(col *schema.Column, cellData interface{}, rowData reader.RowData)
 	if cellData == nil {
 		return "<span class='null bare-value'>[null]</span>"
 	}
-	var valueHTML string
-	hasFk := col.Fks != nil
 	stringValue := *reader.DbValueToString(cellData, col.Type)
-	if hasFk {
-		// todo: possible performance optimisation to save lots of lookups within a loop for the majority case of single column fks
-		//if len(col.Fks.SourceColumns) ==1{
-		//	valueHTML = fmt.Sprintf("<a href='%s?%s=", col.Fks.DestinationTable, col.Fks.DestinationColumns[0].Name)
-		//  valueHTML = fmt.Sprintf("%s=", col.Fks.DestinationTable, col.Fks.DestinationColumns[0].Name)
-		//  valueHTML = valueHTML + template.HTMLEscapeString(stringValue)
-		//}else{
-		suffix := "&_rowLimit=100#data"
-		if len(col.Fks) > 1 {
-			valueHTML = "<span class='compound-value'>" + template.HTMLEscapeString(stringValue) + "</span> "
+	if col.Fks != nil {
+		multiFk := len(col.Fks) > 1
+		if multiFk {
+			// if multiple fks on this col, put val first
+			valueHTML := "<span class='compound-value'>" + template.HTMLEscapeString(stringValue) + "</span> "
 			for _, fk := range col.Fks {
-				var cssClass string
-				if len(fk.SourceColumns) > 1 {
-					cssClass = "fk compound multi"
-				} else {
-					cssClass = "fk multi"
-				}
-				joinedQueryData := buildQueryData(fk, rowData)
-				valueHTML = valueHTML + fmt.Sprintf("<a href='%s?%s%s' class='%s'>%s(%s)</a> ", fk.DestinationTable, joinedQueryData, suffix, cssClass, fk.DestinationTable, fk.DestinationColumns)
+				displayText := fmt.Sprintf("%s(%s)", fk.DestinationTable, fk.DestinationColumns)
+				valueHTML = valueHTML + buildCompleteFkHref(fk, multiFk, rowData, displayText)
 			}
+			return valueHTML
 		} else {
+			// otherwise put it in the link
 			fk := col.Fks[0]
-			var cssClass string
-			if len(fk.SourceColumns) > 1 {
-				cssClass = "fk compound single"
-			} else {
-				cssClass = "fk single"
-			}
-			joinedQueryData := buildQueryData(fk, rowData)
-			valueHTML = valueHTML + fmt.Sprintf("<a href='%s?%s%s' class='%s'>%s</a> ", fk.DestinationTable, joinedQueryData, suffix, cssClass, template.HTMLEscapeString(stringValue))
+			displayText := stringValue
+			return buildCompleteFkHref(fk, multiFk, rowData, displayText)
 		}
 	} else {
-		valueHTML = "<span class='bare-value'>" + template.HTMLEscapeString(stringValue) + "</span> "
+		return "<span class='bare-value'>" + template.HTMLEscapeString(stringValue) + "</span> "
 	}
-	return valueHTML
+}
+
+func buildCompleteFkHref(fk *schema.Fk, multiFk bool, rowData reader.RowData, displayText string)string{
+	cssClass := buildFkCss(fk, multiFk)
+	joinedQueryData := buildQueryData(fk, rowData)
+	return buildFkHref(fk.DestinationTable, joinedQueryData, cssClass, displayText)
+}
+
+func buildFkCss(fk *schema.Fk, multiFkCol bool) string{
+	typeString := "single"
+	if multiFkCol{
+		typeString = "multi"
+	}
+	if len(fk.SourceColumns) > 1 {
+		return "fk compound " + typeString
+	} else {
+		return "fk " + typeString
+	}
+}
+
+func buildFkHref(table *schema.Table, query string, cssClass string, displayText string) string{
+	suffix := "&_rowLimit=100#data"
+	return fmt.Sprintf("<a href='%s?%s%s' class='%s'>%s</a> ", table, query, suffix, cssClass, template.HTMLEscapeString(displayText))
 }
 
 func buildQueryData(fk *schema.Fk, rowData reader.RowData) string {
