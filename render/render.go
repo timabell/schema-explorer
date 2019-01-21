@@ -317,24 +317,23 @@ func buildCell(col *schema.Column, cellData interface{}, rowData reader.RowData)
 		if len(col.Fks) > 1 {
 			valueHTML = "<span class='compound-value'>" + template.HTMLEscapeString(stringValue) + "</span> "
 			for _, fk := range col.Fks {
-				multiCol := true
 				displayText := fmt.Sprintf("%s(%s)", fk.DestinationTable, fk.DestinationColumns)
-				cssClass := buildFkCss(fk, multiCol)
-				joinedQueryData := buildQueryData(fk, rowData)
-				valueHTML = valueHTML + buildFkHref(fk.DestinationTable, joinedQueryData, cssClass, displayText)
+				valueHTML = valueHTML + buildCompleteFkHref(fk, true, rowData, displayText)
 			}
 		} else {
 			fk := col.Fks[0]
-			multiCol := false
-			displayText := stringValue
-			cssClass := buildFkCss(fk, multiCol)
-			joinedQueryData := buildQueryData(fk, rowData)
-			valueHTML = valueHTML + buildFkHref(fk.DestinationTable, joinedQueryData, cssClass, displayText)
+			valueHTML = valueHTML + buildCompleteFkHref(fk, false, rowData, stringValue)
 		}
 	} else {
 		valueHTML = "<span class='bare-value'>" + template.HTMLEscapeString(stringValue) + "</span> "
 	}
 	return valueHTML
+}
+
+func buildCompleteFkHref(fk *schema.Fk, multiCol bool, rowData reader.RowData, displayText string)string{
+	cssClass := buildFkCss(fk, multiCol)
+	joinedQueryData := buildQueryData(fk, rowData)
+	return buildFkHref(fk.DestinationTable, joinedQueryData, cssClass, displayText)
 }
 
 func buildFkCss(fk *schema.Fk, multiFkCol bool) string{
