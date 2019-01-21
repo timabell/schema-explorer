@@ -317,24 +317,14 @@ func buildCell(col *schema.Column, cellData interface{}, rowData reader.RowData)
 		if len(col.Fks) > 1 {
 			valueHTML = "<span class='compound-value'>" + template.HTMLEscapeString(stringValue) + "</span> "
 			for _, fk := range col.Fks {
-				var cssClass string
-				if len(fk.SourceColumns) > 1 {
-					cssClass = "fk compound multi"
-				} else {
-					cssClass = "fk multi"
-				}
+				cssClass := buildFkCss(fk, true)
 				joinedQueryData := buildQueryData(fk, rowData)
 				displayText := fmt.Sprintf("%s(%s)", fk.DestinationTable, fk.DestinationColumns)
 				valueHTML = valueHTML + buildFkHref(fk.DestinationTable, joinedQueryData, cssClass, displayText)
 			}
 		} else {
 			fk := col.Fks[0]
-			var cssClass string
-			if len(fk.SourceColumns) > 1 {
-				cssClass = "fk compound single"
-			} else {
-				cssClass = "fk single"
-			}
+			cssClass := buildFkCss(fk, false)
 			joinedQueryData := buildQueryData(fk, rowData)
 			displayText := stringValue
 			valueHTML = valueHTML + buildFkHref(fk.DestinationTable, joinedQueryData, cssClass, displayText)
@@ -343,6 +333,18 @@ func buildCell(col *schema.Column, cellData interface{}, rowData reader.RowData)
 		valueHTML = "<span class='bare-value'>" + template.HTMLEscapeString(stringValue) + "</span> "
 	}
 	return valueHTML
+}
+
+func buildFkCss(fk *schema.Fk, multiFkCol bool) string{
+	typeString := "single"
+	if multiFkCol{
+		typeString = "multi"
+	}
+	if len(fk.SourceColumns) > 1 {
+		return "fk compound " + typeString
+	} else {
+		return "fk " + typeString
+	}
 }
 
 func buildFkHref(table *schema.Table, query string, cssClass string, displayText string) string{
