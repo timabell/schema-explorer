@@ -304,9 +304,8 @@ func buildCell(col *schema.Column, cellData interface{}, rowData reader.RowData)
 	if cellData == nil {
 		return "<span class='null bare-value'>[null]</span>"
 	}
-	hasFk := col.Fks != nil
 	stringValue := *reader.DbValueToString(cellData, col.Type)
-	if hasFk {
+	if col.Fks != nil {
 		multiFk := len(col.Fks) > 1
 		if multiFk {
 			// if multiple fks on this col, put val first
