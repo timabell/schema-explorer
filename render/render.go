@@ -308,12 +308,6 @@ func buildCell(col *schema.Column, cellData interface{}, rowData reader.RowData)
 	hasFk := col.Fks != nil
 	stringValue := *reader.DbValueToString(cellData, col.Type)
 	if hasFk {
-		// todo: possible performance optimisation to save lots of lookups within a loop for the majority case of single column fks
-		//if len(col.Fks.SourceColumns) ==1{
-		//	valueHTML = fmt.Sprintf("<a href='%s?%s=", col.Fks.DestinationTable, col.Fks.DestinationColumns[0].Name)
-		//  valueHTML = fmt.Sprintf("%s=", col.Fks.DestinationTable, col.Fks.DestinationColumns[0].Name)
-		//  valueHTML = valueHTML + template.HTMLEscapeString(stringValue)
-		//}else{
 		multiFk := len(col.Fks) > 1
 		if multiFk {
 			// if multiple fks on this col, put val first
