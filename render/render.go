@@ -315,13 +315,15 @@ func buildCell(col *schema.Column, cellData interface{}, rowData reader.RowData)
 		//  valueHTML = valueHTML + template.HTMLEscapeString(stringValue)
 		//}else{
 		multiFk := len(col.Fks) > 1
-		if len(col.Fks) > 1 {
+		if multiFk {
+			// if multiple fks on this col, put val first
 			valueHTML = "<span class='compound-value'>" + template.HTMLEscapeString(stringValue) + "</span> "
 			for _, fk := range col.Fks {
 				displayText := fmt.Sprintf("%s(%s)", fk.DestinationTable, fk.DestinationColumns)
 				valueHTML = valueHTML + buildCompleteFkHref(fk, multiFk, rowData, displayText)
 			}
 		} else {
+			// otherwise put it in the link
 			fk := col.Fks[0]
 			valueHTML = valueHTML + buildCompleteFkHref(fk, multiFk, rowData, stringValue)
 		}
