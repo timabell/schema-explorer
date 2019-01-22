@@ -332,7 +332,7 @@ func buildCompleteFkHref(fk *schema.Fk, multiFk bool, rowData reader.RowData, di
 
 	peekHtml := ""
 	for _, peekFk := range peekFinder.Fks{
-		for _, peekColumn := range peekFk.DestinationColumns{
+		for _, peekColumn := range peekFk.DestinationTable.PeekColumns{
 			peekIndex := peekFinder.Find(peekFk, peekColumn)
 			peekString := template.HTMLEscapeString(*reader.DbValueToString(rowData[peekIndex], peekColumn.Type))
 			peekHtml = peekHtml + fmt.Sprintf("<span class='peek'>%s</span>", peekString)
