@@ -95,7 +95,7 @@ func (peekFinder *PeekLookup) Find(peekFk *schema.Fk, peekCol *schema.Column) (p
 			peekDataIndex++
 		}
 	}
-	panic("didn't find peek fk/col in PeekLookup data")
+	panic(fmt.Sprintf("didn't find peek fk %s col %s in PeekLookup data", peekFk, peekCol))
 }
 
 func (peekFinder *PeekLookup) peekColumnCount() (count int){
