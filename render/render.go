@@ -326,7 +326,7 @@ func buildCell(col *schema.Column, cellData interface{}, rowData reader.RowData,
 	}
 }
 
-func buildCompleteFkHref(fk *schema.Fk, multiFk bool, rowData reader.RowData, displayText string, peekFinder *reader.PeekLookup)string{
+func buildCompleteFkHref(fk *schema.Fk, multiFk bool, rowData reader.RowData, displayText string, peekFinder *reader.PeekLookup) string {
 	cssClass := buildFkCss(fk, multiFk)
 	joinedQueryData := buildQueryData(fk, rowData)
 
@@ -340,9 +340,9 @@ func buildCompleteFkHref(fk *schema.Fk, multiFk bool, rowData reader.RowData, di
 	return buildFkHref(fk.DestinationTable, joinedQueryData, cssClass, displayText, peekHtml)
 }
 
-func buildFkCss(fk *schema.Fk, multiFkCol bool) string{
+func buildFkCss(fk *schema.Fk, multiFkCol bool) string {
 	typeString := "single"
-	if multiFkCol{
+	if multiFkCol {
 		typeString = "multi"
 	}
 	if len(fk.SourceColumns) > 1 {
@@ -352,7 +352,7 @@ func buildFkCss(fk *schema.Fk, multiFkCol bool) string{
 	}
 }
 
-func buildFkHref(table *schema.Table, query string, cssClass string, displayText string, peekHtml string) string{
+func buildFkHref(table *schema.Table, query string, cssClass string, displayText string, peekHtml string) string {
 	suffix := "&_rowLimit=100#data"
 	return fmt.Sprintf("<a href='%s?%s%s' class='%s'>%s%s</a> ", table, query, suffix, cssClass, template.HTMLEscapeString(displayText), peekHtml)
 }
