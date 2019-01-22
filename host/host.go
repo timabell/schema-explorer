@@ -110,7 +110,7 @@ func requestSetup() (layoutData render.PageTemplateModel, dbReader reader.DbRead
 		// todo: move this somewhere sensible and allow the user to configure it
 		for _, tbl := range database.Tables {
 			for _, col := range tbl.Columns {
-				if col.Name == "Name" {
+				if strings.ToLower(col.Name) == "name" {
 					tbl.PeekColumns = append(tbl.PeekColumns, col)
 				}
 			}
