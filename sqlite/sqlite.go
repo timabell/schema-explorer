@@ -414,7 +414,6 @@ func buildQuery(table *schema.Table, params *params.TableParams, peekFinder *rea
 	if params.RowLimit > 0 || params.SkipRows > 0 {
 		sql = sql + fmt.Sprintf(" limit %d, %d", params.SkipRows, params.RowLimit)
 	}
-	log.Println(sql)
 	return sql, values
 }
 
