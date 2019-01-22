@@ -320,3 +320,25 @@ create table "select" (
 insert into "select" (id, "table") values (1, 'times');
 
 -- select * from "select";
+
+create table peek(
+  id int primary key,
+  something varchar(10),
+  poke_id int,
+  pike_id int,
+  foreign key (poke_id) references poke(id),
+  foreign key (pike_id) references pike(id)
+);
+
+create table poke(
+  id int primary key,
+  name varchar(10) -- peekable (or at least configured to be so)
+);
+
+create table pike(
+  id int primary key,
+  lake varchar(10) -- not peekable
+);
+
+insert into poke (id, name) values (2, 'piggy');
+insert into peek (id, something, poke_id) values (1, 'wiggy', 2);
