@@ -459,7 +459,7 @@ func checkFilterAndSort(dbReader reader.DbReader, database *schema.Database, t *
 		Sort:     []params.SortCol{{Column: colourCol, Descending: false}, {Column: sizeCol, Descending: true}},
 		RowLimit: 10,
 	}
-	rows, err := reader.GetRows(dbReader, table, tableParams)
+	rows, _, err := reader.GetRows(dbReader, table, tableParams)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -508,7 +508,7 @@ func checkPaging(dbReader reader.DbReader, database *schema.Database, t *testing
 }
 
 func pagingChecker(dbReader reader.DbReader, table *schema.Table, tableParams *params.TableParams, t *testing.T, idCol *schema.Column) {
-	rows, err := reader.GetRows(dbReader, table, tableParams)
+	rows, _, err := reader.GetRows(dbReader, table, tableParams)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -601,7 +601,7 @@ func checkKeywordEscaping(dbReader reader.DbReader, database *schema.Database, t
 		Filter:   params.FieldFilterList{filter},
 		Sort:     []params.SortCol{{Column: col, Descending: false}},
 	}
-	rows, err := reader.GetRows(dbReader, table, params)
+	rows, _, err := reader.GetRows(dbReader, table, params)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -623,7 +623,7 @@ func Test_GetRows(t *testing.T) {
 	params := &params.TableParams{
 		RowLimit: 999,
 	}
-	rows, err := reader.GetRows(dbReader, table, params)
+	rows, _, err := reader.GetRows(dbReader, table, params)
 	if err != nil {
 		t.Fatal(err)
 	}
