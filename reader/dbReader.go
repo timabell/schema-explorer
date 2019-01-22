@@ -85,7 +85,7 @@ type PeekLookup struct {
 
 // Figures out the index of the peek column in the returned dataset for the given fk & column.
 // Intended to be used by the renderer to get the data it needs for peeking.
-func (peekFinder PeekLookup) Find(peekFk *schema.Fk, peekCol *schema.Column) (peekDataIndex int){
+func (peekFinder *PeekLookup) Find(peekFk *schema.Fk, peekCol *schema.Column) (peekDataIndex int){
 	peekDataIndex = 0
 	for _, storedFk := range peekFinder.Fks{
 		for _, col := range storedFk.DestinationTable.PeekColumns{
@@ -96,6 +96,13 @@ func (peekFinder PeekLookup) Find(peekFk *schema.Fk, peekCol *schema.Column) (pe
 		}
 	}
 	panic("didn't find peek fk/col in PeekLookup data")
+}
+
+func (peekFinder *PeekLookup) peekColumnCount() (count int){
+	for _, storedFk := range peekFinder.Fks{
+		count += len(storedFk.SourceColumns)
+	}
+	return
 }
 
 func GetRows(reader DbReader, table *schema.Table, params *params.TableParams) (rowsData []RowData, peekFinder *PeekLookup, err error) {
@@ -117,7 +124,7 @@ func GetRows(reader DbReader, table *schema.Table, params *params.TableParams) (
 	if len(table.Columns) == 0 {
 		panic("No columns found when reading table data table")
 	}
-	rowsData, err = GetAllData(len(table.Columns), rows)
+	rowsData, err = GetAllData(len(table.Columns)+peekFinder.peekColumnCount(), rows)
 	if err != nil {
 		return nil, nil, err
 	}
