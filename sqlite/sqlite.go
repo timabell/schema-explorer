@@ -309,7 +309,7 @@ func (model sqliteModel) GetRowCount(table *schema.Table, params *params.TablePa
 	}
 	defer dbc.Close()
 
-	sql, values := buildQuery(table, params, nil)
+	sql, values := buildQuery(table, params, &reader.PeekLookup{})
 	sql = "select count(*) from (" + sql + ")"
 	rows, err := dbc.Query(sql, values...)
 	if err != nil {
