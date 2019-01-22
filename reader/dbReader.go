@@ -80,16 +80,17 @@ func GetDbReader() DbReader {
 // which then need to be known about by the renderer. This class is the bridge between
 // the two sides.
 type PeekLookup struct {
-	Fks []*schema.Fk // foreign keys referenced in this table/query
+	Fks         []*schema.Fk
+	indexOffset int
 }
 
 // Figures out the index of the peek column in the returned dataset for the given fk & column.
 // Intended to be used by the renderer to get the data it needs for peeking.
-func (peekFinder *PeekLookup) Find(peekFk *schema.Fk, peekCol *schema.Column) (peekDataIndex int){
-	peekDataIndex = 0
-	for _, storedFk := range peekFinder.Fks{
-		for _, col := range storedFk.DestinationTable.PeekColumns{
-			if peekFk == storedFk && peekCol == col{
+func (peekFinder *PeekLookup) Find(peekFk *schema.Fk, peekCol *schema.Column) (peekDataIndex int) {
+	peekDataIndex = peekFinder.indexOffset
+	for _, storedFk := range peekFinder.Fks {
+		for _, col := range storedFk.DestinationTable.PeekColumns {
+			if peekFk == storedFk && peekCol == col {
 				return
 			}
 			peekDataIndex++
@@ -98,8 +99,8 @@ func (peekFinder *PeekLookup) Find(peekFk *schema.Fk, peekCol *schema.Column) (p
 	panic(fmt.Sprintf("didn't find peek fk %s col %s in PeekLookup data", peekFk, peekCol))
 }
 
-func (peekFinder *PeekLookup) peekColumnCount() (count int){
-	for _, storedFk := range peekFinder.Fks{
+func (peekFinder *PeekLookup) peekColumnCount() (count int) {
+	for _, storedFk := range peekFinder.Fks {
 		count += len(storedFk.SourceColumns)
 	}
 	return
@@ -115,6 +116,7 @@ func GetRows(reader DbReader, table *schema.Table, params *params.TableParams) (
 		}
 		peekFinder.Fks = append(peekFinder.Fks, fk)
 	}
+	peekFinder.indexOffset = len(table.Columns)
 
 	rows, err := reader.GetSqlRows(table, params, peekFinder)
 	if rows == nil {
