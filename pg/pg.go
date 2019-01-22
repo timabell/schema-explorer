@@ -373,7 +373,7 @@ func (model pgModel) GetSqlRows(table *schema.Table, params *params.TableParams,
 	}
 	defer dbc.Close()
 
-	sql, values := buildQuery(table, params)
+	sql, values := buildQuery(table, params, peekFinder)
 	rows, err = dbc.Query(sql, values...)
 	if err != nil {
 		log.Print("GetRows failed to get query")
@@ -391,7 +391,7 @@ func (model pgModel) GetRowCount(table *schema.Table, params *params.TableParams
 	}
 	defer dbc.Close()
 
-	sql, values := buildQuery(table, params)
+	sql, values := buildQuery(table, params, &reader.PeekLookup{})
 	sql = "select count(*) from (" + sql + ") as x"
 	rows, err := dbc.Query(sql, values...)
 	if err != nil {
@@ -445,8 +445,29 @@ func (model pgModel) GetAnalysis(table *schema.Table) (analysis []schema.ColumnA
 	return
 }
 
-func buildQuery(table *schema.Table, params *params.TableParams) (sql string, values []interface{}) {
-	sql = "select * from \"" + table.Schema + "\".\"" + table.Name + "\""
+func buildQuery(table *schema.Table, params *params.TableParams, peekFinder *reader.PeekLookup) (sql string, values []interface{}) {
+	sql = "select t.*"
+
+	// peek cols
+	for fkIndex, fk := range peekFinder.Fks {
+		for _, peekCol := range fk.DestinationTable.PeekColumns {
+			sql = sql + fmt.Sprintf(", fk%d.\"%s\" fk%d_%s", fkIndex, peekCol, fkIndex, peekCol)
+		}
+	}
+
+	sql = sql + " from \"" + table.Schema + "\".\"" + table.Name + "\" t"
+
+	// peek tables
+	for fkIndex, fk := range peekFinder.Fks {
+		sql = sql + fmt.Sprintf(" left outer join \"%s\".\"%s\" fk%d on ", fk.DestinationTable.Schema, fk.DestinationTable.Name, fkIndex)
+		onPredicates := []string{}
+		for ix, sourceCol := range fk.SourceColumns {
+			onPredicates = append(onPredicates, fmt.Sprintf("t.\"%s\" = fk%d.\"%s\"", sourceCol, fkIndex, fk.DestinationColumns[ix]))
+		}
+		onString := strings.Join(onPredicates, " and ")
+		sql = sql + onString
+	}
+
 	query := params.Filter
 	if len(query) > 0 {
 		sql = sql + " where "
