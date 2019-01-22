@@ -104,6 +104,9 @@ func Test_ReadSchema(t *testing.T) {
 
 	t.Log("Checking keyword escaping")
 	checkKeywordEscaping(reader, database, t)
+
+	t.Log("Checking peeking")
+	checkPeeking(reader, database, t)
 }
 
 func checkIndexes(database *schema.Database, t *testing.T) {
@@ -608,6 +611,19 @@ func checkKeywordEscaping(dbReader reader.DbReader, database *schema.Database, t
 	checkInt(1, len(rows), "expected one row in keyword table", t)
 	val := fmt.Sprintf("%s", rows[0][1])
 	checkStr("times", val, "incorrect value in keyword row", t)
+}
+
+func checkPeeking(dbReader reader.DbReader, database *schema.Database, t *testing.T) {
+	table := findTable(schema.Table{Schema: database.DefaultSchemaName, Name: "peek"}, database, t)
+
+	params := &params.TableParams{
+		RowLimit: 999,
+	}
+	_, peek, err := reader.GetRows(dbReader, table, params)
+	if err != nil {
+		t.Fatal(err)
+	}
+	checkInt(1, len(peek.Fks), "peekable fks", t)
 }
 
 func Test_GetRows(t *testing.T) {
