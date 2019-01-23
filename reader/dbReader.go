@@ -101,7 +101,7 @@ func (peekFinder *PeekLookup) Find(peekFk *schema.Fk, peekCol *schema.Column) (p
 
 func (peekFinder *PeekLookup) peekColumnCount() (count int) {
 	for _, storedFk := range peekFinder.Fks {
-		count += len(storedFk.SourceColumns)
+		count += len(storedFk.DestinationTable.PeekColumns)
 	}
 	return
 }
