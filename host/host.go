@@ -25,8 +25,10 @@ var driver string
 var cachingEnabled bool
 var database *schema.Database
 var connectionName string
+var options *reader.SseOptions
 
-func RunServer(options reader.SseOptions) {
+func RunServer(sourceOptions *reader.SseOptions) {
+	options = sourceOptions
 	driver = *options.Driver
 	cachingEnabled = options.Live == nil || !*options.Live
 	if options.ConnectionDisplayName != nil {
@@ -116,11 +118,11 @@ func requestSetup() (layoutData render.PageTemplateModel, dbReader reader.DbRead
 }
 
 func setupPeekList() {
-	peekFilename := "peek-config.txt"
+	peekFilename := *options.PeekConfigPath
 	log.Printf("Loading peek config from %s ...", peekFilename)
 	file, err := os.Open(peekFilename)
 	if err != nil {
-		log.Printf("Failed to load %s, disabling peek feature. %s", peekFilename, err)
+		log.Printf("Failed to load %s, disabling peek feature, check peek-config-path configuration. %s", peekFilename, err)
 		return
 	}
 	defer file.Close()

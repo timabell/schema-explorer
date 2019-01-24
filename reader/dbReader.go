@@ -17,11 +17,12 @@ type SseOptions struct {
 	ConnectionDisplayName *string `short:"n" long:"display-name" description:"A display name for this connection" env:"schemaexplorer_display_name"`
 	ListenOnAddress       *string `short:"a" long:"listen-on-address" description:"address to listen on" default:"localhost" env:"schemaexplorer_listen_on_address"` // localhost so that it's secure by default, only listen for local connections
 	ListenOnPort          *int    `short:"p" long:"listen-on-port" description:"port to listen on" default:"8080" env:"schemaexplorer_listen_on_port"`
+	PeekConfigPath        *string `long:"peek-config-path" description:"path to peek configuration file" default:"peek-config.txt" env:"schemaexplorer_peek_config_path"`
 }
 
 // todo: arg parsing and options shouldn't be here
-var Options = SseOptions{}
-var ArgParser = flags.NewParser(&Options, flags.Default)
+var Options = &SseOptions{}
+var ArgParser = flags.NewParser(Options, flags.Default)
 
 type DbReader interface {
 	// does select or something to make sure we have a working db connection
