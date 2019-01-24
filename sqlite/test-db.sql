@@ -326,18 +326,12 @@ create table peek(
   something varchar(10),
   poke_id int,
   pike_id int,
-  foreign key (poke_id) references poke(id),
-  foreign key (pike_id) references pike(id)
+  foreign key (poke_id) references poke(id)
 );
 
 create table poke(
   id int primary key,
-  name varchar(10) -- peekable (or at least configured to be so)
-);
-
-create table pike(
-  id int primary key,
-  lake varchar(10) -- not peekable
+  name varchar(10)
 );
 
 insert into poke (id, name) values (2, 'piggy');

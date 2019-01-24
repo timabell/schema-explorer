@@ -615,15 +615,28 @@ func checkKeywordEscaping(dbReader reader.DbReader, database *schema.Database, t
 
 func checkPeeking(dbReader reader.DbReader, database *schema.Database, t *testing.T) {
 	table := findTable(schema.Table{Schema: database.DefaultSchemaName, Name: "peek"}, database, t)
+	peekFk := table.Fks[0]
+	peekTable := peekFk.DestinationTable
+	peekColumn := peekTable.Columns[1]
+	peekTable.PeekColumns = append(peekTable.PeekColumns, peekColumn)
 
 	params := &params.TableParams{
 		RowLimit: 999,
 	}
-	_, peek, err := reader.GetRows(dbReader, table, params)
+	data, peek, err := reader.GetRows(dbReader, table, params)
 	if err != nil {
 		t.Fatal(err)
 	}
+	if data == nil {
+		t.Fatal("peek failed: getrows returned nil")
+	}
 	checkInt(1, len(peek.Fks), "peekable fks", t)
+	peekIndex := peek.Find(peekFk, peekColumn)
+	sourceTableColumnCount := 4             // as per sql files "create table"
+	baseIndex := sourceTableColumnCount - 1 // convert from one to zero-based
+	peekColumnNumber := 1
+	checkInt(baseIndex+peekColumnNumber, peekIndex, "peekIndex", t)
+	checkStr("piggy", fmt.Sprintf("%s", data[0][peekIndex]), "peeked data", t)
 }
 
 func Test_GetRows(t *testing.T) {
