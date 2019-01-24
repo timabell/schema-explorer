@@ -129,14 +129,14 @@ func ShowTable(resp http.ResponseWriter, dbReader reader.DbReader, database *sch
 	unfilteredParams := tableParams.ClearPaging()
 	filteredRowCount, err := dbReader.GetRowCount(table, &unfilteredParams)
 	totalRowCount, err := dbReader.GetRowCount(table, &params.TableParams{})
-	rowsData, err := reader.GetRows(dbReader, table, tableParams)
+	rowsData, peekFinder, err := reader.GetRows(dbReader, table, tableParams)
 	if err != nil {
 		return err
 	}
 
 	rows := []cells{}
 	for _, rowData := range rowsData {
-		row := buildRow(rowData, table)
+		row := buildRow(rowData, peekFinder, table)
 		rows = append(rows, row)
 	}
 
@@ -231,11 +231,11 @@ func ShowTableAnalysis(resp http.ResponseWriter, dbReader reader.DbReader, datab
 	return nil
 }
 
-func buildRow(rowData reader.RowData, table *schema.Table) cells {
+func buildRow(rowData reader.RowData, peekFinder *reader.PeekLookup, table *schema.Table) cells {
 	row := cells{}
 	for colIndex, col := range table.Columns {
 		cellData := rowData[colIndex]
-		valueHTML := buildCell(col, cellData, rowData)
+		valueHTML := buildCell(col, cellData, rowData, peekFinder)
 		row = append(row, template.HTML(valueHTML))
 	}
 	parentHTML := buildInwardCell(table.InboundFks, rowData, table.Columns)
@@ -300,7 +300,7 @@ func buildInwardLink(fk *schema.Fk, rowData reader.RowData) string {
 	return linkHTML
 }
 
-func buildCell(col *schema.Column, cellData interface{}, rowData reader.RowData) string {
+func buildCell(col *schema.Column, cellData interface{}, rowData reader.RowData, peekFinder *reader.PeekLookup) string {
 	if cellData == nil {
 		return "<span class='null bare-value'>[null]</span>"
 	}
@@ -312,29 +312,45 @@ func buildCell(col *schema.Column, cellData interface{}, rowData reader.RowData)
 			valueHTML := "<span class='compound-value'>" + template.HTMLEscapeString(stringValue) + "</span> "
 			for _, fk := range col.Fks {
 				displayText := fmt.Sprintf("%s(%s)", fk.DestinationTable, fk.DestinationColumns)
-				valueHTML = valueHTML + buildCompleteFkHref(fk, multiFk, rowData, displayText)
+				valueHTML = valueHTML + buildCompleteFkHref(fk, multiFk, rowData, displayText, peekFinder)
 			}
 			return valueHTML
 		} else {
 			// otherwise put it in the link
 			fk := col.Fks[0]
 			displayText := stringValue
-			return buildCompleteFkHref(fk, multiFk, rowData, displayText)
+			return buildCompleteFkHref(fk, multiFk, rowData, displayText, peekFinder)
 		}
 	} else {
 		return "<span class='bare-value'>" + template.HTMLEscapeString(stringValue) + "</span> "
 	}
 }
 
-func buildCompleteFkHref(fk *schema.Fk, multiFk bool, rowData reader.RowData, displayText string)string{
+func buildCompleteFkHref(fk *schema.Fk, multiFk bool, rowData reader.RowData, displayText string, peekFinder *reader.PeekLookup) string {
 	cssClass := buildFkCss(fk, multiFk)
 	joinedQueryData := buildQueryData(fk, rowData)
-	return buildFkHref(fk.DestinationTable, joinedQueryData, cssClass, displayText)
+
+	peekHtml := ""
+	for _, peekColumn := range fk.DestinationTable.PeekColumns {
+		peekIndex := peekFinder.Find(fk, peekColumn)
+		val := rowData[peekIndex]
+		var peekString string
+		if val == nil {
+			// This could be null because the current table's fk col is null in which case we get no value (so nothing to peek)
+			// or it could be because the value we are peeking at is null, which isn't very interesting to see so we'll not show it.
+			peekString = ""
+		} else {
+			peekString = template.HTMLEscapeString(*reader.DbValueToString(val, peekColumn.Type))
+		}
+		peekHtml = peekHtml + fmt.Sprintf("<span class='peek'>%s</span>", peekString)
+	}
+
+	return buildFkHref(fk.DestinationTable, joinedQueryData, cssClass, displayText, peekHtml)
 }
 
-func buildFkCss(fk *schema.Fk, multiFkCol bool) string{
+func buildFkCss(fk *schema.Fk, multiFkCol bool) string {
 	typeString := "single"
-	if multiFkCol{
+	if multiFkCol {
 		typeString = "multi"
 	}
 	if len(fk.SourceColumns) > 1 {
@@ -344,9 +360,9 @@ func buildFkCss(fk *schema.Fk, multiFkCol bool) string{
 	}
 }
 
-func buildFkHref(table *schema.Table, query string, cssClass string, displayText string) string{
+func buildFkHref(table *schema.Table, query string, cssClass string, displayText string, peekHtml string) string {
 	suffix := "&_rowLimit=100#data"
-	return fmt.Sprintf("<a href='%s?%s%s' class='%s'>%s</a> ", table, query, suffix, cssClass, template.HTMLEscapeString(displayText))
+	return fmt.Sprintf("<a href='%s?%s%s' class='%s'>%s%s</a> ", table, query, suffix, cssClass, template.HTMLEscapeString(displayText), peekHtml)
 }
 
 func buildQueryData(fk *schema.Fk, rowData reader.RowData) string {

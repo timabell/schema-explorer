@@ -1,0 +1,25 @@
+# http://schemaexplorer.io/
+# This file configures which columns will be loaded from the other side of a foreign key.
+# Place this file next the schema explorer executable and name it peek-config.txt
+
+# Lines starting with # will be ignored along with blank lines.
+# Each line is a golang regex https://golang.org/pkg/regexp/ that will be matched against schema.table.column, (table.column for sqlite)
+# schema/table/column names are converted to lower-case before comparing with the below regexes
+
+# Customise this file to suit your database (but make sure you keep your copy when upgrading schema explorer).
+
+# Some sensible defaults to peek
+name
+\.title$
+\.code$
+\.email$
+
+# Examples:
+# ^finance\.invoices\.invoice_date$   - match exactly one column in one table
+# ^public\..*\..*code.*$              - match any column with "code" in the name, but only in the "public" schema
+# name       - match any column with "name" in the name (but will match everything if you happen to have name in your schema or table)
+# \.title$   - match any column called title
+# \.code$    - match any column called code
+# \.email$   - match any column called email
+
+# Why not share yours to help others, you can fork this one from https://gist.github.com/timabell/6874ab9c58797bd3a1af82769b355a26

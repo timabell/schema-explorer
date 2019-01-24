@@ -8,11 +8,14 @@ import (
 	"bitbucket.org/timabell/sql-data-viewer/render"
 	"bitbucket.org/timabell/sql-data-viewer/schema"
 	"bitbucket.org/timabell/sql-data-viewer/trail"
+	"bufio"
 	"fmt"
 	"github.com/gorilla/mux"
 	"log"
 	"net/http"
 	"net/http/httputil"
+	"os"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -22,8 +25,10 @@ var driver string
 var cachingEnabled bool
 var database *schema.Database
 var connectionName string
+var options *reader.SseOptions
 
-func RunServer(options reader.SseOptions) {
+func RunServer(sourceOptions *reader.SseOptions) {
+	options = sourceOptions
 	driver = *options.Driver
 	cachingEnabled = options.Live == nil || !*options.Live
 	if options.ConnectionDisplayName != nil {
@@ -47,6 +52,7 @@ func RunServer(options reader.SseOptions) {
 		// todo: send 500 error to client
 		return
 	}
+	setupPeekList()
 
 	r := mux.NewRouter()
 	r.PathPrefix("/static/").Handler(http.FileServer(http.Dir(".")))
@@ -106,8 +112,41 @@ func requestSetup() (layoutData render.PageTemplateModel, dbReader reader.DbRead
 			// todo: send 500 error to client
 			return
 		}
+		setupPeekList()
 	}
 	return
+}
+
+func setupPeekList() {
+	peekFilename := *options.PeekConfigPath
+	log.Printf("Loading peek config from %s ...", peekFilename)
+	file, err := os.Open(peekFilename)
+	if err != nil {
+		log.Printf("Failed to load %s, disabling peek feature, check peek-config-path configuration. %s", peekFilename, err)
+		return
+	}
+	defer file.Close()
+	scanner := bufio.NewScanner(file)
+	var regexes []regexp.Regexp
+	for scanner.Scan() {
+		line := strings.TrimSpace(scanner.Text())
+		if line == "" || strings.HasPrefix(line, "#") {
+			continue // skip blanks and comments
+		}
+		regexes = append(regexes, *regexp.MustCompile(line))
+	}
+	for _, tbl := range database.Tables {
+		for _, col := range tbl.Columns {
+			for _, regex := range regexes {
+				fullName := tbl.String() + "." + col.Name
+				fullNameLower := strings.ToLower(fullName)
+				if regex.MatchString(fullNameLower) {
+					tbl.PeekColumns = append(tbl.PeekColumns, col)
+					log.Printf(" - peek configured for %s", fullName)
+				}
+			}
+		}
+	}
 }
 
 func ClearTableTrailHandler(resp http.ResponseWriter, req *http.Request) {

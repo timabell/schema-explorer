@@ -17,11 +17,12 @@ type SseOptions struct {
 	ConnectionDisplayName *string `short:"n" long:"display-name" description:"A display name for this connection" env:"schemaexplorer_display_name"`
 	ListenOnAddress       *string `short:"a" long:"listen-on-address" description:"address to listen on" default:"localhost" env:"schemaexplorer_listen_on_address"` // localhost so that it's secure by default, only listen for local connections
 	ListenOnPort          *int    `short:"p" long:"listen-on-port" description:"port to listen on" default:"8080" env:"schemaexplorer_listen_on_port"`
+	PeekConfigPath        *string `long:"peek-config-path" description:"path to peek configuration file" default:"peek-config.txt" env:"schemaexplorer_peek_config_path"`
 }
 
 // todo: arg parsing and options shouldn't be here
-var Options = SseOptions{}
-var ArgParser = flags.NewParser(&Options, flags.Default)
+var Options = &SseOptions{}
+var ArgParser = flags.NewParser(Options, flags.Default)
 
 type DbReader interface {
 	// does select or something to make sure we have a working db connection
@@ -34,7 +35,7 @@ type DbReader interface {
 	UpdateRowCounts(database *schema.Database) (err error)
 
 	// get some data, obeying sorting, filtering etc in the table params
-	GetSqlRows(table *schema.Table, params *params.TableParams) (rows *sql.Rows, err error)
+	GetSqlRows(table *schema.Table, params *params.TableParams, peekFinder *PeekLookup) (rows *sql.Rows, err error)
 
 	// get a count for the supplied filters, for use with paging and overview info
 	GetRowCount(table *schema.Table, params *params.TableParams) (rowCount int, err error)
@@ -76,8 +77,49 @@ func GetDbReader() DbReader {
 	return createReader()
 }
 
-func GetRows(reader DbReader, table *schema.Table, params *params.TableParams) (rowsData []RowData, err error) {
-	rows, err := reader.GetSqlRows(table, params)
+// GetRows adds extra columns for peeking over foreign keys in the selected table,
+// which then need to be known about by the renderer. This class is the bridge between
+// the two sides.
+type PeekLookup struct {
+	Fks         []*schema.Fk
+	indexOffset int
+}
+
+// Figures out the index of the peek column in the returned dataset for the given fk & column.
+// Intended to be used by the renderer to get the data it needs for peeking.
+func (peekFinder *PeekLookup) Find(peekFk *schema.Fk, peekCol *schema.Column) (peekDataIndex int) {
+	peekDataIndex = peekFinder.indexOffset
+	for _, storedFk := range peekFinder.Fks {
+		for _, col := range storedFk.DestinationTable.PeekColumns {
+			if peekFk == storedFk && peekCol == col {
+				return
+			}
+			peekDataIndex++
+		}
+	}
+	panic(fmt.Sprintf("didn't find peek fk %s col %s in PeekLookup data", peekFk, peekCol))
+}
+
+func (peekFinder *PeekLookup) peekColumnCount() (count int) {
+	for _, storedFk := range peekFinder.Fks {
+		count += len(storedFk.DestinationTable.PeekColumns)
+	}
+	return
+}
+
+func GetRows(reader DbReader, table *schema.Table, params *params.TableParams) (rowsData []RowData, peekFinder *PeekLookup, err error) {
+
+	// load up all the fks that we have peek info for
+	peekFinder = &PeekLookup{}
+	for _, fk := range table.Fks {
+		if len(fk.DestinationTable.PeekColumns) == 0 {
+			continue
+		}
+		peekFinder.Fks = append(peekFinder.Fks, fk)
+	}
+	peekFinder.indexOffset = len(table.Columns)
+
+	rows, err := reader.GetSqlRows(table, params, peekFinder)
 	if rows == nil {
 		panic("GetSqlRows() returned nil")
 	}
@@ -85,9 +127,9 @@ func GetRows(reader DbReader, table *schema.Table, params *params.TableParams) (
 	if len(table.Columns) == 0 {
 		panic("No columns found when reading table data table")
 	}
-	rowsData, err = GetAllData(len(table.Columns), rows)
+	rowsData, err = GetAllData(len(table.Columns)+peekFinder.peekColumnCount(), rows)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	return
 }
