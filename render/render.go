@@ -333,7 +333,15 @@ func buildCompleteFkHref(fk *schema.Fk, multiFk bool, rowData reader.RowData, di
 	peekHtml := ""
 	for _, peekColumn := range fk.DestinationTable.PeekColumns {
 		peekIndex := peekFinder.Find(fk, peekColumn)
-		peekString := template.HTMLEscapeString(*reader.DbValueToString(rowData[peekIndex], peekColumn.Type))
+		val := rowData[peekIndex]
+		var peekString string
+		if val == nil {
+			// This could be null because the current table's fk col is null in which case we get no value (so nothing to peek)
+			// or it could be because the value we are peeking at is null, which isn't very interesting to see so we'll not show it.
+			peekString = ""
+		} else {
+			peekString = template.HTMLEscapeString(*reader.DbValueToString(val, peekColumn.Type))
+		}
 		peekHtml = peekHtml + fmt.Sprintf("<span class='peek'>%s</span>", peekString)
 	}
 
