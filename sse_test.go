@@ -619,24 +619,39 @@ func checkPeeking(dbReader reader.DbReader, database *schema.Database, t *testin
 	peekTable := peekFk.DestinationTable
 	peekColumn := peekTable.Columns[1]
 	peekTable.PeekColumns = append(peekTable.PeekColumns, peekColumn)
+	filterColumn := findColumn(table, "dumb_filter", t)
 
 	params := &params.TableParams{
 		RowLimit: 999,
+		Filter:   params.FieldFilterList{{Field: filterColumn, Values: []string{"filtration"}}}, // add a filter to check where clauses join properly
+		Sort:     []params.SortCol{{Column: filterColumn, Descending: false}},                   // add a filter to check order by clauses works with peek joins
 	}
 	data, peek, err := reader.GetRows(dbReader, table, params)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if data == nil {
-		t.Fatal("peek failed: getrows returned nil")
-	}
+
+	// check peek lookup data
 	checkInt(1, len(peek.Fks), "peekable fks", t)
 	peekIndex := peek.Find(peekFk, peekColumn)
-	sourceTableColumnCount := 4             // as per sql files "create table"
+	sourceTableColumnCount := 5             // as per sql files "create table"
 	baseIndex := sourceTableColumnCount - 1 // convert from one to zero-based
 	peekColumnNumber := 1
 	checkInt(baseIndex+peekColumnNumber, peekIndex, "peekIndex", t)
-	checkStr("piggy", fmt.Sprintf("%s", data[0][peekIndex]), "peeked data", t)
+
+	// check returned peek data
+	if data == nil {
+		t.Fatal("peek failed: getrows returned nil")
+	}
+	checkInt(sourceTableColumnCount+1, len(data[0]), "columns in result set", t)
+	checkInt(3, len(data), "data rows for peeking at", t)
+	checkStr("piggy", fmt.Sprintf("%s", data[0][peekIndex]), "peeked data with string", t)
+	if data[1][peekIndex] != nil{
+		t.Fatal("peeked data with null in peek table wasn't nil")
+	}
+	if data[2][peekIndex] != nil{
+		t.Fatal("peeked data with null in source")
+	}
 }
 
 func Test_GetRows(t *testing.T) {
@@ -697,4 +712,13 @@ func findTable(tableToFind schema.Table, database *schema.Database, t *testing.T
 		t.Fatal(tableToFind.String() + " table missing")
 	}
 	return table
+}
+
+// error if not found
+func findColumn(table *schema.Table, columnName string, t *testing.T) (column *schema.Column) {
+	_, column = table.FindColumn(columnName)
+	if column == nil {
+		t.Fatalf("column missing %s.%s", table, columnName)
+	}
+	return
 }
