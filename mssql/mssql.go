@@ -341,7 +341,7 @@ func (model mssqlModel) GetSqlRows(table *schema.Table, params *params.TablePara
 	}
 	defer dbc.Close()
 
-	sql, values := buildQuery(table, params)
+	sql, values := buildQuery(table, params, peekFinder)
 	rows, err = dbc.Query(sql, values...)
 	if params.SkipRows > 0 && len(params.Sort) == 0 {
 		// Can't use offset or row_number without a sort order so use a hack.
@@ -368,7 +368,7 @@ func (model mssqlModel) GetRowCount(table *schema.Table, params *params.TablePar
 	}
 	defer dbc.Close()
 
-	sql, values := buildQuery(table, params)
+	sql, values := buildQuery(table, params, &reader.PeekLookup{})
 	sql = "select count(*) from (" + sql + ") as x"
 	rows, err := dbc.Query(sql, values...)
 	if err != nil {
@@ -421,7 +421,7 @@ func (model mssqlModel) GetAnalysis(table *schema.Table) (analysis []schema.Colu
 	return
 }
 
-func buildQuery(table *schema.Table, params *params.TableParams) (sql string, values []interface{}) {
+func buildQuery(table *schema.Table, params *params.TableParams, peekFinder *reader.PeekLookup) (sql string, values []interface{}) {
 	// Limitation: we can't support paging (offset/skip) without a sort order so
 	// 		params.SkipRows will be ignored if there is no sorting supplied.
 	// As a less performant alternative to keep things consistent we'll fetch the preceding rows and throw them away
@@ -433,7 +433,27 @@ func buildQuery(table *schema.Table, params *params.TableParams) (sql string, va
 		sql = sql + " top " + strconv.Itoa(params.RowLimit+params.SkipRows)
 	}
 
-	sql = sql + " * from [" + table.Schema + "].[" + table.Name + "]"
+	sql = sql + " t.*"
+
+	// peek cols
+	for fkIndex, fk := range peekFinder.Fks {
+		for _, peekCol := range fk.DestinationTable.PeekColumns {
+			sql = sql + fmt.Sprintf(", fk%d.[%s] fk%d_%s", fkIndex, peekCol, fkIndex, peekCol)
+		}
+	}
+
+	sql = sql + " from [" + table.Schema + "].[" + table.Name + "] t"
+
+	// peek tables
+	for fkIndex, fk := range peekFinder.Fks {
+		sql = sql + fmt.Sprintf(" left outer join [%s].[%s] fk%d on ", fk.DestinationTable.Schema, fk.DestinationTable.Name, fkIndex)
+		onPredicates := []string{}
+		for ix, sourceCol := range fk.SourceColumns {
+			onPredicates = append(onPredicates, fmt.Sprintf("t.[%s] = fk%d.[%s]", sourceCol, fkIndex, fk.DestinationColumns[ix]))
+		}
+		onString := strings.Join(onPredicates, " and ")
+		sql = sql + onString
+	}
 
 	query := params.Filter
 	if len(query) > 0 {
@@ -442,7 +462,7 @@ func buildQuery(table *schema.Table, params *params.TableParams) (sql string, va
 		values = make([]interface{}, 0, len(query))
 		for _, v := range query {
 			col := v.Field
-			clauses = append(clauses, "["+col.Name+"] = ?")
+			clauses = append(clauses, "t.["+col.Name+"] = ?")
 			values = append(values, v.Values[0]) // todo: maybe support multiple values
 		}
 		sql = sql + strings.Join(clauses, " and ")
@@ -451,7 +471,7 @@ func buildQuery(table *schema.Table, params *params.TableParams) (sql string, va
 	if len(params.Sort) > 0 {
 		var sortParts []string
 		for _, sortCol := range params.Sort {
-			sortString := "[" + sortCol.Column.Name + "]"
+			sortString := "t.[" + sortCol.Column.Name + "]"
 			if sortCol.Descending {
 				sortString = sortString + " desc"
 			}
