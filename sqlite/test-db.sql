@@ -321,6 +321,15 @@ insert into "select" (id, "table") values (1, 'times');
 
 -- select * from "select";
 
+create table poke(
+  id int primary key,
+  name varchar(10),
+  dumb_filter varchar(10) -- name clash to induce error if not qualified with table name/alias
+);
+insert into poke (id, name) values (11, 'piggy');
+insert into poke (id, name) values (12, null);
+
+
 create table peek(
   id int primary key,
   something varchar(10),
@@ -329,15 +338,6 @@ create table peek(
   pike_id int,
   foreign key (poke_id) references poke(id)
 );
-
-create table poke(
-  id int primary key,
-  name varchar(10),
-  dumb_filter varchar(10) -- name clash to induce error if not qualified with table name/alias
-);
-
-insert into poke (id, name) values (11, 'piggy');
-insert into poke (id, name) values (12, null);
 
 insert into peek (id, something, poke_id) values (1, 'wiggy', 11);
 insert into peek (id, something, poke_id) values (2, 'weggy', 12);
