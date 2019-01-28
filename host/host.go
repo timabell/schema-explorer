@@ -59,7 +59,8 @@ func RunServer(sourceOptions *reader.SseOptions) {
 	r.HandleFunc("/", TableListHandler)
 	r.HandleFunc("/table-trail", TableTrailHandler)
 	r.HandleFunc("/table-trail/clear", ClearTableTrailHandler)
-	r.HandleFunc("/tables/{tableName}", TableHandler)
+	r.HandleFunc("/tables/{tableName}", TableInfoHandler)
+	r.HandleFunc("/tables/{tableName}/data", TableDataHandler)
 	r.HandleFunc("/tables/{tableName}/analyse-data", AnalyseTableHandler)
 	r.Use(loggingHandler)
 	listenOnHostPort := fmt.Sprintf("%s:%d", *options.ListenOnAddress, *options.ListenOnPort) // e.g. localhost:8080 or 0.0.0.0:80
@@ -177,7 +178,15 @@ func TableTrailHandler(resp http.ResponseWriter, req *http.Request) {
 	}
 }
 
-func TableHandler(resp http.ResponseWriter, req *http.Request) {
+func TableDataHandler(resp http.ResponseWriter, req *http.Request) {
+	TableHandler(resp, req, true)
+}
+
+func TableInfoHandler(resp http.ResponseWriter, req *http.Request) {
+	TableHandler(resp, req, false)
+}
+
+func TableHandler(resp http.ResponseWriter, req *http.Request, dataOnly bool) {
 	layoutData, dbReader, err := requestSetup()
 	if err != nil {
 		// todo: client error
@@ -220,7 +229,7 @@ func TableHandler(resp http.ResponseWriter, req *http.Request) {
 	trail.AddTable(table)
 	SetCookie(trail, resp)
 
-	err = render.ShowTable(resp, dbReader, database, table, params, layoutData)
+	err = render.ShowTable(resp, dbReader, database, table, params, layoutData, dataOnly)
 	if err != nil {
 		fmt.Println("error rendering table: ", err)
 		return

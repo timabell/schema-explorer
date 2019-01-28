@@ -70,6 +70,7 @@ type tableAnalysisDataViewModel struct {
 
 var tablesTemplate *template.Template
 var tableTemplate *template.Template
+var tableDataTemplate *template.Template
 var tableAnalysisTemplate *template.Template
 var tableTrailTemplate *template.Template
 
@@ -101,6 +102,10 @@ func SetupTemplate() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	tableDataTemplate, err = template.Must(templates.Clone()).ParseGlob("templates/table-data.tmpl")
+	if err != nil {
+		log.Fatal(err)
+	}
 	tableAnalysisTemplate, err = template.Must(templates.Clone()).ParseGlob("templates/table-analysis.tmpl")
 	if err != nil {
 		log.Fatal(err)
@@ -125,7 +130,7 @@ func ShowTableList(resp http.ResponseWriter, database *schema.Database, layoutDa
 	}
 }
 
-func ShowTable(resp http.ResponseWriter, dbReader reader.DbReader, database *schema.Database, table *schema.Table, tableParams *params.TableParams, layoutData PageTemplateModel) error {
+func ShowTable(resp http.ResponseWriter, dbReader reader.DbReader, database *schema.Database, table *schema.Table, tableParams *params.TableParams, layoutData PageTemplateModel, dataOnly bool) error {
 	unfilteredParams := tableParams.ClearPaging()
 	filteredRowCount, err := dbReader.GetRowCount(table, &unfilteredParams)
 	totalRowCount, err := dbReader.GetRowCount(table, &params.TableParams{})
@@ -142,13 +147,15 @@ func ShowTable(resp http.ResponseWriter, dbReader reader.DbReader, database *sch
 
 	diagramTables := []*schema.Table{table}
 	var tableLinks []fkViewModel
-	for _, tableFks := range table.Fks {
-		diagramTables = append(diagramTables, tableFks.DestinationTable)
-		tableLinks = append(tableLinks, fkViewModel{Source: *tableFks.SourceTable, Destination: *tableFks.DestinationTable})
-	}
-	for _, inboundFks := range table.InboundFks {
-		diagramTables = append(diagramTables, inboundFks.SourceTable)
-		tableLinks = append(tableLinks, fkViewModel{Source: *inboundFks.SourceTable, Destination: *inboundFks.DestinationTable})
+	if !dataOnly {
+		for _, tableFks := range table.Fks {
+			diagramTables = append(diagramTables, tableFks.DestinationTable)
+			tableLinks = append(tableLinks, fkViewModel{Source: *tableFks.SourceTable, Destination: *tableFks.DestinationTable})
+		}
+		for _, inboundFks := range table.InboundFks {
+			diagramTables = append(diagramTables, inboundFks.SourceTable)
+			tableLinks = append(tableLinks, fkViewModel{Source: *inboundFks.SourceTable, Destination: *inboundFks.DestinationTable})
+		}
 	}
 
 	viewModel := tableDataViewModel{
@@ -167,7 +174,11 @@ func ShowTable(resp http.ResponseWriter, dbReader reader.DbReader, database *sch
 
 	viewModel.LayoutData.Title = fmt.Sprintf("%s | %s", table.String(), viewModel.LayoutData.Title)
 
-	err = tableTemplate.ExecuteTemplate(resp, "layout", viewModel)
+	if dataOnly {
+		err = tableDataTemplate.ExecuteTemplate(resp, "layout", viewModel)
+	} else {
+		err = tableTemplate.ExecuteTemplate(resp, "layout", viewModel)
+	}
 	if err != nil {
 		log.Print("template execution error ", err)
 	}
