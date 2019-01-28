@@ -2,12 +2,16 @@
 
 <h2 id="data">Data</h2>
 
-<a href="/tables/{{$.Table}}/data?{{$.TableParams.AsQueryString}}" target="_blank">Open data in new window</a>
-
-<a href='#dataControls' class='jump-link button'>
-    <i class="fas fa-angle-double-down"></i>
-    Skip to Data Controls
-</a>
+<div>
+    <a href='#dataControls' class='jump-link button'>
+        <i class="fas fa-angle-double-down"></i>
+        Skip to Data Controls
+    </a>
+    <a href="/tables/{{$.Table}}/data?{{$.TableParams.AsQueryString}}" target="_blank" class="button">
+        Open data in new window
+        <i class="fas fa-external-link-alt"></i>
+    </a>
+</div>
 
 {{if .TableParams.CardView}}
 <div class="cards">
