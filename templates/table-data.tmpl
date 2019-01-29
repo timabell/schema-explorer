@@ -1,3 +1,17 @@
+{{define "common-headers"}}
+<div id="justTheDataHeaders">
+    <i class="fas fa-database"></i>
+    {{.LayoutData.ConnectionName}}
+
+    &nbsp; &nbsp; &nbsp;
+
+    <i class="fas fa-table"></i>
+    {{.Table.Name}}
+</div>
+{{end}}
+
 {{define "content"}}
+<div id="justTheData">
 {{template "_table-data" .}}
+</div>
 {{end}}

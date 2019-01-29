@@ -296,3 +296,9 @@ footer *, footer a, footer a:visited{
     color: #666;
     margin-left: 0.75em;
 }
+#justTheData table{
+    overflow: inherit;
+}
+#justTheData .new-window-button{
+    display: none;
+}
