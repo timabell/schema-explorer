@@ -307,7 +307,7 @@ func buildInwardLink(fk *schema.Fk, rowData reader.RowData) string {
 	}
 	var joinedQueryData = strings.Join(queryData, "&")
 	suffix := "&_rowLimit=100#data"
-	linkHTML := fmt.Sprintf("<a href='%s?%s%s' class='parent-fk-link'>%s</a>", fk.SourceTable, joinedQueryData, suffix, fk.SourceColumns)
+	linkHTML := fmt.Sprintf("<a href='/tables/%s?%s%s' class='parent-fk-link'>%s</a>", fk.SourceTable, joinedQueryData, suffix, fk.SourceColumns)
 	return linkHTML
 }
 
@@ -373,7 +373,7 @@ func buildFkCss(fk *schema.Fk, multiFkCol bool) string {
 
 func buildFkHref(table *schema.Table, query string, cssClass string, displayText string, peekHtml string) string {
 	suffix := "&_rowLimit=100#data"
-	return fmt.Sprintf("<a href='%s?%s%s' class='%s'>%s%s</a> ", table, query, suffix, cssClass, template.HTMLEscapeString(displayText), peekHtml)
+	return fmt.Sprintf("<a href='/tables/%s?%s%s' class='%s'>%s%s</a> ", table, query, suffix, cssClass, template.HTMLEscapeString(displayText), peekHtml)
 }
 
 func buildQueryData(fk *schema.Fk, rowData reader.RowData) string {
