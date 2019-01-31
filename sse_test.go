@@ -646,10 +646,10 @@ func checkPeeking(dbReader reader.DbReader, database *schema.Database, t *testin
 	checkInt(sourceTableColumnCount+1, len(data[0]), "columns in result set", t)
 	checkInt(3, len(data), "data rows for peeking at", t)
 	checkStr("piggy", fmt.Sprintf("%s", data[0][peekIndex]), "peeked data with string", t)
-	if data[1][peekIndex] != nil{
+	if data[1][peekIndex] != nil {
 		t.Fatal("peeked data with null in peek table wasn't nil")
 	}
-	if data[2][peekIndex] != nil{
+	if data[2][peekIndex] != nil {
 		t.Fatal("peeked data with null in source")
 	}
 }

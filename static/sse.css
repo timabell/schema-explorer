@@ -296,3 +296,17 @@ footer *, footer a, footer a:visited{
     color: #666;
     margin-left: 0.75em;
 }
+#justTheDataHeaders{
+    margin-bottom: 1em;
+}
+#justTheData table{
+    overflow: inherit;
+}
+#justTheDataHeaders .context-link{
+    text-decoration: none;
+    display: inline-block;
+    padding: 0.25em;
+}
+#justTheDataHeaders .context-link:hover{
+    background-color: #ddd;
+}

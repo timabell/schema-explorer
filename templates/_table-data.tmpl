@@ -1,0 +1,259 @@
+{{define "_table-data"}}
+
+{{if .TableParams.CardView}}
+<div class="cards">
+{{ range .Rows }}
+{{$val := .}}
+{{$refsLen := len .}}
+{{$refsIndex := minus $refsLen 1}}
+    <table class="card-view clicky-cells">
+    {{ range $i, $col :=  $.Table.Columns }}
+        <tr>
+            <th title='type: {{.Type}}'>
+            {{ if .IsInPrimaryKey}}<i class="fas fa-key" title="Primary Key"></i>{{end}}
+            {{.Name}}
+            </th>
+            <td>{{index $val $i}}</td>
+        </tr>
+    {{end}}
+    {{if $.Table.InboundFks}}
+        <tr>
+            <th class='references'>Referenced by</th>
+            <td>{{index $val $refsIndex}}</td>
+        </tr>
+    {{end}}
+    </table>
+{{end}}
+</div>
+{{else}}
+<table class="data-table-view clicky-cells">
+    <thead>
+    <tr>
+    {{ range .Table.Columns }}
+        <th title='Field data type: {{.Type}}' class="sortable">
+            <a href="?{{($.TableParams.AddSort .).AsQueryString}}#data" class="fk">
+                        <span class="sort-markers">
+                        {{ if $.TableParams.IsSorted . }}
+                            {{ if $.TableParams.IsSortedAsc . }}
+                                <i class="fas fa-sort-up"> </i>
+                                        asc
+                            {{end}}
+                            {{ if $.TableParams.IsSortedDesc . }}
+                                <i class="fas fa-sort-down"> </i>
+                                        desc
+                            {{end}}
+                            {{ $.TableParams.SortPosition . }}
+                        {{else}}
+                            <i class="fas fa-sort"> </i> sort
+                        {{end}}
+                        </span>
+                <span class="column-name">
+                            {{.Name}}
+                            {{ if .IsInPrimaryKey}}<i class="fas fa-key" title="Primary Key"></i>{{end}}
+                        </span>
+            </a>
+        </th>
+    {{end}}
+    {{if $.Table.InboundFks}}
+        <th class='references'>Referenced by</th>
+    {{end}}
+    </tr>
+    </thead>
+{{ range .Rows }}
+    <tr>
+    {{ range . }}
+        <td>{{.}}</td>
+    {{end}}
+    </tr>
+{{end}}
+</table>
+{{end}}
+
+<div class="sort-filter-info">
+<span id="dataControls"></span>
+
+{{ if .TableParams.Filter }}
+    <table class='filter-info'>
+        <thead>
+        <tr>
+            <th colspan="2">
+                Filter
+            </th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td colspan="2">
+                <a class="button table-button" href="?{{$.TableParams.ClearFilter.AsQueryString}}#data">
+                    <i class="fas fa-times"></i>
+                    Clear Filter</a>
+            </td>
+        </tr>
+        {{ range .TableParams.Filter }}
+        <tr>
+            <th>
+            {{.Field}}
+            </th>
+            <td>
+            {{ range .Values }}
+                  {{.}}
+                {{end}}
+            </td>
+        </tr>
+        {{end}}
+        </tbody>
+    </table>
+{{end}}
+
+{{if .TableParams.Sort}}
+    <table class='filter-info'>
+        <thead>
+        <tr>
+            <th colspan="2">
+                Sort
+            </th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td colspan="2">
+                <a class="button table-button" href="?{{.TableParams.ClearSort.AsQueryString}}#data">
+                    <i class="fas fa-sort"> </i>
+                    Reset Sort Order</a>
+            </td>
+        </tr>
+        {{ range .TableParams.Sort }}
+        <tr>
+            <td>
+            {{.Column}}
+            </td>
+            <td>
+            {{if .Descending}}
+                <i class="fas fa-sort-down"> </i>
+                Descending
+            {{else}}
+                <i class="fas fa-sort-up"> </i>
+                Ascending
+            {{end}}
+            </td>
+        </tr>
+        {{end}}
+        </tbody>
+    </table>
+{{end}}
+
+    <form method="post" id="pageSizeForm">
+        <table class='filter-info'>
+            <thead>
+            <tr>
+                <th>
+                    Page
+                </th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>
+                    {{ if .TableParams.RowLimit }}
+                        {{if .HasPrevPage}}
+                            <a class="button" href="?{{.TableParams.PrevPage.AsQueryString}}#data">&lt; Previous
+                                Page</a>
+                        {{else}}
+                            <span class="button disabled">No earlier pages</span>
+                        {{end}}
+                        <br/>
+                        {{if .HasNextPage}}
+                            <a class="button" href="?{{.TableParams.NextPage.AsQueryString}}#data">Next Page
+                                &gt;</a>
+                        {{else}}
+                            <span class="button disabled">No more pages</span>
+                        {{end}}
+                    {{end}}
+                    <br/>
+                    <button>Update page size</button>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                {{ .TotalRowCount }} row{{if ne .TotalRowCount 1}}s{{end}} in table
+                </td>
+            </tr>
+            {{ if .TableParams.Filter }}
+            <tr>
+                <td>
+                {{ .FilteredRowCount }} row{{if ne .FilteredRowCount 1}}s{{end}} for this filter
+                </td>
+            </tr>
+            {{end}}
+            <tr>
+                <td>
+                {{ .DisplayedRowCount }} row{{if ne .DisplayedRowCount 1}}s{{end}} shown
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Showing rows {{.TableParams.FromRow}}
+                {{if .TableParams.RowLimit}}
+                    {{if not .HasNextPage}}
+                        to end
+                    {{else}}
+                        to {{.TableParams.ToRow}}
+                    {{end}}
+                {{else}}
+                    onwards
+                {{end}}
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <input type="number" name="_rowLimit" id="rowLimitInput" value="{{$.TableParams.RowLimit}}"
+                           size="5"/>
+                    <br/>
+                    <label for="rowLimitInput">
+                        rows per page
+                    </label>
+                </td>
+            </tr>
+            {{if or $.Database.Supports.PagingWithoutSorting $.TableParams.Sort}}
+            {{else}}
+            <tr>
+                <td>
+                    <small class="hint" style="margin-left: 0.75em;"
+                           title="Sql Server doesn't support skipping rows in SQL without a sort order. :-(">
+                        <i class="fas fa-info-circle"></i>
+                        Choose a sort order to speed up paging
+                    </small>
+                </td>
+            </tr>
+            {{end}}
+        </table>
+    </form>
+
+    <table class='filter-info'>
+        <thead>
+        <tr>
+            <th>
+                Display
+            </th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td>
+            {{if .TableParams.CardView}}
+            {{/*todo: need a url builder to avoid ending up with ?& if there's no query*/}}
+                <a class="button table-button" href="?{{.TableParams.CardViewOff.AsQueryString}}#data">
+                    <i class="fas fa-table"> </i>
+                    Switch to table view</a>
+            {{else}}
+                <a class="button table-button" href="?{{.TableParams.CardViewOn.AsQueryString}}#data">
+                    <i class="fas fa-list"> </i>
+                    Switch to card view</a>
+            {{end}}
+            </td>
+        </tr>
+    </table>
+
+</div>
+
+{{end}}

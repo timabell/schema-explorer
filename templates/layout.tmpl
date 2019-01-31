@@ -16,6 +16,7 @@
     <link rel="stylesheet" type="text/css" href="/static/vendor/tablesorter/sse-theme.css"/>
 </head>
 <body>
+{{block "common-headers" .}}
     <h1>
         <a href="/"><img src="/static/logo.svg" alt="SQL Schema Explorer by Tim Abell" height="80px"/></a>
     </h1>
@@ -46,6 +47,7 @@
     </ul>
 </nav>
 
+{{end}}
 {{block "content" .}}
     **template content block not defined**
 {{end}}

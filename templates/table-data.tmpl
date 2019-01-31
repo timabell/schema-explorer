@@ -1,0 +1,26 @@
+{{define "common-headers"}}
+<div id="justTheDataHeaders">
+    <a href="/" class="context-link"><i class="fas fa-database"></i> {{.LayoutData.ConnectionName}}</a>
+
+    &nbsp; &nbsp; &nbsp;
+
+    <a href="/tables/{{$.Table}}?_rowLimit=100" class="context-link"><i class="fas fa-table"></i> {{.Table.Name}}</a>
+</div>
+{{end}}
+
+{{define "content"}}
+<div id="justTheData">
+    <div>
+        <a href='#dataControls' class='jump-link button'>
+            <i class="fas fa-angle-double-down"></i>
+            Skip to Data Controls
+        </a>
+        <a class="new-window-button button" href="/tables/{{$.Table}}?{{$.TableParams.AsQueryString}}#data">
+            View in context
+            <i class="fas fa-expand-arrows-alt"></i>
+        </a>
+    </div>
+
+{{template "_table-data" .}}
+</div>
+{{end}}
