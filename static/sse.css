@@ -302,3 +302,11 @@ footer *, footer a, footer a:visited{
 #justTheData table{
     overflow: inherit;
 }
+#justTheDataHeaders .context-link{
+    text-decoration: none;
+    display: inline-block;
+    padding: 0.25em;
+}
+#justTheDataHeaders .context-link:hover{
+    background-color: #ddd;
+}

@@ -1,12 +1,10 @@
 {{define "common-headers"}}
 <div id="justTheDataHeaders">
-    <i class="fas fa-database"></i>
-    {{.LayoutData.ConnectionName}}
+    <a href="/" class="context-link"><i class="fas fa-database"></i> {{.LayoutData.ConnectionName}}</a>
 
     &nbsp; &nbsp; &nbsp;
 
-    <i class="fas fa-table"></i>
-    {{.Table.Name}}
+    <a href="/tables/{{$.Table}}?_rowLimit=100" class="context-link"><i class="fas fa-table"></i> {{.Table.Name}}</a>
 </div>
 {{end}}
 
