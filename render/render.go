@@ -273,7 +273,7 @@ func buildInwardCell(inboundFks []*schema.Fk, rowData []interface{}, cols []*sch
 		fks := groupedFks[table]
 		parentHTML = parentHTML + "<span class='parent-fk-table'>"
 		parentHTML = parentHTML + template.HTMLEscapeString(table.String()) + ":"
-		parentHTML = parentHTML + "</span>"
+		parentHTML = parentHTML + "</span> "
 		for _, fk := range fks {
 			parentHTML = parentHTML + buildInwardLink(fk, rowData) + " "
 		}
