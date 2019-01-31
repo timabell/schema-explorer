@@ -307,8 +307,12 @@ func buildInwardLink(fk *schema.Fk, rowData reader.RowData) string {
 	}
 	var joinedQueryData = strings.Join(queryData, "&")
 	suffix := "&_rowLimit=100#data"
-	linkHTML := fmt.Sprintf("<a href='/tables/%s?%s%s' class='parent-fk-link'>%s</a>", fk.SourceTable, joinedQueryData, suffix, fk.SourceColumns)
-	return linkHTML
+	rowCount := rowData[2].(int64)
+	if rowCount > 0 {
+		return fmt.Sprintf("<a href='/tables/%s?%s%s' class='parent-fk-link'>%s - %d rows</a>", fk.SourceTable, joinedQueryData, suffix, fk.SourceColumns, rowCount)
+	} else {
+		return fmt.Sprintf("%s - %d rows", fk.SourceColumns, rowCount)
+	}
 }
 
 func buildCell(col *schema.Column, cellData interface{}, rowData reader.RowData, peekFinder *reader.PeekLookup) string {

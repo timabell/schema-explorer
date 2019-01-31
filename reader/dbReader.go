@@ -127,7 +127,7 @@ func GetRows(reader DbReader, table *schema.Table, params *params.TableParams) (
 	if len(table.Columns) == 0 {
 		panic("No columns found when reading table data table")
 	}
-	rowsData, err = GetAllData(len(table.Columns)+peekFinder.peekColumnCount(), rows)
+	rowsData, err = GetAllData(len(table.Columns)+peekFinder.peekColumnCount()+len(table.InboundFks), rows)
 	if err != nil {
 		return nil, nil, err
 	}
