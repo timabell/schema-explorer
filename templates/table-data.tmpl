@@ -12,6 +12,17 @@
 
 {{define "content"}}
 <div id="justTheData">
+    <div>
+        <a href='#dataControls' class='jump-link button'>
+            <i class="fas fa-angle-double-down"></i>
+            Skip to Data Controls
+        </a>
+        <a class="new-window-button button" href="/tables/{{$.Table}}?{{$.TableParams.AsQueryString}}#data">
+            View in context
+            <i class="fas fa-expand-arrows-alt"></i>
+        </a>
+    </div>
+
 {{template "_table-data" .}}
 </div>
 {{end}}

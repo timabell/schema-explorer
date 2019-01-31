@@ -302,6 +302,3 @@ footer *, footer a, footer a:visited{
 #justTheData table{
     overflow: inherit;
 }
-#justTheData .new-window-button{
-    display: none;
-}
