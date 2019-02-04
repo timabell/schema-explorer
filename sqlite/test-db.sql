@@ -326,8 +326,9 @@ create table poke(
   name varchar(10),
   dumb_filter varchar(10) -- name clash to induce error if not qualified with table name/alias
 );
-insert into poke (id, name) values (11, 'piggy');
-insert into poke (id, name) values (12, null);
+insert into poke (id, name) values (11, 'piggy'); --  one inbound ref
+insert into poke (id, name) values (12, null);    --  two inbound refs
+insert into poke (id, name) values (13, 'pie');   -- zero inbound refs
 
 
 create table peek(
@@ -342,3 +343,4 @@ create table peek(
 insert into peek (id, something, poke_id) values (1, 'wiggy', 11);
 insert into peek (id, something, poke_id) values (2, 'weggy', 12);
 insert into peek (id, something, poke_id) values (3, 'woggy', null);
+insert into peek (id, something, poke_id) values (4, 'wibble', 12);

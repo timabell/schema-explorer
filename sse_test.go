@@ -107,6 +107,9 @@ func Test_ReadSchema(t *testing.T) {
 
 	t.Log("Checking peeking")
 	checkPeeking(reader, database, t)
+
+	t.Log("Checking inbound peeking")
+	checkInboundPeeking(reader, database, t)
 }
 
 func checkIndexes(database *schema.Database, t *testing.T) {
@@ -396,6 +399,14 @@ func checkInt(expected int, actual int, subject string, t *testing.T) {
 
 // [actual] [subject], expected [expected]
 // e.g. 4 foos in bar, expected 3
+func checkInt64(expected int64, actual int64, subject string, t *testing.T) {
+	if expected != actual {
+		t.Errorf("%d %s expected %d", actual, subject, expected)
+	}
+}
+
+// [actual] [subject], expected [expected]
+// e.g. 4 foos in bar, expected 3
 func checkStr(expected string, actual string, subject string, t *testing.T) {
 	if expected != actual {
 		t.Errorf("%s %s expected %s", actual, subject, expected)
@@ -644,7 +655,7 @@ func checkPeeking(dbReader reader.DbReader, database *schema.Database, t *testin
 		t.Fatal("peek failed: getrows returned nil")
 	}
 	checkInt(sourceTableColumnCount+1, len(data[0]), "columns in result set", t)
-	checkInt(3, len(data), "data rows for peeking at", t)
+	checkInt(4, len(data), "data rows for peeking at", t)
 	checkStr("piggy", fmt.Sprintf("%s", data[0][peekIndex]), "peeked data with string", t)
 	if data[1][peekIndex] != nil {
 		t.Fatal("peeked data with null in peek table wasn't nil")
@@ -652,6 +663,42 @@ func checkPeeking(dbReader reader.DbReader, database *schema.Database, t *testin
 	if data[2][peekIndex] != nil {
 		t.Fatal("peeked data with null in source")
 	}
+}
+
+func checkInboundPeeking(dbReader reader.DbReader, database *schema.Database, t *testing.T) {
+	table := findTable(schema.Table{Schema: database.DefaultSchemaName, Name: "poke"}, database, t)
+	idCol := findColumn(table, "id", t)
+	checkInt(1, len(table.InboundFks), "inbound fks on table "+table.String(), t)
+
+	params := &params.TableParams{
+		RowLimit: 999,
+		Sort:     []params.SortCol{{Column: idCol, Descending: false}},
+	}
+	data, _, err := reader.GetRows(dbReader, table, params)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// check inbound peek lookup data
+	sourceTableColumnCount := 3             // as per sql files "create table"
+	baseIndex := sourceTableColumnCount - 1 // convert from one to zero-based
+	inboundPeekColumnNumber := 1
+	inboundPeekColumnIndex := baseIndex + inboundPeekColumnNumber
+
+	// check returned peek data
+	if data == nil {
+		t.Fatal("peek failed: getrows returned nil")
+	}
+
+	//insert into poke (id, name) values (11, 'piggy'); --  one inbound ref
+	//insert into poke (id, name) values (12, null);    --  two inbound refs
+	//insert into poke (id, name) values (13, 'pie');   -- zero inbound refs
+
+	checkInt(sourceTableColumnCount+1, len(data[0]), "columns in inbound peek result set", t)
+	checkInt(3, len(data), "data rows for inbound peeking", t)
+	checkInt64(1, data[0][inboundPeekColumnIndex].(int64), "inbound refs for row id 11", t)
+	checkInt64(2, data[1][inboundPeekColumnIndex].(int64), "inbound refs for row id 12", t)
+	checkInt64(0, data[2][inboundPeekColumnIndex].(int64), "inbound refs for row id 13", t)
 }
 
 func Test_GetRows(t *testing.T) {
