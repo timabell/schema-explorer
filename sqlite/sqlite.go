@@ -375,7 +375,12 @@ func buildQuery(table *schema.Table, params *params.TableParams, peekFinder *rea
 
 	// inbound fk counts
 	for inboundFkIndex, inboundFk := range table.InboundFks {
-		sql = sql + fmt.Sprintf(", (select count(*) from [%s] ifk%d where ifk%d.[%s] = t.[%s]) ifk%d_count", inboundFk.SourceTable, inboundFkIndex, inboundFkIndex, inboundFk.SourceColumns[0], inboundFk.DestinationColumns[0], inboundFkIndex)
+		onPredicates := []string{}
+		for ix, sourceCol := range inboundFk.SourceColumns {
+			onPredicates = append(onPredicates, fmt.Sprintf("ifk%d.[%s] = t.[%s]", inboundFkIndex, sourceCol.Name, inboundFk.DestinationColumns[ix].Name))
+		}
+		onString := strings.Join(onPredicates, " and ")
+		sql = sql + fmt.Sprintf(", (select count(*) from [%s] ifk%d where %s) ifk%d_count", inboundFk.SourceTable, inboundFkIndex, onString, inboundFkIndex)
 	}
 
 	sql = sql + " from [" + table.Name + "] t"
