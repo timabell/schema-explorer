@@ -668,7 +668,7 @@ func checkPeeking(dbReader reader.DbReader, database *schema.Database, t *testin
 func checkInboundPeeking(dbReader reader.DbReader, database *schema.Database, t *testing.T) {
 	table := findTable(schema.Table{Schema: database.DefaultSchemaName, Name: "poke"}, database, t)
 	idCol := findColumn(table, "id", t)
-	checkInt(1, len(table.InboundFks), "inbound fks on table "+table.String(), t)
+	checkInt(2, len(table.InboundFks), "inbound fks on table "+table.String(), t)
 
 	params := &params.TableParams{
 		RowLimit: 999,
@@ -682,8 +682,8 @@ func checkInboundPeeking(dbReader reader.DbReader, database *schema.Database, t 
 	// check inbound peek lookup data
 	sourceTableColumnCount := 3             // as per sql files "create table"
 	baseIndex := sourceTableColumnCount - 1 // convert from one to zero-based
-	inboundPeekColumnNumber := 1
-	inboundPeekColumnIndex := baseIndex + inboundPeekColumnNumber
+	cozColIndex := baseIndex + 1
+	peekColIndex := baseIndex + 2
 
 	// check returned peek data
 	if data == nil {
@@ -694,11 +694,14 @@ func checkInboundPeeking(dbReader reader.DbReader, database *schema.Database, t 
 	//insert into poke (id, name) values (12, null);    --  two inbound refs
 	//insert into poke (id, name) values (13, 'pie');   -- zero inbound refs
 
-	checkInt(sourceTableColumnCount+1, len(data[0]), "columns in inbound peek result set", t)
+	checkInt(sourceTableColumnCount+2, len(data[0]), "columns in inbound peek result set", t)
 	checkInt(3, len(data), "data rows for inbound peeking", t)
-	checkInt64(1, data[0][inboundPeekColumnIndex].(int64), "inbound refs for row id 11", t)
-	checkInt64(2, data[1][inboundPeekColumnIndex].(int64), "inbound refs for row id 12", t)
-	checkInt64(0, data[2][inboundPeekColumnIndex].(int64), "inbound refs for row id 13", t)
+	checkInt64(1, data[0][peekColIndex].(int64), "inbound refs for peekFk row id 11", t)
+	checkInt64(2, data[1][peekColIndex].(int64), "inbound refs for peekFk row id 12", t)
+	checkInt64(0, data[2][peekColIndex].(int64), "inbound refs for peekFk row id 13", t)
+	checkInt64(2, data[0][cozColIndex].(int64), "inbound refs for cozFk row id 11", t)
+	checkInt64(0, data[1][cozColIndex].(int64), "inbound refs for cozFk row id 12", t)
+	checkInt64(0, data[2][cozColIndex].(int64), "inbound refs for cozFk row id 13", t)
 }
 
 func Test_GetRows(t *testing.T) {
