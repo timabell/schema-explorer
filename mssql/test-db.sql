@@ -323,3 +323,13 @@ create table peek(
 insert into peek (id, something, poke_id) values (1, 'wiggy', 11);
 insert into peek (id, something, poke_id) values (2, 'weggy', 12);
 insert into peek (id, something, poke_id) values (3, 'woggy', null);
+insert into peek (id, something, poke_id) values (4, 'wibble', 12);
+
+create table coz(
+  id int primary key,
+  name varchar(10),
+  poke_id int,
+  foreign key (poke_id) references poke(id)
+);
+insert into coz(id, name, poke_id) values (1, 'andy', 11);
+insert into coz(id, name, poke_id) values (2, 'bob', 11);

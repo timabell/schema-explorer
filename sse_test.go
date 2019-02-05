@@ -682,8 +682,24 @@ func checkInboundPeeking(dbReader reader.DbReader, database *schema.Database, t 
 	// check inbound peek lookup data
 	sourceTableColumnCount := 3             // as per sql files "create table"
 	baseIndex := sourceTableColumnCount - 1 // convert from one to zero-based
-	cozColIndex := baseIndex + 1
-	peekColIndex := baseIndex + 2
+	var peekColIndex int
+	var cozColIndex int
+	// location of inbound fk is unstable (different for sqlite vs pg) so need to find it
+	for ix, fk := range table.InboundFks{
+		switch fk.SourceTable.Name{
+		case "peek":
+			peekColIndex = baseIndex + 1 + ix
+		case "coz":
+			cozColIndex = baseIndex + 1 + ix
+		}
+
+	}
+	if peekColIndex == 0{
+		t.Fatal("Failed to find col index for peekCol for inbound fk")
+	}
+	if cozColIndex == 0{
+		t.Fatal("Failed to find col index for cozCol for inbound fk")
+	}
 
 	// check returned peek data
 	if data == nil {
