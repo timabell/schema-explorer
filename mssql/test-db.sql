@@ -229,6 +229,7 @@ create table poke(
 );
 insert into poke (id, name) values (11, 'piggy');
 insert into poke (id, name) values (12, null);
+insert into poke (id, name) values (13, 'pie');
 
 
 create table peek(
