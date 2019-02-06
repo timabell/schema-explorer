@@ -109,7 +109,7 @@ declare @action_update varchar(10) = 'update';
 declare @action_add varchar(10) = 'add';
 
 --select * from @doc;
-
+/*
 -- see what's changed (exact copy of merge cursor sql below)
 select
     isnull(doc.[schema], existing.[schema]) [schema],
@@ -140,7 +140,7 @@ from
         on existing.[schema] = doc.[schema] and existing.[table] = doc.[table]
             and (existing.[column] = doc.[column] or (existing.[column] is null and doc.[column] is null))
 where doc.description <> existing.description or doc.description is null or existing.description is null
-
+*/
 /* you can run between begin-tran and here to preview changes that will be made */
 
 -- set up list of properties to check
@@ -187,18 +187,18 @@ declare @action varchar(10);
 fetch next from mergeList into @schema, @table, @column, @newDescription, @action;
 while @@FETCH_STATUS = 0
 begin
-    print concat(@schema, '.', @table, '.', @column, ' - ', @action);
+--     print concat(@schema, '.', @table, '.', @column, ' - ', @action);
     if @action = @action_add
     begin
         if @column is null
         begin
-            print 'adding description for ' + @schema + '.' + @table;
+--             print 'adding description for ' + @schema + '.' + @table;
             exec sys.sp_addextendedproperty @name=N'MS_Description', @level0type=N'SCHEMA', @level1type=N'TABLE',
                 @level0name=@schema, @level1name=@table, @value=@newDescription
         end
         else
         begin
-            print 'adding description for ' + @schema + '.' + @table + '.' + @column;
+--             print 'adding description for ' + @schema + '.' + @table + '.' + @column;
             exec sys.sp_addextendedproperty @name=N'MS_Description', @level0type=N'SCHEMA', @level1type=N'TABLE', @level2type=N'COLUMN',
                 @level0name=@schema, @level1name=@table, @level2name=@column, @value=@newDescription
         end

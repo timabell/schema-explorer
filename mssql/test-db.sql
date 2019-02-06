@@ -1,98 +1,17 @@
 -- mssql example db for regression tests
 -- schema must match test code's expectations
 
--- todo: drop sql doesn't cope with schema.
-
--- drop database [sse-regression-test];
-create database [sse-regression-test];
-GO
-use [sse-regression-test];
-GO
--- use [sse-regression-test]; -- not supported on azure sql
-
--- ###################################
--- Clear out the db.
--- Verbatim from https://stackoverflow.com/a/36619064
-/* Azure friendly */
-/* Drop all Foreign Key constraints */
-DECLARE @name VARCHAR(128)
-DECLARE @constraint VARCHAR(254)
-DECLARE @SQL VARCHAR(254)
-
-SELECT @name = (SELECT TOP 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS WHERE constraint_catalog=DB_NAME() AND CONSTRAINT_TYPE = 'FOREIGN KEY' ORDER BY TABLE_NAME)
-
-WHILE @name is not null
-	BEGIN
-		SELECT @constraint = (SELECT TOP 1 CONSTRAINT_NAME FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS WHERE constraint_catalog=DB_NAME() AND CONSTRAINT_TYPE = 'FOREIGN KEY' AND TABLE_NAME = @name ORDER BY CONSTRAINT_NAME)
-		WHILE @constraint IS NOT NULL
-			BEGIN
-				SELECT @SQL = 'ALTER TABLE [dbo].[' + RTRIM(@name) +'] DROP CONSTRAINT [' + RTRIM(@constraint) +']'
-				EXEC (@SQL)
-				PRINT 'Dropped FK Constraint: ' + @constraint + ' on ' + @name
-				SELECT @constraint = (SELECT TOP 1 CONSTRAINT_NAME FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS WHERE constraint_catalog=DB_NAME() AND CONSTRAINT_TYPE = 'FOREIGN KEY' AND CONSTRAINT_NAME <> @constraint AND TABLE_NAME = @name ORDER BY CONSTRAINT_NAME)
-			END
-		SELECT @name = (SELECT TOP 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS WHERE constraint_catalog=DB_NAME() AND CONSTRAINT_TYPE = 'FOREIGN KEY' ORDER BY TABLE_NAME)
-	END
-GO
-
-/*
-/* Drop all Primary Key constraints */
-DECLARE @name VARCHAR(128)
-DECLARE @constraint VARCHAR(254)
-DECLARE @SQL VARCHAR(254)
-
-SELECT @name = (SELECT TOP 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS WHERE constraint_catalog=DB_NAME() AND CONSTRAINT_TYPE = 'PRIMARY KEY' ORDER BY TABLE_NAME)
-
-WHILE @name IS NOT NULL
-	BEGIN
-		SELECT @constraint = (SELECT TOP 1 CONSTRAINT_NAME FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS WHERE constraint_catalog=DB_NAME() AND CONSTRAINT_TYPE = 'PRIMARY KEY' AND TABLE_NAME = @name ORDER BY CONSTRAINT_NAME)
-		WHILE @constraint is not null
-			BEGIN
-				SELECT @SQL = 'ALTER TABLE [dbo].[' + RTRIM(@name) +'] DROP CONSTRAINT [' + RTRIM(@constraint)+']'
-				EXEC (@SQL)
-				PRINT 'Dropped PK Constraint: ' + @constraint + ' on ' + @name
-				SELECT @constraint = (SELECT TOP 1 CONSTRAINT_NAME FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS WHERE constraint_catalog=DB_NAME() AND CONSTRAINT_TYPE = 'PRIMARY KEY' AND CONSTRAINT_NAME <> @constraint AND TABLE_NAME = @name ORDER BY CONSTRAINT_NAME)
-			END
-		SELECT @name = (SELECT TOP 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS WHERE constraint_catalog=DB_NAME() AND CONSTRAINT_TYPE = 'PRIMARY KEY' ORDER BY TABLE_NAME)
-	END
-GO
-
-/* Drop all tables */
-DECLARE @name VARCHAR(128)
-DECLARE @SQL VARCHAR(254)
-
-SELECT @name = (SELECT TOP 1 [name] FROM sysobjects WHERE [type] = 'U' AND category = 0 ORDER BY [name])
-
-WHILE @name IS NOT NULL
-	BEGIN
-		SELECT @SQL = 'DROP TABLE [dbo].[' + RTRIM(@name) +']'
-		EXEC (@SQL)
-		PRINT 'Dropped Table: ' + @name
-		SELECT @name = (SELECT TOP 1 [name] FROM sysobjects WHERE [type] = 'U' AND category = 0 AND [name] > @name ORDER BY [name])
-	END
-GO
--- ###################################
-*/
-
-drop table kitchen.sink
-drop table kitchen.person
-drop SCHEMA kitchen
-drop table DataTypeTest
-drop table toy
-drop table pet
-drop table person
-drop table SortFilterTest
-drop table CompoundKeyChild
-drop table CompoundKeyParent
-drop table CompoundKeyAunty
-drop table [identity].[select];
-
-GO
+-- print 'creating schema...'
+go
 create SCHEMA kitchen;
 
+go
 -- user had a schema named the same as a keyword. good test for escaping correctly
 create SCHEMA [identity];
-GO
+go
+
+-- print 'creating tables etc...'
+set nocount on;
 --------
 
 create table DataTypeTest (
@@ -165,7 +84,7 @@ create table toy (
 	toyName nvarchar(50),
 	belongsToId int references pet(petId)
 );
-alter table person add favouritePetId int references pet(petId)
+alter table person add favouritePetId int references pet(petId);
 
 -- test different schema name
 /*
@@ -276,13 +195,14 @@ create table index_test(
   compound_a varchar(10),
   compound_b varchar(10),
   complex_index varchar(10),
-  unique_index varchar(10),
-  lower_complex as lower(complex_index) persisted
+  unique_index varchar(10)
+--   lower_complex as lower(complex_index) persisted // todo: didn't work on docker mssql
 );
-create index "IX_on_has_index" on index_test (has_index);
-create index "IX_compound" on index_test (compound_a, compound_b);
-create index "IX_complex" on index_test (lower_complex);
-create unique index "IX_unique" on index_test (unique_index);
+
+create index IX_on_has_index on index_test (has_index);
+create index IX_compound on index_test (compound_a, compound_b);
+-- create index IX_complex on index_test (lower_complex);
+create unique index IX_unique on index_test (unique_index);
 
 create table analysis_test(
   colour varchar(50)
@@ -300,7 +220,7 @@ create table [identity].[select] (
 );
 insert into [identity].[select] ([table]) values ('times');
 
-select * from [identity].[select];
+-- select * from [identity].[select];
 
 create table poke(
   id int primary key,
