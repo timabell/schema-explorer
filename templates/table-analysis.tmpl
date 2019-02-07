@@ -23,7 +23,7 @@
     {{range .ValueCounts}}
         <tr>
         <td>
-            {{if eq .Value nil }}
+            {{if isNil .Value }}
                 <span class='null bare-value'>[null]</span>
             {{else}}
                 <a href="../{{$.Table}}?_rowLimit=100&{{$col}}={{DbValueToString .Value $col.Type}}#data">{{DbValueToString .Value $col.Type}}</a>

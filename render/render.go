@@ -79,10 +79,16 @@ var tableTrailTemplate *template.Template
 var funcMap = template.FuncMap{
 	"minus":           minus,
 	"DbValueToString": reader.DbValueToString,
+	"isNil":           isNil,
 }
 
 func minus(x, y int) int {
 	return x - y
+}
+
+// because https://stackoverflow.com/questions/54578243/how-can-i-prevent-non-nil-values-triggering-a-golang-template-if-nil-block/54579872#54579872
+func isNil(value interface{}) bool {
+	return value == nil
 }
 
 func SetupTemplate() {
