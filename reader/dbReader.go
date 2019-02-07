@@ -81,14 +81,17 @@ func GetDbReader() DbReader {
 // which then need to be known about by the renderer. This class is the bridge between
 // the two sides.
 type PeekLookup struct {
-	Fks         []*schema.Fk
-	indexOffset int
+	Table                  *schema.Table
+	Fks                    []*schema.Fk
+	outboundPeekStartIndex int
+	inboundPeekStartIndex  int
+	peekColumnCount        int
 }
 
 // Figures out the index of the peek column in the returned dataset for the given fk & column.
 // Intended to be used by the renderer to get the data it needs for peeking.
 func (peekFinder *PeekLookup) Find(peekFk *schema.Fk, peekCol *schema.Column) (peekDataIndex int) {
-	peekDataIndex = peekFinder.indexOffset
+	peekDataIndex = peekFinder.outboundPeekStartIndex
 	for _, storedFk := range peekFinder.Fks {
 		for _, col := range storedFk.DestinationTable.PeekColumns {
 			if peekFk == storedFk && peekCol == col {
@@ -100,24 +103,32 @@ func (peekFinder *PeekLookup) Find(peekFk *schema.Fk, peekCol *schema.Column) (p
 	panic(fmt.Sprintf("didn't find peek fk %s col %s in PeekLookup data", peekFk, peekCol))
 }
 
-func (peekFinder *PeekLookup) peekColumnCount() (count int) {
-	for _, storedFk := range peekFinder.Fks {
-		count += len(storedFk.DestinationTable.PeekColumns)
+func (peekFinder *PeekLookup) FindInbound(peekFk *schema.Fk) (peekDataIndex int) {
+	for ix, fk := range peekFinder.Table.InboundFks {
+		if peekFk == fk {
+			peekDataIndex = peekFinder.inboundPeekStartIndex + ix
+			return
+		}
 	}
-	return
+	panic(fmt.Sprintf("Didn't find inbound fk %s in table.InboundFks", peekFk))
 }
 
 func GetRows(reader DbReader, table *schema.Table, params *params.TableParams) (rowsData []RowData, peekFinder *PeekLookup, err error) {
 
 	// load up all the fks that we have peek info for
 	peekFinder = &PeekLookup{}
+	inboundPeekCount := 0
 	for _, fk := range table.Fks {
 		if len(fk.DestinationTable.PeekColumns) == 0 {
 			continue
 		}
 		peekFinder.Fks = append(peekFinder.Fks, fk)
+		inboundPeekCount += len(fk.DestinationTable.PeekColumns)
 	}
-	peekFinder.indexOffset = len(table.Columns)
+	peekFinder.outboundPeekStartIndex = len(table.Columns)
+	peekFinder.inboundPeekStartIndex = peekFinder.outboundPeekStartIndex + inboundPeekCount
+	peekFinder.peekColumnCount = inboundPeekCount + len(table.InboundFks)
+	peekFinder.Table = table
 
 	rows, err := reader.GetSqlRows(table, params, peekFinder)
 	if rows == nil {
@@ -127,7 +138,7 @@ func GetRows(reader DbReader, table *schema.Table, params *params.TableParams) (
 	if len(table.Columns) == 0 {
 		panic("No columns found when reading table data table")
 	}
-	rowsData, err = GetAllData(len(table.Columns)+peekFinder.peekColumnCount(), rows)
+	rowsData, err = GetAllData(len(table.Columns)+peekFinder.peekColumnCount, rows)
 	if err != nil {
 		return nil, nil, err
 	}
