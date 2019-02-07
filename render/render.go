@@ -249,13 +249,13 @@ func buildRow(rowData reader.RowData, peekFinder *reader.PeekLookup, table *sche
 		valueHTML := buildCell(col, cellData, rowData, peekFinder)
 		row = append(row, template.HTML(valueHTML))
 	}
-	parentHTML := buildInwardCell(table.InboundFks, rowData, table.Columns)
+	parentHTML := buildInwardCell(table.InboundFks, rowData)
 	row = append(row, template.HTML(parentHTML))
 	return row
 }
 
 // Groups fks by source table, adds table name for each followed by links for each inbound fk for that table
-func buildInwardCell(inboundFks []*schema.Fk, rowData []interface{}, cols []*schema.Column) string {
+func buildInwardCell(inboundFks []*schema.Fk, rowData []interface{}) string {
 	groupedFks := groupFksByTable(inboundFks)
 
 	// note.... for table, fks := range groupedFks { ... is an unstable sort, don't do it this way! https://stackoverflow.com/a/23332089/10245
