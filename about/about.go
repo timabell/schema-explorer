@@ -8,7 +8,7 @@ type AboutType struct {
 
 var About = AboutType{
 	ProductName: "Sql Schema Explorer",
-	Version:     "0.50",
+	Version:     "0.51",
 	Website:     "http://schemaexplorer.io/",
 	Email:       "sse@timwise.co.uk",
 }
