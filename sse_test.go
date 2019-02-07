@@ -685,8 +685,8 @@ func checkInboundPeeking(dbReader reader.DbReader, database *schema.Database, t 
 	var peekColIndex int
 	var cozColIndex int
 	// location of inbound fk is unstable (different for sqlite vs pg) so need to find it
-	for ix, fk := range table.InboundFks{
-		switch fk.SourceTable.Name{
+	for ix, fk := range table.InboundFks {
+		switch fk.SourceTable.Name {
 		case "peek":
 			peekColIndex = baseIndex + 1 + ix
 		case "coz":
@@ -694,10 +694,10 @@ func checkInboundPeeking(dbReader reader.DbReader, database *schema.Database, t 
 		}
 
 	}
-	if peekColIndex == 0{
+	if peekColIndex == 0 {
 		t.Fatal("Failed to find col index for peekCol for inbound fk")
 	}
-	if cozColIndex == 0{
+	if cozColIndex == 0 {
 		t.Fatal("Failed to find col index for cozCol for inbound fk")
 	}
 
