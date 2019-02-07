@@ -249,13 +249,13 @@ func buildRow(rowData reader.RowData, peekFinder *reader.PeekLookup, table *sche
 		valueHTML := buildCell(col, cellData, rowData, peekFinder)
 		row = append(row, template.HTML(valueHTML))
 	}
-	parentHTML := buildInwardCell(table.InboundFks, rowData)
+	parentHTML := buildInwardCell(table.InboundFks, rowData, peekFinder)
 	row = append(row, template.HTML(parentHTML))
 	return row
 }
 
 // Groups fks by source table, adds table name for each followed by links for each inbound fk for that table
-func buildInwardCell(inboundFks []*schema.Fk, rowData []interface{}) string {
+func buildInwardCell(inboundFks []*schema.Fk, rowData []interface{}, peekFinder *reader.PeekLookup) string {
 	groupedFks := groupFksByTable(inboundFks)
 
 	// note.... for table, fks := range groupedFks { ... is an unstable sort, don't do it this way! https://stackoverflow.com/a/23332089/10245
@@ -275,7 +275,7 @@ func buildInwardCell(inboundFks []*schema.Fk, rowData []interface{}) string {
 		parentHTML = parentHTML + template.HTMLEscapeString(table.String()) + ":"
 		parentHTML = parentHTML + "</span> "
 		for _, fk := range fks {
-			parentHTML = parentHTML + buildInwardLink(fk, rowData) + " "
+			parentHTML = parentHTML + buildInwardLink(fk, rowData, peekFinder) + " "
 		}
 		parentHTML = parentHTML + "<br/>"
 	}
@@ -296,7 +296,7 @@ func groupFksByTable(inboundFks []*schema.Fk) groupedFkMap {
 	return groupedFks
 }
 
-func buildInwardLink(fk *schema.Fk, rowData reader.RowData) string {
+func buildInwardLink(fk *schema.Fk, rowData reader.RowData, peekFinder *reader.PeekLookup) string {
 	var queryData []string
 	for ix, fkCol := range fk.SourceColumns {
 		destinationCol := fk.DestinationColumns[ix]
@@ -307,7 +307,8 @@ func buildInwardLink(fk *schema.Fk, rowData reader.RowData) string {
 	}
 	var joinedQueryData = strings.Join(queryData, "&")
 	suffix := "&_rowLimit=100#data"
-	rowCount := rowData[2].(int64)
+	inboundPeekIndex := peekFinder.FindInbound(fk)
+	rowCount := rowData[inboundPeekIndex].(int64)
 	if rowCount > 0 {
 		return fmt.Sprintf("<a href='/tables/%s?%s%s' class='parent-fk-link'>%s - %d rows</a>", fk.SourceTable, joinedQueryData, suffix, fk.SourceColumns, rowCount)
 	} else {
