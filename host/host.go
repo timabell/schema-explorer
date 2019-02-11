@@ -55,7 +55,12 @@ func RunServer(sourceOptions *reader.SseOptions) {
 	setupPeekList()
 
 	r := Router()
-	listenOnHostPort := fmt.Sprintf("%s:%d", *options.ListenOnAddress, *options.ListenOnPort) // e.g. localhost:8080 or 0.0.0.0:80
+	runHttpServer(r)
+}
+
+func runHttpServer(r *mux.Router) {
+	listenOnHostPort := fmt.Sprintf("%s:%d", *options.ListenOnAddress, *options.ListenOnPort)
+	// e.g. localhost:8080 or 0.0.0.0:80
 	srv := &http.Server{
 		Handler:      r,
 		Addr:         listenOnHostPort,
