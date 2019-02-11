@@ -54,15 +54,7 @@ func RunServer(sourceOptions *reader.SseOptions) {
 	}
 	setupPeekList()
 
-	r := mux.NewRouter()
-	r.PathPrefix("/static/").Handler(http.FileServer(http.Dir(".")))
-	r.HandleFunc("/", TableListHandler)
-	r.HandleFunc("/table-trail", TableTrailHandler)
-	r.HandleFunc("/table-trail/clear", ClearTableTrailHandler)
-	r.HandleFunc("/tables/{tableName}", TableInfoHandler)
-	r.HandleFunc("/tables/{tableName}/data", TableDataHandler)
-	r.HandleFunc("/tables/{tableName}/analyse-data", AnalyseTableHandler)
-	r.Use(loggingHandler)
+	r := Router()
 	listenOnHostPort := fmt.Sprintf("%s:%d", *options.ListenOnAddress, *options.ListenOnPort) // e.g. localhost:8080 or 0.0.0.0:80
 	srv := &http.Server{
 		Handler:      r,
@@ -72,6 +64,19 @@ func RunServer(sourceOptions *reader.SseOptions) {
 	}
 	log.Printf("Starting web-server, point your browser at http://%s/\nPress Ctrl-C to exit schemaexplorer.\n", listenOnHostPort)
 	log.Fatal(srv.ListenAndServe())
+}
+
+func Router() *mux.Router {
+	r := mux.NewRouter()
+	r.PathPrefix("/static/").Handler(http.FileServer(http.Dir(".")))
+	r.HandleFunc("/", TableListHandler)
+	r.HandleFunc("/table-trail", TableTrailHandler)
+	r.HandleFunc("/table-trail/clear", ClearTableTrailHandler)
+	r.HandleFunc("/tables/{tableName}", TableInfoHandler)
+	r.HandleFunc("/tables/{tableName}/data", TableDataHandler)
+	r.HandleFunc("/tables/{tableName}/analyse-data", AnalyseTableHandler)
+	r.Use(loggingHandler)
+	return r
 }
 
 // wrap handler, log requests as they pass through
