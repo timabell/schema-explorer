@@ -9,7 +9,7 @@ import (
 
 // at least 6 months from when this is released into the wild
 var Expiry = time.Date(2019, time.April, 2, 0, 0, 0, 0, time.UTC)
-var CopyrightYear = 2018
+var CopyrightYear = 2019
 
 func Licensing() {
 	if time.Now().After(Expiry) {
