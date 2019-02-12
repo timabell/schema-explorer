@@ -24,7 +24,7 @@ import (
 )
 
 func main() {
-	licensing.Licensing()
+	licensing.EnforceLicensing()
 
 	_, err := reader.ArgParser.ParseArgs(os.Args)
 	if err != nil {

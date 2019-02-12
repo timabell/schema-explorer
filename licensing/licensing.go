@@ -11,7 +11,7 @@ import (
 var expiry = time.Date(2019, time.April, 2, 0, 0, 0, 0, time.UTC)
 var copyrightYear = 2019
 
-func Licensing() {
+func EnforceLicensing() {
 	if time.Now().After(expiry) {
 		log.Panicf("Expired trial, contact %s to obtain a license", about.About.Email)
 	}

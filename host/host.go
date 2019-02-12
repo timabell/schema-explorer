@@ -102,7 +102,7 @@ func loggingHandler(next http.Handler) http.Handler {
 }
 
 func requestSetup() (layoutData render.PageTemplateModel, dbReader reader.DbReader, err error) {
-	licensing.Licensing()
+	licensing.EnforceLicensing()
 	dbReader = reader.GetDbReader()
 
 	layoutData = render.PageTemplateModel{
