@@ -1,5 +1,5 @@
 /*
-Sql Data Viewer, Copyright Tim Abell 2015-17
+Sql Data Viewer, Copyright Tim Abell 2015-19
 All rights reserved.
 
 A tool for browsing the data in any rdbms databse
