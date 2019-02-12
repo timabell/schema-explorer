@@ -23,6 +23,7 @@ aren't silently missing any of the supported data types.
 */
 
 import (
+	"bitbucket.org/timabell/sql-data-viewer/host"
 	_ "bitbucket.org/timabell/sql-data-viewer/mssql"
 	"bitbucket.org/timabell/sql-data-viewer/options"
 	"bitbucket.org/timabell/sql-data-viewer/params"
@@ -32,6 +33,8 @@ import (
 	_ "bitbucket.org/timabell/sql-data-viewer/sqlite"
 	"fmt"
 	"log"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"reflect"
 	"strings"
@@ -788,4 +791,15 @@ func findColumn(table *schema.Table, columnName string, t *testing.T) (column *s
 		t.Fatalf("column missing %s.%s", table, columnName)
 	}
 	return
+}
+
+// http tests //
+
+func Test_Http(t *testing.T) {
+	request, _ := http.NewRequest("GET", "/", nil)
+	response := httptest.NewRecorder()
+	host.Router().ServeHTTP(response, request)
+	if response.Code != 200 {
+		t.Fatalf("%d status for /", response.Code)
+	}
 }
