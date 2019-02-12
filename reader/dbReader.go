@@ -69,6 +69,9 @@ func RegisterReader(name string, opt interface{}, creator CreateReader) {
 }
 
 func GetDbReader() DbReader {
+	if Options == nil || (*Options).Driver == nil {
+		panic("driver option missing")
+	}
 	createReader := creators[*Options.Driver]
 	if createReader == nil {
 		log.Printf("Unknown reader '%s'", *Options.Driver)
