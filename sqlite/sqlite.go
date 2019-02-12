@@ -28,14 +28,14 @@ var opt = &sqliteOpts{}
 
 func init() {
 	// https://github.com/jessevdk/go-flags/blob/master/group_test.go#L33
-	reader.RegisterReader("sqlite", opt, NewSqlite)
+	reader.RegisterReader("sqlite", opt, newSqlite)
 }
 
 type sqliteModel struct {
 	path string
 }
 
-func NewSqlite() reader.DbReader {
+func newSqlite() reader.DbReader {
 	if opt.Path == nil {
 		log.Printf("Error: sqlite file is required")
 		reader.ArgParser.WriteHelp(os.Stdout)

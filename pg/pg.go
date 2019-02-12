@@ -46,10 +46,10 @@ var opts = &pgOpts{}
 
 func init() {
 	// https://github.com/jessevdk/go-flags/blob/master/group_test.go#L33
-	reader.RegisterReader("pg", opts, NewPg)
+	reader.RegisterReader("pg", opts, newPg)
 }
 
-func NewPg() reader.DbReader {
+func newPg() reader.DbReader {
 	err := opts.validate()
 	if err != nil {
 		log.Printf("Pg args error: %s", err)

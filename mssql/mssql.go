@@ -33,7 +33,7 @@ var opts = &mssqlOpts{}
 
 func init() {
 	// https://github.com/jessevdk/go-flags/blob/master/group_test.go#L33
-	reader.RegisterReader("mssql", opts, NewMssql)
+	reader.RegisterReader("mssql", opts, newMssql)
 }
 
 func (opts mssqlOpts) validate() error {
@@ -51,7 +51,7 @@ func (opts mssqlOpts) hasAnyDetails() bool {
 		opts.Password != nil
 }
 
-func NewMssql() reader.DbReader {
+func newMssql() reader.DbReader {
 	err := opts.validate()
 	if err != nil {
 		log.Printf("Mssql args error: %s", err)
