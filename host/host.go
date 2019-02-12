@@ -129,6 +129,12 @@ func requestSetup() (layoutData render.PageTemplateModel, dbReader reader.DbRead
 }
 
 func setupPeekList() {
+	if options == nil {
+		panic("options is nil")
+	}
+	if (*options).PeekConfigPath == nil {
+		panic("PeekConfigPath option missing")
+	}
 	peekFilename := *options.PeekConfigPath
 	log.Printf("Loading peek config from %s ...", peekFilename)
 	file, err := os.Open(peekFilename)
