@@ -13,7 +13,7 @@ package main
 
 import (
 	"bitbucket.org/timabell/sql-data-viewer/about"
-	"bitbucket.org/timabell/sql-data-viewer/host"
+	"bitbucket.org/timabell/sql-data-viewer/http"
 	"bitbucket.org/timabell/sql-data-viewer/licensing"
 	_ "bitbucket.org/timabell/sql-data-viewer/mssql"
 	"bitbucket.org/timabell/sql-data-viewer/options"
@@ -52,5 +52,5 @@ func main() {
 		*options.Options.Driver,
 		connectionName)
 
-	host.RunServer(options.Options)
+	http.RunServer()
 }
