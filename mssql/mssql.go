@@ -2,6 +2,7 @@ package mssql
 
 import (
 	"bitbucket.org/timabell/sql-data-viewer/about"
+	"bitbucket.org/timabell/sql-data-viewer/options"
 	"bitbucket.org/timabell/sql-data-viewer/params"
 	"bitbucket.org/timabell/sql-data-viewer/reader"
 	"bitbucket.org/timabell/sql-data-viewer/schema"
@@ -55,7 +56,7 @@ func newMssql() reader.DbReader {
 	err := opts.validate()
 	if err != nil {
 		log.Printf("Mssql args error: %s", err)
-		reader.ArgParser.WriteHelp(os.Stdout)
+		options.ArgParser.WriteHelp(os.Stdout)
 		os.Exit(1)
 	}
 	var cs string

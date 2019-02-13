@@ -1,28 +1,15 @@
 package reader
 
 import (
+	"bitbucket.org/timabell/sql-data-viewer/options"
 	"bitbucket.org/timabell/sql-data-viewer/params"
 	"bitbucket.org/timabell/sql-data-viewer/schema"
 	"database/sql"
 	"fmt"
-	"github.com/jessevdk/go-flags"
 	"log"
 	"os"
 	"strings"
 )
-
-type SseOptions struct {
-	Driver                *string `short:"d" long:"driver" required:"true" description:"Driver to use" choice:"mssql" choice:"pg" choice:"sqlite" env:"schemaexplorer_driver"`
-	Live                  *bool   `short:"l" long:"live" description:"update html templates & schema information from disk on every page load" env:"schemaexplorer_live"`
-	ConnectionDisplayName *string `short:"n" long:"display-name" description:"A display name for this connection" env:"schemaexplorer_display_name"`
-	ListenOnAddress       *string `short:"a" long:"listen-on-address" description:"address to listen on" default:"localhost" env:"schemaexplorer_listen_on_address"` // localhost so that it's secure by default, only listen for local connections
-	ListenOnPort          *int    `short:"p" long:"listen-on-port" description:"port to listen on" default:"8080" env:"schemaexplorer_listen_on_port"`
-	PeekConfigPath        *string `long:"peek-config-path" description:"path to peek configuration file" default:"peek-config.txt" env:"schemaexplorer_peek_config_path"`
-}
-
-// todo: arg parsing and options shouldn't be here
-var Options = &SseOptions{}
-var ArgParser = flags.NewParser(Options, flags.Default)
 
 type DbReader interface {
 	// does select or something to make sure we have a working db connection
@@ -53,14 +40,9 @@ type RowData []interface{}
 
 var creators = make(map[string]CreateReader)
 
-func init() {
-	ArgParser.EnvNamespace = "schemaexplorer"
-	ArgParser.NamespaceDelimiter = "-"
-}
-
 func RegisterReader(name string, opt interface{}, creator CreateReader) {
 	creators[name] = creator
-	group, err := ArgParser.AddGroup(name, fmt.Sprintf("Options for %s database", name), opt)
+	group, err := options.ArgParser.AddGroup(name, fmt.Sprintf("Options for %s database", name), opt)
 	if err != nil {
 		panic(err)
 	}
@@ -69,12 +51,12 @@ func RegisterReader(name string, opt interface{}, creator CreateReader) {
 }
 
 func GetDbReader() DbReader {
-	if Options == nil || (*Options).Driver == nil {
+	if options.Options == nil || (*options.Options).Driver == nil {
 		panic("driver option missing")
 	}
-	createReader := creators[*Options.Driver]
+	createReader := creators[*options.Options.Driver]
 	if createReader == nil {
-		log.Printf("Unknown reader '%s'", *Options.Driver)
+		log.Printf("Unknown reader '%s'", *options.Options.Driver)
 		os.Exit(1)
 	}
 	return createReader()

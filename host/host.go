@@ -3,6 +3,7 @@ package host
 import (
 	"bitbucket.org/timabell/sql-data-viewer/about"
 	"bitbucket.org/timabell/sql-data-viewer/licensing"
+	"bitbucket.org/timabell/sql-data-viewer/options"
 	"bitbucket.org/timabell/sql-data-viewer/params"
 	"bitbucket.org/timabell/sql-data-viewer/reader"
 	"bitbucket.org/timabell/sql-data-viewer/render"
@@ -25,14 +26,12 @@ var driver string
 var cachingEnabled bool
 var database *schema.Database
 var connectionName string
-var options *reader.SseOptions
 
-func RunServer(sourceOptions *reader.SseOptions) {
-	options = sourceOptions
-	driver = *options.Driver
-	cachingEnabled = options.Live == nil || !*options.Live
-	if options.ConnectionDisplayName != nil {
-		connectionName = *options.ConnectionDisplayName
+func RunServer() {
+	driver = *options.Options.Driver
+	cachingEnabled = options.Options.Live == nil || !*options.Options.Live
+	if options.Options.ConnectionDisplayName != nil {
+		connectionName = *options.Options.ConnectionDisplayName
 	}
 
 	render.SetupTemplate()
@@ -59,7 +58,7 @@ func RunServer(sourceOptions *reader.SseOptions) {
 }
 
 func runHttpServer(r *mux.Router) {
-	listenOnHostPort := fmt.Sprintf("%s:%d", *options.ListenOnAddress, *options.ListenOnPort)
+	listenOnHostPort := fmt.Sprintf("%s:%d", *options.Options.ListenOnAddress, *options.Options.ListenOnPort)
 	// e.g. localhost:8080 or 0.0.0.0:80
 	srv := &http.Server{
 		Handler:      r,
@@ -129,13 +128,13 @@ func requestSetup() (layoutData render.PageTemplateModel, dbReader reader.DbRead
 }
 
 func setupPeekList() {
-	if options == nil {
+	if options.Options == nil {
 		panic("options is nil")
 	}
-	if (*options).PeekConfigPath == nil {
+	if (*options.Options).PeekConfigPath == nil {
 		panic("PeekConfigPath option missing")
 	}
-	peekFilename := *options.PeekConfigPath
+	peekFilename := *options.Options.PeekConfigPath
 	log.Printf("Loading peek config from %s ...", peekFilename)
 	file, err := os.Open(peekFilename)
 	if err != nil {
