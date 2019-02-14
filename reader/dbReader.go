@@ -38,6 +38,8 @@ type RowData []interface{}
 
 var creators = make(map[string]CreateReader)
 
+// This is how implementations for reading different RDBMS systems can register themselves.
+// They should call this in their init() function
 func RegisterReader(name string, opt interface{}, creator CreateReader) {
 	creators[name] = creator
 	group, err := options.ArgParser.AddGroup(name, fmt.Sprintf("Options for %s database", name), opt)
