@@ -24,6 +24,7 @@ aren't silently missing any of the supported data types.
 
 import (
 	_ "bitbucket.org/timabell/sql-data-viewer/mssql"
+	"bitbucket.org/timabell/sql-data-viewer/options"
 	"bitbucket.org/timabell/sql-data-viewer/params"
 	_ "bitbucket.org/timabell/sql-data-viewer/pg"
 	"bitbucket.org/timabell/sql-data-viewer/reader"
@@ -41,13 +42,13 @@ var testDb string
 var testDbDriver string
 
 func init() {
-	_, err := reader.ArgParser.ParseArgs([]string{})
+	_, err := options.ArgParser.ParseArgs([]string{})
 	if err != nil {
 		os.Stderr.WriteString("Note that running sse under test only supports environment variables because command line args clash with the go-test args.\n\n")
-		reader.ArgParser.WriteHelp(os.Stdout)
+		options.ArgParser.WriteHelp(os.Stdout)
 		os.Exit(1)
 	}
-	log.Printf("%s is the driver", *reader.Options.Driver)
+	log.Printf("%s is the driver", *options.Options.Driver)
 }
 
 func Test_CheckConnection(t *testing.T) {

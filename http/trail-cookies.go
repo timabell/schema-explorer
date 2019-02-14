@@ -1,4 +1,4 @@
-package host
+package http
 
 import (
 	"bitbucket.org/timabell/sql-data-viewer/trail"
@@ -17,12 +17,8 @@ func ReadTrail(req *http.Request) *trail.TrailLog {
 	return &trail.TrailLog{}
 }
 
-func trailFromCsv(values string) *trail.TrailLog {
-	return &trail.TrailLog{Tables: strings.Split(values, ",")}
-}
-
-func SetCookie(trail *trail.TrailLog, resp http.ResponseWriter) {
-	trailCookie := &http.Cookie{Name: trailCookieName, Value: TrailString(trail), Path: "/"}
+func SetTrailCookie(trail *trail.TrailLog, resp http.ResponseWriter) {
+	trailCookie := &http.Cookie{Name: trailCookieName, Value: trailString(trail), Path: "/"}
 	http.SetCookie(resp, trailCookie)
 }
 func ClearTrailCookie(resp http.ResponseWriter) {
@@ -30,6 +26,10 @@ func ClearTrailCookie(resp http.ResponseWriter) {
 	http.SetCookie(resp, trailCookie)
 }
 
-func TrailString(trail *trail.TrailLog) string {
+func trailString(trail *trail.TrailLog) string {
 	return strings.Join(trail.Tables, ",")
+}
+
+func trailFromCsv(values string) *trail.TrailLog {
+	return &trail.TrailLog{Tables: strings.Split(values, ",")}
 }

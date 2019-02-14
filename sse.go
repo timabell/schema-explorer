@@ -13,11 +13,11 @@ package main
 
 import (
 	"bitbucket.org/timabell/sql-data-viewer/about"
-	"bitbucket.org/timabell/sql-data-viewer/host"
+	"bitbucket.org/timabell/sql-data-viewer/http"
 	"bitbucket.org/timabell/sql-data-viewer/licensing"
 	_ "bitbucket.org/timabell/sql-data-viewer/mssql"
+	"bitbucket.org/timabell/sql-data-viewer/options"
 	_ "bitbucket.org/timabell/sql-data-viewer/pg"
-	"bitbucket.org/timabell/sql-data-viewer/reader"
 	_ "bitbucket.org/timabell/sql-data-viewer/sqlite"
 	"log"
 	"os"
@@ -26,9 +26,9 @@ import (
 func main() {
 	licensing.EnforceLicensing()
 
-	_, err := reader.ArgParser.ParseArgs(os.Args)
+	_, err := options.ArgParser.ParseArgs(os.Args)
 	if err != nil {
-		reader.ArgParser.WriteHelp(os.Stdout)
+		options.ArgParser.WriteHelp(os.Stdout)
 		os.Stdout.WriteString("\n")
 		os.Stdout.WriteString("Environment Variables:\n")
 		os.Stdout.WriteString("  Environment variables can be used instead of of the command line arguments.\n")
@@ -41,16 +41,16 @@ func main() {
 	}
 
 	connectionName := ""
-	if reader.Options.ConnectionDisplayName != nil {
-		connectionName = *reader.Options.ConnectionDisplayName
+	if options.Options.ConnectionDisplayName != nil {
+		connectionName = *options.Options.ConnectionDisplayName
 	}
 	log.Printf("%s\n  %s\n  %s\n  Feeback/support/contact: <%s>\n  Driver: %s, connection name: \"%s\"\n",
 		about.About.Summary(),
 		licensing.CopyrightText(),
 		licensing.LicenseText(),
 		about.About.Email,
-		*reader.Options.Driver,
+		*options.Options.Driver,
 		connectionName)
 
-	host.RunServer(reader.Options)
+	http.RunServer()
 }

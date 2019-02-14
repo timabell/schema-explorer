@@ -1,28 +1,15 @@
 package reader
 
 import (
+	"bitbucket.org/timabell/sql-data-viewer/options"
 	"bitbucket.org/timabell/sql-data-viewer/params"
 	"bitbucket.org/timabell/sql-data-viewer/schema"
 	"database/sql"
 	"fmt"
-	"github.com/jessevdk/go-flags"
 	"log"
 	"os"
 	"strings"
 )
-
-type SseOptions struct {
-	Driver                *string `short:"d" long:"driver" required:"true" description:"Driver to use" choice:"mssql" choice:"pg" choice:"sqlite" env:"schemaexplorer_driver"`
-	Live                  *bool   `short:"l" long:"live" description:"update html templates & schema information from disk on every page load" env:"schemaexplorer_live"`
-	ConnectionDisplayName *string `short:"n" long:"display-name" description:"A display name for this connection" env:"schemaexplorer_display_name"`
-	ListenOnAddress       *string `short:"a" long:"listen-on-address" description:"address to listen on" default:"localhost" env:"schemaexplorer_listen_on_address"` // localhost so that it's secure by default, only listen for local connections
-	ListenOnPort          *int    `short:"p" long:"listen-on-port" description:"port to listen on" default:"8080" env:"schemaexplorer_listen_on_port"`
-	PeekConfigPath        *string `long:"peek-config-path" description:"path to peek configuration file" default:"peek-config.txt" env:"schemaexplorer_peek_config_path"`
-}
-
-// todo: arg parsing and options shouldn't be here
-var Options = &SseOptions{}
-var ArgParser = flags.NewParser(Options, flags.Default)
 
 type DbReader interface {
 	// does select or something to make sure we have a working db connection
@@ -44,8 +31,6 @@ type DbReader interface {
 	GetAnalysis(table *schema.Table) (analysis []schema.ColumnAnalysis, err error)
 }
 
-type DbReaderOptions interface{}
-
 type CreateReader func() DbReader
 
 // Single row of data
@@ -53,14 +38,11 @@ type RowData []interface{}
 
 var creators = make(map[string]CreateReader)
 
-func init() {
-	ArgParser.EnvNamespace = "schemaexplorer"
-	ArgParser.NamespaceDelimiter = "-"
-}
-
+// This is how implementations for reading different RDBMS systems can register themselves.
+// They should call this in their init() function
 func RegisterReader(name string, opt interface{}, creator CreateReader) {
 	creators[name] = creator
-	group, err := ArgParser.AddGroup(name, fmt.Sprintf("Options for %s database", name), opt)
+	group, err := options.ArgParser.AddGroup(name, fmt.Sprintf("Options for %s database", name), opt)
 	if err != nil {
 		panic(err)
 	}
@@ -69,55 +51,18 @@ func RegisterReader(name string, opt interface{}, creator CreateReader) {
 }
 
 func GetDbReader() DbReader {
-	if Options == nil || (*Options).Driver == nil {
+	if options.Options == nil || (*options.Options).Driver == nil {
 		panic("driver option missing")
 	}
-	createReader := creators[*Options.Driver]
+	createReader := creators[*options.Options.Driver]
 	if createReader == nil {
-		log.Printf("Unknown reader '%s'", *Options.Driver)
+		log.Printf("Unknown reader '%s'", *options.Options.Driver)
 		os.Exit(1)
 	}
 	return createReader()
 }
 
-// GetRows adds extra columns for peeking over foreign keys in the selected table,
-// which then need to be known about by the renderer. This class is the bridge between
-// the two sides.
-type PeekLookup struct {
-	Table                  *schema.Table
-	Fks                    []*schema.Fk
-	outboundPeekStartIndex int
-	inboundPeekStartIndex  int
-	peekColumnCount        int
-}
-
-// Figures out the index of the peek column in the returned dataset for the given fk & column.
-// Intended to be used by the renderer to get the data it needs for peeking.
-func (peekFinder *PeekLookup) Find(peekFk *schema.Fk, peekCol *schema.Column) (peekDataIndex int) {
-	peekDataIndex = peekFinder.outboundPeekStartIndex
-	for _, storedFk := range peekFinder.Fks {
-		for _, col := range storedFk.DestinationTable.PeekColumns {
-			if peekFk == storedFk && peekCol == col {
-				return
-			}
-			peekDataIndex++
-		}
-	}
-	panic(fmt.Sprintf("didn't find peek fk %s col %s in PeekLookup data", peekFk, peekCol))
-}
-
-func (peekFinder *PeekLookup) FindInbound(peekFk *schema.Fk) (peekDataIndex int) {
-	for ix, fk := range peekFinder.Table.InboundFks {
-		if peekFk == fk {
-			peekDataIndex = peekFinder.inboundPeekStartIndex + ix
-			return
-		}
-	}
-	panic(fmt.Sprintf("Didn't find inbound fk %s in table.InboundFks", peekFk))
-}
-
 func GetRows(reader DbReader, table *schema.Table, params *params.TableParams) (rowsData []RowData, peekFinder *PeekLookup, err error) {
-
 	// load up all the fks that we have peek info for
 	peekFinder = &PeekLookup{}
 	inboundPeekCount := 0
@@ -141,16 +86,16 @@ func GetRows(reader DbReader, table *schema.Table, params *params.TableParams) (
 	if len(table.Columns) == 0 {
 		panic("No columns found when reading table data table")
 	}
-	rowsData, err = GetAllData(len(table.Columns)+peekFinder.peekColumnCount, rows)
+	rowsData, err = getAllData(len(table.Columns)+peekFinder.peekColumnCount, rows)
 	if err != nil {
 		return nil, nil, err
 	}
 	return
 }
 
-func GetAllData(colCount int, rows *sql.Rows) (rowsData []RowData, err error) {
+func getAllData(colCount int, rows *sql.Rows) (rowsData []RowData, err error) {
 	for rows.Next() {
-		row, err := GetRow(colCount, rows)
+		row, err := getRow(colCount, rows)
 		if err != nil {
 			return nil, err
 		}
@@ -159,7 +104,7 @@ func GetAllData(colCount int, rows *sql.Rows) (rowsData []RowData, err error) {
 	return
 }
 
-func GetRow(colCount int, rows *sql.Rows) (rowsData RowData, err error) {
+func getRow(colCount int, rows *sql.Rows) (rowsData RowData, err error) {
 	// http://stackoverflow.com/a/23507765/10245 - getting ad-hoc column data
 	singleRow := make([]interface{}, colCount)
 	rowDataPointers := make([]interface{}, colCount)
