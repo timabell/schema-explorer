@@ -80,6 +80,9 @@ func TableListHandler(resp http.ResponseWriter, req *http.Request) {
 		fmt.Println("setup error rendering table list: ", err)
 		return
 	}
+	if database == nil{
+		panic("database is nil")
+	}
 	err = dbReader.UpdateRowCounts(database)
 	if err != nil {
 		// todo: client error
