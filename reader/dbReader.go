@@ -31,8 +31,6 @@ type DbReader interface {
 	GetAnalysis(table *schema.Table) (analysis []schema.ColumnAnalysis, err error)
 }
 
-type DbReaderOptions interface{}
-
 type CreateReader func() DbReader
 
 // Single row of data
