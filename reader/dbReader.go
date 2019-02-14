@@ -86,16 +86,16 @@ func GetRows(reader DbReader, table *schema.Table, params *params.TableParams) (
 	if len(table.Columns) == 0 {
 		panic("No columns found when reading table data table")
 	}
-	rowsData, err = GetAllData(len(table.Columns)+peekFinder.peekColumnCount, rows)
+	rowsData, err = getAllData(len(table.Columns)+peekFinder.peekColumnCount, rows)
 	if err != nil {
 		return nil, nil, err
 	}
 	return
 }
 
-func GetAllData(colCount int, rows *sql.Rows) (rowsData []RowData, err error) {
+func getAllData(colCount int, rows *sql.Rows) (rowsData []RowData, err error) {
 	for rows.Next() {
-		row, err := GetRow(colCount, rows)
+		row, err := getRow(colCount, rows)
 		if err != nil {
 			return nil, err
 		}
@@ -104,7 +104,7 @@ func GetAllData(colCount int, rows *sql.Rows) (rowsData []RowData, err error) {
 	return
 }
 
-func GetRow(colCount int, rows *sql.Rows) (rowsData RowData, err error) {
+func getRow(colCount int, rows *sql.Rows) (rowsData RowData, err error) {
 	// http://stackoverflow.com/a/23507765/10245 - getting ad-hoc column data
 	singleRow := make([]interface{}, colCount)
 	rowDataPointers := make([]interface{}, colCount)
