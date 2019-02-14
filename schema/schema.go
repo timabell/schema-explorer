@@ -1,7 +1,6 @@
 package schema
 
 import (
-	"bytes"
 	"fmt"
 	"strings"
 )
@@ -93,16 +92,6 @@ type Fk struct {
 	DestinationColumns ColumnList
 }
 
-type ColumnAnalysis struct {
-	Column      *Column
-	ValueCounts []ValueInfo
-}
-
-type ValueInfo struct {
-	Value    interface{}
-	Quantity int
-}
-
 // Simplified fk constructor for single-column foreign keys
 func NewFk(name string, sourceTable *Table, sourceColumn *Column, destinationTable *Table, destinationColumn *Column) *Fk {
 	return &Fk{Name: name, SourceTable: sourceTable, SourceColumns: ColumnList{sourceColumn}, DestinationTable: destinationTable, DestinationColumns: ColumnList{destinationColumn}}
@@ -115,16 +104,13 @@ func (table Table) String() string {
 	return table.Schema + "." + table.Name
 }
 
+// reconstructs schema+name from "schema.name" string
 func TableFromString(value string) Table {
 	parts := strings.SplitN(value, ".", 2)
 	if len(parts) == 2 {
 		return Table{Schema: parts[0], Name: parts[1]}
 	}
 	return Table{Schema: "", Name: parts[0]}
-}
-
-func TableDebug(table *Table) string {
-	return fmt.Sprintf("%s: | pk: %s | cols: %s | fks: %s | inboundFks: %s", table.String(), table.Pk, table.Columns, table.Fks, table.InboundFks)
 }
 
 func (columns ColumnList) String() string {
@@ -142,23 +128,6 @@ func (column Column) String() string {
 func (fk Fk) String() string {
 	return fmt.Sprintf("%s %s(%s) => %s(%s)", fk.Name, fk.SourceTable, fk.SourceColumns.String(), fk.DestinationTable, fk.DestinationColumns.String())
 }
-
-// filter the fk list down to keys that reference the "child" table
-// todo: not sure this should live here conceptually
-//func (child Table) FindParents(fks GlobalFkList) (parents GlobalFkList) {
-//	parents = GlobalFkList{}
-//	for srcTable, tableFks := range fks {
-//		newFkList := FkList{}
-//		for srcCol, ref := range tableFks {
-//			if ref.Table.String() == child.String() {
-//				// match; copy into new list
-//				newFkList[srcCol] = ref
-//				parents[srcTable] = newFkList
-//			}
-//		}
-//	}
-//	return
-//}
 
 // returns nil if not found.
 // searches on schema+name
@@ -178,134 +147,4 @@ func (table Table) FindColumn(columnName string) (index int, column *Column) {
 		}
 	}
 	return -1, nil
-}
-
-func (database Database) DebugString() string {
-	var buffer bytes.Buffer
-	buffer.WriteString("database debug dump:\n")
-	buffer.WriteString("tables:\n")
-	for _, table := range database.Tables {
-		buffer.WriteString("- ")
-		buffer.WriteString(table.String())
-		buffer.WriteString(" ")
-		buffer.WriteString(fmt.Sprintf("%p", table))
-		buffer.WriteString(" - ")
-		buffer.WriteString(table.Description)
-		buffer.WriteString("\n")
-		for _, col := range table.Columns {
-			buffer.WriteString("  - '")
-			buffer.WriteString(col.Name)
-			buffer.WriteString("'\t")
-			buffer.WriteString(col.Type)
-			buffer.WriteString("\t")
-			buffer.WriteString(fmt.Sprintf("%p", col))
-			buffer.WriteString("\t\"")
-			buffer.WriteString(col.Description)
-			buffer.WriteString("\"\n")
-			if col.Fks != nil {
-				for _, fk := range col.Fks {
-					buffer.WriteString("    - ")
-					buffer.WriteString(fk.String())
-					buffer.WriteString(" ")
-					buffer.WriteString(fmt.Sprintf("%p", fk))
-					buffer.WriteString("\n")
-				}
-			}
-		}
-		for _, fk := range table.Fks {
-			buffer.WriteString("  - ")
-			buffer.WriteString(fk.String())
-			buffer.WriteString(" ")
-			buffer.WriteString(fmt.Sprintf("%p", fk))
-			buffer.WriteString("\n")
-			buffer.WriteString("    - ")
-			buffer.WriteString(fk.SourceTable.String())
-			buffer.WriteString("\t")
-			buffer.WriteString(fmt.Sprintf("%p", fk.SourceTable))
-			buffer.WriteString("\n")
-			for _, col := range fk.SourceColumns {
-				buffer.WriteString("        - '")
-				buffer.WriteString(col.Name)
-				buffer.WriteString("\t")
-				buffer.WriteString(fmt.Sprintf("%p", col))
-				buffer.WriteString("\n")
-			}
-			buffer.WriteString("    - ")
-			buffer.WriteString(fk.DestinationTable.String())
-			buffer.WriteString("\t")
-			buffer.WriteString(fmt.Sprintf("%p", fk.DestinationTable))
-			buffer.WriteString("\n")
-			for _, col := range fk.DestinationColumns {
-				buffer.WriteString("        - '")
-				buffer.WriteString(col.Name)
-				buffer.WriteString("\t")
-				buffer.WriteString(fmt.Sprintf("%p", col))
-				buffer.WriteString("\n")
-			}
-		}
-		for _, fk := range table.InboundFks {
-			buffer.WriteString("  - ")
-			buffer.WriteString(fk.String())
-			buffer.WriteString(" ")
-			buffer.WriteString(fmt.Sprintf("%p", fk))
-			buffer.WriteString("\n")
-			buffer.WriteString("    - ")
-			buffer.WriteString(fk.SourceTable.String())
-			buffer.WriteString("\t")
-			buffer.WriteString(fmt.Sprintf("%p", fk.SourceTable))
-			buffer.WriteString("\n")
-			for _, col := range fk.SourceColumns {
-				buffer.WriteString("        - '")
-				buffer.WriteString(col.Name)
-				buffer.WriteString("\t")
-				buffer.WriteString(fmt.Sprintf("%p", col))
-				buffer.WriteString("\n")
-			}
-			buffer.WriteString("    - ")
-			buffer.WriteString(fk.DestinationTable.String())
-			buffer.WriteString("\t")
-			buffer.WriteString(fmt.Sprintf("%p", fk.DestinationTable))
-			buffer.WriteString("\n")
-			for _, col := range fk.DestinationColumns {
-				buffer.WriteString("        - '")
-				buffer.WriteString(col.Name)
-				buffer.WriteString("\t")
-				buffer.WriteString(fmt.Sprintf("%p", col))
-				buffer.WriteString("\n")
-			}
-		}
-	}
-	buffer.WriteString("fks:\n")
-	for _, fk := range database.Fks {
-		buffer.WriteString("- ")
-		buffer.WriteString(fk.String())
-		buffer.WriteString(" ")
-		buffer.WriteString(fmt.Sprintf("%p", fk))
-		buffer.WriteString("\n")
-		buffer.WriteString("  - ")
-		buffer.WriteString(fk.SourceTable.String())
-		buffer.WriteString("\t")
-		buffer.WriteString(fmt.Sprintf("%p", fk.SourceTable))
-		buffer.WriteString("\n")
-		for _, col := range fk.SourceColumns {
-			buffer.WriteString("      - '")
-			buffer.WriteString(col.Name)
-			buffer.WriteString("\t")
-			buffer.WriteString(fmt.Sprintf("%p", col))
-			buffer.WriteString("\n")
-		}
-		buffer.WriteString("  - ")
-		buffer.WriteString(fk.DestinationTable.String())
-		buffer.WriteString("\t")
-		buffer.WriteString(fmt.Sprintf("%p", fk.DestinationTable))
-		buffer.WriteString("\n")
-		for _, col := range fk.DestinationColumns {
-			buffer.WriteString("      - '")
-			buffer.WriteString(col.Name)
-			buffer.WriteString("\t")
-			buffer.WriteString(fmt.Sprintf("%p", col))
-			buffer.WriteString("\n")
-		}
-	}
-	return buffer.String()
 }
