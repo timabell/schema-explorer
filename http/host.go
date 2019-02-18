@@ -22,12 +22,27 @@ import (
 var database *schema.Database
 
 func RunServer() {
+	r := SetupRouter()
+	runHttpServer(r)
+}
 
+// Runs setup code then builds router.
+// Factored out to this combination to be able to test http calls without the built in http server.
+func SetupRouter() *mux.Router {
+	err := Setup()
+	if err != nil {
+		// todo: send 500 error for all requests
+		panic("SetupRouter failed")
+	}
+	return Router()
+}
+
+func Setup() (err error) {
 	render.SetupTemplate()
 
 	dbReader := reader.GetDbReader()
 	log.Println("Checking database connection...")
-	err := dbReader.CheckConnection()
+	err = dbReader.CheckConnection()
 	if err != nil {
 		log.Println(err)
 		panic("connection check failed")
@@ -41,9 +56,7 @@ func RunServer() {
 		return
 	}
 	setupPeekList()
-
-	r := Router()
-	runHttpServer(r)
+	return
 }
 
 func runHttpServer(r *mux.Router) {

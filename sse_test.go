@@ -796,7 +796,7 @@ func findColumn(table *schema.Table, columnName string, t *testing.T) (column *s
 func Test_Http(t *testing.T) {
 	request, _ := http.NewRequest("GET", "/", nil)
 	response := httptest.NewRecorder()
-	sseHttp.Router().ServeHTTP(response, request)
+	sseHttp.SetupRouter().ServeHTTP(response, request)
 	if response.Code != 200 {
 		t.Fatalf("%d status for /", response.Code)
 	}
