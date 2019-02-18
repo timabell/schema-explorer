@@ -286,8 +286,9 @@ footer *, footer a, footer a:visited{
     .button,
     button,
     footer,
-    .trail-info
-    { display: none; }
+    .trail-info,
+    .top-link
+    { display: none !important; }
 }
 :target {
     background-color: #e6dada;
@@ -309,4 +310,17 @@ footer *, footer a, footer a:visited{
 }
 #justTheDataHeaders .context-link:hover{
     background-color: #ddd;
+}
+
+.top-link{
+    position: fixed;
+    display: block;
+    right: 0;
+    bottom: 0;
+    background-color: #ddda;
+    padding: 0.5em;
+    text-decoration: none;
+    border: solid #f8f8f8;
+    border-width: 0.125em 0 0 0.125em;
+
 }
