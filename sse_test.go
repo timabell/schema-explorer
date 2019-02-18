@@ -32,6 +32,7 @@ import (
 	"bitbucket.org/timabell/sql-data-viewer/schema"
 	_ "bitbucket.org/timabell/sql-data-viewer/sqlite"
 	"fmt"
+	"github.com/gorilla/mux"
 	"log"
 	"net/http"
 	"net/http/httptest"
@@ -794,17 +795,22 @@ func findColumn(table *schema.Table, columnName string, t *testing.T) (column *s
 }
 
 func Test_Http(t *testing.T) {
-	CheckForOk("/", t)
-	CheckForOk("/tables/DataTypeTest", t)
-	CheckForOk("/tables/DataTypeTest/data", t)
-	CheckForOk("/tables/DataTypeTest/analyse-data", t)
-	CheckForOk("/table-trail", t)
+	router, database := sseHttp.SetupRouter()
+	var schemaPrefix string
+	if database.Supports.Schema {
+		schemaPrefix = database.DefaultSchemaName + "."
+	}
+	CheckForOk("/", router, t)
+	CheckForOk(fmt.Sprintf("/tables/%sDataTypeTest", schemaPrefix), router, t)
+	CheckForOk(fmt.Sprintf("/tables/%sDataTypeTest/data", schemaPrefix), router, t)
+	CheckForOk(fmt.Sprintf("/tables/%sDataTypeTest/analyse-data", schemaPrefix), router, t)
+	CheckForOk("/table-trail", router, t)
 }
 
-func CheckForOk(path string, t *testing.T) {
+func CheckForOk(path string, router *mux.Router, t *testing.T) {
 	request, _ := http.NewRequest("GET", path, nil)
 	response := httptest.NewRecorder()
-	sseHttp.SetupRouter().ServeHTTP(response, request)
+	router.ServeHTTP(response, request)
 	if response.Code != 200 {
 		t.Fatalf("%d status for %s", response.Code, path)
 	}

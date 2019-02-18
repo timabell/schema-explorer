@@ -22,19 +22,19 @@ import (
 var database *schema.Database
 
 func RunServer() {
-	r := SetupRouter()
+	r, _ := SetupRouter()
 	runHttpServer(r)
 }
 
 // Runs setup code then builds router.
 // Factored out to this combination to be able to test http calls without the built in http server.
-func SetupRouter() *mux.Router {
+func SetupRouter() (*mux.Router, *schema.Database) {
 	err := Setup()
 	if err != nil {
 		// todo: send 500 error for all requests
 		panic("SetupRouter failed")
 	}
-	return Router()
+	return Router(), database
 }
 
 func Setup() (err error) {
