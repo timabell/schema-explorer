@@ -794,10 +794,18 @@ func findColumn(table *schema.Table, columnName string, t *testing.T) (column *s
 }
 
 func Test_Http(t *testing.T) {
-	request, _ := http.NewRequest("GET", "/", nil)
+	CheckForOk("/", t)
+	CheckForOk("/tables/DataTypeTest", t)
+	CheckForOk("/tables/DataTypeTest/data", t)
+	CheckForOk("/tables/DataTypeTest/analyse-data", t)
+	CheckForOk("/table-trail", t)
+}
+
+func CheckForOk(path string, t *testing.T) {
+	request, _ := http.NewRequest("GET", path, nil)
 	response := httptest.NewRecorder()
 	sseHttp.SetupRouter().ServeHTTP(response, request)
 	if response.Code != 200 {
-		t.Fatalf("%d status for /", response.Code)
+		t.Fatalf("%d status for %s", response.Code, path)
 	}
 }
