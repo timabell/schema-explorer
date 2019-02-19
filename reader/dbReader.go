@@ -132,6 +132,8 @@ func DbValueToString(colData interface{}, dataType string) *string {
 	case dataType == "numeric": // mssql numeric
 		stringValue = fmt.Sprintf("%s", colData) // seems to come back as byte array for a string, surprising, could be a driver thing
 	case dataType == "integer":
+		fallthrough
+	case dataType == "int4":
 		stringValue = fmt.Sprintf("%d", colData)
 	case dataType == "float":
 		stringValue = fmt.Sprintf("%f", colData)
