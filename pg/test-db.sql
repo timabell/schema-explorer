@@ -6,20 +6,26 @@ create table "DataTypeTest" (
 	"colCount" int,
 	"field_INT4" INT,
 	"field_NotNullInt" int not null,
-	"field_NullInt" int null
+	"field_NullInt" int null,
+	"field_json" json,
+	"field_jsonb" jsonb
 );
 
-insert into "DataTypeTest"( intpk, "colCount", "field_INT4", "field_NotNullInt"
+insert into "DataTypeTest"( intpk, "colCount", "field_INT4", "field_NotNullInt", "field_json", "field_jsonb"
 )values(
 	10, --intpk
-	5, --colCount
+	7, --colCount
 	20, --INT
-	1984
+	1984,
+	'[{"name": "frank"}, {"name": "sinatra"}]'::json,
+	'[{"name": "frank"}, {"name": "sinatra"}]'::jsonb
 ),(
 	11, --intpk
 	0, --colCount
 	-33, --INT
-	1978
+	1978,
+	null,
+	null
 );
 
 create table toy (
