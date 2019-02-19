@@ -463,6 +463,8 @@ var tests = []testCase{
 	{colName: "field_numeric", row: 0, expectedType: "numeric", expectedString: "987.1234500"},
 	{colName: "field_decimal", row: 0, expectedType: "decimal", expectedString: "666.1234500"},
 	{colName: "field_uniqueidentifier", row: 0, expectedType: "uniqueidentifier", expectedString: "b7a16c7a-a718-4ed8-97cb-20ccbadcc339"},
+	{colName: "field_json", row: 0, expectedType: "json", expectedString: "[{\"name\": \"frank\"}, {\"name\": \"sinatra\"}]"},
+	{colName: "field_jsonb", row: 0, expectedType: "jsonb", expectedString: "[{\"name\": \"frank\"}, {\"name\": \"sinatra\"}]"},
 }
 
 func checkFilterAndSort(dbReader reader.DbReader, database *schema.Database, t *testing.T) {
