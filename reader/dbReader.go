@@ -150,7 +150,9 @@ func DbValueToString(colData interface{}, dataType string) *string {
 		fallthrough
 	case dataType == "json": // pg
 		fallthrough
-	case strings.Contains(strings.ToLower(dataType), "varchar"): // sqlite is [N]VARCHAR sqlserver is [n]varchar
+	case dataType == "CLOB": // sqlite
+		fallthrough
+	case strings.Contains(strings.ToLower(dataType), "char"): // sqlite is uppercase, mssql is lowercase. See test data for things this should cover
 		stringValue = fmt.Sprintf("%s", colData)
 	case strings.Contains(dataType, "TEXT"): // mssql
 		// https://stackoverflow.com/a/18615786/10245

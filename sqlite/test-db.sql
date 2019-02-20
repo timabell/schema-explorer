@@ -81,24 +81,24 @@ insert into DataTypeTest(
 	90, --UNSIGNED
 	100, --INT2
 	110, --INT8
-	'field_CHARACTER', --CHARACTER
-	'field_VARCHAR', --VARCHAR
-	'field_VARYING', --VARYING
-	'field_NCHAR', --NCHAR
-	'field_NATIVE', --NATIVE
-	'field_NVARCHAR', --NVARCHAR
-	'field_TEXT', --TEXT
-	'field_CLOB', --CLOB
-	'field_BLOB', --BLOB
-	'field_REAL', --REAL
-	'field_DOUBLE', --DOUBLE
-	'field_DOUBLEPRECISION', --DOUBLE PRECISION
-	'field_FLOAT', --FLOAT
-	'field_NUMERIC', --NUMERIC
-	'field_DECIMAL', --DECIMAL
+	'a_CHARACTER', --CHARACTER
+	'a_VARCHAR', --VARCHAR
+	'a_VARYING', --VARYING
+	'a_NCHAR', --NCHAR
+	'a_NATIVE', --NATIVE
+	'a_NVARCHAR', --NVARCHAR
+	'a_TEXT', --TEXT
+	'a_CLOB', --CLOB
+	'a_BLOB', --BLOB
+	1.234, --REAL
+	1.234, --DOUBLE
+	1.234, --DOUBLE PRECISION
+	1.234, --FLOAT
+	1.234, --NUMERIC
+	1.234, --DECIMAL
 	1, --BOOLEAN
-	'field_DATE', --DATE
-	'field_DATETIME', --DATETIME'
+	'1984-04-02', --DATE
+	'1984-04-02 11:12', --DATETIME'
 	1984
 ),(
 	11, --intpk
@@ -112,24 +112,24 @@ insert into DataTypeTest(
 	90, --UNSIGNED
 	100, --INT2
 	110, --INT8
-	'field_CHARACTER', --CHARACTER
-	'field_VARCHAR', --VARCHAR
-	'field_VARYING', --VARYING
-	'field_NCHAR', --NCHAR
-	'field_NATIVE', --NATIVE
-	'field_NVARCHAR', --NVARCHAR
-	'field_TEXT', --TEXT
-	'field_CLOB', --CLOB
-	'field_BLOB', --BLOB
-	'field_REAL', --REAL
-	'field_DOUBLE', --DOUBLE
-	'field_DOUBLEPRECISION', --DOUBLE PRECISION
-	'field_FLOAT', --FLOAT
-	'field_NUMERIC', --NUMERIC
-	'field_DECIMAL', --DECIMAL
-	1, --BOOLEAN
-	'field_DATE', --DATE
-	'field_DATETIME', --DATETIME'
+	'a_CHARACTER', --CHARACTER
+	'a_VARCHAR', --VARCHAR
+	'a_VARYING', --VARYING
+	'a_NCHAR', --NCHAR
+	'a_NATIVE', --NATIVE
+	'a_NVARCHAR', --NVARCHAR
+	'a_TEXT', --TEXT
+	'a_CLOB', --CLOB
+	'a_BLOB', --BLOB
+	'a_REAL', --REAL
+	'a_DOUBLE', --DOUBLE
+	'a_DOUBLEPRECISION', --DOUBLE PRECISION
+	'a_FLOAT', --FLOAT
+	'a_NUMERIC', --NUMERIC
+	'a_DECIMAL', --DECIMAL
+	0, --BOOLEAN
+	'a_DATE', --DATE
+	'a_DATETIME', --DATETIME'
 	1978
 );
 
