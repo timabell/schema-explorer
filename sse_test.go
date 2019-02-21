@@ -802,8 +802,8 @@ func Test_GetRows(t *testing.T) {
 			t.Errorf("Incorrect column type %s %+v", actualType, test)
 		}
 		actualString := reader.DbValueToString(rows[test.row][columnIndex], actualType)
-		if *actualString != test.expectedString {
-			t.Errorf("Incorrect string '%s' %+v", *actualString, test)
+		if actualString == nil || *actualString != test.expectedString {
+			t.Errorf("Incorrect string '%+v' %+v", actualString, test)
 		}
 	}
 }
