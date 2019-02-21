@@ -488,7 +488,6 @@ var tests = []testCase{
 	// todo: all timezone variant things
 	{colName: "field_DATE", row: 0, expectedType: "DATE", expectedString: "1984-04-02 00:00:00 +0000 UTC"},
 	{colName: "field_DATETIME", row: 0, expectedType: "DATETIME", expectedString: "1984-04-02 11:12:00 +0000 UTC"},
-	{colName: "field_NotNullInt", row: 0, expectedType: "int", expectedString: "1984"},
 	// pg
 	{colName: "field_money", row: 0, expectedType: "money", expectedString: "1234.5670"},
 	{colName: "field_numeric", row: 0, expectedType: "numeric", expectedString: "987.1234500"},

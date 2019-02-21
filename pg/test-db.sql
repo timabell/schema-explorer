@@ -4,17 +4,64 @@
 create table "DataTypeTest" (
   intpk integer primary key,
 	"colCount" int,
-	"field_INT4" INT,
-	"field_NotNullInt" int not null,
+	-- numeric
+	"field_BareINT" INT, -- reported as int4, so avoiding clash with sqlite int
+	"field_INT4" INT4,
 	"field_NullInt" int null,
+	"field_smallint" smallint,
+	"field_interval" interval null,
+	"field_double" double precision null,
+	"field_money" money null,
+	"field_numeric" numeric(5,2) null,
+	"field_real" real null,
+	-- char
+	"field_character" character(20) null,
+	"field_varchar" varchar(20) null,
+	"field_text" text null,
+	-- bool
+	"field_boolean" boolean null,
+	"field_bit" bit null,
+	"field_varbit" varbit null,
+	--binary
+	"field_bytea" bytea null,
+	-- date
+	"field_date" date null,
+	"field_time" time null,
+	"field_timetz" timetz null,
+	"field_timestamp" timestamp null,
+	"field_timestamptz" timestamptz null,
+	-- geom
+	"field_circle" circle null,
+	"field_line" line null,
+	"field_lseg" lseg null,
+	"field_path" path null,
+	"field_point" point null,
+	"field_polygon" polygon null,
+	-- networking
+	"field_inet" inet null, -- ip4/6 network address
+	"field_cidr" cidr null, -- ip4/6 host address
+	"field_macaddr" macaddr null,
+	-- "field_macaddr8" macaddr8 null, -- ERROR:  type "macaddr8" does not exist
+	-- json
 	"field_json" json,
-	"field_jsonb" jsonb
+	"field_jsonb" jsonb,
+	-- misc
+	"field_pg_lsn" pg_lsn,
+	"field_smallserial" smallserial,
+	"field_serial" serial,
+	"field_tsquery" tsquery, -- text-search query
+	"field_tsvector" tsvector, -- text-search document
+	"field_txid_snapshot" txid_snapshot, -- user-level transaction ID snapshot
+	"field_uuid" uuid,
+	"field_xml" xml,
+	-- null
+	"field_NotNullInt" int not null
 );
 
 insert into "DataTypeTest"( intpk, "colCount", "field_INT4", "field_NotNullInt", "field_json", "field_jsonb"
 )values(
 	10, --intpk
-	7, --colCount
+	43, --colCount
 	20, --INT
 	1984,
 	'[{"name": "frank"}, {"name": "sinatra"}]'::json,
