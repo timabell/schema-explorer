@@ -5,9 +5,9 @@ create table "DataTypeTest" (
   intpk integer primary key,
 	"colCount" int,
 	-- numeric
-	"field_BareINT" INT, -- reported as int4, so avoiding clash with sqlite int
-	"field_INT4" INT4,
-	"field_NullInt" int null,
+	"field_bare_int" INT, -- reported as int4, so not named field_int to avoiding clash with sqlite int
+	"field_int4" INT4,
+	"field_null_int" int null,
 	"field_smallint" smallint,
 	"field_interval" interval null,
 	"field_double" double precision null,
@@ -55,10 +55,10 @@ create table "DataTypeTest" (
 	"field_uuid" uuid,
 	"field_xml" xml,
 	-- null
-	"field_NotNullInt" int not null
+	"field_not_null_int" int not null
 );
 
-insert into "DataTypeTest"( intpk, "colCount", "field_INT4", "field_NotNullInt", "field_json", "field_jsonb"
+insert into "DataTypeTest"( intpk, "colCount", "field_int4", "field_not_null_int", "field_json", "field_jsonb"
 )values(
 	10, --intpk
 	43, --colCount
