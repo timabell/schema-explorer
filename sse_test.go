@@ -794,7 +794,7 @@ func Test_GetRows(t *testing.T) {
 		}
 		columnIndex, column := table.FindColumn(test.colName)
 		if column == nil {
-			t.Logf("Skipped test for non-existent column %+v", test)
+			//t.Logf("Skipped test for non-existent column %+v", test)
 			continue
 		}
 		checkedCols[test.colName] = true
