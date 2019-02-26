@@ -786,6 +786,8 @@ func Test_GetRows(t *testing.T) {
 		t.Errorf("Expected %#v columns, found %#v", expectedColCount, actualColCount)
 	}
 
+	checkedCols := make(map[string]bool, len(table.Columns))
+
 	for _, test := range tests {
 		if test.row+1 > len(rows) {
 			t.Errorf("Not enough rows. %+v", test)
@@ -796,6 +798,7 @@ func Test_GetRows(t *testing.T) {
 			t.Logf("Skipped test for non-existent column %+v", test)
 			continue
 		}
+		checkedCols[test.colName] = true
 
 		actualType := table.Columns[columnIndex].Type
 		if !strings.EqualFold(actualType, test.expectedType) {
@@ -804,6 +807,11 @@ func Test_GetRows(t *testing.T) {
 		actualString := reader.DbValueToString(rows[test.row][columnIndex], actualType)
 		if actualString == nil || *actualString != test.expectedString {
 			t.Errorf("Incorrect string '%+v' %+v", actualString, test)
+		}
+	}
+	for _, col := range table.Columns{
+		if !checkedCols[col.Name]{
+			t.Errorf("col %s.%s was not checked", table, col.Name)
 		}
 	}
 }
