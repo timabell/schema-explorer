@@ -504,7 +504,6 @@ func checkFilterAndSort(dbReader reader.DbReader, database *schema.Database, t *
 	_, sizeCol := table.FindColumn("size")
 	_, colourCol := table.FindColumn("colour")
 	filter := params.FieldFilter{Field: patternCol, Values: []string{"plain"}}
-	log.Print(filter)
 	tableParams := &params.TableParams{
 		Filter:   params.FieldFilterList{filter},
 		Sort:     []params.SortCol{{Column: colourCol, Descending: false}, {Column: sizeCol, Descending: true}},
