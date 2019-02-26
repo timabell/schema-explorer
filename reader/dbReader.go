@@ -162,6 +162,7 @@ func DbValueToString(colData interface{}, dataType string) *string {
 		stringValue = "[binary]"
 	default:
 		log.Printf("unknown data type %s", dataType)
+		//panic(fmt.Sprintf("unknown data type %s", dataType))
 		stringValue = fmt.Sprintf("%v", colData)
 	}
 	return &stringValue
