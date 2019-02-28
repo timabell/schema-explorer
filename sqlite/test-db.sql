@@ -29,12 +29,12 @@ create table DataTypeTest (
 	field_doubleprecision double precision,
 	field_float float,
 	field_numeric numeric,
-	field_decimal decimal(10,5),
+	field_sqlite_decimal decimal(10,5),
 	field_boolean boolean,
 	field_date date,
 	field_datetime datetime,
-	field_notnullint int not null,
-	field_nullint int null
+	field_not_null_int int not null,
+	field_null_int int null
 );
 
 insert into DataTypeTest(
@@ -64,11 +64,11 @@ insert into DataTypeTest(
 	field_doubleprecision,
 	field_float,
 	field_numeric,
-	field_decimal,
+	field_sqlite_decimal,
 	field_boolean,
 	field_date,
 	field_datetime,
-	field_notnullint
+	field_not_null_int
 )values(
 	10, --intpk
 	31, --colCount
@@ -94,7 +94,7 @@ insert into DataTypeTest(
 	1.234, --DOUBLE
 	1.234, --DOUBLE PRECISION
 	1.234, --FLOAT
-	1.234, --NUMERIC
+	987.12345, --NUMERIC
 	1.234, --DECIMAL
 	1, --BOOLEAN
 	'1984-04-02', --DATE
@@ -112,24 +112,24 @@ insert into DataTypeTest(
 	90, --UNSIGNED
 	100, --INT2
 	110, --INT8
-	'a_CHARACTER', --CHARACTER
-	'a_VARCHAR', --VARCHAR
-	'a_VARYING', --VARYING
-	'a_NCHAR', --NCHAR
-	'a_NATIVE', --NATIVE
-	'a_NVARCHAR', --NVARCHAR
-	'a_TEXT', --TEXT
-	'a_CLOB', --CLOB
-	'a_BLOB', --BLOB
-	'a_REAL', --REAL
-	'a_DOUBLE', --DOUBLE
-	'a_DOUBLEPRECISION', --DOUBLE PRECISION
-	'a_FLOAT', --FLOAT
-	'a_NUMERIC', --NUMERIC
-	'a_DECIMAL', --DECIMAL
+	null, --CHARACTER
+	null, --VARCHAR
+	null, --VARYING
+	null, --NCHAR
+	null, --NATIVE
+	null, --NVARCHAR
+	null, --TEXT
+	null, --CLOB
+	null, --BLOB
+	null, --REAL
+	null, --DOUBLE
+	null, --DOUBLE PRECISION
+	null, --FLOAT
+	null, --NUMERIC
+	null, --DECIMAL
 	0, --BOOLEAN
-	'a_DATE', --DATE
-	'a_DATETIME', --DATETIME'
+	null, --DATE
+	null, --DATETIME'
 	1978
 );
 
