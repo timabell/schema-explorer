@@ -719,6 +719,7 @@ var tests = []testCase{
 	// The headings are just to make it easier to navigate the list in reality there will be arbitary sharing.
 	// i.e. something in sqlite section might also test the pg database if the results are expected to be the same,
 	// that test will not be repeated in the pg section.
+	// todo: homogenize type reading - varchar(20) -> "varchar" + length info
 	// sqlite
 	{colName: "field_int", row: 0, expectedType: "INT", expectedString: "20"},
 	{colName: "field_int", row: 1, expectedType: "INT", expectedString: "-33"},
@@ -732,7 +733,7 @@ var tests = []testCase{
 	{colName: "field_int8", row: 0, expectedType: "INT8", expectedString: "110"},
 	{colName: "field_numeric", row: 0, expectedType: "numeric", expectedString: "987.12345"},
 	{colName: "field_character", row: 0, expectedType: "CHARACTER(20)", expectedString: "a_CHARACTER"},
-	{colName: "field_varchar", row: 0, expectedType: "VARCHAR(255)", expectedString: "a_VARCHAR"},
+	{colName: "field_sqlite_varchar", row: 0, expectedType: "VARCHAR(255)", expectedString: "a_VARCHAR"},
 	{colName: "field_varying", row: 0, expectedType: "VARYING CHARACTER(255)", expectedString: "a_VARYING"},
 	{colName: "field_nchar", row: 0, expectedType: "NCHAR(55)", expectedString: "a_NCHAR"},
 	{colName: "field_native", row: 0, expectedType: "NATIVE CHARACTER(70)", expectedString: "a_NATIVE"},
@@ -744,7 +745,7 @@ var tests = []testCase{
 	{colName: "field_double", row: 0, expectedType: "DOUBLE", expectedString: "1.234"},
 	{colName: "field_doubleprecision", row: 0, expectedType: "DOUBLE PRECISION", expectedString: "1.234"},
 	{colName: "field_float", row: 0, expectedType: "FLOAT", expectedString: "1.234"},
-	{colName: "field_sqlite_decimal", row: 0, expectedType: "DECIMAL(10,5)", expectedString: "1.234"}, // todo: homogenize type reading
+	{colName: "field_sqlite_decimal", row: 0, expectedType: "DECIMAL(10,5)", expectedString: "1.234"},
 	{colName: "field_boolean", row: 0, expectedType: "BOOLEAN", expectedString: "true"},
 	{colName: "field_boolean", row: 1, expectedType: "BOOLEAN", expectedString: "false"},
 	// todo: all timezone variant things

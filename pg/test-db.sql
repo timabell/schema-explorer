@@ -10,12 +10,12 @@ create table "DataTypeTest" (
 	"field_null_int" int null,
 	"field_pg_smallint" smallint,
 	"field_interval" interval null,
-	"field_double" double precision null,
+	"field_float8" double precision null,
 	"field_money" money null,
 	"field_numeric" numeric(5,2) null,
-	"field_real" real null,
+	"field_float4" real null,
 	-- char
-	"field_character" character(20) null,
+	"field_bpchar" character(20) null,
 	"field_varchar" varchar(20) null,
 	"field_text" text null,
 	-- bool

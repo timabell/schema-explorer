@@ -16,7 +16,7 @@ create table DataTypeTest (
 	field_int2 int2,
 	field_int8 int8,
 	field_character character(20),
-	field_varchar varchar(255),
+	field_sqlite_varchar varchar(255),
 	field_varying varying character(255),
 	field_nchar nchar(55),
 	field_native native character(70),
@@ -51,7 +51,7 @@ insert into DataTypeTest(
 	field_int2,
 	field_int8,
 	field_character,
-	field_varchar,
+	field_sqlite_varchar,
 	field_varying,
 	field_nchar,
 	field_native,
@@ -82,7 +82,7 @@ insert into DataTypeTest(
 	100, --INT2
 	110, --INT8
 	'a_CHARACTER', --CHARACTER
-	'a_VARCHAR', --VARCHAR
+	'a_VARCHAR', --sqlite_VARCHAR
 	'a_VARYING', --VARYING
 	'a_NCHAR', --NCHAR
 	'a_NATIVE', --NATIVE
@@ -113,7 +113,7 @@ insert into DataTypeTest(
 	100, --INT2
 	110, --INT8
 	null, --CHARACTER
-	null, --VARCHAR
+	null, --sqlite_VARCHAR
 	null, --VARYING
 	null, --NCHAR
 	null, --NATIVE
