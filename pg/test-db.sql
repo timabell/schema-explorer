@@ -8,7 +8,7 @@ create table "DataTypeTest" (
 	"field_bare_int" INT, -- reported as int4, so not named field_int to avoiding clash with sqlite int
 	"field_int4" INT4,
 	"field_null_int" int null,
-	"field_smallint" smallint,
+	"field_pg_smallint" smallint,
 	"field_interval" interval null,
 	"field_double" double precision null,
 	"field_money" money null,

@@ -753,6 +753,7 @@ var tests = []testCase{
 	// pg
 	{colName: "field_money", row: 0, expectedType: "money", expectedString: "1234.5670"},
 	{colName: "field_pg_decimal", row: 0, expectedType: "decimal", expectedString: "666.1234500"},
+	{colName: "field_pg_smallint", row: 0, expectedType: "int2", expectedString: "60"},
 	{colName: "field_uniqueidentifier", row: 0, expectedType: "uniqueidentifier", expectedString: "b7a16c7a-a718-4ed8-97cb-20ccbadcc339"},
 	{colName: "field_json", row: 0, expectedType: "json", expectedString: "[{\"name\": \"frank\"}, {\"name\": \"sinatra\"}]"},
 	{colName: "field_jsonb", row: 0, expectedType: "jsonb", expectedString: "[{\"name\": \"frank\"}, {\"name\": \"sinatra\"}]"},
