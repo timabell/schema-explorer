@@ -813,7 +813,9 @@ func Test_GetRows(t *testing.T) {
 		}
 		// todo: check type of retrieved value, turns out you can put anything you like in sqlite cols
 		actualString := reader.DbValueToString(rows[test.row][columnIndex], actualType)
-		if actualString == nil || *actualString != test.expectedString {
+		if actualString == nil {
+			t.Errorf("Incorrect nil string %+v, actual data type '%s'", test, actualType)
+		} else if actualString == nil || *actualString != test.expectedString {
 			t.Errorf("Incorrect string '%+v' %+v, actual data type '%s'", *actualString, test, actualType)
 		}
 	}
