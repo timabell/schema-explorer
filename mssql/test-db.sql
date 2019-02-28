@@ -16,7 +16,7 @@ set nocount on;
 
 create table DataTypeTest (
 	intpk integer primary key,
-	colCount integer,
+	col_count integer,
 	field_INT int,
 	field_money MONEY,
 	field_numeric numeric(18,7),
@@ -31,7 +31,7 @@ create table DataTypeTest (
 delete DataTypeTest;
 insert into DataTypeTest (
 	intpk,
-	colCount,
+	col_count,
 	field_INT,
 	field_money,
 	field_numeric,
@@ -42,7 +42,7 @@ insert into DataTypeTest (
 	field_NotNullInt
 ) values (
 	10, --intpk
-	11, --colCount
+	11, --col_count
 	20, --field_INT
 	1234.567, --field_money,
 	987.1234500, --field_numeric,
@@ -53,7 +53,7 @@ insert into DataTypeTest (
 	1984
 ),(
 	11, --intpk
-	0, --colCount
+	0, --col_count
 	-33, --field_INT
 	null, --field_money,
 	null, --field_numeric,

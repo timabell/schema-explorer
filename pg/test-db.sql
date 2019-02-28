@@ -3,7 +3,7 @@
 
 create table "DataTypeTest" (
   intpk integer primary key,
-	"colCount" int,
+	"col_count" int,
 	-- numeric
 	"field_bare_int" INT, -- reported as int4, so not named field_int to avoiding clash with sqlite int
 	"field_int4" INT4,
@@ -58,17 +58,17 @@ create table "DataTypeTest" (
 	"field_not_null_int" int not null
 );
 
-insert into "DataTypeTest"( intpk, "colCount", "field_int4", "field_not_null_int", "field_json", "field_jsonb"
+insert into "DataTypeTest"( intpk, "col_count", "field_int4", "field_not_null_int", "field_json", "field_jsonb"
 )values(
 	10, --intpk
-	43, --colCount
+	43, --col_count
 	20, --INT
 	1984,
 	'[{"name": "frank"}, {"name": "sinatra"}]'::json,
 	'[{"name": "frank"}, {"name": "sinatra"}]'::jsonb
 ),(
 	11, --intpk
-	0, --colCount
+	0, --col_count
 	-33, --INT
 	1978,
 	null,

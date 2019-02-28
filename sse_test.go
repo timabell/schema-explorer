@@ -782,7 +782,7 @@ func Test_GetRows(t *testing.T) {
 	checkedCols["field_null_int"] = true     // tested in another test
 
 	// check the column count is as expected
-	colName := "colcount"
+	colName := "col_count"
 	countIndex, column := table.FindColumn(colName)
 	if column == nil {
 		t.Fatalf("column missing: %s.%s", table, colName)
@@ -792,7 +792,7 @@ func Test_GetRows(t *testing.T) {
 	if actualColCount != expectedColCount {
 		t.Errorf("Expected %#v columns, found %#v", expectedColCount, actualColCount)
 	}
-	checkedCols["colcount"] = true
+	checkedCols["col_count"] = true
 
 	for _, test := range tests {
 		if test.row+1 > len(rows) {
