@@ -19,7 +19,7 @@ create table "DataTypeTest" (
 	"field_varchar" varchar(20) null,
 	"field_text" text null,
 	-- bool
-	"field_boolean" boolean null,
+	"field_bool" boolean null,
 	"field_bit" bit null,
 	"field_varbit" varbit null,
 	--binary
