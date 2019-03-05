@@ -138,6 +138,8 @@ func DbValueToString(colData interface{}, dataType string) *string {
 		stringValue = fmt.Sprintf("%x%x%x%x-%x%x-%x%x-%x%x-%x%x%x%x%x%x",
 			bytes[3], bytes[2], bytes[1], bytes[0], bytes[5], bytes[4], bytes[7], bytes[6], bytes[8], bytes[9], bytes[10], bytes[11], bytes[12], bytes[13], bytes[14], bytes[15])
 	// === //
+	case dataType == "numeric": // sqlite - best type for number. needs casting for pg
+		stringValue = fmt.Sprintf("%v", colData.(float64))
 	case dataType == "varbinary":
 		fallthrough
 	case dataType == "blob":
@@ -156,8 +158,6 @@ func DbValueToString(colData interface{}, dataType string) *string {
 	case dataType == "real":
 		fallthrough
 	case dataType == "float":
-		fallthrough
-	case dataType == "numeric": // sqlite - best type for number.
 		fallthrough
 	case strings.HasPrefix(dataType, "double"):
 		fallthrough
