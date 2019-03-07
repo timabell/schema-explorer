@@ -2,6 +2,7 @@ package http
 
 import (
 	"bitbucket.org/timabell/sql-data-viewer/about"
+	"bitbucket.org/timabell/sql-data-viewer/browser"
 	"bitbucket.org/timabell/sql-data-viewer/licensing"
 	"bitbucket.org/timabell/sql-data-viewer/options"
 	"bitbucket.org/timabell/sql-data-viewer/reader"
@@ -14,7 +15,6 @@ import (
 	"net"
 	"net/http"
 	"os"
-	"os/exec"
 	"regexp"
 	"strings"
 	"time"
@@ -84,15 +84,8 @@ func runHttpServer(r *mux.Router) {
 	}
 	url := fmt.Sprintf("http://%s:%d/", *options.Options.ListenOnAddress, port)
 	log.Printf("Starting web-server, point your browser at %s\nPress Ctrl-C to exit schemaexplorer.\n", url)
-	launchBrowser(url) // probably won't beat the server coming up.
+	browser.LaunchBrowser(url) // probably won't beat the server coming up.
 	log.Fatal(srv.Serve(listener))
-}
-
-func launchBrowser(url string) {
-	err := exec.Command("xdg-open", url).Run()
-	if err != nil {
-		log.Printf("Failed to launch browser automatically: %s", err)
-	}
 }
 
 func requestSetup() (layoutData render.PageTemplateModel, dbReader reader.DbReader, err error) {
