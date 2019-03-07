@@ -19,7 +19,7 @@ create table DataTypeTest (
 	col_count integer,
 	field_INT int,
 	field_money MONEY,
-	field_numeric numeric(18,7),
+-- 	field_numeric numeric(18,7),
 	field_decimal decimal(18,7),
 	field_varcharmax varchar(max),
 	field_nvarchar nvarchar(123),
@@ -34,7 +34,7 @@ insert into DataTypeTest (
 	col_count,
 	field_INT,
 	field_money,
-	field_numeric,
+-- 	field_numeric,
 	field_decimal,
 	field_varcharmax,
 	field_nvarchar,
@@ -45,7 +45,7 @@ insert into DataTypeTest (
 	11, --col_count
 	20, --field_INT
 	1234.567, --field_money,
-	987.1234500, --field_numeric,
+-- 	987.1234500, --field_numeric,
 	666.1234500, --field_decimal,
 	'this is a ''text'' field',
 	'blue',
@@ -56,7 +56,7 @@ insert into DataTypeTest (
 	0, --col_count
 	-33, --field_INT
 	null, --field_money,
-	null, --field_numeric,
+-- 	null, --field_numeric,
 	null, --field_decimal,
 	'this is a ''text'' field',
 	'blue',

@@ -810,7 +810,7 @@ func Test_GetRows(t *testing.T) {
 
 		actualType := table.Columns[columnIndex].Type
 		if !strings.EqualFold(actualType, test.expectedType) {
-			t.Errorf("Incorrect column type %s %+v", actualType, test)
+			t.Errorf("Incorrect column type for field '%s': '%s', expected '%s'", test.colName, actualType, test.expectedType)
 		}
 		// todo: check type of retrieved value, turns out you can put anything you like in sqlite cols
 		actualString := reader.DbValueToString(rows[test.row][columnIndex], actualType)
