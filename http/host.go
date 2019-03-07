@@ -14,6 +14,7 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"os/exec"
 	"regexp"
 	"strings"
 	"time"
@@ -81,8 +82,17 @@ func runHttpServer(r *mux.Router) {
 	if port == 0 {
 		port = listener.Addr().(*net.TCPAddr).Port
 	}
-	log.Printf("Starting web-server, point your browser at http://%s:%d/\nPress Ctrl-C to exit schemaexplorer.\n", *options.Options.ListenOnAddress, port)
+	url := fmt.Sprintf("http://%s:%d/", *options.Options.ListenOnAddress, port)
+	log.Printf("Starting web-server, point your browser at %s\nPress Ctrl-C to exit schemaexplorer.\n", url)
+	launchBrowser(url) // probably won't beat the server coming up.
 	log.Fatal(srv.Serve(listener))
+}
+
+func launchBrowser(url string) {
+	err := exec.Command("xdg-open", url).Run()
+	if err != nil {
+		log.Printf("Failed to launch browser automatically: %s", err)
+	}
 }
 
 func requestSetup() (layoutData render.PageTemplateModel, dbReader reader.DbReader, err error) {
