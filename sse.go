@@ -19,6 +19,7 @@ import (
 	"bitbucket.org/timabell/sql-data-viewer/options"
 	_ "bitbucket.org/timabell/sql-data-viewer/pg"
 	_ "bitbucket.org/timabell/sql-data-viewer/sqlite"
+	"github.com/jessevdk/go-flags"
 	"log"
 	"os"
 )
@@ -28,7 +29,10 @@ func main() {
 
 	_, err := options.ArgParser.ParseArgs(os.Args)
 	if err != nil {
-		options.ArgParser.WriteHelp(os.Stdout)
+		// only write out help if not already being written
+		if e, ok := err.(*flags.Error); !ok || e.Type != flags.ErrHelp {
+			options.ArgParser.WriteHelp(os.Stdout)
+		}
 		os.Stdout.WriteString("\n")
 		os.Stdout.WriteString("Environment Variables:\n")
 		os.Stdout.WriteString("  Environment variables can be used instead of of the command line arguments.\n")
