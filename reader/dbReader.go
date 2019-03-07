@@ -120,23 +120,16 @@ func getRow(colCount int, rows *sql.Rows) (rowsData RowData, err error) {
 }
 
 func DbValueToString(colData interface{}, dataType string) *string {
+	// todo: check type of colData matches type of dataTyoe - sqlite will let you insert anything into anything
 	var stringValue string
+	dataType = strings.ToLower(dataType)
 	uuidLen := 16
+	// todo: optimise order for speed, also consider possible fuzzy clashes and which one would win
 	switch {
+	// === // NULLs ...
 	case colData == nil:
 		return nil
-	case dataType == "money": // mssql money
-		fallthrough
-	case dataType == "decimal": // mssql decimal
-		fallthrough
-	case dataType == "numeric": // mssql numeric
-		stringValue = fmt.Sprintf("%s", colData) // seems to come back as byte array for a string, surprising, could be a driver thing
-	case dataType == "integer":
-		fallthrough
-	case dataType == "int4":
-		stringValue = fmt.Sprintf("%d", colData)
-	case dataType == "float":
-		stringValue = fmt.Sprintf("%f", colData)
+	// === // exact matches only ...
 	case dataType == "uniqueidentifier": // mssql guid
 		bytes := colData.([]byte)
 		if len(bytes) != uuidLen {
@@ -144,23 +137,55 @@ func DbValueToString(colData interface{}, dataType string) *string {
 		}
 		stringValue = fmt.Sprintf("%x%x%x%x-%x%x-%x%x-%x%x-%x%x%x%x%x%x",
 			bytes[3], bytes[2], bytes[1], bytes[0], bytes[5], bytes[4], bytes[7], bytes[6], bytes[8], bytes[9], bytes[10], bytes[11], bytes[12], bytes[13], bytes[14], bytes[15])
+	// === //
+	case dataType == "numeric": // sqlite - best type for number. needs casting for pg
+		stringValue = fmt.Sprintf("%v", colData.(float64))
+	case dataType == "varbinary":
+		fallthrough
+	case dataType == "blob":
+		fallthrough
+	// === //
+	case dataType == "boolean":
+		fallthrough
+	// === //
+	case dataType == "date":
+		fallthrough
+	case dataType == "datetime":
+		fallthrough
+	// === // more expensive fuzzy type name matches from here ...
+	case dataType == "money":
+		fallthrough
+	case dataType == "real":
+		fallthrough
+	case dataType == "float":
+		fallthrough
+	case strings.HasPrefix(dataType, "double"):
+		fallthrough
+	case strings.HasPrefix(dataType, "decimal"): // todo: don't allow "decimal(10,5)"
+		fallthrough
+	case strings.Contains(dataType, "int"): // todo: expensive, optimise for supported values
+		stringValue = fmt.Sprintf("%v", colData)
+	// === //
 	case dataType == "text": // sqlite
 		fallthrough
-	case dataType == "jsonb": // pg
+	case dataType == "jsonb":
 		fallthrough
-	case dataType == "json": // pg
+	case dataType == "json":
 		fallthrough
-	case strings.Contains(strings.ToLower(dataType), "varchar"): // sqlite is [N]VARCHAR sqlserver is [n]varchar
+	case dataType == "clob": // sqlite - char large object
+		fallthrough
+	case strings.Contains(dataType, "char"): // See test sql files for things this should cover. // todo: expensive, optimise for supported values
 		stringValue = fmt.Sprintf("%s", colData)
-	case strings.Contains(dataType, "TEXT"): // mssql
+	// === //
+	case strings.Contains(dataType, "text"): // mssql // todo: expensive, optimise for supported values
 		// https://stackoverflow.com/a/18615786/10245
 		bytes := colData.([]uint8)
 		stringValue = fmt.Sprintf("%s", bytes)
-	case dataType == "varbinary": // mssql varbinary
-		stringValue = "[binary]"
+	// === // unknown ...
 	default:
-		log.Printf("unknown data type %s", dataType)
-		stringValue = fmt.Sprintf("%v", colData)
+		//log.Printf("unknown data type %s", dataType)
+		panic(fmt.Sprintf("unknown data type %s", dataType))
+		stringValue = fmt.Sprintf("%v", colData) // fallback, hope for the best, but don't use this for ones we know to make it clear what works
 	}
 	return &stringValue
 }

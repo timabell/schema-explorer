@@ -223,23 +223,22 @@ func checkIndexes(database *schema.Database, t *testing.T) {
 
 func checkNullable(database *schema.Database, t *testing.T) {
 	table := findTable(schema.Table{Schema: database.DefaultSchemaName, Name: "DataTypeTest"}, database, t)
-	_, notNullCol := table.FindColumn("field_NotNullInt")
+
+	notNullColName := "field_not_null_int"
+	_, notNullCol := table.FindColumn(notNullColName)
 	if notNullCol == nil {
-		t.Log(schema.TableDebug(table))
-		t.Fatal("Column field_NotNullInt not found")
-	}
-	if notNullCol.Nullable {
+		t.Fatalf("Column %s not found", notNullColName)
+	} else if notNullCol.Nullable {
 		t.Errorf("%s.%s should not be nullable", table, notNullCol)
 	}
-	_, nullCol := table.FindColumn("field_NullInt")
-	if notNullCol == nil {
-		t.Log(schema.TableDebug(table))
-		t.Fatal("Column field_NullInt not found")
-	}
-	if !nullCol.Nullable {
+
+	nullColName := "field_null_int"
+	_, nullCol := table.FindColumn(nullColName)
+	if nullCol == nil {
+		t.Fatalf("Column %s not found", nullCol)
+	} else if !nullCol.Nullable {
 		t.Errorf("%s.%s should be nullable", table, nullCol)
 	}
-
 }
 
 func checkTableRowCount(reader reader.DbReader, database *schema.Database, t *testing.T) {
@@ -456,17 +455,6 @@ type testCase struct {
 	expectedString string
 }
 
-var tests = []testCase{
-	{colName: "field_INT", row: 0, expectedType: "int", expectedString: "20"},
-	{colName: "field_INT", row: 1, expectedType: "int", expectedString: "-33"},
-	{colName: "field_money", row: 0, expectedType: "money", expectedString: "1234.5670"},
-	{colName: "field_numeric", row: 0, expectedType: "numeric", expectedString: "987.1234500"},
-	{colName: "field_decimal", row: 0, expectedType: "decimal", expectedString: "666.1234500"},
-	{colName: "field_uniqueidentifier", row: 0, expectedType: "uniqueidentifier", expectedString: "b7a16c7a-a718-4ed8-97cb-20ccbadcc339"},
-	{colName: "field_json", row: 0, expectedType: "json", expectedString: "[{\"name\": \"frank\"}, {\"name\": \"sinatra\"}]"},
-	{colName: "field_jsonb", row: 0, expectedType: "jsonb", expectedString: "[{\"name\": \"frank\"}, {\"name\": \"sinatra\"}]"},
-}
-
 func checkFilterAndSort(dbReader reader.DbReader, database *schema.Database, t *testing.T) {
 	table := findTable(schema.Table{Schema: database.DefaultSchemaName, Name: "SortFilterTest"}, database, t)
 
@@ -474,7 +462,6 @@ func checkFilterAndSort(dbReader reader.DbReader, database *schema.Database, t *
 	_, sizeCol := table.FindColumn("size")
 	_, colourCol := table.FindColumn("colour")
 	filter := params.FieldFilter{Field: patternCol, Values: []string{"plain"}}
-	log.Print(filter)
 	tableParams := &params.TableParams{
 		Filter:   params.FieldFilterList{filter},
 		Sort:     []params.SortCol{{Column: colourCol, Descending: false}, {Column: sizeCol, Descending: true}},
@@ -727,6 +714,52 @@ func checkInboundPeeking(dbReader reader.DbReader, database *schema.Database, t 
 	checkInt64(0, data[2][cozColIndex].(int64), "inbound refs for cozFk row id 13", t)
 }
 
+var tests = []testCase{
+	// Some of these might be shared across databases, but they will be in order of appearance.
+	// The headings are just to make it easier to navigate the list in reality there will be arbitary sharing.
+	// i.e. something in sqlite section might also test the pg database if the results are expected to be the same,
+	// that test will not be repeated in the pg section.
+	// todo: homogenize type reading - varchar(20) -> "varchar" + length info
+	// sqlite
+	{colName: "field_int", row: 0, expectedType: "INT", expectedString: "20"},
+	{colName: "field_int", row: 1, expectedType: "INT", expectedString: "-33"},
+	{colName: "field_integer", row: 0, expectedType: "INTEGER", expectedString: "30"},
+	{colName: "field_tinyint", row: 0, expectedType: "TINYINT", expectedString: "50"},
+	{colName: "field_smallint", row: 0, expectedType: "SMALLINT", expectedString: "60"},
+	{colName: "field_mediumint", row: 0, expectedType: "MEDIUMINT", expectedString: "70"},
+	{colName: "field_bigint", row: 0, expectedType: "BIGINT", expectedString: "80"},
+	{colName: "field_unsigned", row: 0, expectedType: "UNSIGNED BIG INT", expectedString: "90"},
+	{colName: "field_int2", row: 0, expectedType: "INT2", expectedString: "100"},
+	{colName: "field_int8", row: 0, expectedType: "INT8", expectedString: "110"},
+	{colName: "field_numeric", row: 0, expectedType: "numeric", expectedString: "987.12345"},
+	{colName: "field_character", row: 0, expectedType: "CHARACTER(20)", expectedString: "a_CHARACTER"},
+	{colName: "field_sqlite_varchar", row: 0, expectedType: "VARCHAR(255)", expectedString: "a_VARCHAR"},
+	{colName: "field_varying", row: 0, expectedType: "VARYING CHARACTER(255)", expectedString: "a_VARYING"},
+	{colName: "field_nchar", row: 0, expectedType: "NCHAR(55)", expectedString: "a_NCHAR"},
+	{colName: "field_native", row: 0, expectedType: "NATIVE CHARACTER(70)", expectedString: "a_NATIVE"},
+	{colName: "field_nvarchar", row: 0, expectedType: "NVARCHAR(100)", expectedString: "a_NVARCHAR"},
+	{colName: "field_text", row: 0, expectedType: "TEXT", expectedString: "a_TEXT"},
+	{colName: "field_clob", row: 0, expectedType: "CLOB", expectedString: "a_CLOB"},
+	{colName: "field_blob", row: 0, expectedType: "BLOB", expectedString: "[97 95 66 76 79 66]"},
+	{colName: "field_real", row: 0, expectedType: "REAL", expectedString: "1.234"},
+	{colName: "field_double", row: 0, expectedType: "DOUBLE", expectedString: "1.234"},
+	{colName: "field_doubleprecision", row: 0, expectedType: "DOUBLE PRECISION", expectedString: "1.234"},
+	{colName: "field_float", row: 0, expectedType: "FLOAT", expectedString: "1.234"},
+	{colName: "field_sqlite_decimal", row: 0, expectedType: "DECIMAL(10,5)", expectedString: "1.234"},
+	{colName: "field_boolean", row: 0, expectedType: "BOOLEAN", expectedString: "true"},
+	{colName: "field_boolean", row: 1, expectedType: "BOOLEAN", expectedString: "false"},
+	// todo: all timezone variant things
+	{colName: "field_date", row: 0, expectedType: "DATE", expectedString: "1984-04-02 00:00:00 +0000 UTC"},
+	{colName: "field_datetime", row: 0, expectedType: "DATETIME", expectedString: "1984-04-02 11:12:00 +0000 UTC"},
+	// pg
+	{colName: "field_money", row: 0, expectedType: "money", expectedString: "1234.5670"},
+	{colName: "field_pg_decimal", row: 0, expectedType: "decimal", expectedString: "666.1234500"},
+	{colName: "field_pg_smallint", row: 0, expectedType: "int2", expectedString: "60"},
+	{colName: "field_uniqueidentifier", row: 0, expectedType: "uniqueidentifier", expectedString: "b7a16c7a-a718-4ed8-97cb-20ccbadcc339"},
+	{colName: "field_json", row: 0, expectedType: "json", expectedString: "[{\"name\": \"frank\"}, {\"name\": \"sinatra\"}]"},
+	{colName: "field_jsonb", row: 0, expectedType: "jsonb", expectedString: "[{\"name\": \"frank\"}, {\"name\": \"sinatra\"}]"},
+}
+
 func Test_GetRows(t *testing.T) {
 	dbReader := reader.GetDbReader()
 	database, err := dbReader.ReadSchema()
@@ -745,35 +778,51 @@ func Test_GetRows(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	checkedCols := make(map[string]bool, len(table.Columns))
+	checkedCols["intpk"] = true              // not part of the test
+	checkedCols["field_not_null_int"] = true // tested in another test
+	checkedCols["field_null_int"] = true     // tested in another test
+
 	// check the column count is as expected
-	countIndex, column := table.FindColumn("colCount")
+	colName := "col_count"
+	countIndex, column := table.FindColumn(colName)
 	if column == nil {
-		t.Fatal("colCount column missing from " + table.String())
+		t.Fatalf("column missing: %s.%s", table, colName)
 	}
 	expectedColCount := int(rows[0][countIndex].(int64))
 	actualColCount := len(table.Columns)
 	if actualColCount != expectedColCount {
 		t.Errorf("Expected %#v columns, found %#v", expectedColCount, actualColCount)
 	}
+	checkedCols["col_count"] = true
 
 	for _, test := range tests {
 		if test.row+1 > len(rows) {
-			t.Errorf("Not enough rows. %+v", test)
+			t.Fatalf("Not enough rows. %+v", test)
 			continue
 		}
+		checkedCols[test.colName] = true
 		columnIndex, column := table.FindColumn(test.colName)
 		if column == nil {
-			t.Logf("Skipped test for non-existent column %+v", test)
+			//t.Logf("Skipped test for non-existent column %+v", test)
 			continue
 		}
 
 		actualType := table.Columns[columnIndex].Type
 		if !strings.EqualFold(actualType, test.expectedType) {
-			t.Errorf("Incorrect column type %s %+v", actualType, test)
+			t.Errorf("Incorrect column type for field '%s': '%s', expected '%s'", test.colName, actualType, test.expectedType)
 		}
+		// todo: check type of retrieved value, turns out you can put anything you like in sqlite cols
 		actualString := reader.DbValueToString(rows[test.row][columnIndex], actualType)
-		if *actualString != test.expectedString {
-			t.Errorf("Incorrect string '%s' %+v", *actualString, test)
+		if actualString == nil {
+			t.Errorf("Incorrect nil string %+v, actual data type '%s'", test, actualType)
+		} else if actualString == nil || *actualString != test.expectedString {
+			t.Errorf("Incorrect string '%+v' %+v, actual data type '%s'", *actualString, test, actualType)
+		}
+	}
+	for _, col := range table.Columns {
+		if !checkedCols[col.Name] {
+			t.Errorf("col %s.%s was not checked", table, col.Name)
 		}
 	}
 }

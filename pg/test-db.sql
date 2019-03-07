@@ -1,31 +1,196 @@
 -- postgres example db for regression tests
 -- schema must match test code's expectations
 
+-- todo: commented out types
 create table "DataTypeTest" (
   intpk integer primary key,
-	"colCount" int,
-	"field_INT4" INT,
-	"field_NotNullInt" int not null,
-	"field_NullInt" int null,
+	"col_count" int,
+	-- numeric
+-- 	"field_bare_int" INT, -- reported as int4, so not named field_int to avoiding clash with sqlite int
+-- 	"field_int4" INT4,
+	"field_null_int" int null,
+-- 	"field_pg_smallint" smallint,
+-- 	"field_interval" interval null,
+-- 	"field_float8" double precision null,
+-- 	"field_money" money null,
+-- 	"field_numeric" numeric(5,2) null,
+-- 	"field_float4" real null,
+	-- char
+-- 	"field_bpchar" character(20) null,
+-- 	"field_varchar" varchar(20) null,
+	"field_text" text null,
+	-- bool
+-- 	"field_bool" boolean null,
+-- 	"field_bit" bit null,
+-- 	"field_varbit" varbit null,
+	--binary
+-- 	"field_bytea" bytea null,
+	-- date
+-- 	"field_date" date null,
+-- 	"field_time" time null,
+-- 	"field_timetz" timetz null,
+-- 	"field_timestamp" timestamp null,
+-- 	"field_timestamptz" timestamptz null,
+	-- geom
+-- 	"field_circle" circle null,
+-- 	"field_line" line null,
+-- 	"field_lseg" lseg null,
+-- 	"field_path" path null,
+-- 	"field_point" point null,
+-- 	"field_polygon" polygon null,
+	-- networking
+-- 	"field_inet" inet null, -- ip4/6 network address
+-- 	"field_cidr" cidr null, -- ip4/6 host address
+-- 	"field_macaddr" macaddr null,
+	-- "field_macaddr8" macaddr8 null, -- ERROR:  type "macaddr8" does not exist
+	-- json
 	"field_json" json,
-	"field_jsonb" jsonb
+	"field_jsonb" jsonb,
+	-- misc
+-- 	"field_pg_lsn" pg_lsn,
+-- 	"field_smallserial" smallserial,
+-- 	"field_serial" serial,
+-- 	"field_tsquery" tsquery, -- text-search query
+-- 	"field_tsvector" tsvector, -- text-search document
+-- 	"field_txid_snapshot" txid_snapshot, -- user-level transaction ID snapshot
+-- 	"field_uuid" uuid,
+-- 	"field_xml" xml,
+	-- null
+	"field_not_null_int" int not null
 );
 
-insert into "DataTypeTest"( intpk, "colCount", "field_INT4", "field_NotNullInt", "field_json", "field_jsonb"
-)values(
-	10, --intpk
-	7, --colCount
-	20, --INT
-	1984,
-	'[{"name": "frank"}, {"name": "sinatra"}]'::json,
-	'[{"name": "frank"}, {"name": "sinatra"}]'::jsonb
+insert into "DataTypeTest"(
+  intpk,
+  col_count,
+--   field_bare_int,
+--   field_int4,
+  field_null_int,
+--   field_pg_smallint,
+--   field_interval,
+--   field_float8,
+--   field_money,
+--   field_numeric,
+--   field_float4,
+--   field_bpchar,
+--   field_varchar,
+  field_text,
+--   field_bool,
+--   field_bit,
+--   field_varbit,
+--   field_bytea,
+--   field_date,
+--   field_time,
+--   field_timetz,
+--   field_timestamp,
+--   field_timestamptz,
+--   field_circle,
+--   field_line,
+--   field_lseg,
+--   field_path,
+--   field_point,
+--   field_polygon,
+--   field_inet,
+--   field_cidr,
+--   field_macaddr,
+  field_json,
+  field_jsonb,
+--   field_pg_lsn,
+--   field_smallserial,
+--   field_serial,
+--   field_tsquery,
+--   field_tsvector,
+--   field_txid_snapshot,
+--   field_uuid,
+--   field_xml,
+  field_not_null_int
+) values (
+10, -- intpk,
+7, -- col_count,
+-- 20, -- field_bare_int,
+-- 1984, -- field_int4,
+null, -- field_null_int,
+-- null, -- field_pg_smallint,
+-- null, -- field_interval,
+-- null, -- field_float8,
+-- null, -- field_money,
+-- 987.12345, -- field_numeric,
+-- null, -- field_float4,
+-- null, -- field_bpchar,
+-- null, -- field_varchar,
+'a_TEXT', -- field_text,
+-- null, -- field_bool,
+-- null, -- field_bit,
+-- null, -- field_varbit,
+-- null, -- field_bytea,
+-- '1984-04-02', -- field_date,
+-- null, -- field_time,
+-- null, -- field_timetz,
+-- null, -- field_timestamp,
+-- null, -- field_timestamptz,
+-- null, -- field_circle,
+-- null, -- field_line,
+-- null, -- field_lseg,
+-- null, -- field_path,
+-- null, -- field_point,
+-- null, -- field_polygon,
+-- null, -- field_inet,
+-- null, -- field_cidr,
+-- null, -- field_macaddr,
+'[{"name": "frank"}, {"name": "sinatra"}]'::json, -- field_json,
+'[{"name": "frank"}, {"name": "sinatra"}]'::jsonb, -- field_jsonb,
+-- null, -- field_pg_lsn,
+-- 1234, -- field_smallserial, // seems to not be nullable
+-- 1243456, -- field_serial,
+-- null, -- field_tsquery,
+-- null, -- field_tsvector,
+-- null, -- field_txid_snapshot,
+-- null, -- field_uuid,
+-- null, -- field_xml,
+4541 -- field_not_null_int)
 ),(
-	11, --intpk
-	0, --colCount
-	-33, --INT
-	1978,
-	null,
-	null
+11, -- intpk,
+0, -- col_count,
+-- -33, -- field_bare_int,
+-- 1978, -- field_int4,
+null, -- field_null_int,
+-- null, -- field_pg_smallint,
+-- null, -- field_interval,
+-- null, -- field_float8,
+-- null, -- field_money,
+-- null, -- field_numeric,
+-- null, -- field_float4,
+-- null, -- field_bpchar,
+-- null, -- field_varchar,
+null, -- field_text,
+-- null, -- field_bool,
+-- null, -- field_bit,
+-- null, -- field_varbit,
+-- null, -- field_bytea,
+-- null, -- field_date,
+-- null, -- field_time,
+-- null, -- field_timetz,
+-- null, -- field_timestamp,
+-- null, -- field_timestamptz,
+-- null, -- field_circle,
+-- null, -- field_line,
+-- null, -- field_lseg,
+-- null, -- field_path,
+-- null, -- field_point,
+-- null, -- field_polygon,
+-- null, -- field_inet,
+-- null, -- field_cidr,
+-- null, -- field_macaddr,
+null, -- field_json,
+null, -- field_jsonb,
+-- null, -- field_pg_lsn,
+-- 12345, -- field_smallserial,
+-- 12434567, -- field_serial,
+-- null, -- field_tsquery,
+-- null, -- field_tsvector,
+-- null, -- field_txid_snapshot,
+-- null, -- field_uuid,
+-- null, -- field_xml,
+4542 -- field_not_null_int)
 );
 
 create table toy (

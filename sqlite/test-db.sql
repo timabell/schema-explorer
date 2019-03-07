@@ -5,73 +5,73 @@ drop table if exists DataTypeTest;
 
 create table DataTypeTest (
 	intpk integer primary key,
-	colCount int,
-	field_INT INT,
-	field_INTEGER INTEGER,
-	field_TINYINT TINYINT,
-	field_SMALLINT SMALLINT,
-	field_MEDIUMINT MEDIUMINT,
-	field_BIGINT BIGINT,
-	field_UNSIGNED UNSIGNED BIG INT,
-	field_INT2 INT2,
-	field_INT8 INT8,
-	field_CHARACTER CHARACTER(20),
-	field_VARCHAR VARCHAR(255),
-	field_VARYING VARYING CHARACTER(255),
-	field_NCHAR NCHAR(55),
-	field_NATIVE NATIVE CHARACTER(70),
-	field_NVARCHAR NVARCHAR(100),
-	field_TEXT TEXT,
-	field_CLOB CLOB,
-	field_BLOB BLOB,
-	field_REAL REAL,
-	field_DOUBLE DOUBLE,
-	field_DOUBLEPRECISION DOUBLE PRECISION,
-	field_FLOAT FLOAT,
-	field_NUMERIC NUMERIC,
-	field_DECIMAL DECIMAL(10,5),
-	field_BOOLEAN BOOLEAN,
-	field_DATE DATE,
-	field_DATETIME DATETIME,
-	field_NotNullInt int not null,
-	field_NullInt int null
+	col_count int,
+	field_int int,
+	field_integer integer,
+	field_tinyint tinyint,
+	field_smallint smallint,
+	field_mediumint mediumint,
+	field_bigint bigint,
+	field_unsigned unsigned big int,
+	field_int2 int2,
+	field_int8 int8,
+	field_character character(20),
+	field_sqlite_varchar varchar(255),
+	field_varying varying character(255),
+	field_nchar nchar(55),
+	field_native native character(70),
+	field_nvarchar nvarchar(100),
+	field_text text,
+	field_clob clob,
+	field_blob blob,
+	field_real real,
+	field_double double,
+	field_doubleprecision double precision,
+	field_float float,
+	field_numeric numeric,
+	field_sqlite_decimal decimal(10,5),
+	field_boolean boolean,
+	field_date date,
+	field_datetime datetime,
+	field_not_null_int int not null,
+	field_null_int int null
 );
 
 insert into DataTypeTest(
 	intpk,
-	colCount,
+	col_count,
 	-- https://www.sqlite.org/datatype3.html#affinity_name_examples
-	field_INT,
-	field_INTEGER,
-	field_TINYINT,
-	field_SMALLINT,
-	field_MEDIUMINT,
-	field_BIGINT,
-	field_UNSIGNED,
-	field_INT2,
-	field_INT8,
-	field_CHARACTER,
-	field_VARCHAR,
-	field_VARYING,
-	field_NCHAR,
-	field_NATIVE,
-	field_NVARCHAR,
-	field_TEXT,
-	field_CLOB,
-	field_BLOB,
-	field_REAL,
-	field_DOUBLE,
-	field_DOUBLEPRECISION,
-	field_FLOAT,
-	field_NUMERIC,
-	field_DECIMAL,
-	field_BOOLEAN,
-	field_DATE,
-	field_DATETIME,
-	field_NotNullInt
+	field_int,
+	field_integer,
+	field_tinyint,
+	field_smallint,
+	field_mediumint,
+	field_bigint,
+	field_unsigned,
+	field_int2,
+	field_int8,
+	field_character,
+	field_sqlite_varchar,
+	field_varying,
+	field_nchar,
+	field_native,
+	field_nvarchar,
+	field_text,
+	field_clob,
+	field_blob,
+	field_real,
+	field_double,
+	field_doubleprecision,
+	field_float,
+	field_numeric,
+	field_sqlite_decimal,
+	field_boolean,
+	field_date,
+	field_datetime,
+	field_not_null_int
 )values(
 	10, --intpk
-	31, --colCount
+	31, --col_count
 	20, --INT
 	30, --INTEGER
 	50, --TINYINT
@@ -81,28 +81,28 @@ insert into DataTypeTest(
 	90, --UNSIGNED
 	100, --INT2
 	110, --INT8
-	'field_CHARACTER', --CHARACTER
-	'field_VARCHAR', --VARCHAR
-	'field_VARYING', --VARYING
-	'field_NCHAR', --NCHAR
-	'field_NATIVE', --NATIVE
-	'field_NVARCHAR', --NVARCHAR
-	'field_TEXT', --TEXT
-	'field_CLOB', --CLOB
-	'field_BLOB', --BLOB
-	'field_REAL', --REAL
-	'field_DOUBLE', --DOUBLE
-	'field_DOUBLEPRECISION', --DOUBLE PRECISION
-	'field_FLOAT', --FLOAT
-	'field_NUMERIC', --NUMERIC
-	'field_DECIMAL', --DECIMAL
+	'a_CHARACTER', --CHARACTER
+	'a_VARCHAR', --sqlite_VARCHAR
+	'a_VARYING', --VARYING
+	'a_NCHAR', --NCHAR
+	'a_NATIVE', --NATIVE
+	'a_NVARCHAR', --NVARCHAR
+	'a_TEXT', --TEXT
+	'a_CLOB', --CLOB
+	'a_BLOB', --BLOB
+	1.234, --REAL
+	1.234, --DOUBLE
+	1.234, --DOUBLE PRECISION
+	1.234, --FLOAT
+	987.12345, --NUMERIC
+	1.234, --DECIMAL
 	1, --BOOLEAN
-	'field_DATE', --DATE
-	'field_DATETIME', --DATETIME'
+	'1984-04-02', --DATE
+	'1984-04-02 11:12', --DATETIME'
 	1984
 ),(
 	11, --intpk
-	0, --colCount
+	0, --col_count
 	-33, --INT
 	30, --INTEGER
 	50, --TINYINT
@@ -112,24 +112,24 @@ insert into DataTypeTest(
 	90, --UNSIGNED
 	100, --INT2
 	110, --INT8
-	'field_CHARACTER', --CHARACTER
-	'field_VARCHAR', --VARCHAR
-	'field_VARYING', --VARYING
-	'field_NCHAR', --NCHAR
-	'field_NATIVE', --NATIVE
-	'field_NVARCHAR', --NVARCHAR
-	'field_TEXT', --TEXT
-	'field_CLOB', --CLOB
-	'field_BLOB', --BLOB
-	'field_REAL', --REAL
-	'field_DOUBLE', --DOUBLE
-	'field_DOUBLEPRECISION', --DOUBLE PRECISION
-	'field_FLOAT', --FLOAT
-	'field_NUMERIC', --NUMERIC
-	'field_DECIMAL', --DECIMAL
-	1, --BOOLEAN
-	'field_DATE', --DATE
-	'field_DATETIME', --DATETIME'
+	null, --CHARACTER
+	null, --sqlite_VARCHAR
+	null, --VARYING
+	null, --NCHAR
+	null, --NATIVE
+	null, --NVARCHAR
+	null, --TEXT
+	null, --CLOB
+	null, --BLOB
+	null, --REAL
+	null, --DOUBLE
+	null, --DOUBLE PRECISION
+	null, --FLOAT
+	null, --NUMERIC
+	null, --DECIMAL
+	0, --BOOLEAN
+	null, --DATE
+	null, --DATETIME'
 	1978
 );
 
