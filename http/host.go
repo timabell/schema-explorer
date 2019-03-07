@@ -2,6 +2,7 @@ package http
 
 import (
 	"bitbucket.org/timabell/sql-data-viewer/about"
+	"bitbucket.org/timabell/sql-data-viewer/browser"
 	"bitbucket.org/timabell/sql-data-viewer/licensing"
 	"bitbucket.org/timabell/sql-data-viewer/options"
 	"bitbucket.org/timabell/sql-data-viewer/reader"
@@ -81,7 +82,9 @@ func runHttpServer(r *mux.Router) {
 	if port == 0 {
 		port = listener.Addr().(*net.TCPAddr).Port
 	}
-	log.Printf("Starting web-server, point your browser at http://%s:%d/\nPress Ctrl-C to exit schemaexplorer.\n", *options.Options.ListenOnAddress, port)
+	url := fmt.Sprintf("http://%s:%d/", *options.Options.ListenOnAddress, port)
+	log.Printf("Starting web-server, point your browser at %s\nPress Ctrl-C to exit schemaexplorer.\n", url)
+	browser.LaunchBrowser(url) // probably won't beat the server coming up.
 	log.Fatal(srv.Serve(listener))
 }
 
