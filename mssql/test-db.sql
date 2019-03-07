@@ -17,49 +17,49 @@ set nocount on;
 create table DataTypeTest (
 	intpk integer primary key,
 	col_count integer,
-	field_INT int,
-	field_money MONEY,
+	field_int int,
+-- 	field_money MONEY,
 -- 	field_numeric numeric(18,7),
-	field_decimal decimal(18,7),
-	field_varcharmax varchar(max),
-	field_nvarchar nvarchar(123),
+-- 	field_decimal decimal(18,7),
+-- 	field_varcharmax varchar(max),
+-- 	field_nvarchar nvarchar(123),
 	field_uniqueidentifier UNIQUEIDENTIFIER,
-	field_NotNullInt int not null,
-	field_NullInt int null
+	field_not_null_int int not null,
+	field_null_int int null
 );
 
 delete DataTypeTest;
 insert into DataTypeTest (
 	intpk,
 	col_count,
-	field_INT,
-	field_money,
+	field_int,
+-- 	field_money,
 -- 	field_numeric,
-	field_decimal,
-	field_varcharmax,
-	field_nvarchar,
+-- 	field_decimal,
+-- 	field_varcharmax,
+-- 	field_nvarchar,
 	field_uniqueidentifier,
-	field_NotNullInt
+	field_not_null_int
 ) values (
 	10, --intpk
-	11, --col_count
-	20, --field_INT
-	1234.567, --field_money,
+	6, --col_count
+	20, --field_int
+-- 	1234.567, --field_money,
 -- 	987.1234500, --field_numeric,
-	666.1234500, --field_decimal,
-	'this is a ''text'' field',
-	'blue',
+-- 	666.1234500, --field_decimal,
+-- 	'this is a ''text'' field', -- nvarcharmax
+-- 	'a_NVARCHAR',
 	'b7a16c7a-a718-4ed8-97cb-20ccbadcc339',
 	1984
 ),(
 	11, --intpk
 	0, --col_count
-	-33, --field_INT
-	null, --field_money,
+	-33, --field_int
+-- 	null, --field_money,
 -- 	null, --field_numeric,
-	null, --field_decimal,
-	'this is a ''text'' field',
-	'blue',
+-- 	null, --field_decimal,
+-- 	'this is a ''text'' field', -- nvarcharmax
+-- 	'blue', -- nvarchar
 	'b470fa05-2111-46f9-9c97-f103b594c5f0',
 	1978
 )
