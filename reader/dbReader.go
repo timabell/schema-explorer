@@ -184,7 +184,7 @@ func DbValueToString(colData interface{}, dataType string) *string {
 	// === // unknown ...
 	default:
 		//log.Printf("unknown data type %s", dataType)
-		panic(fmt.Sprintf("unknown data type %s", dataType))
+		//panic(fmt.Sprintf("unknown data type %s", dataType))
 		stringValue = fmt.Sprintf("%v", colData) // fallback, hope for the best, but don't use this for ones we know to make it clear what works
 	}
 	return &stringValue
