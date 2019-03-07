@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"github.com/gorilla/mux"
 	"log"
+	"net"
 	"net/http"
 	"os"
 	"regexp"
@@ -60,16 +61,28 @@ func Setup() (err error) {
 }
 
 func runHttpServer(r *mux.Router) {
-	listenOnHostPort := fmt.Sprintf("%s:%d", *options.Options.ListenOnAddress, *options.Options.ListenOnPort)
+	port := 0 // i.e. pick a random port - https://stackoverflow.com/questions/43424787/how-to-use-next-available-port-in-http-listenandserve/43425461#43425461
+	if options.Options.ListenOnPort != nil {
+		port = *options.Options.ListenOnPort
+	}
+
 	// e.g. localhost:8080 or 0.0.0.0:80
+
 	srv := &http.Server{
 		Handler:      r,
-		Addr:         listenOnHostPort,
 		WriteTimeout: 300 * time.Second,
 		ReadTimeout:  300 * time.Second,
 	}
-	log.Printf("Starting web-server, point your browser at http://%s/\nPress Ctrl-C to exit schemaexplorer.\n", listenOnHostPort)
-	log.Fatal(srv.ListenAndServe())
+
+	listener, err := net.Listen("tcp", fmt.Sprintf("%s:%d", *options.Options.ListenOnAddress, port))
+	if err != nil {
+		log.Fatal(err)
+	}
+	if port == 0 {
+		port = listener.Addr().(*net.TCPAddr).Port
+	}
+	log.Printf("Starting web-server, point your browser at http://%s:%d/\nPress Ctrl-C to exit schemaexplorer.\n", *options.Options.ListenOnAddress, port)
+	log.Fatal(srv.Serve(listener))
 }
 
 func requestSetup() (layoutData render.PageTemplateModel, dbReader reader.DbReader, err error) {
