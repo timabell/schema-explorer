@@ -3,13 +3,20 @@ package reader
 import (
 	"bitbucket.org/timabell/sql-data-viewer/options"
 	"bitbucket.org/timabell/sql-data-viewer/params"
+	"bitbucket.org/timabell/sql-data-viewer/resources"
 	"bitbucket.org/timabell/sql-data-viewer/schema"
+	"bufio"
 	"database/sql"
 	"fmt"
 	"log"
 	"os"
+	"path"
+	"regexp"
 	"strings"
 )
+
+// global in-memory cache of database structure
+var Database *schema.Database
 
 type DbReader interface {
 	// does select or something to make sure we have a working db connection
@@ -33,33 +40,99 @@ type DbReader interface {
 
 type CreateReader func() DbReader
 
+type Driver struct {
+	Name         string
+	FullName     string
+	CreateReader CreateReader // factory method for creating this driver's DbReader implementation
+	Options      interface{}
+}
+
 // Single row of data
 type RowData []interface{}
 
-var creators = make(map[string]CreateReader)
+var Drivers = make(map[string]*Driver)
 
 // This is how implementations for reading different RDBMS systems can register themselves.
 // They should call this in their init() function
-func RegisterReader(name string, opt interface{}, creator CreateReader) {
-	creators[name] = creator
-	group, err := options.ArgParser.AddGroup(name, fmt.Sprintf("Options for %s database", name), opt)
+func RegisterReader(driver *Driver) {
+	Drivers[driver.Name] = driver
+	group, err := options.ArgParser.AddGroup(driver.Name, fmt.Sprintf("Options for %s database", driver.Name), driver.Options)
 	if err != nil {
 		panic(err)
 	}
-	group.Namespace = name
-	group.EnvNamespace = name
+	group.Namespace = driver.Name
+	group.EnvNamespace = driver.Name
+}
+
+func InitializeDatabase() (err error) {
+	dbReader := GetDbReader()
+	log.Println("Checking database connection...")
+	err = dbReader.CheckConnection()
+	if err != nil {
+		log.Println(err)
+		panic("connection check failed")
+	}
+
+	log.Print("Reading schema, this may take a while...")
+	Database, err = dbReader.ReadSchema()
+	if err != nil {
+		fmt.Println("Error reading schema", err)
+		// todo: send 500 error to client
+		return
+	}
+	setupPeekList(Database)
+	return
+}
+
+func setupPeekList(database *schema.Database) {
+	if options.Options == nil {
+		panic("options is nil")
+	}
+	if (*options.Options).PeekConfigPath == nil {
+		panic("PeekConfigPath option missing")
+	}
+	peekFilename := *options.Options.PeekConfigPath
+	peekFilename = path.Join(resources.BasePath, peekFilename)
+	log.Printf("Loading peek config from %s ...", peekFilename)
+	file, err := os.Open(peekFilename)
+	if err != nil {
+		log.Printf("Failed to load %s, disabling peek feature, check peek-config-path configuration. %s", peekFilename, err)
+		return
+	}
+	defer file.Close()
+	scanner := bufio.NewScanner(file)
+	var regexes []regexp.Regexp
+	for scanner.Scan() {
+		line := strings.TrimSpace(scanner.Text())
+		if line == "" || strings.HasPrefix(line, "#") {
+			continue // skip blanks and comments
+		}
+		regexes = append(regexes, *regexp.MustCompile(line))
+	}
+	for _, tbl := range database.Tables {
+		for _, col := range tbl.Columns {
+			for _, regex := range regexes {
+				fullName := tbl.String() + "." + col.Name
+				fullNameLower := strings.ToLower(fullName)
+				if regex.MatchString(fullNameLower) {
+					tbl.PeekColumns = append(tbl.PeekColumns, col)
+					log.Printf(" - peek configured for %s", fullName)
+				}
+			}
+		}
+	}
 }
 
 func GetDbReader() DbReader {
 	if options.Options == nil || (*options.Options).Driver == nil {
 		panic("driver option missing")
 	}
-	createReader := creators[*options.Options.Driver]
-	if createReader == nil {
+	driver := Drivers[*options.Options.Driver]
+	if driver == nil {
 		log.Printf("Unknown reader '%s'", *options.Options.Driver)
 		os.Exit(1)
 	}
-	return createReader()
+	return driver.CreateReader()
 }
 
 func GetRows(reader DbReader, table *schema.Table, params *params.TableParams) (rowsData []RowData, peekFinder *PeekLookup, err error) {

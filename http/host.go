@@ -7,23 +7,14 @@ import (
 	"bitbucket.org/timabell/sql-data-viewer/options"
 	"bitbucket.org/timabell/sql-data-viewer/reader"
 	"bitbucket.org/timabell/sql-data-viewer/render"
-	"bitbucket.org/timabell/sql-data-viewer/resources"
 	"bitbucket.org/timabell/sql-data-viewer/schema"
-	"bufio"
 	"fmt"
 	"github.com/gorilla/mux"
 	"log"
 	"net"
 	"net/http"
-	"os"
-	"path"
-	"regexp"
-	"strings"
 	"time"
 )
-
-// global in-memory cache of database structure
-var database *schema.Database
 
 func RunServer() {
 	r, _ := SetupRouter()
@@ -38,28 +29,14 @@ func SetupRouter() (*mux.Router, *schema.Database) {
 		// todo: send 500 error for all requests
 		panic("SetupRouter failed")
 	}
-	return Router(), database
+	return Router(), reader.Database
 }
 
 func Setup() (err error) {
-	render.SetupTemplate()
-
-	dbReader := reader.GetDbReader()
-	log.Println("Checking database connection...")
-	err = dbReader.CheckConnection()
-	if err != nil {
-		log.Println(err)
-		panic("connection check failed")
+	render.SetupTemplates()
+	if options.Options.Driver != nil {
+		err = reader.InitializeDatabase()
 	}
-
-	log.Print("Reading schema, this may take a while...")
-	database, err = dbReader.ReadSchema()
-	if err != nil {
-		fmt.Println("Error reading schema", err)
-		// todo: send 500 error to client
-		return
-	}
-	setupPeekList()
 	return
 }
 
@@ -90,10 +67,31 @@ func runHttpServer(r *mux.Router) {
 	log.Fatal(srv.Serve(listener))
 }
 
-func requestSetup() (layoutData render.PageTemplateModel, dbReader reader.DbReader, err error) {
-	licensing.EnforceLicensing()
+func dbRequestSetup() (layoutData render.PageTemplateModel, dbReader reader.DbReader, err error) {
+	layoutData = requestSetup()
 	dbReader = reader.GetDbReader()
+	if !isCachingEnabled() {
+		log.Print("Re-reading schema because caching is disabled, this may take a while...")
+		err = reader.InitializeDatabase()
+	}
+	return
+}
 
+func requestSetup() (layoutData render.PageTemplateModel) {
+	licensing.EnforceLicensing()
+	layoutData = getLayoutData()
+	if !isCachingEnabled() {
+		render.SetupTemplates()
+	}
+	return
+}
+
+func isCachingEnabled() bool {
+	cachingEnabled := options.Options.Live == nil || !*options.Options.Live
+	return cachingEnabled
+}
+
+func getLayoutData() (layoutData render.PageTemplateModel) {
 	var connectionName string
 	if options.Options.ConnectionDisplayName != nil {
 		connectionName = *options.Options.ConnectionDisplayName
@@ -106,57 +104,5 @@ func requestSetup() (layoutData render.PageTemplateModel, dbReader reader.DbRead
 		LicenseText:    licensing.LicenseText(),
 		Timestamp:      time.Now().String(),
 	}
-
-	cachingEnabled := options.Options.Live == nil || !*options.Options.Live
-	if !cachingEnabled {
-		render.SetupTemplate()
-		log.Print("Re-reading schema, this may take a while...")
-		database, err = dbReader.ReadSchema()
-		if err != nil {
-			fmt.Println("Error reading schema", err)
-			// todo: send 500 error to client
-			return
-		}
-		setupPeekList()
-	}
 	return
-}
-
-func setupPeekList() {
-	if options.Options == nil {
-		panic("options is nil")
-	}
-	if (*options.Options).PeekConfigPath == nil {
-		panic("PeekConfigPath option missing")
-	}
-	peekFilename := *options.Options.PeekConfigPath
-	peekFilename = path.Join(resources.BasePath, peekFilename)
-	log.Printf("Loading peek config from %s ...", peekFilename)
-	file, err := os.Open(peekFilename)
-	if err != nil {
-		log.Printf("Failed to load %s, disabling peek feature, check peek-config-path configuration. %s", peekFilename, err)
-		return
-	}
-	defer file.Close()
-	scanner := bufio.NewScanner(file)
-	var regexes []regexp.Regexp
-	for scanner.Scan() {
-		line := strings.TrimSpace(scanner.Text())
-		if line == "" || strings.HasPrefix(line, "#") {
-			continue // skip blanks and comments
-		}
-		regexes = append(regexes, *regexp.MustCompile(line))
-	}
-	for _, tbl := range database.Tables {
-		for _, col := range tbl.Columns {
-			for _, regex := range regexes {
-				fullName := tbl.String() + "." + col.Name
-				fullNameLower := strings.ToLower(fullName)
-				if regex.MatchString(fullNameLower) {
-					tbl.PeekColumns = append(tbl.PeekColumns, col)
-					log.Printf(" - peek configured for %s", fullName)
-				}
-			}
-		}
-	}
 }

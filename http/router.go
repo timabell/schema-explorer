@@ -9,6 +9,9 @@ import (
 func Router() *mux.Router {
 	r := mux.NewRouter()
 	r.PathPrefix("/static/").Handler(http.FileServer(http.Dir(resources.BasePath)))
+	r.HandleFunc("/setup", SetupHandler)
+	r.HandleFunc("/setup/{driver}", SetupDriverHandler)
+	r.HandleFunc("/setup/{driver}/run", SetupDriverPostHandler)
 	r.HandleFunc("/", TableListHandler)
 	r.HandleFunc("/table-trail", TableTrailHandler)
 	r.HandleFunc("/table-trail/clear", ClearTableTrailHandler)

@@ -47,7 +47,7 @@ var opts = &pgOpts{}
 
 func init() {
 	// https://github.com/jessevdk/go-flags/blob/master/group_test.go#L33
-	reader.RegisterReader("pg", opts, newPg)
+	reader.RegisterReader(&reader.Driver{Name: "pg", Options: opts, CreateReader: newPg, FullName: "Postgres"})
 }
 
 func newPg() reader.DbReader {

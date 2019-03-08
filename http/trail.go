@@ -1,6 +1,7 @@
 package http
 
 import (
+	"bitbucket.org/timabell/sql-data-viewer/reader"
 	"bitbucket.org/timabell/sql-data-viewer/render"
 	"bitbucket.org/timabell/sql-data-viewer/trail"
 	"fmt"
@@ -8,7 +9,7 @@ import (
 )
 
 func TableTrailHandler(resp http.ResponseWriter, req *http.Request) {
-	layoutData, _, err := requestSetup()
+	layoutData, _, err := dbRequestSetup()
 	if err != nil {
 		// todo: client error
 		fmt.Println("setup error rendering table: ", err)
@@ -23,7 +24,7 @@ func TableTrailHandler(resp http.ResponseWriter, req *http.Request) {
 		trail = ReadTrail(req)
 		trail.Dynamic = true
 	}
-	err = render.ShowTableTrail(resp, database, trail, layoutData)
+	err = render.ShowTableTrail(resp, reader.Database, trail, layoutData)
 	if err != nil {
 		fmt.Println("error rendering trail: ", err)
 		return

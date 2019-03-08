@@ -25,11 +25,11 @@ type sqliteOpts struct {
 	Path *string `short:"f" long:"file" description:"Path to sqlite db file" env:"file"`
 }
 
-var opt = &sqliteOpts{}
+var opts = &sqliteOpts{}
 
 func init() {
 	// https://github.com/jessevdk/go-flags/blob/master/group_test.go#L33
-	reader.RegisterReader("sqlite", opt, newSqlite)
+	reader.RegisterReader(&reader.Driver{Name: "sqlite", Options: opts, CreateReader: newSqlite, FullName: "SQLite"})
 }
 
 type sqliteModel struct {
@@ -37,14 +37,14 @@ type sqliteModel struct {
 }
 
 func newSqlite() reader.DbReader {
-	if opt.Path == nil {
+	if opts.Path == nil {
 		log.Printf("Error: sqlite file is required")
 		options.ArgParser.WriteHelp(os.Stdout)
 		os.Exit(1)
 	}
-	log.Printf("Connecting to sqlite file %s", *opt.Path)
+	log.Printf("Connecting to sqlite file %s", *opts.Path)
 	return sqliteModel{
-		path: *opt.Path,
+		path: *opts.Path,
 	}
 }
 

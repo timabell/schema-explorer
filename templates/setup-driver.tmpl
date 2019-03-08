@@ -1,0 +1,18 @@
+{{define "content"}}
+    <h2>{{.Driver.FullName}}</h2>
+    <form action="/setup/{{.Driver.Name}}/run" method="post">
+        {{range .Options}}
+    <div>
+        <label>{{.LongName}}
+        <input name="{{.LongName}}"/>
+        </label>
+        <br/>
+        {{.Description}}
+    </div>
+    <br/>
+        {{end}}
+    <div>
+        <button>run</button>
+    </div>
+    </form>
+{{end}}

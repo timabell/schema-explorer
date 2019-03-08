@@ -2,12 +2,14 @@ package render
 
 import (
 	"bitbucket.org/timabell/sql-data-viewer/about"
+	"bitbucket.org/timabell/sql-data-viewer/options"
 	"bitbucket.org/timabell/sql-data-viewer/params"
 	"bitbucket.org/timabell/sql-data-viewer/reader"
 	"bitbucket.org/timabell/sql-data-viewer/resources"
 	"bitbucket.org/timabell/sql-data-viewer/schema"
 	"bitbucket.org/timabell/sql-data-viewer/trail"
 	"fmt"
+	"github.com/jessevdk/go-flags"
 	"html/template"
 	"log"
 	"net/http"
@@ -22,6 +24,17 @@ type PageTemplateModel struct {
 	Copyright      string
 	LicenseText    string
 	Timestamp      string
+}
+
+type driverSelectionViewModel struct {
+	LayoutData PageTemplateModel
+	Drivers    []*reader.Driver
+}
+
+type driverSetupViewModel struct {
+	LayoutData PageTemplateModel
+	Driver     *reader.Driver
+	Options    []*flags.Option
 }
 
 type tableListViewModel struct {
@@ -74,6 +87,8 @@ var tableTemplate *template.Template
 var tableDataTemplate *template.Template
 var tableAnalysisTemplate *template.Template
 var tableTrailTemplate *template.Template
+var selectDriverTemplate *template.Template
+var setupDriverTemplate *template.Template
 
 // Make minus available in templates to be able to convert len to slice index
 // https://stackoverflow.com/a/24838050/10245
@@ -92,7 +107,7 @@ func isNil(value interface{}) bool {
 	return value == nil
 }
 
-func SetupTemplate() {
+func SetupTemplates() {
 	templates, err := template.Must(template.New("").Funcs(funcMap).ParseGlob(resources.TemplateFolder + "/layout.tmpl")).ParseGlob(resources.TemplateFolder + "/_*.tmpl")
 	if err != nil {
 		log.Fatal(err)
@@ -117,6 +132,90 @@ func SetupTemplate() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	selectDriverTemplate, err = template.Must(templates.Clone()).ParseGlob(resources.TemplateFolder + "/select-driver.tmpl")
+	if err != nil {
+		log.Fatal(err)
+	}
+	setupDriverTemplate, err = template.Must(templates.Clone()).ParseGlob(resources.TemplateFolder + "/setup-driver.tmpl")
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+func ShowSelectDriver(resp http.ResponseWriter, layoutData PageTemplateModel) {
+	model := driverSelectionViewModel{
+		LayoutData: layoutData,
+		Drivers:    getDrivers(),
+	}
+	err := selectDriverTemplate.ExecuteTemplate(resp, "layout", model)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+func getDrivers() []*reader.Driver {
+	var drivers []*reader.Driver
+	// stable sort:
+	var keys []string
+	for name, _ := range reader.Drivers {
+		keys = append(keys, name)
+	}
+	sort.Strings(keys)
+	for _, name := range keys {
+		drivers = append(drivers, reader.Drivers[name])
+	}
+	return drivers
+}
+
+func ShowSetupDriver(resp http.ResponseWriter, layoutData PageTemplateModel, driver string) {
+	opts := getDriverOptions(driver)
+
+	model := driverSetupViewModel{
+		LayoutData: layoutData,
+		Driver:     reader.Drivers[driver],
+		Options:    opts,
+	}
+	err := setupDriverTemplate.ExecuteTemplate(resp, "layout", model)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+func RunSetupDriver(resp http.ResponseWriter, req *http.Request, layoutData PageTemplateModel, driver string) {
+	opts := getDriverOptions(driver)
+
+	// configure global things
+	options.Options.Driver = &driver
+
+	for _, option := range opts {
+		val := req.FormValue(option.LongName)
+		if val != ""{
+			err := option.Set(&val) // depends on modified flags library that exposes set as a public method
+			if err != nil {
+				log.Fatal(err)
+			}
+		}
+	}
+
+	err := reader.InitializeDatabase()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	http.Redirect(resp, req, "/", http.StatusFound)
+}
+
+func getDriverOptions(driver string) []*flags.Option {
+	groups := options.ArgParser.Groups()
+	var driverArgs *flags.Group
+	for _, group := range groups {
+		if group.Namespace == driver {
+			driverArgs = group
+		}
+	}
+	opts := driverArgs.Options()
+	return opts
 }
 
 func ShowTableList(resp http.ResponseWriter, database *schema.Database, layoutData PageTemplateModel) {

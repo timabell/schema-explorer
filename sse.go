@@ -44,17 +44,22 @@ func main() {
 		os.Exit(1)
 	}
 
-	connectionName := ""
-	if options.Options.ConnectionDisplayName != nil {
-		connectionName = *options.Options.ConnectionDisplayName
-	}
-	log.Printf("%s\n  %s\n  %s\n  Feeback/support/contact: <%s>\n  Driver: %s, connection name: \"%s\"\n",
+	log.Printf("%s\n  %s\n  %s\n  Feeback/support/contact: <%s>",
 		about.About.Summary(),
 		licensing.CopyrightText(),
 		licensing.LicenseText(),
-		about.About.Email,
-		*options.Options.Driver,
-		connectionName)
+		about.About.Email)
+
+	// only spit out connection info if configured from env/args
+	if options.Options.Driver != nil {
+		connectionName := ""
+		if options.Options.ConnectionDisplayName != nil {
+			connectionName = *options.Options.ConnectionDisplayName
+		}
+		log.Printf("Driver: %s, connection name: \"%s\"\n",
+			*options.Options.Driver,
+			connectionName)
+	}
 
 	http.RunServer()
 }

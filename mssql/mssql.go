@@ -34,7 +34,7 @@ var opts = &mssqlOpts{}
 
 func init() {
 	// https://github.com/jessevdk/go-flags/blob/master/group_test.go#L33
-	reader.RegisterReader("mssql", opts, newMssql)
+	reader.RegisterReader(&reader.Driver{Name: "mssql", Options: opts, CreateReader: newMssql, FullName: "Microsoft SQL Server / Azure SQL"})
 }
 
 func (opts mssqlOpts) validate() error {

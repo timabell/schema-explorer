@@ -1,7 +1,9 @@
 package http
 
 import (
+	"bitbucket.org/timabell/sql-data-viewer/options"
 	"bitbucket.org/timabell/sql-data-viewer/params"
+	"bitbucket.org/timabell/sql-data-viewer/reader"
 	"bitbucket.org/timabell/sql-data-viewer/render"
 	"bitbucket.org/timabell/sql-data-viewer/schema"
 	"fmt"
@@ -20,7 +22,7 @@ func TableInfoHandler(resp http.ResponseWriter, req *http.Request) {
 }
 
 func TableHandler(resp http.ResponseWriter, req *http.Request, dataOnly bool) {
-	layoutData, dbReader, err := requestSetup()
+	layoutData, dbReader, err := dbRequestSetup()
 	if err != nil {
 		// todo: client error
 		fmt.Println("setup error rendering table: ", err)
@@ -33,7 +35,7 @@ func TableHandler(resp http.ResponseWriter, req *http.Request, dataOnly bool) {
 		http.Redirect(resp, req, "/", http.StatusFound)
 		return
 	}
-	table := database.FindTable(&requestedTable)
+	table := reader.Database.FindTable(&requestedTable)
 	if table == nil {
 		resp.WriteHeader(http.StatusNotFound)
 		fmt.Fprint(resp, "Alas, thy table hast not been seen of late. 404 my friend.")
@@ -66,7 +68,7 @@ func TableHandler(resp http.ResponseWriter, req *http.Request, dataOnly bool) {
 	trail.AddTable(table)
 	SetTrailCookie(trail, resp)
 
-	err = render.ShowTable(resp, dbReader, database, table, params, layoutData, dataOnly)
+	err = render.ShowTable(resp, dbReader, reader.Database, table, params, layoutData, dataOnly)
 	if err != nil {
 		fmt.Println("error rendering table: ", err)
 		return
@@ -74,26 +76,31 @@ func TableHandler(resp http.ResponseWriter, req *http.Request, dataOnly bool) {
 }
 
 func TableListHandler(resp http.ResponseWriter, req *http.Request) {
-	layoutData, dbReader, err := requestSetup()
+	if options.Options.Driver == nil {
+		http.Redirect(resp, req, "/setup", http.StatusFound)
+		return
+	}
+
+	layoutData, dbReader, err := dbRequestSetup()
 	if err != nil {
 		// todo: client error
 		fmt.Println("setup error rendering table list: ", err)
 		return
 	}
-	if database == nil {
+	if reader.Database == nil {
 		panic("database is nil")
 	}
-	err = dbReader.UpdateRowCounts(database)
+	err = dbReader.UpdateRowCounts(reader.Database)
 	if err != nil {
 		// todo: client error
 		fmt.Println("error getting row counts for table list: ", err)
 		return
 	}
-	render.ShowTableList(resp, database, layoutData)
+	render.ShowTableList(resp, reader.Database, layoutData)
 }
 
 func AnalyseTableHandler(resp http.ResponseWriter, req *http.Request) {
-	layoutData, dbReader, err := requestSetup()
+	layoutData, dbReader, err := dbRequestSetup()
 	if err != nil {
 		// todo: client error
 		fmt.Println("setup error rendering table: ", err)
@@ -102,14 +109,14 @@ func AnalyseTableHandler(resp http.ResponseWriter, req *http.Request) {
 
 	tableName := mux.Vars(req)["tableName"]
 	requestedTable := parseTableName(tableName)
-	table := database.FindTable(&requestedTable)
+	table := reader.Database.FindTable(&requestedTable)
 	if table == nil {
 		resp.WriteHeader(http.StatusNotFound)
 		fmt.Fprint(resp, "Alas, thy table hast not been seen of late. 404 my friend.")
 		return
 	}
 
-	err = render.ShowTableAnalysis(resp, dbReader, database, table, layoutData)
+	err = render.ShowTableAnalysis(resp, dbReader, reader.Database, table, layoutData)
 	if err != nil {
 		fmt.Println("error rendering table analysis: ", err)
 		return
