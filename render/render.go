@@ -4,6 +4,7 @@ import (
 	"bitbucket.org/timabell/sql-data-viewer/about"
 	"bitbucket.org/timabell/sql-data-viewer/params"
 	"bitbucket.org/timabell/sql-data-viewer/reader"
+	"bitbucket.org/timabell/sql-data-viewer/resources"
 	"bitbucket.org/timabell/sql-data-viewer/schema"
 	"bitbucket.org/timabell/sql-data-viewer/trail"
 	"fmt"
@@ -92,27 +93,27 @@ func isNil(value interface{}) bool {
 }
 
 func SetupTemplate() {
-	templates, err := template.Must(template.New("").Funcs(funcMap).ParseGlob("templates/layout.tmpl")).ParseGlob("templates/_*.tmpl")
+	templates, err := template.Must(template.New("").Funcs(funcMap).ParseGlob(resources.TemplateFolder + "/layout.tmpl")).ParseGlob(resources.TemplateFolder + "/_*.tmpl")
 	if err != nil {
 		log.Fatal(err)
 	}
-	tablesTemplate, err = template.Must(templates.Clone()).ParseGlob("templates/tables.tmpl")
+	tablesTemplate, err = template.Must(templates.Clone()).ParseGlob(resources.TemplateFolder + "/tables.tmpl")
 	if err != nil {
 		log.Fatal(err)
 	}
-	tableTrailTemplate, err = template.Must(templates.Clone()).ParseGlob("templates/table-trail.tmpl")
+	tableTrailTemplate, err = template.Must(templates.Clone()).ParseGlob(resources.TemplateFolder + "/table-trail.tmpl")
 	if err != nil {
 		log.Fatal(err)
 	}
-	tableTemplate, err = template.Must(templates.Clone()).ParseGlob("templates/table.tmpl")
+	tableTemplate, err = template.Must(templates.Clone()).ParseGlob(resources.TemplateFolder + "/table.tmpl")
 	if err != nil {
 		log.Fatal(err)
 	}
-	tableDataTemplate, err = template.Must(templates.Clone()).ParseGlob("templates/table-data.tmpl")
+	tableDataTemplate, err = template.Must(templates.Clone()).ParseGlob(resources.TemplateFolder + "/table-data.tmpl")
 	if err != nil {
 		log.Fatal(err)
 	}
-	tableAnalysisTemplate, err = template.Must(templates.Clone()).ParseGlob("templates/table-analysis.tmpl")
+	tableAnalysisTemplate, err = template.Must(templates.Clone()).ParseGlob(resources.TemplateFolder + "/table-analysis.tmpl")
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -7,6 +7,7 @@ import (
 	"bitbucket.org/timabell/sql-data-viewer/options"
 	"bitbucket.org/timabell/sql-data-viewer/reader"
 	"bitbucket.org/timabell/sql-data-viewer/render"
+	"bitbucket.org/timabell/sql-data-viewer/resources"
 	"bitbucket.org/timabell/sql-data-viewer/schema"
 	"bufio"
 	"fmt"
@@ -15,6 +16,7 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"path"
 	"regexp"
 	"strings"
 	"time"
@@ -128,6 +130,7 @@ func setupPeekList() {
 		panic("PeekConfigPath option missing")
 	}
 	peekFilename := *options.Options.PeekConfigPath
+	peekFilename = path.Join(resources.BasePath, peekFilename)
 	log.Printf("Loading peek config from %s ...", peekFilename)
 	file, err := os.Open(peekFilename)
 	if err != nil {

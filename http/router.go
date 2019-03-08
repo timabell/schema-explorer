@@ -1,13 +1,14 @@
 package http
 
 import (
+	"bitbucket.org/timabell/sql-data-viewer/resources"
 	"github.com/gorilla/mux"
 	"net/http"
 )
 
 func Router() *mux.Router {
 	r := mux.NewRouter()
-	r.PathPrefix("/static/").Handler(http.FileServer(http.Dir(".")))
+	r.PathPrefix("/static/").Handler(http.FileServer(http.Dir(resources.BasePath)))
 	r.HandleFunc("/", TableListHandler)
 	r.HandleFunc("/table-trail", TableTrailHandler)
 	r.HandleFunc("/table-trail/clear", ClearTableTrailHandler)

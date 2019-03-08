@@ -3,4 +3,3 @@
 package browser
 
 var browserCommand = "xdg-open"
-
