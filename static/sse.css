@@ -324,3 +324,21 @@ footer *, footer a, footer a:visited{
     border-width: 0.125em 0 0 0.125em;
 
 }
+#driverSetup label{
+    display: inline-block;
+    width: 8em;
+    text-align: right;
+}
+#driverSetup input{
+    width: 20em;
+    margin-top: 0.5em;
+}
+#driverSetup .description{
+    color: #666;
+    margin-left: 10.5em;
+    font-size: 0.8em;
+}
+#driverSetup button{
+    margin-left: 8.25em;
+    margin-top: 0.5em;
+}
