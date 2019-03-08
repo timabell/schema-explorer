@@ -5,7 +5,7 @@ import (
 	"path"
 )
 
-var basePath = ""
+var BasePath = ""
 
 const relativeTemplateFolder = "templates/"
 
@@ -24,11 +24,11 @@ func init() {
 		}
 		exeFolder := path.Dir(exePath)
 		//log.Printf("Using absolute resource paths. Base folder: %s", exeFolder)
-		basePath = exeFolder
+		BasePath = exeFolder
 	}
 
 	// setup individual base paths once to save re-calculating
-	if basePath != "" {
-		TemplateFolder = path.Join(basePath, relativeTemplateFolder)
+	if BasePath != "" {
+		TemplateFolder = path.Join(BasePath, relativeTemplateFolder)
 	}
 }
