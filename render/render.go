@@ -4,14 +4,13 @@ import (
 	"bitbucket.org/timabell/sql-data-viewer/about"
 	"bitbucket.org/timabell/sql-data-viewer/params"
 	"bitbucket.org/timabell/sql-data-viewer/reader"
+	"bitbucket.org/timabell/sql-data-viewer/resources"
 	"bitbucket.org/timabell/sql-data-viewer/schema"
 	"bitbucket.org/timabell/sql-data-viewer/trail"
 	"fmt"
 	"html/template"
 	"log"
 	"net/http"
-	"os"
-	"path"
 	"sort"
 	"strings"
 )
@@ -94,42 +93,27 @@ func isNil(value interface{}) bool {
 }
 
 func SetupTemplate() {
-	// Try relative first, if that doesn't exist switch to absolute.
-	// Need both because local build moves the exe but uses build folder working dir (so need relative),
-	// but mac double-click doesn't set working folder so need to figure out absolute path to resources
-	templateFolder := "templates/"
-	// if we can't find the relative folder, switch to absolute paths for everything
-	if _, e := os.Stat(templateFolder); e != nil && os.IsNotExist(e){
-		exePath, err := os.Executable()
-		if err != nil{
-			panic("couldn't get exe path for templates/ path: " + err.Error())
-		}
-		exeFolder := path.Dir(exePath)
-		templateFolder = path.Join(exeFolder, templateFolder)
-		log.Printf("Using absolute resource paths. Base folder: %s", exeFolder)
-	}
-
-	templates, err := template.Must(template.New("").Funcs(funcMap).ParseGlob(templateFolder + "/layout.tmpl")).ParseGlob(templateFolder + "/_*.tmpl")
+	templates, err := template.Must(template.New("").Funcs(funcMap).ParseGlob(resources.TemplateFolder + "/layout.tmpl")).ParseGlob(resources.TemplateFolder + "/_*.tmpl")
 	if err != nil {
 		log.Fatal(err)
 	}
-	tablesTemplate, err = template.Must(templates.Clone()).ParseGlob(templateFolder + "/tables.tmpl")
+	tablesTemplate, err = template.Must(templates.Clone()).ParseGlob(resources.TemplateFolder + "/tables.tmpl")
 	if err != nil {
 		log.Fatal(err)
 	}
-	tableTrailTemplate, err = template.Must(templates.Clone()).ParseGlob(templateFolder + "/table-trail.tmpl")
+	tableTrailTemplate, err = template.Must(templates.Clone()).ParseGlob(resources.TemplateFolder + "/table-trail.tmpl")
 	if err != nil {
 		log.Fatal(err)
 	}
-	tableTemplate, err = template.Must(templates.Clone()).ParseGlob(templateFolder + "/table.tmpl")
+	tableTemplate, err = template.Must(templates.Clone()).ParseGlob(resources.TemplateFolder + "/table.tmpl")
 	if err != nil {
 		log.Fatal(err)
 	}
-	tableDataTemplate, err = template.Must(templates.Clone()).ParseGlob(templateFolder + "/table-data.tmpl")
+	tableDataTemplate, err = template.Must(templates.Clone()).ParseGlob(resources.TemplateFolder + "/table-data.tmpl")
 	if err != nil {
 		log.Fatal(err)
 	}
-	tableAnalysisTemplate, err = template.Must(templates.Clone()).ParseGlob(templateFolder + "/table-analysis.tmpl")
+	tableAnalysisTemplate, err = template.Must(templates.Clone()).ParseGlob(resources.TemplateFolder + "/table-analysis.tmpl")
 	if err != nil {
 		log.Fatal(err)
 	}
