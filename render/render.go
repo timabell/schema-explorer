@@ -203,6 +203,15 @@ func RunDatabaseSelection(resp http.ResponseWriter, req *http.Request, databaseN
 			}
 		}
 	}
+
+	err := reader.InitializeDatabase()
+	if err != nil {
+		log.Print(err)
+		resp.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintf(resp, "Failed to connect to the selected database.\n\n%s", err)
+		return
+	}
+
 	http.Redirect(resp, req, "/", http.StatusFound)
 }
 
