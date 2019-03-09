@@ -129,6 +129,12 @@ func TableListHandler(resp http.ResponseWriter, req *http.Request) {
 		fmt.Fprintf(resp, "Failed to connect to the selected database.\n\n%s", err)
 		return
 	}
+
+	if !dbReader.DatabaseSelected() {
+		http.Redirect(resp, req, "/databases", http.StatusFound)
+		return
+	}
+
 	if reader.Database == nil {
 		panic("database is nil")
 	}
