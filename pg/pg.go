@@ -161,7 +161,7 @@ func (model pgModel) ListDatabases() (databaseList []string, err error) {
 }
 
 func (model pgModel) DatabaseSelected() bool {
-	return opts.Database != nil
+	return opts.Database != nil || opts.ConnectionString != nil
 }
 
 func (model pgModel) UpdateRowCounts(database *schema.Database) (err error) {
