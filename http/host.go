@@ -27,7 +27,7 @@ func SetupRouter() (*mux.Router, *schema.Database) {
 	err := Setup()
 	if err != nil {
 		// todo: send 500 error for all requests
-		panic("SetupRouter failed")
+		panic("SetupRouter failed: " + err.Error())
 	}
 	return Router(), reader.Database
 }
