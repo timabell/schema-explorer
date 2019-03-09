@@ -25,6 +25,7 @@ type pgOpts struct {
 	Database         *string `long:"database" description:"Postgres database name" env:"database"`
 	User             *string `long:"user" description:"Postgres username" env:"user"`
 	Password         *string `long:"password" description:"Postgres password" env:"password"`
+	SslMode          *string `long:"sslmode" description:"Postgres ssl mode. Set this to 'disable' if you are connecting to a server that doesn't have ssl enabled.'" env:"sslmode"`
 	ConnectionString *string `long:"connection-string" description:"Postgres connection string. Use this instead of host, port etc for advanced driver options. See https://godoc.org/github.com/lib/pq for connection-string options." env:"connection_string"`
 }
 
@@ -74,6 +75,9 @@ func newPg() reader.DbReader {
 		}
 		if opts.Password != nil {
 			optList["password"] = *opts.Password
+		}
+		if opts.SslMode != nil {
+			optList["sslmode"] = *opts.SslMode
 		}
 		pairs := []string{}
 		for key, value := range optList {
