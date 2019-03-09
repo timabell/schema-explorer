@@ -8,7 +8,11 @@
         {{range .Options}}
     <div>
         <label for="{{.LongName}}">{{.LongName}}:</label>
-        <input name="{{.LongName}}"/>
+        {{if eq .LongName "password"}}
+            <input name="{{.LongName}}" type="password"/>
+        {{else}}
+            <input name="{{.LongName}}" type="text"/>
+        {{end}}
         <br/>
         <div class="description">
         {{.Description}}
