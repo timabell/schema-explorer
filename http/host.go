@@ -103,6 +103,7 @@ func getLayoutData() (layoutData render.PageTemplateModel) {
 		Copyright:      licensing.CopyrightText(),
 		LicenseText:    licensing.LicenseText(),
 		Timestamp:      time.Now().String(),
+		DbReady:        reader.Database != nil,
 	}
 	return
 }

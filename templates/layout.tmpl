@@ -32,6 +32,7 @@
     {{end}}
 </div>
 
+{{if .LayoutData.DbReady}}
 <nav>
     <ul>
         <li>
@@ -46,6 +47,7 @@
         </li>
     </ul>
 </nav>
+{{end}}
 
 {{end}}
 {{block "content" .}}

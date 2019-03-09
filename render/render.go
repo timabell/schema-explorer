@@ -24,6 +24,7 @@ type PageTemplateModel struct {
 	Copyright      string
 	LicenseText    string
 	Timestamp      string
+	DbReady        bool
 }
 
 type driverSelectionViewModel struct {
@@ -190,7 +191,7 @@ func RunSetupDriver(resp http.ResponseWriter, req *http.Request, layoutData Page
 
 	for _, option := range opts {
 		val := req.FormValue(option.LongName)
-		if val != ""{
+		if val != "" {
 			err := option.Set(&val) // depends on modified flags library that exposes set as a public method
 			if err != nil {
 				log.Fatal(err)
