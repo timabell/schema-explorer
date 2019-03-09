@@ -75,6 +75,26 @@ func TableHandler(resp http.ResponseWriter, req *http.Request, dataOnly bool) {
 	}
 }
 
+func DatabaseListHandler(resp http.ResponseWriter, req *http.Request) {
+	if options.Options.Driver == nil {
+		http.Redirect(resp, req, "/setup", http.StatusFound)
+		return
+	}
+	layoutData, dbReader, err := dbRequestSetup()
+	if err != nil {
+		// todo: client error
+		fmt.Println("setup error rendering database list: ", err)
+		return
+	}
+	databaseList, err := dbReader.ListDatabases()
+	if err != nil {
+		// todo: client error
+		fmt.Println("error getting row counts for table list: ", err)
+		return
+	}
+	render.ShowDatabaseList(resp, layoutData, databaseList)
+}
+
 func TableListHandler(resp http.ResponseWriter, req *http.Request) {
 	if options.Options.Driver == nil {
 		http.Redirect(resp, req, "/setup", http.StatusFound)

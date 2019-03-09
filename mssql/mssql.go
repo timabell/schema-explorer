@@ -151,6 +151,11 @@ func (model mssqlModel) ReadSchema() (database *schema.Database, err error) {
 	//log.Print(database.DebugString())
 	return
 }
+
+func (model mssqlModel) ListDatabases() (databaseList []string, err error) {
+	panic("not implemented")
+}
+
 func addDescriptions(dbc *sql.DB, database *schema.Database) error {
 	rows, err := dbc.Query(`
 		select

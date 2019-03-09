@@ -38,6 +38,10 @@ type driverSetupViewModel struct {
 	Options    []*flags.Option
 }
 
+type databaseListViewModel struct {
+	LayoutData   PageTemplateModel
+	DatabaseList []string
+}
 type tableListViewModel struct {
 	LayoutData PageTemplateModel
 	Database   *schema.Database
@@ -83,6 +87,7 @@ type tableAnalysisDataViewModel struct {
 	Analysis   []schema.ColumnAnalysis
 }
 
+var databasesTemplate *template.Template
 var tablesTemplate *template.Template
 var tableTemplate *template.Template
 var tableDataTemplate *template.Template
@@ -110,6 +115,10 @@ func isNil(value interface{}) bool {
 
 func SetupTemplates() {
 	templates, err := template.Must(template.New("").Funcs(funcMap).ParseGlob(resources.TemplateFolder + "/layout.tmpl")).ParseGlob(resources.TemplateFolder + "/_*.tmpl")
+	if err != nil {
+		log.Fatal(err)
+	}
+	databasesTemplate, err = template.Must(templates.Clone()).ParseGlob(resources.TemplateFolder + "/databases.tmpl")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -220,6 +229,17 @@ func getDriverOptions(driver string) []*flags.Option {
 	}
 	opts := driverArgs.Options()
 	return opts
+}
+
+func ShowDatabaseList(resp http.ResponseWriter, layoutData PageTemplateModel, databaseList []string) {
+	model := databaseListViewModel{
+		LayoutData:   layoutData,
+		DatabaseList: databaseList,
+	}
+	err := databasesTemplate.ExecuteTemplate(resp, "layout", model)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func ShowTableList(resp http.ResponseWriter, database *schema.Database, layoutData PageTemplateModel) {

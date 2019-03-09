@@ -37,6 +37,8 @@ type DbReader interface {
 
 	// get breakdown of most common values in each column
 	GetAnalysis(table *schema.Table) (analysis []schema.ColumnAnalysis, err error)
+
+	ListDatabases() (databaseList []string, err error)
 }
 
 type CreateReader func() DbReader

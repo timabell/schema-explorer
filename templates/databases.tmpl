@@ -1,0 +1,18 @@
+{{define "content"}}
+<h2 id="databaseList">Databases</h2>
+<table class="tableList clicky-cells tablesorter">
+    <thead>
+    <tr>
+        <th>Name</th>
+    </tr>
+    </thead>
+    <tbody>
+{{range .DatabaseList}}
+        <tr>
+            <td><a href='{{.}}/'>{{.}}</a></td>
+        </tr>
+{{end}}
+    </tbody>
+</table>
+
+{{end}}

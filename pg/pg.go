@@ -138,6 +138,28 @@ func (model pgModel) ReadSchema() (database *schema.Database, err error) {
 	return
 }
 
+func (model pgModel) ListDatabases() (databaseList []string, err error) {
+	sql := "select datname from pg_database where datistemplate = false;"
+
+	dbc, err := getConnection(model.connectionString)
+	if dbc == nil {
+		log.Println(err)
+		panic("getConnection() returned nil")
+	}
+	defer dbc.Close()
+	rows, err := dbc.Query(sql)
+	if err != nil {
+		return []string{}, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var name string
+		rows.Scan(&name)
+		databaseList = append(databaseList, name)
+	}
+	return
+}
+
 func (model pgModel) UpdateRowCounts(database *schema.Database) (err error) {
 	for _, table := range database.Tables {
 		rowCount, err := model.getRowCount(table)
