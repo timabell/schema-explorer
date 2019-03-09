@@ -76,6 +76,16 @@ func TableHandler(resp http.ResponseWriter, req *http.Request, dataOnly bool) {
 }
 
 func DatabaseSelectionHandler(resp http.ResponseWriter, req *http.Request) {
+	_, dbReader, err := dbRequestSetup()
+	if err != nil {
+		// todo: client error
+		fmt.Println("setup error selecting database: ", err)
+		return
+	}
+	if dbReader.DatabaseSelected() {
+		http.Redirect(resp, req, "/setup", http.StatusFound)
+		return
+	}
 	databaseName := req.FormValue("database")
 	render.RunDatabaseSelection(resp, req, databaseName)
 }
@@ -89,6 +99,10 @@ func DatabaseListHandler(resp http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		// todo: client error
 		fmt.Println("setup error rendering database list: ", err)
+		return
+	}
+	if dbReader.DatabaseSelected() {
+		http.Redirect(resp, req, "/setup", http.StatusFound)
 		return
 	}
 	databaseList, err := dbReader.ListDatabases()
