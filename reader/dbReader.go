@@ -7,6 +7,7 @@ import (
 	"bitbucket.org/timabell/sql-data-viewer/schema"
 	"bufio"
 	"database/sql"
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -69,15 +70,14 @@ func InitializeDatabase() (err error) {
 	log.Println("Checking database connection...")
 	err = dbReader.CheckConnection()
 	if err != nil {
-		log.Println(err)
-		panic("connection check failed")
+		err = errors.New("check connection failed: " + err.Error())
+		return
 	}
 
 	log.Print("Reading schema, this may take a while...")
 	Database, err = dbReader.ReadSchema()
 	if err != nil {
-		fmt.Println("Error reading schema", err)
-		// todo: send 500 error to client
+		err = errors.New("error reading schema: " + err.Error())
 		return
 	}
 	setupPeekList(Database)

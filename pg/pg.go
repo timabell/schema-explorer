@@ -202,10 +202,12 @@ func (model pgModel) CheckConnection() (err error) {
 	defer dbc.Close()
 	tables, err := model.getTables(dbc)
 	if err != nil {
-		panic(err)
+		err = errors.New("getTables() failed - " + err.Error())
+		return
 	}
 	if len(tables) == 0 {
-		panic("No tables found.")
+		err = errors.New("no tables found")
+		return
 	}
 	log.Println("Connected.", len(tables), "tables found")
 	return

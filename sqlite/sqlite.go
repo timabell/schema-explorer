@@ -181,15 +181,18 @@ func (model sqliteModel) CheckConnection() (err error) {
 	defer dbc.Close()
 	err = dbc.Ping()
 	if err != nil {
-		panic(err)
+		err = errors.New("database ping failed - " + err.Error())
+		return
 	}
 	tables, err := model.getTables(dbc)
 	if err != nil {
-		panic(err)
+		err = errors.New("getTables() failed - " + err.Error())
+		return
 	}
 	if len(tables) == 0 {
 		// https://stackoverflow.com/q/45777113/10245
-		panic("No tables found. (Sqlite will create an empty db if the specified file doesn't exist).")
+		err = errors.New("no tables found. (SQLite will create an empty db if the specified file doesn't exist)")
+		return
 	}
 	log.Println("Connected.", len(tables), "tables found")
 	return
