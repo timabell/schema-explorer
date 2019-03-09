@@ -124,8 +124,9 @@ func TableListHandler(resp http.ResponseWriter, req *http.Request) {
 
 	layoutData, dbReader, err := dbRequestSetup()
 	if err != nil {
-		// todo: client error
-		fmt.Println("setup error rendering table list: ", err)
+		log.Print(err)
+		resp.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintf(resp, "Failed to connect to the selected database.\n\n%s", err)
 		return
 	}
 	if reader.Database == nil {
