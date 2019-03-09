@@ -34,7 +34,7 @@ var opts = &mssqlOpts{}
 
 func init() {
 	// https://github.com/jessevdk/go-flags/blob/master/group_test.go#L33
-	reader.RegisterReader("mssql", opts, newMssql)
+	reader.RegisterReader(&reader.Driver{Name: "mssql", Options: opts, CreateReader: newMssql, FullName: "Microsoft SQL Server / Azure SQL"})
 }
 
 func (opts mssqlOpts) validate() error {
@@ -252,14 +252,14 @@ func (model mssqlModel) CheckConnection() (err error) {
 		panic("getConnection() returned nil")
 	}
 	defer dbc.Close()
-	showVersion(dbc)
+	err = showVersion(dbc)
 	return
 }
 
-func showVersion(dbc *sql.DB) {
+func showVersion(dbc *sql.DB) (err error) {
 	rows, err := dbc.Query("select @@version")
 	if err != nil {
-		log.Fatal("failed to get server version.", err)
+		err = errors.New("failed to get server version." + err.Error())
 		return
 	}
 	defer rows.Close()
@@ -269,6 +269,7 @@ func showVersion(dbc *sql.DB) {
 	serverVersion = strings.Replace(serverVersion, "\n", " ", -1)
 	serverVersion = strings.Replace(serverVersion, "\t", " ", -1)
 	log.Print("Successfully connected to MSSQL. @@version: " + serverVersion)
+	return
 }
 
 func allFks(dbc *sql.DB, database *schema.Database) (allFks []*schema.Fk, err error) {

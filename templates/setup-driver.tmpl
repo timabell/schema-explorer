@@ -1,0 +1,23 @@
+{{define "content"}}
+    <h2>{{.Driver.FullName}}</h2>
+    <p>
+        For configuration help see
+        <a target="_blank" href="http://schemaexplorer.io/help/getting-started.html">the getting started guide</a>.
+    </p>
+    <form action="/setup/{{.Driver.Name}}/run" method="post" id="driverSetup">
+        {{range .Options}}
+    <div>
+        <label for="{{.LongName}}">{{.LongName}}:</label>
+        <input name="{{.LongName}}"/>
+        <br/>
+        <div class="description">
+        {{.Description}}
+        </div>
+    </div>
+    <br/>
+        {{end}}
+    <div>
+        <button>Connect</button>
+    </div>
+    </form>
+{{end}}
