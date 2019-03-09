@@ -75,6 +75,11 @@ func TableHandler(resp http.ResponseWriter, req *http.Request, dataOnly bool) {
 	}
 }
 
+func DatabaseSelectionHandler(resp http.ResponseWriter, req *http.Request) {
+	databaseName := req.FormValue("database")
+	render.RunDatabaseSelection(resp, req, databaseName)
+}
+
 func DatabaseListHandler(resp http.ResponseWriter, req *http.Request) {
 	if options.Options.Driver == nil {
 		http.Redirect(resp, req, "/setup", http.StatusFound)

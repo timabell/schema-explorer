@@ -160,6 +160,10 @@ func (model pgModel) ListDatabases() (databaseList []string, err error) {
 	return
 }
 
+func (model pgModel) DatabaseSelected() bool {
+	return false // todo
+}
+
 func (model pgModel) UpdateRowCounts(database *schema.Database) (err error) {
 	for _, table := range database.Tables {
 		rowCount, err := model.getRowCount(table)

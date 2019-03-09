@@ -192,6 +192,20 @@ func ShowSetupDriver(resp http.ResponseWriter, layoutData PageTemplateModel, dri
 	}
 }
 
+func RunDatabaseSelection(resp http.ResponseWriter, req *http.Request, databaseName string) {
+	opts := getDriverOptions(*options.Options.Driver)
+
+	for _, option := range opts {
+		if option.LongName == "database" {
+			err := option.Set(&databaseName)
+			if err != nil {
+				log.Fatal(err)
+			}
+		}
+	}
+	http.Redirect(resp, req, "/", http.StatusFound)
+}
+
 func RunSetupDriver(resp http.ResponseWriter, req *http.Request, layoutData PageTemplateModel, driver string) {
 	opts := getDriverOptions(driver)
 
@@ -206,6 +220,12 @@ func RunSetupDriver(resp http.ResponseWriter, req *http.Request, layoutData Page
 				log.Fatal(err)
 			}
 		}
+	}
+
+	dbReader := reader.GetDbReader()
+	if !dbReader.DatabaseSelected() {
+		http.Redirect(resp, req, "/databases", http.StatusFound)
+		return
 	}
 
 	err := reader.InitializeDatabase()

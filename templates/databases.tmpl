@@ -1,5 +1,6 @@
 {{define "content"}}
 <h2 id="databaseList">Databases</h2>
+<form action="/databases/select" method="post" id="driverSetup">
 <table class="tableList clicky-cells tablesorter">
     <thead>
     <tr>
@@ -9,10 +10,11 @@
     <tbody>
 {{range .DatabaseList}}
         <tr>
-            <td><a href='{{.}}/'>{{.}}</a></td>
+            <td><button name="database" value='{{.}}'>{{.}}</button></td>
         </tr>
 {{end}}
     </tbody>
 </table>
 
+</form>
 {{end}}

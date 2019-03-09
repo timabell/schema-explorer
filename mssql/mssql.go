@@ -156,6 +156,10 @@ func (model mssqlModel) ListDatabases() (databaseList []string, err error) {
 	panic("not implemented")
 }
 
+func (model mssqlModel) DatabaseSelected() bool {
+	return false // todo
+}
+
 func addDescriptions(dbc *sql.DB, database *schema.Database) error {
 	rows, err := dbc.Query(`
 		select

@@ -119,7 +119,11 @@ func (model sqliteModel) ReadSchema() (database *schema.Database, err error) {
 }
 
 func (model sqliteModel) ListDatabases() (databaseList []string, err error) {
-	panic("not implemented")
+	panic("not available for sqlite")
+}
+
+func (model sqliteModel) DatabaseSelected() bool {
+	return true // there is only one
 }
 
 func (model sqliteModel) UpdateRowCounts(database *schema.Database) (err error) {
