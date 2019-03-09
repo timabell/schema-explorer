@@ -8,6 +8,7 @@ import (
 	"bitbucket.org/timabell/sql-data-viewer/schema"
 	"fmt"
 	"github.com/gorilla/mux"
+	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -97,8 +98,9 @@ func DatabaseListHandler(resp http.ResponseWriter, req *http.Request) {
 	}
 	layoutData, dbReader, err := dbRequestSetup()
 	if err != nil {
-		// todo: client error
-		fmt.Println("setup error rendering database list: ", err)
+		log.Print(err)
+		resp.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintf(resp, "Failed to connect to the selected database.\n\n%s", err)
 		return
 	}
 	if dbReader.DatabaseSelected() {
