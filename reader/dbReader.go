@@ -37,6 +37,12 @@ type DbReader interface {
 
 	// get breakdown of most common values in each column
 	GetAnalysis(table *schema.Table) (analysis []schema.ColumnAnalysis, err error)
+
+	// get list of databases on this server (if supported)
+	ListDatabases() (databaseList []string, err error)
+
+	// whether a database has already been chosen
+	DatabaseSelected() bool
 }
 
 type CreateReader func() DbReader

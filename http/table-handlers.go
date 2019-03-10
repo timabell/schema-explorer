@@ -8,6 +8,7 @@ import (
 	"bitbucket.org/timabell/sql-data-viewer/schema"
 	"fmt"
 	"github.com/gorilla/mux"
+	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -75,6 +76,47 @@ func TableHandler(resp http.ResponseWriter, req *http.Request, dataOnly bool) {
 	}
 }
 
+func DatabaseSelectionHandler(resp http.ResponseWriter, req *http.Request) {
+	_, dbReader, err := dbRequestSetup()
+	if err != nil {
+		// todo: client error
+		fmt.Println("setup error selecting database: ", err)
+		return
+	}
+	if dbReader.DatabaseSelected() {
+		http.Redirect(resp, req, "/setup", http.StatusFound)
+		return
+	}
+	databaseName := req.FormValue("database")
+	render.RunDatabaseSelection(resp, req, databaseName)
+}
+
+func DatabaseListHandler(resp http.ResponseWriter, req *http.Request) {
+	if options.Options.Driver == nil {
+		http.Redirect(resp, req, "/setup", http.StatusFound)
+		return
+	}
+	layoutData, dbReader, err := dbRequestSetup()
+	if err != nil {
+		log.Print(err)
+		resp.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintf(resp, "Failed to connect to the selected database.\n\n%s", err)
+		return
+	}
+	if dbReader.DatabaseSelected() {
+		http.Redirect(resp, req, "/setup", http.StatusFound)
+		return
+	}
+	databaseList, err := dbReader.ListDatabases()
+	if err != nil {
+		log.Print(err)
+		resp.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintf(resp, "Error getting list of databases.\n\n%s", err)
+		return
+	}
+	render.ShowDatabaseList(resp, layoutData, databaseList)
+}
+
 func TableListHandler(resp http.ResponseWriter, req *http.Request) {
 	if options.Options.Driver == nil {
 		http.Redirect(resp, req, "/setup", http.StatusFound)
@@ -83,10 +125,17 @@ func TableListHandler(resp http.ResponseWriter, req *http.Request) {
 
 	layoutData, dbReader, err := dbRequestSetup()
 	if err != nil {
-		// todo: client error
-		fmt.Println("setup error rendering table list: ", err)
+		log.Print(err)
+		resp.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintf(resp, "Failed to connect to the selected database.\n\n%s", err)
 		return
 	}
+
+	if !dbReader.DatabaseSelected() {
+		http.Redirect(resp, req, "/databases", http.StatusFound)
+		return
+	}
+
 	if reader.Database == nil {
 		panic("database is nil")
 	}

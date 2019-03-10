@@ -1,0 +1,20 @@
+{{define "content"}}
+<h2 id="databaseList">Select a database</h2>
+<form action="/databases/select" method="post">
+<table class="tableList clicky-cells tablesorter">
+    <thead>
+    <tr>
+        <th>Name</th>
+    </tr>
+    </thead>
+    <tbody>
+{{range .DatabaseList}}
+        <tr>
+            <td><button name="database" value='{{.}}'>{{.}}</button></td>
+        </tr>
+{{end}}
+    </tbody>
+</table>
+
+</form>
+{{end}}

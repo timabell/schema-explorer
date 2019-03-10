@@ -151,6 +151,33 @@ func (model mssqlModel) ReadSchema() (database *schema.Database, err error) {
 	//log.Print(database.DebugString())
 	return
 }
+
+func (model mssqlModel) ListDatabases() (databaseList []string, err error) {
+	sql := "select name from sys.databases where database_id > 4;" // https://stackoverflow.com/questions/147659/get-list-of-databases-from-sql-server/147707#147707
+
+	dbc, err := getConnection(model.connectionString)
+	if dbc == nil {
+		log.Println(err)
+		panic("getConnection() returned nil")
+	}
+	defer dbc.Close()
+	rows, err := dbc.Query(sql)
+	if err != nil {
+		return []string{}, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var name string
+		rows.Scan(&name)
+		databaseList = append(databaseList, name)
+	}
+	return
+}
+
+func (model mssqlModel) DatabaseSelected() bool {
+	return opts.Database != nil || opts.ConnectionString != nil
+}
+
 func addDescriptions(dbc *sql.DB, database *schema.Database) error {
 	rows, err := dbc.Query(`
 		select

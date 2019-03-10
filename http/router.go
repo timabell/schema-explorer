@@ -12,6 +12,8 @@ func Router() *mux.Router {
 	r.HandleFunc("/setup", SetupHandler)
 	r.HandleFunc("/setup/{driver}", SetupDriverHandler)
 	r.HandleFunc("/setup/{driver}/run", SetupDriverPostHandler)
+	r.HandleFunc("/databases", DatabaseListHandler)
+	r.HandleFunc("/databases/select", DatabaseSelectionHandler)
 	r.HandleFunc("/", TableListHandler)
 	r.HandleFunc("/table-trail", TableTrailHandler)
 	r.HandleFunc("/table-trail/clear", ClearTableTrailHandler)

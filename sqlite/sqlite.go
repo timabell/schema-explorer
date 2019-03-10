@@ -118,6 +118,14 @@ func (model sqliteModel) ReadSchema() (database *schema.Database, err error) {
 	return
 }
 
+func (model sqliteModel) ListDatabases() (databaseList []string, err error) {
+	panic("not available for sqlite")
+}
+
+func (model sqliteModel) DatabaseSelected() bool {
+	return true // there is only one
+}
+
 func (model sqliteModel) UpdateRowCounts(database *schema.Database) (err error) {
 	for _, table := range database.Tables {
 		rowCount, err := model.getRowCount(table)
