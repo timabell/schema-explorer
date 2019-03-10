@@ -204,6 +204,10 @@ func RunDatabaseSelection(resp http.ResponseWriter, req *http.Request, databaseN
 		}
 	}
 
+	if options.Options.ConnectionDisplayName == nil {
+		options.Options.ConnectionDisplayName = &databaseName
+	}
+
 	err := reader.InitializeDatabase()
 	if err != nil {
 		log.Print(err)
@@ -227,6 +231,9 @@ func RunSetupDriver(resp http.ResponseWriter, req *http.Request, layoutData Page
 			err := option.Set(&val) // depends on modified flags library that exposes set as a public method
 			if err != nil {
 				log.Fatal(err)
+			}
+			if option.LongName == "database" && options.Options.ConnectionDisplayName == nil {
+				options.Options.ConnectionDisplayName = &val
 			}
 		}
 	}
