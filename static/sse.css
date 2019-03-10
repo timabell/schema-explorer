@@ -7,6 +7,7 @@ li{margin-bottom: 1em;}
 h1{
     margin: -11px 0 0.75em -24px;/* negatives to adjust for unwanted padding in svg */
     float: left;
+    position: relative; /* so I can line up customer names */
 }
 .encore{font-size: 60%;}
 a{color:#333;}
@@ -341,4 +342,17 @@ footer *, footer a, footer a:visited{
 #driverSetup button{
     margin-left: 8.25em;
     margin-top: 0.5em;
+}
+.customer-love{
+    color: #984e4c;
+    font-size: 0.35em;
+    font-weight: normal;
+    font-family: Tahoma, Geneva, sans-serif;
+    display: inline-block;
+    position: absolute;
+    top: 79px;
+    left: 26px;
+}
+.customer-love *{
+    color: #984e4c;
 }
