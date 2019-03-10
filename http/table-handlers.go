@@ -109,8 +109,9 @@ func DatabaseListHandler(resp http.ResponseWriter, req *http.Request) {
 	}
 	databaseList, err := dbReader.ListDatabases()
 	if err != nil {
-		// todo: client error
-		fmt.Println("error getting row counts for table list: ", err)
+		log.Print(err)
+		resp.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintf(resp, "Error getting list of databases.\n\n%s", err)
 		return
 	}
 	render.ShowDatabaseList(resp, layoutData, databaseList)
