@@ -2,9 +2,7 @@
 
 echo running mac build
 env GOOS=darwin GOARCH=amd64 go build -o bin/mac/schemaexplorer
-cp -r templates bin/mac/
-cp -r static bin/mac/
-cp peek-config.txt bin/mac/
+cp -r templates static config bin/mac/
 
 # also tried gox https://github.com/mitchellh/gox
 # gox -cgo -output="bin/{{.Dir}}_{{.OS}}_{{.Arch}}" -os="darwin" -arch="amd64"
