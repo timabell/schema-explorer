@@ -94,11 +94,12 @@ func setupPeekList(database *schema.Database) {
 	if options.Options == nil {
 		panic("options is nil")
 	}
+	var peekFilename string
 	if (*options.Options).PeekConfigPath == nil {
-		panic("PeekConfigPath option missing")
+		peekFilename = path.Join(resources.BasePath, "config/peek-config.txt")
+	} else {
+		peekFilename = *options.Options.PeekConfigPath
 	}
-	peekFilename := *options.Options.PeekConfigPath
-	peekFilename = path.Join(resources.BasePath, peekFilename)
 	log.Printf("Loading peek config from %s ...", peekFilename)
 	file, err := os.Open(peekFilename)
 	if err != nil {
