@@ -1,15 +1,8 @@
-# Sql Data Viewer
+# SQL Schema Explorer
 
-Copyright 2015-18 Tim Abell
+Copyright 2015-19 Tim Abell
 
 [http://schemaexplorer.io/](http://schemaexplorer.io/)
-
-Get in touch: sse@timwise.co.uk
-
-An html based viewer of SQL Server Databases written in
-[Go](https://golang.org/)
-
-Supports Sqlite, Postgres and MSSQL.
 
 # No Warranty
 
