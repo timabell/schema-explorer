@@ -4,7 +4,13 @@
         For configuration help see
         <a target="_blank" href="http://schemaexplorer.io/help/getting-started.html">the getting started guide</a>.
     </p>
-    <form action="/setup/{{.Driver.Name}}/run" method="post" id="driverSetup">
+    {{if .Errors}}
+        <div class="errors">
+            <i class="fas fa-exclamation-triangle"></i>
+            {{.Errors}}
+        </div>
+    {{end}}
+    <form action="/setup/{{.Driver.Name}}" method="post" id="driverSetup">
         {{range .Options}}
     <div>
         <label for="{{.LongName}}">{{.LongName}}:</label>

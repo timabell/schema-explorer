@@ -21,7 +21,7 @@ func SetupDriverHandler(resp http.ResponseWriter, req *http.Request) {
 	}
 	layoutData := requestSetup()
 	driverName := mux.Vars(req)["driver"]
-	render.ShowSetupDriver(resp, layoutData, driverName)
+	render.ShowSetupDriver(resp, layoutData, driverName, "")
 }
 
 func SetupDriverPostHandler(resp http.ResponseWriter, req *http.Request) {

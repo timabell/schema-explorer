@@ -356,3 +356,13 @@ footer *, footer a, footer a:visited{
 .customer-love *{
     color: #984e4c;
 }
+.errors{
+    color: #ee1111;
+    border: 2px solid #ee1111;
+    background-color: #ffeeee;
+    padding: 1em;
+    margin: 1em 0;
+}
+.errors *{
+    color: #ee1111;
+}

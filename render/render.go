@@ -36,6 +36,7 @@ type driverSetupViewModel struct {
 	LayoutData PageTemplateModel
 	Driver     *reader.Driver
 	Options    []*flags.Option
+	Errors     string
 }
 
 type databaseListViewModel struct {
@@ -178,13 +179,14 @@ func getDrivers() []*reader.Driver {
 	return drivers
 }
 
-func ShowSetupDriver(resp http.ResponseWriter, layoutData PageTemplateModel, driver string) {
+func ShowSetupDriver(resp http.ResponseWriter, layoutData PageTemplateModel, driver string, errors string) {
 	opts := getDriverOptions(driver)
 
 	model := driverSetupViewModel{
 		LayoutData: layoutData,
 		Driver:     reader.Drivers[driver],
 		Options:    opts,
+		Errors:     errors,
 	}
 	err := setupDriverTemplate.ExecuteTemplate(resp, "layout", model)
 	if err != nil {
@@ -238,17 +240,19 @@ func RunSetupDriver(resp http.ResponseWriter, req *http.Request, layoutData Page
 		}
 	}
 
-	dbReader := reader.GetDbReader()
-	if !dbReader.DatabaseSelected() {
-		http.Redirect(resp, req, "/databases", http.StatusFound)
-		return
-	}
-
 	err := reader.InitializeDatabase()
 	if err != nil {
 		log.Print(err)
 		resp.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprintf(resp, "Failed to connect to the selected database.\n\n%s", err)
+		errorInfo := fmt.Sprintf("Failed to connect to the selected database.\n\n%s", err)
+		options.Options.Driver = nil
+		ShowSetupDriver(resp, layoutData, driver, errorInfo)
+		return
+	}
+
+	dbReader := reader.GetDbReader()
+	if !dbReader.DatabaseSelected() {
+		http.Redirect(resp, req, "/databases", http.StatusFound)
 		return
 	}
 
