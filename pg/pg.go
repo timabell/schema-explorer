@@ -235,10 +235,6 @@ func (model pgModel) CheckConnection() (err error) {
 		err = errors.New("getTables() failed - " + err.Error())
 		return
 	}
-	if len(tables) == 0 {
-		err = errors.New("no tables found")
-		return
-	}
 	log.Println("Connected.", len(tables), "tables found")
 	return
 }
