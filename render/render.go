@@ -101,10 +101,12 @@ var selectDriverTemplate *template.Template
 var setupDriverTemplate *template.Template
 
 // global copy for reverse url lookups
-var muxRouter *mux.Router
+type UrlBuilder func(dbReader reader.DbReader, pairs []string) *url2.URL
 
-func SetRouter(r *mux.Router) {
-	muxRouter = r
+var urlBuilder UrlBuilder
+
+func SetRouterFinder(u UrlBuilder) {
+	urlBuilder = u
 }
 
 // Make minus available in templates to be able to convert len to slice index
@@ -518,12 +520,12 @@ func buildFkHref(dbReader reader.DbReader, table *schema.Table, query string, cs
 	var url *url2.URL
 	var err error
 	if dbReader.CanSwitchDatabase(){
-		url, err = muxRouter.Get("multidb-route-database-tables").URL("database", dbReader.GetDatabaseName(), "tableName", table.String())
+		url, err = urlBuilder.Get("multidb-route-database-tables").URL("database", dbReader.GetDatabaseName(), "tableName", table.String())
 		if err != nil {
 			panic(err)
 		}
 	}else{
-		url, err = muxRouter.Get("route-database-tables").URL("tableName", table.String())
+		url, err = urlBuilder.Get("route-database-tables").URL("tableName", table.String())
 		if err != nil {
 			panic(err)
 		}

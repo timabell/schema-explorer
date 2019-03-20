@@ -21,6 +21,10 @@ func RunServer() {
 	runHttpServer(r)
 }
 
+func urlBuilder(dbReader reader.DbReader, pairs []string) *url2.URL{
+
+}
+
 // Runs setup code then builds router.
 // Factored out to this combination to be able to test http calls without the built in http server.
 func SetupRouter() (*mux.Router, reader.SchemaCache) {
