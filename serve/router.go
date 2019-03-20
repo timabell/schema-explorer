@@ -6,20 +6,47 @@ import (
 	"net/http"
 )
 
-func Router() *mux.Router {
-	r := mux.NewRouter()
-	r.PathPrefix("/static/").Handler(http.FileServer(http.Dir(resources.BasePath)))
-	r.HandleFunc("/setup", SetupHandler)
-	r.HandleFunc("/setup/{driver}", SetupDriverHandler).Methods("GET")
-	r.HandleFunc("/setup/{driver}", SetupDriverPostHandler).Methods("POST")
-	r.HandleFunc("/databases", DatabaseListHandler)
-	r.HandleFunc("/databases/select", DatabaseSelectionHandler)
-	r.HandleFunc("/", TableListHandler)
-	r.HandleFunc("/table-trail", TableTrailHandler)
-	r.HandleFunc("/table-trail/clear", ClearTableTrailHandler)
-	r.HandleFunc("/tables/{tableName}", TableInfoHandler)
-	r.HandleFunc("/tables/{tableName}/data", TableDataHandler)
-	r.HandleFunc("/tables/{tableName}/analyse-data", AnalyseTableHandler)
+func Router() (r *mux.Router) {
+	r = mux.NewRouter()
+
 	r.Use(loggingHandler)
-	return r
+
+	// static/*
+	r.PathPrefix("/static/").Handler(http.FileServer(http.Dir(resources.BasePath)))
+
+	// root
+	r.HandleFunc("/", RootHandler)
+
+	// setup/*
+	setup := r.PathPrefix("/setup").Subrouter()
+	setup.HandleFunc("", SetupHandler)
+	setup.HandleFunc("/{driver}", SetupDriverHandler).Methods("GET")
+	setup.HandleFunc("/{driver}", SetupDriverPostHandler).Methods("POST")
+
+	// db list
+	r.HandleFunc("/databases", DatabaseListHandler)
+
+	/* database sub-route */
+	database := r.PathPrefix("/{database}/").Subrouter()
+
+	// Register all the per datbase routes twice:
+	// once for when there is a /dbname/ prefix in the route:
+	registerDatbaseRoutes(database, "multidb-")
+	// and once for when the database choice is fixed (sqlite/azure/configured):
+	registerDatbaseRoutes(r, "")
+
+	return
+}
+
+func registerDatbaseRoutes(routerBase *mux.Router, namePrefix string) {
+	// db info
+	routerBase.HandleFunc("/", TableListHandler)
+	// db/table/*
+	tables := routerBase.PathPrefix("/tables/{tableName}").Subrouter()
+	tables.HandleFunc("", TableInfoHandler).Name(namePrefix + "route-database-tables")
+	tables.HandleFunc("/data", TableDataHandler)
+	tables.HandleFunc("/analyse-data", AnalyseTableHandler)
+	trail := routerBase.PathPrefix("/table-trail").Subrouter()
+	trail.HandleFunc("", TableTrailHandler)
+	trail.HandleFunc("/clear", ClearTableTrailHandler)
 }

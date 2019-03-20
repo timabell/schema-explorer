@@ -66,7 +66,7 @@ func Test_CheckConnection(t *testing.T) {
 
 func Test_ReadSchema(t *testing.T) {
 	reader := reader.GetDbReader()
-	database, err := reader.ReadSchema()
+	database, err := reader.ReadSchema("")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -771,7 +771,7 @@ var tests = []testCase{
 
 func Test_GetRows(t *testing.T) {
 	dbReader := reader.GetDbReader()
-	database, err := dbReader.ReadSchema()
+	database, err := dbReader.ReadSchema("")
 	if err != nil {
 		t.Fatal(err)
 	}

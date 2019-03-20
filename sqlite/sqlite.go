@@ -48,7 +48,7 @@ func newSqlite() reader.DbReader {
 	}
 }
 
-func (model sqliteModel) ReadSchema() (database *schema.Database, err error) {
+func (model sqliteModel) ReadSchema(databaseName string) (database *schema.Database, err error) {
 	dbc, err := getConnection(model.path)
 	if err != nil {
 		return
@@ -118,6 +118,10 @@ func (model sqliteModel) ReadSchema() (database *schema.Database, err error) {
 	return
 }
 
+func (model sqliteModel) CanSwitchDatabase() bool {
+	return false
+}
+
 func (model sqliteModel) ListDatabases() (databaseList []string, err error) {
 	panic("not available for sqlite")
 }
@@ -178,6 +182,14 @@ func getConnection(path string) (dbc *sql.DB, err error) {
 		log.Println("connection error", err)
 	}
 	return
+}
+
+func (model sqliteModel) SetDatabase(databaseName string) {
+	// n/a
+}
+
+func (model sqliteModel) GetDatabaseName() string {
+	return "" // n/a
 }
 
 func (model sqliteModel) CheckConnection() (err error) {

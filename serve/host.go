@@ -7,7 +7,6 @@ import (
 	"bitbucket.org/timabell/sql-data-viewer/options"
 	"bitbucket.org/timabell/sql-data-viewer/reader"
 	"bitbucket.org/timabell/sql-data-viewer/render"
-	"bitbucket.org/timabell/sql-data-viewer/schema"
 	"fmt"
 	"github.com/gorilla/mux"
 	"log"
@@ -18,26 +17,15 @@ import (
 
 func RunServer() {
 	r, _ := SetupRouter()
+	render.SetRouter(r)
 	runHttpServer(r)
 }
 
 // Runs setup code then builds router.
 // Factored out to this combination to be able to test http calls without the built in http server.
-func SetupRouter() (*mux.Router, *schema.Database) {
-	err := Setup()
-	if err != nil {
-		// todo: send 500 error for all requests
-		panic("SetupRouter failed: " + err.Error())
-	}
-	return Router(), reader.Database
-}
-
-func Setup() (err error) {
+func SetupRouter() (*mux.Router, reader.SchemaCache) {
 	render.SetupTemplates()
-	if options.Options.Driver != nil {
-		err = reader.InitializeDatabase()
-	}
-	return
+	return Router(), reader.Databases
 }
 
 func runHttpServer(r *mux.Router) {
@@ -67,19 +55,26 @@ func runHttpServer(r *mux.Router) {
 	log.Fatal(srv.Serve(listener))
 }
 
-func dbRequestSetup() (layoutData render.PageTemplateModel, dbReader reader.DbReader, err error) {
-	layoutData = requestSetup()
+func dbRequestSetup(databaseName string) (layoutData render.PageTemplateModel, dbReader reader.DbReader, err error) {
 	dbReader = reader.GetDbReader()
-	if !isCachingEnabled() {
-		log.Print("Re-reading schema because caching is disabled, this may take a while...")
-		err = reader.InitializeDatabase()
+	if dbReader.CanSwitchDatabase() && databaseName == "" {
+		// no database needed yet, e.g. for database list page
+		layoutData = requestSetup(false, false) // turn off top navigation
+		return
 	}
+	// if single database then "" will be db name, which will become the index, otherwise it's the db name
+	dbReader.SetDatabase(databaseName)
+	if reader.Databases[databaseName] == nil || !isCachingEnabled() {
+		log.Print("Reading schema...")
+		err = reader.InitializeDatabase(databaseName)
+	}
+	layoutData = requestSetup(dbReader.CanSwitchDatabase(), true)
 	return
 }
 
-func requestSetup() (layoutData render.PageTemplateModel) {
+func requestSetup(canSwitchDatabase bool, dbReady bool) (layoutData render.PageTemplateModel) {
 	licensing.EnforceLicensing()
-	layoutData = getLayoutData()
+	layoutData = getLayoutData(canSwitchDatabase, dbReady)
 	if !isCachingEnabled() {
 		render.SetupTemplates()
 	}
@@ -91,19 +86,20 @@ func isCachingEnabled() bool {
 	return cachingEnabled
 }
 
-func getLayoutData() (layoutData render.PageTemplateModel) {
+func getLayoutData(canSwitchDatabase bool, dbReady bool) (layoutData render.PageTemplateModel) {
 	var connectionName string
 	if options.Options.ConnectionDisplayName != nil {
 		connectionName = *options.Options.ConnectionDisplayName
 	}
 	layoutData = render.PageTemplateModel{
-		Title:          connectionName + "|" + about.About.ProductName,
-		ConnectionName: connectionName,
-		About:          about.About,
-		Copyright:      licensing.CopyrightText(),
-		LicenseText:    licensing.LicenseText(),
-		Timestamp:      time.Now().String(),
-		DbReady:        reader.Database != nil,
+		Title:             connectionName + "|" + about.About.ProductName,
+		ConnectionName:    connectionName,
+		About:             about.About,
+		Copyright:         licensing.CopyrightText(),
+		LicenseText:       licensing.LicenseText(),
+		Timestamp:         time.Now().String(),
+		CanSwitchDatabase: canSwitchDatabase,
+		DbReady:           dbReady,
 	}
 	return
 }

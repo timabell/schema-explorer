@@ -32,9 +32,16 @@
     {{end}}
 </div>
 
-{{if .LayoutData.DbReady}}
 <nav>
     <ul>
+        {{if .LayoutData.CanSwitchDatabase}}
+        <li>
+            <a href='/databases'>
+                <i class="fas fa-clone"></i>
+                Databases</a>
+        </li>
+        {{end}}
+        {{if .LayoutData.DbReady}}
         <li>
             <a href='/'>
                 <i class="fas fa-database"></i>
@@ -45,9 +52,9 @@
                 <i class="fas fa-history"></i>
                 Visited Tables</a>
         </li>
+        {{end}}
     </ul>
 </nav>
-{{end}}
 
 {{end}}
 {{block "content" .}}

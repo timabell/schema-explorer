@@ -16,7 +16,6 @@ import (
 )
 
 type pgModel struct {
-	connectionString string
 }
 
 type pgOpts struct {
@@ -28,6 +27,8 @@ type pgOpts struct {
 	SslMode          *string `long:"sslmode" description:"Postgres ssl mode. Set this to 'disable' if you are connecting to a server that doesn't have ssl enabled.'" env:"sslmode"`
 	ConnectionString *string `long:"connection-string" description:"Postgres connection string. Use this instead of host, port etc for advanced driver options. See https://godoc.org/github.com/lib/pq for connection-string options." env:"connection_string"`
 }
+
+var overrideDatabaseName string
 
 func (opts pgOpts) validate() error {
 	if opts.hasAnyDetails() && opts.ConnectionString != nil {
@@ -58,43 +59,46 @@ func newPg() reader.DbReader {
 		options.ArgParser.WriteHelp(os.Stdout)
 		os.Exit(1)
 	}
-	var cs string
-	if opts.ConnectionString == nil {
-		optList := make(map[string]string)
-		if opts.Host != nil {
-			optList["host"] = *opts.Host
-		}
-		if opts.Port != nil {
-			optList["port"] = strconv.Itoa(*opts.Port)
-		}
-		if opts.Database != nil {
-			optList["dbname"] = *opts.Database
-		}
-		if opts.User != nil {
-			optList["user"] = *opts.User
-		}
-		if opts.Password != nil {
-			optList["password"] = *opts.Password
-		}
-		if opts.SslMode != nil {
-			optList["sslmode"] = *opts.SslMode
-		}
-		pairs := []string{}
-		for key, value := range optList {
-			pairs = append(pairs, fmt.Sprintf("%s='%s'", key, strings.Replace(value, "'", "\\'", -1)))
-		}
-		cs = strings.Join(pairs, " ")
-	} else {
-		cs = *opts.ConnectionString
-	}
 	log.Println("Connecting to pg db")
-	return pgModel{
-		connectionString: cs,
-	}
+	return pgModel{}
 }
 
-func (model pgModel) ReadSchema() (database *schema.Database, err error) {
-	dbc, err := getConnection(model.connectionString)
+// optionally override db name with param
+func buildConnectionString() string {
+	if opts.ConnectionString != nil {
+		return *opts.ConnectionString
+	}
+
+	optList := make(map[string]string)
+	if opts.Host != nil {
+		optList["host"] = *opts.Host
+	}
+	if opts.Port != nil {
+		optList["port"] = strconv.Itoa(*opts.Port)
+	}
+	if overrideDatabaseName != "" {
+		optList["dbname"] = overrideDatabaseName
+	} else if opts.Database != nil {
+		optList["dbname"] = *opts.Database
+	}
+	if opts.User != nil {
+		optList["user"] = *opts.User
+	}
+	if opts.Password != nil {
+		optList["password"] = *opts.Password
+	}
+	if opts.SslMode != nil {
+		optList["sslmode"] = *opts.SslMode
+	}
+	pairs := []string{}
+	for key, value := range optList {
+		pairs = append(pairs, fmt.Sprintf("%s='%s'", key, strings.Replace(value, "'", "\\'", -1)))
+	}
+	return strings.Join(pairs, " ")
+}
+
+func (model pgModel) ReadSchema(databaseName string) (database *schema.Database, err error) {
+	dbc, err := getConnection(buildConnectionString())
 	if err != nil {
 		return
 	}
@@ -142,10 +146,14 @@ func (model pgModel) ReadSchema() (database *schema.Database, err error) {
 	return
 }
 
+func (model pgModel) CanSwitchDatabase() bool {
+	return true
+}
+
 func (model pgModel) ListDatabases() (databaseList []string, err error) {
 	sql := "select datname from pg_database where datistemplate = false;"
 
-	dbc, err := getConnection(model.connectionString)
+	dbc, err := getConnection(buildConnectionString())
 	if dbc == nil {
 		log.Println(err)
 		panic("getConnection() returned nil")
@@ -184,7 +192,7 @@ func (model pgModel) getRowCount(table *schema.Table) (rowCount int, err error) 
 	// todo: whitelist-sanitize unparameterizable parts
 	sql := "select count(*) from \"" + table.Schema + "\".\"" + table.Name + "\""
 
-	dbc, err := getConnection(model.connectionString)
+	dbc, err := getConnection(buildConnectionString())
 	if dbc == nil {
 		log.Println(err)
 		panic("getConnection() returned nil")
@@ -223,8 +231,21 @@ func getConnection(connectionString string) (dbc *sql.DB, err error) {
 	return
 }
 
+func (model pgModel) SetDatabase(databaseName string) {
+	overrideDatabaseName = databaseName
+}
+
+func (model pgModel) GetDatabaseName() string {
+	if overrideDatabaseName != "" {
+		return overrideDatabaseName
+	} else if opts.Database != nil {
+		return *opts.Database
+	}
+	return "" // unknown, could be in the connection string, doesn't matter because we only need this for multi-db url building and that won't be enabled for connection strings
+}
+
 func (model pgModel) CheckConnection() (err error) {
-	dbc, err := getConnection(model.connectionString)
+	dbc, err := getConnection(buildConnectionString())
 	if dbc == nil {
 		log.Println(err)
 		panic("getConnection() returned nil")
@@ -395,7 +416,7 @@ func readIndexes(dbc *sql.DB, database *schema.Database) (err error) {
 }
 
 func (model pgModel) GetSqlRows(table *schema.Table, params *params.TableParams, peekFinder *reader.PeekLookup) (rows *sql.Rows, err error) {
-	dbc, err := getConnection(model.connectionString)
+	dbc, err := getConnection(buildConnectionString())
 	if err != nil {
 		log.Print("GetRows failed to get connection")
 		return
@@ -413,7 +434,7 @@ func (model pgModel) GetSqlRows(table *schema.Table, params *params.TableParams,
 }
 
 func (model pgModel) GetRowCount(table *schema.Table, params *params.TableParams) (rowCount int, err error) {
-	dbc, err := getConnection(model.connectionString)
+	dbc, err := getConnection(buildConnectionString())
 	if err != nil {
 		log.Print("GetRows failed to get connection")
 		return
@@ -439,7 +460,7 @@ func (model pgModel) GetRowCount(table *schema.Table, params *params.TableParams
 
 func (model pgModel) GetAnalysis(table *schema.Table) (analysis []schema.ColumnAnalysis, err error) {
 	// todo, might be good to stream this all the way to the http response
-	dbc, err := getConnection(model.connectionString)
+	dbc, err := getConnection(buildConnectionString())
 	if err != nil {
 		log.Print("GetAnalysis failed to get connection")
 		return

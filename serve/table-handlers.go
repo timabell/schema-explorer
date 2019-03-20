@@ -23,7 +23,8 @@ func TableInfoHandler(resp http.ResponseWriter, req *http.Request) {
 }
 
 func TableHandler(resp http.ResponseWriter, req *http.Request, dataOnly bool) {
-	layoutData, dbReader, err := dbRequestSetup()
+	databaseName := mux.Vars(req)["database"]
+	layoutData, dbReader, err := dbRequestSetup(databaseName)
 	if err != nil {
 		// todo: client error
 		fmt.Println("setup error rendering table: ", err)
@@ -36,7 +37,7 @@ func TableHandler(resp http.ResponseWriter, req *http.Request, dataOnly bool) {
 		http.Redirect(resp, req, "/", http.StatusFound)
 		return
 	}
-	table := reader.Database.FindTable(&requestedTable)
+	table := reader.Databases[databaseName].FindTable(&requestedTable)
 	if table == nil {
 		resp.WriteHeader(http.StatusNotFound)
 		fmt.Fprint(resp, "Alas, thy table hast not been seen of late. 404 my friend.")
@@ -69,26 +70,34 @@ func TableHandler(resp http.ResponseWriter, req *http.Request, dataOnly bool) {
 	trail.AddTable(table)
 	SetTrailCookie(trail, resp)
 
-	err = render.ShowTable(resp, dbReader, reader.Database, table, params, layoutData, dataOnly)
+	err = render.ShowTable(resp, dbReader, reader.Databases[databaseName], table, params, layoutData, dataOnly)
 	if err != nil {
 		fmt.Println("error rendering table: ", err)
 		return
 	}
 }
 
-func DatabaseSelectionHandler(resp http.ResponseWriter, req *http.Request) {
-	_, dbReader, err := dbRequestSetup()
-	if err != nil {
-		// todo: client error
-		fmt.Println("setup error selecting database: ", err)
-		return
-	}
-	if dbReader.DatabaseSelected() {
+func RootHandler(resp http.ResponseWriter, req *http.Request) {
+	if options.Options.Driver == nil {
 		http.Redirect(resp, req, "/setup", http.StatusFound)
 		return
 	}
-	databaseName := req.FormValue("database")
-	render.RunDatabaseSelection(resp, req, databaseName)
+
+	_, dbReader, err := dbRequestSetup("")
+	if err != nil {
+		log.Print(err)
+		resp.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintf(resp, "Root request setup failed.\n\n%s", err)
+		return
+	}
+
+	if dbReader.CanSwitchDatabase() {
+		http.Redirect(resp, req, "/databases", http.StatusFound)
+		return
+	}
+
+	// if single db then show table list
+	TableListHandler(resp, req)
 }
 
 func DatabaseListHandler(resp http.ResponseWriter, req *http.Request) {
@@ -96,15 +105,11 @@ func DatabaseListHandler(resp http.ResponseWriter, req *http.Request) {
 		http.Redirect(resp, req, "/setup", http.StatusFound)
 		return
 	}
-	layoutData, dbReader, err := dbRequestSetup()
+	layoutData, dbReader, err := dbRequestSetup("")
 	if err != nil {
 		log.Print(err)
 		resp.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprintf(resp, "Failed to connect to the selected database.\n\n%s", err)
-		return
-	}
-	if dbReader.DatabaseSelected() {
-		http.Redirect(resp, req, "/setup", http.StatusFound)
+		fmt.Fprintf(resp, "Database list request setup failed.\n\n%s", err)
 		return
 	}
 	databaseList, err := dbReader.ListDatabases()
@@ -123,7 +128,8 @@ func TableListHandler(resp http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	layoutData, dbReader, err := dbRequestSetup()
+	databaseName := mux.Vars(req)["database"]
+	layoutData, dbReader, err := dbRequestSetup(databaseName)
 	if err != nil {
 		log.Print(err)
 		resp.WriteHeader(http.StatusInternalServerError)
@@ -131,25 +137,22 @@ func TableListHandler(resp http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	if !dbReader.DatabaseSelected() {
-		http.Redirect(resp, req, "/databases", http.StatusFound)
-		return
-	}
-
-	if reader.Database == nil {
+	if reader.Databases[databaseName] == nil {
 		panic("database is nil")
 	}
-	err = dbReader.UpdateRowCounts(reader.Database)
+
+	err = dbReader.UpdateRowCounts(reader.Databases[databaseName])
 	if err != nil {
 		// todo: client error
 		fmt.Println("error getting row counts for table list: ", err)
 		return
 	}
-	render.ShowTableList(resp, reader.Database, layoutData)
+	render.ShowTableList(resp, reader.Databases[databaseName], layoutData)
 }
 
 func AnalyseTableHandler(resp http.ResponseWriter, req *http.Request) {
-	layoutData, dbReader, err := dbRequestSetup()
+	databaseName := mux.Vars(req)["database"]
+	layoutData, dbReader, err := dbRequestSetup(databaseName)
 	if err != nil {
 		// todo: client error
 		fmt.Println("setup error rendering table: ", err)
@@ -158,14 +161,14 @@ func AnalyseTableHandler(resp http.ResponseWriter, req *http.Request) {
 
 	tableName := mux.Vars(req)["tableName"]
 	requestedTable := parseTableName(tableName)
-	table := reader.Database.FindTable(&requestedTable)
+	table := reader.Databases[databaseName].FindTable(&requestedTable)
 	if table == nil {
 		resp.WriteHeader(http.StatusNotFound)
 		fmt.Fprint(resp, "Alas, thy table hast not been seen of late. 404 my friend.")
 		return
 	}
 
-	err = render.ShowTableAnalysis(resp, dbReader, reader.Database, table, layoutData)
+	err = render.ShowTableAnalysis(resp, dbReader, reader.Databases[databaseName], table, layoutData)
 	if err != nil {
 		fmt.Println("error rendering table analysis: ", err)
 		return

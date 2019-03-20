@@ -5,11 +5,13 @@ import (
 	"bitbucket.org/timabell/sql-data-viewer/render"
 	"bitbucket.org/timabell/sql-data-viewer/trail"
 	"fmt"
+	"github.com/gorilla/mux"
 	"net/http"
 )
 
 func TableTrailHandler(resp http.ResponseWriter, req *http.Request) {
-	layoutData, _, err := dbRequestSetup()
+	databaseName := mux.Vars(req)["database"]
+	layoutData, _, err := dbRequestSetup(databaseName)
 	if err != nil {
 		// todo: client error
 		fmt.Println("setup error rendering table: ", err)
@@ -24,7 +26,7 @@ func TableTrailHandler(resp http.ResponseWriter, req *http.Request) {
 		trail = ReadTrail(req)
 		trail.Dynamic = true
 	}
-	err = render.ShowTableTrail(resp, reader.Database, trail, layoutData)
+	err = render.ShowTableTrail(resp, reader.Databases[databaseName], trail, layoutData)
 	if err != nil {
 		fmt.Println("error rendering trail: ", err)
 		return

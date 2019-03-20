@@ -9,22 +9,25 @@ import (
 	"bitbucket.org/timabell/sql-data-viewer/schema"
 	"bitbucket.org/timabell/sql-data-viewer/trail"
 	"fmt"
+	"github.com/gorilla/mux"
 	"github.com/jessevdk/go-flags"
 	"html/template"
 	"log"
 	"net/http"
+	url2 "net/url"
 	"sort"
 	"strings"
 )
 
 type PageTemplateModel struct {
-	Title          string
-	ConnectionName string
-	About          about.AboutType
-	Copyright      string
-	LicenseText    string
-	Timestamp      string
-	DbReady        bool
+	Title             string
+	ConnectionName    string
+	About             about.AboutType
+	Copyright         string
+	LicenseText       string
+	Timestamp         string
+	CanSwitchDatabase bool
+	DbReady           bool
 }
 
 type driverSelectionViewModel struct {
@@ -96,6 +99,13 @@ var tableAnalysisTemplate *template.Template
 var tableTrailTemplate *template.Template
 var selectDriverTemplate *template.Template
 var setupDriverTemplate *template.Template
+
+// global copy for reverse url lookups
+var muxRouter *mux.Router
+
+func SetRouter(r *mux.Router) {
+	muxRouter = r
+}
 
 // Make minus available in templates to be able to convert len to slice index
 // https://stackoverflow.com/a/24838050/10245
@@ -194,33 +204,6 @@ func ShowSetupDriver(resp http.ResponseWriter, layoutData PageTemplateModel, dri
 	}
 }
 
-func RunDatabaseSelection(resp http.ResponseWriter, req *http.Request, databaseName string) {
-	opts := getDriverOptions(*options.Options.Driver)
-
-	for _, option := range opts {
-		if option.LongName == "database" {
-			err := option.Set(&databaseName)
-			if err != nil {
-				log.Fatal(err)
-			}
-		}
-	}
-
-	if options.Options.ConnectionDisplayName == nil {
-		options.Options.ConnectionDisplayName = &databaseName
-	}
-
-	err := reader.InitializeDatabase()
-	if err != nil {
-		log.Print(err)
-		resp.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprintf(resp, "Failed to connect to the selected database.\n\n%s", err)
-		return
-	}
-
-	http.Redirect(resp, req, "/", http.StatusFound)
-}
-
 func RunSetupDriver(resp http.ResponseWriter, req *http.Request, layoutData PageTemplateModel, driver string) {
 	opts := getDriverOptions(driver)
 
@@ -238,22 +221,6 @@ func RunSetupDriver(resp http.ResponseWriter, req *http.Request, layoutData Page
 				options.Options.ConnectionDisplayName = &val
 			}
 		}
-	}
-
-	err := reader.InitializeDatabase()
-	if err != nil {
-		log.Print(err)
-		resp.WriteHeader(http.StatusInternalServerError)
-		errorInfo := fmt.Sprintf("Failed to connect to the selected database.\n\n%s", err)
-		options.Options.Driver = nil
-		ShowSetupDriver(resp, layoutData, driver, errorInfo)
-		return
-	}
-
-	dbReader := reader.GetDbReader()
-	if !dbReader.DatabaseSelected() {
-		http.Redirect(resp, req, "/databases", http.StatusFound)
-		return
 	}
 
 	http.Redirect(resp, req, "/", http.StatusFound)
@@ -311,7 +278,7 @@ func ShowTable(resp http.ResponseWriter, dbReader reader.DbReader, database *sch
 
 	rows := []cells{}
 	for _, rowData := range rowsData {
-		row := buildRow(rowData, peekFinder, table)
+		row := buildRow(dbReader, rowData, peekFinder, table)
 		rows = append(rows, row)
 	}
 
@@ -412,11 +379,11 @@ func ShowTableAnalysis(resp http.ResponseWriter, dbReader reader.DbReader, datab
 	return nil
 }
 
-func buildRow(rowData reader.RowData, peekFinder *reader.PeekLookup, table *schema.Table) cells {
+func buildRow(dbReader reader.DbReader, rowData reader.RowData, peekFinder *reader.PeekLookup, table *schema.Table) cells {
 	row := cells{}
 	for colIndex, col := range table.Columns {
 		cellData := rowData[colIndex]
-		valueHTML := buildCell(col, cellData, rowData, peekFinder)
+		valueHTML := buildCell(dbReader, col, cellData, rowData, peekFinder)
 		row = append(row, template.HTML(valueHTML))
 	}
 	parentHTML := buildInwardCell(table.InboundFks, rowData, peekFinder)
@@ -486,7 +453,7 @@ func buildInwardLink(fk *schema.Fk, rowData reader.RowData, peekFinder *reader.P
 	}
 }
 
-func buildCell(col *schema.Column, cellData interface{}, rowData reader.RowData, peekFinder *reader.PeekLookup) string {
+func buildCell(dbReader reader.DbReader, col *schema.Column, cellData interface{}, rowData reader.RowData, peekFinder *reader.PeekLookup) string {
 	if cellData == nil {
 		return "<span class='null bare-value'>[null]</span>"
 	}
@@ -498,21 +465,21 @@ func buildCell(col *schema.Column, cellData interface{}, rowData reader.RowData,
 			valueHTML := "<span class='compound-value'>" + template.HTMLEscapeString(stringValue) + "</span> "
 			for _, fk := range col.Fks {
 				displayText := fmt.Sprintf("%s(%s)", fk.DestinationTable, fk.DestinationColumns)
-				valueHTML = valueHTML + buildCompleteFkHref(fk, multiFk, rowData, displayText, peekFinder)
+				valueHTML = valueHTML + buildCompleteFkHref(dbReader, fk, multiFk, rowData, displayText, peekFinder)
 			}
 			return valueHTML
 		} else {
 			// otherwise put it in the link
 			fk := col.Fks[0]
 			displayText := stringValue
-			return buildCompleteFkHref(fk, multiFk, rowData, displayText, peekFinder)
+			return buildCompleteFkHref(dbReader, fk, multiFk, rowData, displayText, peekFinder)
 		}
 	} else {
 		return "<span class='bare-value'>" + template.HTMLEscapeString(stringValue) + "</span> "
 	}
 }
 
-func buildCompleteFkHref(fk *schema.Fk, multiFk bool, rowData reader.RowData, displayText string, peekFinder *reader.PeekLookup) string {
+func buildCompleteFkHref(dbReader reader.DbReader, fk *schema.Fk, multiFk bool, rowData reader.RowData, displayText string, peekFinder *reader.PeekLookup) string {
 	cssClass := buildFkCss(fk, multiFk)
 	joinedQueryData := buildQueryData(fk, rowData)
 
@@ -531,7 +498,7 @@ func buildCompleteFkHref(fk *schema.Fk, multiFk bool, rowData reader.RowData, di
 		peekHtml = peekHtml + fmt.Sprintf("<span class='peek'>%s</span>", peekString)
 	}
 
-	return buildFkHref(fk.DestinationTable, joinedQueryData, cssClass, displayText, peekHtml)
+	return buildFkHref(dbReader, fk.DestinationTable, joinedQueryData, cssClass, displayText, peekHtml)
 }
 
 func buildFkCss(fk *schema.Fk, multiFkCol bool) string {
@@ -546,9 +513,22 @@ func buildFkCss(fk *schema.Fk, multiFkCol bool) string {
 	}
 }
 
-func buildFkHref(table *schema.Table, query string, cssClass string, displayText string, peekHtml string) string {
+func buildFkHref(dbReader reader.DbReader, table *schema.Table, query string, cssClass string, displayText string, peekHtml string) string {
 	suffix := "&_rowLimit=100#data"
-	return fmt.Sprintf("<a href='/tables/%s?%s%s' class='%s'>%s%s</a> ", table, query, suffix, cssClass, template.HTMLEscapeString(displayText), peekHtml)
+	var url *url2.URL
+	var err error
+	if dbReader.CanSwitchDatabase(){
+		url, err = muxRouter.Get("multidb-route-database-tables").URL("database", dbReader.GetDatabaseName(), "tableName", table.String())
+		if err != nil {
+			panic(err)
+		}
+	}else{
+		url, err = muxRouter.Get("route-database-tables").URL("tableName", table.String())
+		if err != nil {
+			panic(err)
+		}
+	}
+	return fmt.Sprintf("<a href='%s?%s%s' class='%s'>%s%s</a> ", url, query, suffix, cssClass, template.HTMLEscapeString(displayText), peekHtml)
 }
 
 func buildQueryData(fk *schema.Fk, rowData reader.RowData) string {

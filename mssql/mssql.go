@@ -30,6 +30,8 @@ type mssqlOpts struct {
 	ConnectionString *string `long:"connection-string" description:"Sql Server connection string. Use this instead of host, port etc for advanced driver options. See https://github.com/simnalamburt/go-mssqldb#connection-parameters-and-dsn for connection-string options." env:"connection_string"`
 }
 
+var overrideDatabaseName string
+
 var opts = &mssqlOpts{}
 
 func init() {
@@ -76,7 +78,9 @@ func newMssql() reader.DbReader {
 		if opts.Port != nil {
 			optList["port"] = strconv.Itoa(*opts.Port)
 		}
-		if opts.Database != nil {
+		if overrideDatabaseName != "" {
+			optList["database"] = overrideDatabaseName
+		} else if opts.Database != nil {
 			optList["database"] = *opts.Database
 		}
 		if opts.User != nil {
@@ -100,7 +104,7 @@ func newMssql() reader.DbReader {
 	}
 }
 
-func (model mssqlModel) ReadSchema() (database *schema.Database, err error) {
+func (model mssqlModel) ReadSchema(databaseName string) (database *schema.Database, err error) {
 	dbc, err := getConnection(model.connectionString)
 	if err != nil {
 		return
@@ -150,6 +154,10 @@ func (model mssqlModel) ReadSchema() (database *schema.Database, err error) {
 
 	//log.Print(database.DebugString())
 	return
+}
+
+func (model mssqlModel) CanSwitchDatabase() bool {
+	return true // todo: return false for azure sql
 }
 
 func (model mssqlModel) ListDatabases() (databaseList []string, err error) {
@@ -270,6 +278,19 @@ func getConnection(connectionString string) (dbc *sql.DB, err error) {
 		log.Println("connection error", err)
 	}
 	return
+}
+
+func (model mssqlModel) SetDatabase(databaseName string) {
+	overrideDatabaseName = databaseName
+}
+
+func (model mssqlModel) GetDatabaseName() string {
+	if overrideDatabaseName != "" {
+		return overrideDatabaseName
+	} else if opts.Database != nil {
+		return *opts.Database
+	}
+	return "" // unknown, could be in the connection string, doesn't matter because we only need this for multi-db url building and that won't be enabled for connection strings
 }
 
 func (model mssqlModel) CheckConnection() (err error) {
