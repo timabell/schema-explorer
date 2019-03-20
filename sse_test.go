@@ -23,13 +23,13 @@ aren't silently missing any of the supported data types.
 */
 
 import (
-	sseHttp "bitbucket.org/timabell/sql-data-viewer/http"
 	_ "bitbucket.org/timabell/sql-data-viewer/mssql"
 	"bitbucket.org/timabell/sql-data-viewer/options"
 	"bitbucket.org/timabell/sql-data-viewer/params"
 	_ "bitbucket.org/timabell/sql-data-viewer/pg"
 	"bitbucket.org/timabell/sql-data-viewer/reader"
 	"bitbucket.org/timabell/sql-data-viewer/schema"
+	"bitbucket.org/timabell/sql-data-viewer/serve"
 	_ "bitbucket.org/timabell/sql-data-viewer/sqlite"
 	"fmt"
 	"github.com/gorilla/mux"
@@ -846,7 +846,7 @@ func findColumn(table *schema.Table, columnName string, t *testing.T) (column *s
 }
 
 func Test_Http(t *testing.T) {
-	router, database := sseHttp.SetupRouter()
+	router, database := serve.SetupRouter()
 	var schemaPrefix string
 	if database.Supports.Schema {
 		schemaPrefix = database.DefaultSchemaName + "."

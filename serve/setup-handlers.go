@@ -1,4 +1,4 @@
-package http
+package serve
 
 import (
 	"bitbucket.org/timabell/sql-data-viewer/options"
