@@ -98,7 +98,7 @@ func (model mysqlModel) ReadSchema() (database *schema.Database, err error) {
 
 	database = &schema.Database{
 		Supports: schema.SupportedFeatures{
-			Schema:               true,
+			Schema:               false,
 			Descriptions:         false,
 			FkNames:              true,
 			PagingWithoutSorting: true,
