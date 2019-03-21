@@ -200,15 +200,15 @@ func (model mysqlModel) getRowCount(table *schema.Table) (rowCount int, err erro
 }
 
 func (model mysqlModel) getTables(dbc *sql.DB) (tables []*schema.Table, err error) {
-	rows, err := dbc.Query(fmt.Sprintf("select table_schema, table_name from information_schema.tables where table_schema = '%s';", *opts.Database))
+	rows, err := dbc.Query(fmt.Sprintf("select table_name from information_schema.tables where table_schema = '%s';", *opts.Database))
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 	for rows.Next() {
-		var name, schemaName string
-		rows.Scan(&schemaName, &name)
-		tables = append(tables, &schema.Table{Schema: schemaName, Name: name, Pk: &schema.Pk{}})
+		var name string
+		rows.Scan(&name)
+		tables = append(tables, &schema.Table{Name: name, Pk: &schema.Pk{}})
 	}
 	return tables, nil
 }
@@ -485,14 +485,14 @@ func buildQuery(table *schema.Table, params *params.TableParams, peekFinder *rea
 			onPredicates = append(onPredicates, fmt.Sprintf("ifk%d.`%s` = t.`%s`", inboundFkIndex, sourceCol.Name, inboundFk.DestinationColumns[ix].Name))
 		}
 		onString := strings.Join(onPredicates, " and ")
-		sql = sql + fmt.Sprintf(", (select count(*) from `%s`.`%s` ifk%d where %s) ifk%d_count", inboundFk.SourceTable.Schema, inboundFk.SourceTable.Name, inboundFkIndex, onString, inboundFkIndex)
+		sql = sql + fmt.Sprintf(", (select count(*) from `%s` ifk%d where %s) ifk%d_count", inboundFk.SourceTable.Name, inboundFkIndex, onString, inboundFkIndex)
 	}
 
-	sql = sql + " from `" + table.Schema + "`.`" + table.Name + "` t"
+	sql = sql + " from `" + table.Name + "` t"
 
 	// peek tables
 	for fkIndex, fk := range peekFinder.Fks {
-		sql = sql + fmt.Sprintf(" left outer join `%s`.`%s` fk%d on ", fk.DestinationTable.Schema, fk.DestinationTable.Name, fkIndex)
+		sql = sql + fmt.Sprintf(" left outer join `%s` fk%d on ", fk.DestinationTable.Name, fkIndex)
 		onPredicates := []string{}
 		for ix, sourceCol := range fk.SourceColumns {
 			onPredicates = append(onPredicates, fmt.Sprintf("t.`%s` = fk%d.`%s`", sourceCol, fkIndex, fk.DestinationColumns[ix]))
