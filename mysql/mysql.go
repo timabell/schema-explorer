@@ -47,13 +47,13 @@ var opts = &mysqlOpts{}
 
 func init() {
 	// https://github.com/jessevdk/go-flags/blob/master/group_test.go#L33
-	reader.RegisterReader(&reader.Driver{Name: "mysql", Options: opts, CreateReader: newPg, FullName: "MySql"})
+	reader.RegisterReader(&reader.Driver{Name: "mysql", Options: opts, CreateReader: newMysql, FullName: "MySql"})
 }
 
-func newPg() reader.DbReader {
+func newMysql() reader.DbReader {
 	err := opts.validate()
 	if err != nil {
-		log.Printf("Pg args error: %s", err)
+		log.Printf("Mysql args error: %s", err)
 		options.ArgParser.WriteHelp(os.Stdout)
 		os.Exit(1)
 	}
