@@ -112,6 +112,7 @@ func (model mysqlModel) ReadSchema() (database *schema.Database, err error) {
 		return
 	}
 
+	/* todo
 	// add table columns
 	for _, table := range database.Tables {
 		var cols []*schema.Column
@@ -133,6 +134,7 @@ func (model mysqlModel) ReadSchema() (database *schema.Database, err error) {
 	if err != nil {
 		return
 	}
+	*/
 
 	//log.Print(database.DebugString())
 	return
