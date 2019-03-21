@@ -15,6 +15,7 @@ import (
 	"bitbucket.org/timabell/sql-data-viewer/about"
 	"bitbucket.org/timabell/sql-data-viewer/licensing"
 	_ "bitbucket.org/timabell/sql-data-viewer/mssql"
+	_ "bitbucket.org/timabell/sql-data-viewer/mysql"
 	"bitbucket.org/timabell/sql-data-viewer/options"
 	_ "bitbucket.org/timabell/sql-data-viewer/pg"
 	"bitbucket.org/timabell/sql-data-viewer/serve"
