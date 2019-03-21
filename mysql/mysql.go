@@ -198,7 +198,7 @@ func (model mysqlModel) getRowCount(table *schema.Table) (rowCount int, err erro
 }
 
 func (model mysqlModel) getTables(dbc *sql.DB) (tables []*schema.Table, err error) {
-	rows, err := dbc.Query("select schemaname, tablename from mysql_catalog.mysql_tables where schemaname not in ('mysql_catalog','information_schema') order by schemaname, tablename")
+	rows, err := dbc.Query("select table_schema, table_name from information_schema.tables;")
 	if err != nil {
 		return nil, err
 	}
