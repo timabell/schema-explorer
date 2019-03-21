@@ -75,9 +75,6 @@ func newMysql() reader.DbReader {
 		if opts.Password != nil {
 			optList["password"] = *opts.Password
 		}
-		if opts.SslMode != nil {
-			optList["sslmode"] = *opts.SslMode
-		}
 		pairs := []string{}
 		for key, value := range optList {
 			pairs = append(pairs, fmt.Sprintf("%s='%s'", key, strings.Replace(value, "'", "\\'", -1)))
