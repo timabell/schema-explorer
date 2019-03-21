@@ -228,12 +228,8 @@ func (model mysqlModel) CheckConnection() (err error) {
 		panic("getConnection() returned nil")
 	}
 	defer dbc.Close()
-	tables, err := model.getTables(dbc)
-	if err != nil {
-		err = errors.New("getTables() failed - " + err.Error())
-		return
-	}
-	log.Println("Connected.", len(tables), "tables found")
+	dbc.Ping()
+	log.Println("Connected.")
 	return
 }
 
