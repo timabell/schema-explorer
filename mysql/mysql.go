@@ -141,7 +141,7 @@ func (model mysqlModel) ReadSchema() (database *schema.Database, err error) {
 }
 
 func (model mysqlModel) ListDatabases() (databaseList []string, err error) {
-	sql := "select datname from mysql_database where datistemplate = false;"
+	sql := "select schema_name from information_schema.schemata where schema_name not in ('information_schema', 'mysql');"
 
 	dbc, err := getConnection(model.connectionString)
 	if dbc == nil {
