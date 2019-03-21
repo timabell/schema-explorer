@@ -25,7 +25,8 @@ type mysqlOpts struct {
 	Database         *string `long:"database" description:"MySql database name" env:"database"`
 	User             *string `long:"user" description:"MySql username" env:"user"`
 	Password         *string `long:"password" description:"MySql password" env:"password"`
-	ConnectionString *string `long:"connection-string" description:"MySql connection string. Use this instead of host, port etc for advanced driver options. See https://godoc.org/github.com/lib/pq for connection-string options." env:"connection_string"`
+	Parameters       *string `long:"parameters" description:"MySql extra parameters" env:"parameters"`
+	ConnectionString *string `long:"connection-string" description:"MySql connection string. Use this instead of host, port etc for advanced driver options. See https://github.com/Go-SQL-Driver/MySQL/#dsn-data-source-name for connection-string options." env:"connection_string"`
 }
 
 func (opts mysqlOpts) validate() error {
@@ -59,27 +60,26 @@ func newMysql() reader.DbReader {
 	}
 	var cs string
 	if opts.ConnectionString == nil {
-		optList := make(map[string]string)
-		if opts.Host != nil {
-			optList["host"] = *opts.Host
-		}
-		if opts.Port != nil {
-			optList["port"] = strconv.Itoa(*opts.Port)
-		}
-		if opts.Database != nil {
-			optList["dbname"] = *opts.Database
-		}
 		if opts.User != nil {
-			optList["user"] = *opts.User
+			cs = *opts.User
+			if opts.Password != nil {
+				cs = fmt.Sprintf("%s:%s", cs, *opts.Password)
+			}
+			cs = fmt.Sprintf("%s@", cs)
 		}
-		if opts.Password != nil {
-			optList["password"] = *opts.Password
+		if opts.Host != nil {
+			cs = fmt.Sprintf("%s%s", cs, *opts.Host)
+			if opts.Port != nil {
+				cs = fmt.Sprintf("%s:%d", cs, *opts.Port)
+			}
 		}
-		pairs := []string{}
-		for key, value := range optList {
-			pairs = append(pairs, fmt.Sprintf("%s='%s'", key, strings.Replace(value, "'", "\\'", -1)))
+		cs = fmt.Sprintf("%s/", cs)
+		if opts.Database != nil {
+			cs = fmt.Sprintf("%s%d", cs, *opts.Database)
 		}
-		cs = strings.Join(pairs, " ")
+		if opts.Parameters != nil {
+			cs = fmt.Sprintf("%s?%s", cs, *opts.Parameters)
+		}
 	} else {
 		cs = *opts.ConnectionString
 	}
