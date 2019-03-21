@@ -200,7 +200,7 @@ func (model mysqlModel) getRowCount(table *schema.Table) (rowCount int, err erro
 }
 
 func (model mysqlModel) getTables(dbc *sql.DB) (tables []*schema.Table, err error) {
-	rows, err := dbc.Query("select table_schema, table_name from information_schema.tables;")
+	rows, err := dbc.Query(fmt.Sprintf("select table_schema, table_name from information_schema.tables where table_schema = '%s';", *opts.Database))
 	if err != nil {
 		return nil, err
 	}
