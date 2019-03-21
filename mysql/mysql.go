@@ -15,28 +15,28 @@ import (
 	"strings"
 )
 
-type pgModel struct {
+type mysqlModel struct {
 	connectionString string
 }
 
-type pgOpts struct {
-	Host             *string `long:"host" description:"Postgres host" env:"host"`
-	Port             *int    `long:"port" description:"Postgres port" env:"port"`
-	Database         *string `long:"database" description:"Postgres database name" env:"database"`
-	User             *string `long:"user" description:"Postgres username" env:"user"`
-	Password         *string `long:"password" description:"Postgres password" env:"password"`
-	SslMode          *string `long:"sslmode" description:"Postgres ssl mode. Set this to 'disable' if you are connecting to a server that doesn't have ssl enabled.'" env:"sslmode"`
-	ConnectionString *string `long:"connection-string" description:"Postgres connection string. Use this instead of host, port etc for advanced driver options. See https://godoc.org/github.com/lib/pq for connection-string options." env:"connection_string"`
+type mysqlOpts struct {
+	Host             *string `long:"host" description:"MySql host" env:"host"`
+	Port             *int    `long:"port" description:"MySql port" env:"port"`
+	Database         *string `long:"database" description:"MySql database name" env:"database"`
+	User             *string `long:"user" description:"MySql username" env:"user"`
+	Password         *string `long:"password" description:"MySql password" env:"password"`
+	SslMode          *string `long:"sslmode" description:"MySql ssl mode. Set this to 'disable' if you are connecting to a server that doesn't have ssl enabled.'" env:"sslmode"`
+	ConnectionString *string `long:"connection-string" description:"MySql connection string. Use this instead of host, port etc for advanced driver options. See https://godoc.org/github.com/lib/pq for connection-string options." env:"connection_string"`
 }
 
-func (opts pgOpts) validate() error {
+func (opts mysqlOpts) validate() error {
 	if opts.hasAnyDetails() && opts.ConnectionString != nil {
 		return errors.New("Specify either a connection string or host etc, not both.")
 	}
 	return nil
 }
 
-func (opts pgOpts) hasAnyDetails() bool {
+func (opts mysqlOpts) hasAnyDetails() bool {
 	return opts.Host != nil ||
 		opts.Port != nil ||
 		opts.Database != nil ||
@@ -44,11 +44,11 @@ func (opts pgOpts) hasAnyDetails() bool {
 		opts.Password != nil
 }
 
-var opts = &pgOpts{}
+var opts = &mysqlOpts{}
 
 func init() {
 	// https://github.com/jessevdk/go-flags/blob/master/group_test.go#L33
-	reader.RegisterReader(&reader.Driver{Name: "pg", Options: opts, CreateReader: newPg, FullName: "Postgres"})
+	reader.RegisterReader(&reader.Driver{Name: "mysql", Options: opts, CreateReader: newPg, FullName: "MySql"})
 }
 
 func newPg() reader.DbReader {
@@ -87,13 +87,13 @@ func newPg() reader.DbReader {
 	} else {
 		cs = *opts.ConnectionString
 	}
-	log.Println("Connecting to pg db")
-	return pgModel{
+	log.Println("Connecting to mysql db")
+	return mysqlModel{
 		connectionString: cs,
 	}
 }
 
-func (model pgModel) ReadSchema() (database *schema.Database, err error) {
+func (model mysqlModel) ReadSchema() (database *schema.Database, err error) {
 	dbc, err := getConnection(model.connectionString)
 	if err != nil {
 		return
@@ -142,8 +142,8 @@ func (model pgModel) ReadSchema() (database *schema.Database, err error) {
 	return
 }
 
-func (model pgModel) ListDatabases() (databaseList []string, err error) {
-	sql := "select datname from pg_database where datistemplate = false;"
+func (model mysqlModel) ListDatabases() (databaseList []string, err error) {
+	sql := "select datname from mysql_database where datistemplate = false;"
 
 	dbc, err := getConnection(model.connectionString)
 	if dbc == nil {
@@ -164,11 +164,11 @@ func (model pgModel) ListDatabases() (databaseList []string, err error) {
 	return
 }
 
-func (model pgModel) DatabaseSelected() bool {
+func (model mysqlModel) DatabaseSelected() bool {
 	return opts.Database != nil || opts.ConnectionString != nil
 }
 
-func (model pgModel) UpdateRowCounts(database *schema.Database) (err error) {
+func (model mysqlModel) UpdateRowCounts(database *schema.Database) (err error) {
 	for _, table := range database.Tables {
 		rowCount, err := model.getRowCount(table)
 		if err != nil {
@@ -179,7 +179,7 @@ func (model pgModel) UpdateRowCounts(database *schema.Database) (err error) {
 	return err
 }
 
-func (model pgModel) getRowCount(table *schema.Table) (rowCount int, err error) {
+func (model mysqlModel) getRowCount(table *schema.Table) (rowCount int, err error) {
 	// todo: parameterise where possible
 	// todo: whitelist-sanitize unparameterizable parts
 	sql := "select count(*) from \"" + table.Schema + "\".\"" + table.Name + "\""
@@ -201,8 +201,8 @@ func (model pgModel) getRowCount(table *schema.Table) (rowCount int, err error) 
 	return count, nil
 }
 
-func (model pgModel) getTables(dbc *sql.DB) (tables []*schema.Table, err error) {
-	rows, err := dbc.Query("select schemaname, tablename from pg_catalog.pg_tables where schemaname not in ('pg_catalog','information_schema') order by schemaname, tablename")
+func (model mysqlModel) getTables(dbc *sql.DB) (tables []*schema.Table, err error) {
+	rows, err := dbc.Query("select schemaname, tablename from mysql_catalog.mysql_tables where schemaname not in ('mysql_catalog','information_schema') order by schemaname, tablename")
 	if err != nil {
 		return nil, err
 	}
@@ -216,14 +216,14 @@ func (model pgModel) getTables(dbc *sql.DB) (tables []*schema.Table, err error) 
 }
 
 func getConnection(connectionString string) (dbc *sql.DB, err error) {
-	dbc, err = sql.Open("postgres", connectionString)
+	dbc, err = sql.Open("mysql", connectionString)
 	if err != nil {
 		log.Println("connection error", err)
 	}
 	return
 }
 
-func (model pgModel) CheckConnection() (err error) {
+func (model mysqlModel) CheckConnection() (err error) {
 	dbc, err := getConnection(model.connectionString)
 	if dbc == nil {
 		log.Println(err)
@@ -248,18 +248,18 @@ func readConstraints(dbc *sql.DB, database *schema.Database) (err error) {
 			fns.nspname foreign_namespace_name, ftbl.relname foreign_table_name, fcol.attname foreign_column_name
 		from
 			(
-				select pgc.oid, pgc.connamespace, pgc.conrelid, pgc.confrelid, pgc.contype, pgc.conname,
-				       unnest(case when pgc.conkey <> '{}' then pgc.conkey else '{null}' end) as conkey,
-				       unnest(case when pgc.confkey <> '{}' then pgc.confkey else '{null}' end) as confkey
-				from pg_constraint pgc
+				select mysqlc.oid, mysqlc.connamespace, mysqlc.conrelid, mysqlc.confrelid, mysqlc.contype, mysqlc.conname,
+				       unnest(case when mysqlc.conkey <> '{}' then mysqlc.conkey else '{null}' end) as conkey,
+				       unnest(case when mysqlc.confkey <> '{}' then mysqlc.confkey else '{null}' end) as confkey
+				from mysql_constraint mysqlc
 			) as con
-			inner join pg_namespace ns on con.connamespace = ns.oid
-			inner join pg_class tbl on tbl.oid = con.conrelid
-			inner join pg_namespace tns on tbl.relnamespace = tns.oid
-			inner join pg_attribute col on col.attrelid = tbl.oid and col.attnum = con.conkey
-			left outer join pg_class ftbl on ftbl.oid = con.confrelid
-			left outer join pg_namespace fns on ftbl.relnamespace = fns.oid
-			left outer join pg_attribute fcol on fcol.attrelid = ftbl.oid and fcol.attnum = con.confkey;`)
+			inner join mysql_namespace ns on con.connamespace = ns.oid
+			inner join mysql_class tbl on tbl.oid = con.conrelid
+			inner join mysql_namespace tns on tbl.relnamespace = tns.oid
+			inner join mysql_attribute col on col.attrelid = tbl.oid and col.attnum = con.conkey
+			left outer join mysql_class ftbl on ftbl.oid = con.confrelid
+			left outer join mysql_namespace fns on ftbl.relnamespace = fns.oid
+			left outer join mysql_attribute fcol on fcol.attrelid = ftbl.oid and fcol.attnum = con.confkey;`)
 
 	rows, err := dbc.Query(sql)
 	if err != nil {
@@ -336,13 +336,13 @@ func readIndexes(dbc *sql.DB, database *schema.Database) (err error) {
 			ix.indisunique,
 			ix.indisclustered
 		from (
-			select *, unnest(indkey) colnum from pg_index
+			select *, unnest(indkey) colnum from mysql_index
 		) ix
-		left outer join pg_class oc on oc.oid = ix.indexrelid
-		left outer join pg_class tbl on tbl.oid = ix.indrelid
-		left outer join pg_namespace tns on tbl.relnamespace = tns.oid
-		left outer join pg_attribute col on col.attrelid = ix.indrelid and col.attnum = ix.colnum
-		where tns.nspname not like 'pg_%'
+		left outer join mysql_class oc on oc.oid = ix.indexrelid
+		left outer join mysql_class tbl on tbl.oid = ix.indrelid
+		left outer join mysql_namespace tns on tbl.relnamespace = tns.oid
+		left outer join mysql_attribute col on col.attrelid = ix.indrelid and col.attnum = ix.colnum
+		where tns.nspname not like 'mysql_%'
 			and not ix.indisprimary;
 	`
 
@@ -380,7 +380,7 @@ func readIndexes(dbc *sql.DB, database *schema.Database) (err error) {
 			database.Indexes = append(database.Indexes, index)
 			table.Indexes = append(table.Indexes, index)
 		}
-		if colName != "" { // more complex indexes don't link back to their columns. See pg_index.indkey https://www.postgresql.org/docs/current/static/catalog-pg-index.html
+		if colName != "" { // more complex indexes don't link back to their columns. See mysql_index.indkey https://www.mysqlql.org/docs/current/static/catalog-mysql-index.html
 			_, col := table.FindColumn(colName)
 			if col == nil {
 				err = errors.New(fmt.Sprintf("Column %s in table %s not found, for index %s", colName, tableToFind.String(), name))
@@ -394,7 +394,7 @@ func readIndexes(dbc *sql.DB, database *schema.Database) (err error) {
 	return
 }
 
-func (model pgModel) GetSqlRows(table *schema.Table, params *params.TableParams, peekFinder *reader.PeekLookup) (rows *sql.Rows, err error) {
+func (model mysqlModel) GetSqlRows(table *schema.Table, params *params.TableParams, peekFinder *reader.PeekLookup) (rows *sql.Rows, err error) {
 	dbc, err := getConnection(model.connectionString)
 	if err != nil {
 		log.Print("GetRows failed to get connection")
@@ -412,7 +412,7 @@ func (model pgModel) GetSqlRows(table *schema.Table, params *params.TableParams,
 	return
 }
 
-func (model pgModel) GetRowCount(table *schema.Table, params *params.TableParams) (rowCount int, err error) {
+func (model mysqlModel) GetRowCount(table *schema.Table, params *params.TableParams) (rowCount int, err error) {
 	dbc, err := getConnection(model.connectionString)
 	if err != nil {
 		log.Print("GetRows failed to get connection")
@@ -437,7 +437,7 @@ func (model pgModel) GetRowCount(table *schema.Table, params *params.TableParams
 	return
 }
 
-func (model pgModel) GetAnalysis(table *schema.Table) (analysis []schema.ColumnAnalysis, err error) {
+func (model mysqlModel) GetAnalysis(table *schema.Table) (analysis []schema.ColumnAnalysis, err error) {
 	// todo, might be good to stream this all the way to the http response
 	dbc, err := getConnection(model.connectionString)
 	if err != nil {
@@ -540,9 +540,9 @@ func buildQuery(table *schema.Table, params *params.TableParams, peekFinder *rea
 	return
 }
 
-func (model pgModel) getColumns(dbc *sql.DB, table *schema.Table) (cols []*schema.Column, err error) {
+func (model mysqlModel) getColumns(dbc *sql.DB, table *schema.Table) (cols []*schema.Column, err error) {
 	// todo: parameterise
-	sql := "select col.attname colname, col.attlen, typ.typname, col.attnotnull from pg_catalog.pg_attribute col inner join pg_catalog.pg_class tbl on col.attrelid = tbl.oid inner join pg_catalog.pg_namespace ns on ns.oid = tbl.relnamespace inner join pg_catalog.pg_type typ on typ.oid = col.atttypid where col.attnum > 0 and not col.attisdropped and ns.nspname = '" + table.Schema + "' and tbl.relname = '" + table.Name + "' order by col.attnum;"
+	sql := "select col.attname colname, col.attlen, typ.typname, col.attnotnull from mysql_catalog.mysql_attribute col inner join mysql_catalog.mysql_class tbl on col.attrelid = tbl.oid inner join mysql_catalog.mysql_namespace ns on ns.oid = tbl.relnamespace inner join mysql_catalog.mysql_type typ on typ.oid = col.atttypid where col.attnum > 0 and not col.attisdropped and ns.nspname = '" + table.Schema + "' and tbl.relname = '" + table.Name + "' order by col.attnum;"
 
 	rows, err := dbc.Query(sql)
 	if err != nil {
