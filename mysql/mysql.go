@@ -180,7 +180,7 @@ func (model mysqlModel) UpdateRowCounts(database *schema.Database) (err error) {
 func (model mysqlModel) getRowCount(table *schema.Table) (rowCount int, err error) {
 	// todo: parameterise where possible
 	// todo: whitelist-sanitize unparameterizable parts
-	sql := "select count(*) from \"" + table.Schema + "\".\"" + table.Name + "\""
+	sql := "select count(*) from `" + table.Schema + "`.`" + table.Name + "`"
 
 	dbc, err := getConnection(model.connectionString)
 	if dbc == nil {
@@ -442,7 +442,7 @@ func (model mysqlModel) GetAnalysis(table *schema.Table) (analysis []schema.Colu
 
 	analysis = []schema.ColumnAnalysis{}
 	for _, col := range table.Columns {
-		sql := "select \"" + col.Name + "\", count(*) qty from \"" + table.Schema + "\".\"" + table.Name + "\" group by \"" + col.Name + "\" order by count(*) desc, \"" + col.Name + "\" limit 100;"
+		sql := "select `" + col.Name + "`, count(*) qty from `" + table.Schema + "`.`" + table.Name + "` group by `" + col.Name + "` order by count(*) desc, `" + col.Name + "` limit 100;"
 		rows, err := dbc.Query(sql)
 		if err != nil {
 			log.Print("GetAnalysis failed to get query")
@@ -474,7 +474,7 @@ func buildQuery(table *schema.Table, params *params.TableParams, peekFinder *rea
 	// peek cols
 	for fkIndex, fk := range peekFinder.Fks {
 		for _, peekCol := range fk.DestinationTable.PeekColumns {
-			sql = sql + fmt.Sprintf(", fk%d.\"%s\" fk%d_%s", fkIndex, peekCol, fkIndex, peekCol)
+			sql = sql + fmt.Sprintf(", fk%d.`%s` fk%d_%s", fkIndex, peekCol, fkIndex, peekCol)
 		}
 	}
 
@@ -482,20 +482,20 @@ func buildQuery(table *schema.Table, params *params.TableParams, peekFinder *rea
 	for inboundFkIndex, inboundFk := range table.InboundFks {
 		onPredicates := []string{}
 		for ix, sourceCol := range inboundFk.SourceColumns {
-			onPredicates = append(onPredicates, fmt.Sprintf("ifk%d.\"%s\" = t.\"%s\"", inboundFkIndex, sourceCol.Name, inboundFk.DestinationColumns[ix].Name))
+			onPredicates = append(onPredicates, fmt.Sprintf("ifk%d.`%s` = t.`%s`", inboundFkIndex, sourceCol.Name, inboundFk.DestinationColumns[ix].Name))
 		}
 		onString := strings.Join(onPredicates, " and ")
-		sql = sql + fmt.Sprintf(", (select count(*) from \"%s\".\"%s\" ifk%d where %s) ifk%d_count", inboundFk.SourceTable.Schema, inboundFk.SourceTable.Name, inboundFkIndex, onString, inboundFkIndex)
+		sql = sql + fmt.Sprintf(", (select count(*) from `%s`.`%s` ifk%d where %s) ifk%d_count", inboundFk.SourceTable.Schema, inboundFk.SourceTable.Name, inboundFkIndex, onString, inboundFkIndex)
 	}
 
-	sql = sql + " from \"" + table.Schema + "\".\"" + table.Name + "\" t"
+	sql = sql + " from `" + table.Schema + "`.`" + table.Name + "` t"
 
 	// peek tables
 	for fkIndex, fk := range peekFinder.Fks {
-		sql = sql + fmt.Sprintf(" left outer join \"%s\".\"%s\" fk%d on ", fk.DestinationTable.Schema, fk.DestinationTable.Name, fkIndex)
+		sql = sql + fmt.Sprintf(" left outer join `%s`.`%s` fk%d on ", fk.DestinationTable.Schema, fk.DestinationTable.Name, fkIndex)
 		onPredicates := []string{}
 		for ix, sourceCol := range fk.SourceColumns {
-			onPredicates = append(onPredicates, fmt.Sprintf("t.\"%s\" = fk%d.\"%s\"", sourceCol, fkIndex, fk.DestinationColumns[ix]))
+			onPredicates = append(onPredicates, fmt.Sprintf("t.`%s` = fk%d.`%s`", sourceCol, fkIndex, fk.DestinationColumns[ix]))
 		}
 		onString := strings.Join(onPredicates, " and ")
 		sql = sql + onString
@@ -509,7 +509,7 @@ func buildQuery(table *schema.Table, params *params.TableParams, peekFinder *rea
 		var index = 1
 		for _, v := range query {
 			col := v.Field
-			clauses = append(clauses, "t.\""+col.Name+"\" = $"+strconv.Itoa(index))
+			clauses = append(clauses, "t.`"+col.Name+"` = $"+strconv.Itoa(index))
 			index = index + 1
 			values = append(values, v.Values[0]) // todo: maybe support multiple values
 		}
@@ -519,7 +519,7 @@ func buildQuery(table *schema.Table, params *params.TableParams, peekFinder *rea
 	if len(params.Sort) > 0 {
 		var sortParts []string
 		for _, sortCol := range params.Sort {
-			sortString := "\"" + sortCol.Column.Name + "\""
+			sortString := "`" + sortCol.Column.Name + "`"
 			if sortCol.Descending {
 				sortString = sortString + " desc"
 			}
