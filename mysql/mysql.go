@@ -112,7 +112,6 @@ func (model mysqlModel) ReadSchema() (database *schema.Database, err error) {
 		return
 	}
 
-	/* todo
 	// add table columns
 	for _, table := range database.Tables {
 		var cols []*schema.Column
@@ -123,6 +122,7 @@ func (model mysqlModel) ReadSchema() (database *schema.Database, err error) {
 		table.Columns = append(table.Columns, cols...)
 	}
 
+	/* todo
 	// fks and other constraints
 	err = readConstraints(dbc, database)
 	if err != nil {
@@ -536,7 +536,8 @@ func buildQuery(table *schema.Table, params *params.TableParams, peekFinder *rea
 
 func (model mysqlModel) getColumns(dbc *sql.DB, table *schema.Table) (cols []*schema.Column, err error) {
 	// todo: parameterise
-	sql := "select col.attname colname, col.attlen, typ.typname, col.attnotnull from mysql_catalog.mysql_attribute col inner join mysql_catalog.mysql_class tbl on col.attrelid = tbl.oid inner join mysql_catalog.mysql_namespace ns on ns.oid = tbl.relnamespace inner join mysql_catalog.mysql_type typ on typ.oid = col.atttypid where col.attnum > 0 and not col.attisdropped and ns.nspname = '" + table.Schema + "' and tbl.relname = '" + table.Name + "' order by col.attnum;"
+	// todo: read all tables' columns in one query hit
+	sql := fmt.Sprintf("select column_name, character_maximum_length, column_type, is_nullable from information_schema.columns where table_schema = '%s' and table_name='%s' order by ordinal_position;", *opts.Database, table.Name)
 
 	rows, err := dbc.Query(sql)
 	if err != nil {
