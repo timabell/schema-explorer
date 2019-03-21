@@ -75,7 +75,7 @@ func newMysql() reader.DbReader {
 		}
 		cs = fmt.Sprintf("%s/", cs)
 		if opts.Database != nil {
-			cs = fmt.Sprintf("%s%d", cs, *opts.Database)
+			cs = fmt.Sprintf("%s%s", cs, *opts.Database)
 		}
 		if opts.Parameters != nil {
 			cs = fmt.Sprintf("%s?%s", cs, *opts.Parameters)
