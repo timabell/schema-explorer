@@ -25,7 +25,6 @@ type mysqlOpts struct {
 	Database         *string `long:"database" description:"MySql database name" env:"database"`
 	User             *string `long:"user" description:"MySql username" env:"user"`
 	Password         *string `long:"password" description:"MySql password" env:"password"`
-	SslMode          *string `long:"sslmode" description:"MySql ssl mode. Set this to 'disable' if you are connecting to a server that doesn't have ssl enabled.'" env:"sslmode"`
 	ConnectionString *string `long:"connection-string" description:"MySql connection string. Use this instead of host, port etc for advanced driver options. See https://godoc.org/github.com/lib/pq for connection-string options." env:"connection_string"`
 }
 
