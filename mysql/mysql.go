@@ -397,7 +397,13 @@ func (model mysqlModel) GetSqlRows(table *schema.Table, params *params.TablePara
 	defer dbc.Close()
 
 	sql, values := buildQuery(table, params, peekFinder)
-	rows, err = dbc.Query(sql, values...)
+	statement, err := dbc.Prepare(sql)
+	if err != nil {
+		log.Print("GetRows failed to prepare query")
+		log.Println(sql)
+		log.Println(err)
+	}
+	rows, err = statement.Query(values...)
 	if err != nil {
 		log.Print("GetRows failed to get query")
 		log.Println(sql)
