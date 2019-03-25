@@ -62,7 +62,7 @@ insert into DataTypeTest(
 	field_not_null_int
 )values(
 	10, -- intpk
-	31, -- col_count
+	27, -- col_count
 	20, -- INT
 	30, -- INTEGER
 	50, -- TINYINT
