@@ -24,6 +24,7 @@ aren't silently missing any of the supported data types.
 
 import (
 	_ "bitbucket.org/timabell/sql-data-viewer/mssql"
+	_ "bitbucket.org/timabell/sql-data-viewer/mysql"
 	"bitbucket.org/timabell/sql-data-viewer/options"
 	"bitbucket.org/timabell/sql-data-viewer/params"
 	_ "bitbucket.org/timabell/sql-data-viewer/pg"
