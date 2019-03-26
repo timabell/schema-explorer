@@ -543,7 +543,7 @@ func buildQuery(table *schema.Table, params *params.TableParams, peekFinder *rea
 func (model mysqlModel) getColumns(dbc *sql.DB, table *schema.Table) (cols []*schema.Column, err error) {
 	// todo: parameterise
 	// todo: read all tables' columns in one query hit
-	sql := fmt.Sprintf("select column_name, column_type, character_maximum_length, is_nullable from information_schema.columns where table_schema = '%s' and table_name='%s' order by ordinal_position;", *opts.Database, table.Name)
+	sql := fmt.Sprintf("select column_name, data_type, character_maximum_length, is_nullable from information_schema.columns where table_schema = '%s' and table_name='%s' order by ordinal_position;", *opts.Database, table.Name)
 
 	rows, err := dbc.Query(sql)
 	if err != nil {
@@ -558,6 +558,9 @@ func (model mysqlModel) getColumns(dbc *sql.DB, table *schema.Table) (cols []*sc
 		var name, typeName string
 		var notNull bool
 		rows.Scan(&name, &typeName, &len, &notNull)
+		if strings.Contains(typeName, "char"){
+			typeName = fmt.Sprintf("%s(%d)",typeName, len)
+		}
 		thisCol := schema.Column{Position: colIndex, Name: name, Type: typeName, Nullable: !notNull}
 		cols = append(cols, &thisCol)
 		colIndex++

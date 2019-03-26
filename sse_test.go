@@ -759,6 +759,14 @@ var tests = []testCase{
 	{colName: "field_uniqueidentifier", row: 0, expectedType: "uniqueidentifier", expectedString: "b7a16c7a-a718-4ed8-97cb-20ccbadcc339"},
 	{colName: "field_json", row: 0, expectedType: "json", expectedString: "[{\"name\": \"frank\"}, {\"name\": \"sinatra\"}]"},
 	{colName: "field_jsonb", row: 0, expectedType: "jsonb", expectedString: "[{\"name\": \"frank\"}, {\"name\": \"sinatra\"}]"},
+	// mysql
+	{colName: "field_mysql_int", row: 0, expectedType: "int", expectedString: "20"},
+	{colName: "field_mysql_character", row: 0, expectedType: "char(20)", expectedString: "a_CHARACTER"},
+	{colName: "field_mysql_nchar", row: 0, expectedType: "char(55)", expectedString: "a_NCHAR"},
+	{colName: "field_mysql_nvarchar", row: 0, expectedType: "varchar(100)", expectedString: "a_NVARCHAR"},
+	{colName: "field_mysql_real", row: 0, expectedType: "double", expectedString: "1.234"},
+	{colName: "field_mysql_doubleprecision", row: 0, expectedType: "double", expectedString: "1.234"},
+	{colName: "field_mysql_boolean", row: 0, expectedType: "tinyint", expectedString: "1"}, // gah! mysql
 }
 
 func Test_GetRows(t *testing.T) {
