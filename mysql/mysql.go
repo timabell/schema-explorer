@@ -443,7 +443,7 @@ func (model mysqlModel) GetAnalysis(table *schema.Table) (analysis []schema.Colu
 
 	analysis = []schema.ColumnAnalysis{}
 	for _, col := range table.Columns {
-		sql := "select `" + col.Name + "`, count(*) qty from `" + table.Schema + "`.`" + table.Name + "` group by `" + col.Name + "` order by count(*) desc, `" + col.Name + "` limit 100;"
+		sql := "select `" + col.Name + "`, count(*) qty from `" + table.Name + "` group by `" + col.Name + "` order by count(*) desc, `" + col.Name + "` limit 100;"
 		rows, err := dbc.Query(sql)
 		if err != nil {
 			log.Print("GetAnalysis failed to get query")
