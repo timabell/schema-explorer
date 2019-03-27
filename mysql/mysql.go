@@ -180,7 +180,7 @@ func (model mysqlModel) UpdateRowCounts(database *schema.Database) (err error) {
 func (model mysqlModel) getRowCount(table *schema.Table) (rowCount int, err error) {
 	// todo: parameterise where possible
 	// todo: whitelist-sanitize unparameterizable parts
-	sql := "select count(*) from `" + table.Schema + "`.`" + table.Name + "`"
+	sql := "select count(*) from `" + table.Name + "`"
 
 	dbc, err := getConnection(model.connectionString)
 	if dbc == nil {
