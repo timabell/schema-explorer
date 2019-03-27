@@ -122,13 +122,13 @@ func (model mysqlModel) ReadSchema() (database *schema.Database, err error) {
 		table.Columns = append(table.Columns, cols...)
 	}
 
-	/* todo
 	// fks and other constraints
 	err = readConstraints(dbc, database)
 	if err != nil {
 		return
 	}
 
+	/* todo
 	// indexes
 	err = readIndexes(dbc, database)
 	if err != nil {
@@ -200,7 +200,7 @@ func (model mysqlModel) getRowCount(table *schema.Table) (rowCount int, err erro
 }
 
 func (model mysqlModel) getTables(dbc *sql.DB) (tables []*schema.Table, err error) {
-	rows, err := dbc.Query(fmt.Sprintf("select table_name from information_schema.tables where table_schema = '%s';", *opts.Database))
+	rows, err := dbc.Query("select table_name from information_schema.tables where table_schema = database();")
 	if err != nil {
 		return nil, err
 	}
@@ -234,26 +234,21 @@ func (model mysqlModel) CheckConnection() (err error) {
 }
 
 func readConstraints(dbc *sql.DB, database *schema.Database) (err error) {
-	// null-proof unnest: https://stackoverflow.com/a/49736694
 	sql := fmt.Sprintf(`
-		select
-			con.oid, ns.nspname, con.conname, con.contype,
-			tns.nspname, tbl.relname, col.attname column_name,
-			fns.nspname foreign_namespace_name, ftbl.relname foreign_table_name, fcol.attname foreign_column_name
-		from
-			(
-				select mysqlc.oid, mysqlc.connamespace, mysqlc.conrelid, mysqlc.confrelid, mysqlc.contype, mysqlc.conname,
-				       unnest(case when mysqlc.conkey <> '{}' then mysqlc.conkey else '{null}' end) as conkey,
-				       unnest(case when mysqlc.confkey <> '{}' then mysqlc.confkey else '{null}' end) as confkey
-				from mysql_constraint mysqlc
-			) as con
-			inner join mysql_namespace ns on con.connamespace = ns.oid
-			inner join mysql_class tbl on tbl.oid = con.conrelid
-			inner join mysql_namespace tns on tbl.relnamespace = tns.oid
-			inner join mysql_attribute col on col.attrelid = tbl.oid and col.attnum = con.conkey
-			left outer join mysql_class ftbl on ftbl.oid = con.confrelid
-			left outer join mysql_namespace fns on ftbl.relnamespace = fns.oid
-			left outer join mysql_attribute fcol on fcol.attrelid = ftbl.oid and fcol.attnum = con.confkey;`)
+			select
+				tc.constraint_type, tc.constraint_name,
+				tc.table_name, kc.column_name,
+				kc.referenced_table_name, kc.referenced_column_name
+			from information_schema.table_constraints tc
+			left outer join information_schema.key_column_usage kc
+				on kc.constraint_schema = tc.constraint_schema
+					and kc.constraint_name = tc.constraint_name
+					and kc.table_name = tc.table_name
+			where tc.constraint_schema=database()
+			order by tc.constraint_type, tc.constraint_name,
+				kc.ordinal_position,
+				tc.table_name, kc.column_name,
+				kc.referenced_table_name, kc.referenced_column_name;`)
 
 	rows, err := dbc.Query(sql)
 	if err != nil {
@@ -261,13 +256,13 @@ func readConstraints(dbc *sql.DB, database *schema.Database) (err error) {
 	}
 	defer rows.Close()
 	for rows.Next() {
-		var oid, conType, namespace, name,
-			sourceNamespace, sourceTableName, sourceColumnName,
-			destinationNamespace, destinationTableName, destinationColumnName string
-		rows.Scan(&oid, &namespace, &name, &conType,
-			&sourceNamespace, &sourceTableName, &sourceColumnName,
-			&destinationNamespace, &destinationTableName, &destinationColumnName)
-		tableToFind := &schema.Table{Schema: sourceNamespace, Name: sourceTableName}
+		var conType, name,
+			sourceTableName, sourceColumnName,
+			destinationTableName, destinationColumnName string
+		rows.Scan(&conType, &name,
+			&sourceTableName, &sourceColumnName,
+			&destinationTableName, &destinationColumnName)
+		tableToFind := &schema.Table{Name: sourceTableName}
 		sourceTable := database.FindTable(tableToFind)
 		if sourceTable == nil {
 			err = errors.New(fmt.Sprintf("Table %s not found, source of constraint %s", tableToFind.String(), name))
@@ -279,8 +274,8 @@ func readConstraints(dbc *sql.DB, database *schema.Database) (err error) {
 			return
 		}
 		switch conType {
-		case "f": // f = foreign key
-			destinationTable := database.FindTable(&schema.Table{Schema: destinationNamespace, Name: destinationTableName})
+		case "FOREIGN KEY":
+			destinationTable := database.FindTable(&schema.Table{Name: destinationTableName})
 			if destinationTable == nil {
 				//log.Print(database.DebugString())
 				panic(fmt.Sprintf("couldn't find table %s in database object while hooking up fks", destinationTableName))
@@ -306,7 +301,7 @@ func readConstraints(dbc *sql.DB, database *schema.Database) (err error) {
 				destinationColumn.InboundFks = append(destinationColumn.InboundFks, fk)
 			}
 			//log.Printf("fk: %+v - oid %+v", fk, oid)
-		case "p": // primary key
+		case "PRIMARY KEY":
 			//log.Printf("pk: %s.%s", sourceTable, sourceColumn)
 			sourceTable.Pk.Columns = append(sourceTable.Pk.Columns, sourceColumn)
 			sourceColumn.IsInPrimaryKey = true
@@ -558,8 +553,8 @@ func (model mysqlModel) getColumns(dbc *sql.DB, table *schema.Table) (cols []*sc
 		var name, typeName string
 		var notNull bool
 		rows.Scan(&name, &typeName, &len, &notNull)
-		if strings.Contains(typeName, "char"){
-			typeName = fmt.Sprintf("%s(%d)",typeName, len)
+		if strings.Contains(typeName, "char") {
+			typeName = fmt.Sprintf("%s(%d)", typeName, len)
 		}
 		thisCol := schema.Column{Position: colIndex, Name: name, Type: typeName, Nullable: !notNull}
 		cols = append(cols, &thisCol)
