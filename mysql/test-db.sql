@@ -70,24 +70,30 @@ insert into DataTypeTest(
 
 -- select * from DataTypeTest;
 
-create table toy (
-	toyId int PRIMARY KEY,
-	toyName nvarchar(50),
-	belongsToId int references pet(petId)
-);
-
 create table person (
 	personId int PRIMARY KEY,
 	personName nvarchar(50),
-	favouritePetId int references pet(petId)
+	favouritePetId int
 );
 
 create table pet (
 	petId int PRIMARY KEY,
 	petName nvarchar(50),
-	ownerId int references person(personId),
-	favouritePersonId int references person(personId)
+	ownerId int,
+	favouritePersonId int,
+	foreign key (ownerId) references person(personId),
+	foreign key (favouritePersonId) references person(personId)
 );
+
+create table toy (
+	toyId int PRIMARY KEY,
+	toyName nvarchar(50),
+	belongsToId int,
+	foreign key (belongsToId) references pet(petId)
+);
+
+alter table person
+ add foreign key (favouritePetId) references pet(petId);
 
 insert into person(personId,personName) values(1,'bob'),(2,'fred');
 insert into pet(petId,petName, ownerId, favouritePersonId)values(5, 'kitty',1,2);
@@ -212,7 +218,8 @@ create table FkParent(
 );
 create table FkChild(
   id int primary key,
-  parentId int references FkParent(parentPk)
+  parentId int,
+  foreign key (parentId) references FkParent(parentPk)
 );
 
 insert into FkParent(parentPk) values(10);
