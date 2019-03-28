@@ -275,7 +275,7 @@ insert into poke (id, name) values (13, 'pie');
 create table peek(
   id int primary key,
   something varchar(10),
-  dumb_filter varchar(10),-- todo default ('filtration'),
+  dumb_filter varchar(10) default 'filtration',
   poke_id int,
   pike_id int,
   foreign key (poke_id) references poke(id)
