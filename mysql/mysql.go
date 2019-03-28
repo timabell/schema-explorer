@@ -128,13 +128,11 @@ func (model mysqlModel) ReadSchema() (database *schema.Database, err error) {
 		return
 	}
 
-	/* todo
 	// indexes
 	err = readIndexes(dbc, database)
 	if err != nil {
 		return
 	}
-	*/
 
 	//log.Print(database.DebugString())
 	return
@@ -305,10 +303,7 @@ func readConstraints(dbc *sql.DB, database *schema.Database) (err error) {
 			//log.Printf("pk: %s.%s", sourceTable, sourceColumn)
 			sourceTable.Pk.Columns = append(sourceTable.Pk.Columns, sourceColumn)
 			sourceColumn.IsInPrimaryKey = true
-		case "c": // todo: check constraint
-		case "u": // todo: unique constraint
-		case "t": // todo: constraint
-		case "x": // todo: exclusion constraint
+		case "UNIQUE": // todo
 		default:
 			log.Printf("?? %s", conType)
 		}
@@ -318,21 +313,9 @@ func readConstraints(dbc *sql.DB, database *schema.Database) (err error) {
 
 func readIndexes(dbc *sql.DB, database *schema.Database) (err error) {
 	sql := `
-		select
-			oc.relname,
-			tns.nspname, tbl.relname table_relname,
-			col.attname colname,
-			ix.indisunique,
-			ix.indisclustered
-		from (
-			select *, unnest(indkey) colnum from mysql_index
-		) ix
-		left outer join mysql_class oc on oc.oid = ix.indexrelid
-		left outer join mysql_class tbl on tbl.oid = ix.indrelid
-		left outer join mysql_namespace tns on tbl.relnamespace = tns.oid
-		left outer join mysql_attribute col on col.attrelid = ix.indrelid and col.attnum = ix.colnum
-		where tns.nspname not like 'mysql_%'
-			and not ix.indisprimary;
+		select index_name, table_name, column_name, non_unique
+		from information_schema.statistics
+		where table_schema=database() order by seq_in_index;
 	`
 
 	//log.Println(sql)
@@ -342,10 +325,10 @@ func readIndexes(dbc *sql.DB, database *schema.Database) (err error) {
 	}
 	defer rows.Close()
 	for rows.Next() {
-		var name, tableNamespace, tableName, colName string
-		var isUnique, isClustered bool
-		rows.Scan(&name, &tableNamespace, &tableName, &colName, &isUnique, &isClustered)
-		tableToFind := &schema.Table{Schema: tableNamespace, Name: tableName}
+		var name, tableName, colName string
+		var nonUnique bool
+		rows.Scan(&name, &tableName, &colName, &nonUnique)
+		tableToFind := &schema.Table{Name: tableName}
 		table := database.FindTable(tableToFind)
 		if table == nil {
 			err = errors.New(fmt.Sprintf("Table %s not found, owner of index %s", tableToFind.String(), name))
@@ -360,11 +343,10 @@ func readIndexes(dbc *sql.DB, database *schema.Database) (err error) {
 		}
 		if index == nil {
 			index = &schema.Index{
-				Name:        name,
-				Columns:     []*schema.Column{},
-				IsUnique:    isUnique,
-				Table:       table,
-				IsClustered: isClustered,
+				Name:     name,
+				Columns:  []*schema.Column{},
+				IsUnique: !nonUnique,
+				Table:    table,
 			}
 			database.Indexes = append(database.Indexes, index)
 			table.Indexes = append(table.Indexes, index)

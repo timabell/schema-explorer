@@ -240,10 +240,9 @@ create table index_test(
   complex_index varchar(10),
   unique_index varchar(10)
 );
--- create index "IX_on_has_index" on index_test (has_index);
--- create index "IX_compound" on index_test (compound_a, compound_b);
--- create index "IX_complex" on index_test (lower(complex_index)); -- this won't show in the column's index list but will show in the table/database list
--- create unique index "IX_unique" on index_test (unique_index);
+create index IX_on_has_index on index_test (has_index);
+create index IX_compound on index_test (compound_a, compound_b);
+create unique index IX_unique on index_test (unique_index);
 
 create table analysis_test(
   colour varchar(50)
