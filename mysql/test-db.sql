@@ -253,16 +253,14 @@ insert into analysis_test(colour)values
 ('green'),
 (null), (null), (null), (null);
 
-/* todo
 -- check keywords are escaped by making a nasty schema/table/column name
-create table "select" (
+create table `select` (
   id int primary key,
-  "table" varchar(50)
+  `table` varchar(50)
 );
-insert into "select" (id, "table") values (1, 'times');
+insert into `select` (id, `table`) values (1, 'times');
 
--- select * from "select";
-*/
+-- select * from `select`;
 
 create table poke(
   id int primary key,
