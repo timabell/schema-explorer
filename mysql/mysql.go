@@ -11,7 +11,6 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"log"
 	"os"
-	"strconv"
 	"strings"
 )
 
@@ -492,7 +491,7 @@ func buildQuery(table *schema.Table, params *params.TableParams, peekFinder *rea
 		var index = 1
 		for _, v := range query {
 			col := v.Field
-			clauses = append(clauses, "t.`"+col.Name+"` = $"+strconv.Itoa(index))
+			clauses = append(clauses, "t.`"+col.Name+"` = ?")
 			index = index + 1
 			values = append(values, v.Values[0]) // todo: maybe support multiple values
 		}
