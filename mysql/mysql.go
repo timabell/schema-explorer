@@ -102,7 +102,6 @@ func (model mysqlModel) ReadSchema() (database *schema.Database, err error) {
 			FkNames:              true,
 			PagingWithoutSorting: true,
 		},
-		DefaultSchemaName: "public",
 	}
 
 	// load table list
