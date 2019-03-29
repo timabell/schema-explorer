@@ -28,8 +28,6 @@ type mysqlOpts struct {
 	ConnectionString *string `long:"connection-string" description:"MySql connection string. Use this instead of host, port etc for advanced driver options. See https://github.com/Go-SQL-Driver/MySQL/#dsn-data-source-name for connection-string options." env:"connection_string"`
 }
 
-var overrideDatabaseName string
-
 func (opts mysqlOpts) validate() error {
 	if opts.hasAnyDetails() && opts.ConnectionString != nil {
 		return errors.New("Specify either a connection string or host etc, not both.")
@@ -59,6 +57,7 @@ func newMysql() reader.DbReader {
 		options.ArgParser.WriteHelp(os.Stdout)
 		os.Exit(1)
 	}
+	// todo: move connection string buidler to own method in all drivers to allow db name override for every call
 	var cs string
 	if opts.ConnectionString == nil {
 		if opts.User != nil {
@@ -221,19 +220,6 @@ func getConnection(connectionString string) (dbc *sql.DB, err error) {
 		log.Println("connection error", err)
 	}
 	return
-}
-
-func (model mysqlModel) SetDatabase(databaseName string) {
-	overrideDatabaseName = databaseName
-}
-
-func (model mysqlModel) GetDatabaseName() string {
-	if overrideDatabaseName != "" {
-		return overrideDatabaseName
-	} else if opts.Database != nil {
-		return *opts.Database
-	}
-	return "" // unknown, could be in the connection string, doesn't matter because we only need this for multi-db url building and that won't be enabled for connection strings
 }
 
 func (model mysqlModel) CheckConnection() (err error) {

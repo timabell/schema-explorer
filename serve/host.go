@@ -17,12 +17,7 @@ import (
 
 func RunServer() {
 	r, _ := SetupRouter()
-	render.SetRouter(r)
 	runHttpServer(r)
-}
-
-func urlBuilder(dbReader reader.DbReader, pairs []string) *url2.URL{
-
 }
 
 // Runs setup code then builds router.
@@ -67,7 +62,6 @@ func dbRequestSetup(databaseName string) (layoutData render.PageTemplateModel, d
 		return
 	}
 	// if single database then "" will be db name, which will become the index, otherwise it's the db name
-	dbReader.SetDatabase(databaseName)
 	if reader.Databases[databaseName] == nil || !isCachingEnabled() {
 		log.Print("Reading schema...")
 		err = reader.InitializeDatabase(databaseName)

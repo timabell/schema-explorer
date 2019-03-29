@@ -23,11 +23,6 @@ type SchemaCache map[string]*schema.Database
 var Databases = make(map[string]*schema.Database)
 
 type DbReader interface {
-	// override database name from options if applicable to this driver, call this before other methods
-	SetDatabase(databaseName string)
-
-	GetDatabaseName() string
-
 	// does select or something to make sure we have a working db connection
 	CheckConnection() (err error)
 
@@ -38,13 +33,13 @@ type DbReader interface {
 	UpdateRowCounts(database *schema.Database) (err error)
 
 	// get some data, obeying sorting, filtering etc in the table params
-	GetSqlRows(table *schema.Table, params *params.TableParams, peekFinder *PeekLookup) (rows *sql.Rows, err error)
+	GetSqlRows(databaseName string, table *schema.Table, params *params.TableParams, peekFinder *PeekLookup) (rows *sql.Rows, err error)
 
 	// get a count for the supplied filters, for use with paging and overview info
-	GetRowCount(table *schema.Table, params *params.TableParams) (rowCount int, err error)
+	GetRowCount(databaseName string, table *schema.Table, params *params.TableParams) (rowCount int, err error)
 
 	// get breakdown of most common values in each column
-	GetAnalysis(table *schema.Table) (analysis []schema.ColumnAnalysis, err error)
+	GetAnalysis(databaseName string, table *schema.Table) (analysis []schema.ColumnAnalysis, err error)
 
 	// get list of databases on this server (if supported)
 	ListDatabases() (databaseList []string, err error)
@@ -93,6 +88,7 @@ func InitializeDatabase(databaseName string) (err error) {
 		err = errors.New("error reading schema: " + err.Error())
 		return
 	}
+	Databases[databaseName].Name = databaseName
 	setupPeekList(Databases[databaseName])
 	return
 }
