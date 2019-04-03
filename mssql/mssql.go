@@ -17,7 +17,6 @@ import (
 )
 
 type mssqlModel struct {
-	connectionString string
 }
 
 type mssqlOpts struct {
@@ -59,51 +58,52 @@ func newMssql() reader.DbReader {
 		options.ArgParser.WriteHelp(os.Stdout)
 		os.Exit(1)
 	}
-	var cs string
-	if opts.ConnectionString == nil {
-		optList := make(map[string]string)
-		if opts.Host != nil {
-			if opts.Instance != nil {
-				optList["server"] = fmt.Sprintf("%s\\%s", *opts.Host, *opts.Instance)
-			} else {
-				optList["server"] = *opts.Host
-			}
-		} else {
-			if opts.Instance != nil {
-				optList["server"] = fmt.Sprintf("localhost\\%s", *opts.Instance)
-			}
-		}
-		if opts.Port != nil {
-			optList["port"] = strconv.Itoa(*opts.Port)
-		}
-		if overrideDatabaseName != "" {
-			optList["database"] = overrideDatabaseName
-		} else if opts.Database != nil {
-			optList["database"] = *opts.Database
-		}
-		if opts.User != nil {
-			optList["user id"] = *opts.User
-		}
-		if opts.Password != nil {
-			optList["password"] = *opts.Password
-		}
-		optList["app-name"] = about.About.Summary()
-		pairs := []string{}
-		for key, value := range optList {
-			pairs = append(pairs, fmt.Sprintf("%s=%s", key, value))
-		}
-		cs = strings.Join(pairs, ";")
-	} else {
-		cs = *opts.ConnectionString
-	}
 	log.Println("Connecting to mssql db")
-	return mssqlModel{
-		connectionString: cs,
+	return mssqlModel{}
+}
+
+// optionally override db name with param
+func buildConnectionString(databaseName string) string {
+	if opts.ConnectionString != nil {
+		return *opts.ConnectionString
 	}
+
+	optList := make(map[string]string)
+	if opts.Host != nil {
+		if opts.Instance != nil {
+			optList["server"] = fmt.Sprintf("%s\\%s", *opts.Host, *opts.Instance)
+		} else {
+			optList["server"] = *opts.Host
+		}
+	} else {
+		if opts.Instance != nil {
+			optList["server"] = fmt.Sprintf("localhost\\%s", *opts.Instance)
+		}
+	}
+	if opts.Port != nil {
+		optList["port"] = strconv.Itoa(*opts.Port)
+	}
+	if databaseName != "" {
+		optList["database"] = databaseName
+	} else if opts.Database != nil {
+		optList["database"] = *opts.Database
+	}
+	if opts.User != nil {
+		optList["user id"] = *opts.User
+	}
+	if opts.Password != nil {
+		optList["password"] = *opts.Password
+	}
+	optList["app-name"] = about.About.Summary()
+	pairs := []string{}
+	for key, value := range optList {
+		pairs = append(pairs, fmt.Sprintf("%s=%s", key, value))
+	}
+	return strings.Join(pairs, ";")
 }
 
 func (model mssqlModel) ReadSchema(databaseName string) (database *schema.Database, err error) {
-	dbc, err := getConnection(model.connectionString)
+	dbc, err := getConnection(buildConnectionString(databaseName))
 	if err != nil {
 		return
 	}
@@ -161,7 +161,7 @@ func (model mssqlModel) CanSwitchDatabase() bool {
 func (model mssqlModel) ListDatabases() (databaseList []string, err error) {
 	sql := "select name from sys.databases where database_id > 4;" // https://stackoverflow.com/questions/147659/get-list-of-databases-from-sql-server/147707#147707
 
-	dbc, err := getConnection(model.connectionString)
+	dbc, err := getConnection(buildConnectionString(""))
 	if dbc == nil {
 		log.Println(err)
 		panic("getConnection() returned nil")
@@ -238,7 +238,7 @@ func getTables(dbc *sql.DB) (tables []*schema.Table, err error) {
 
 func (model mssqlModel) UpdateRowCounts(database *schema.Database) (err error) {
 	for _, table := range database.Tables {
-		rowCount, err := model.getRowCount(table)
+		rowCount, err := model.getRowCount(database.Name, table)
 		if err != nil {
 			log.Printf("Failed to get row count for %s", table)
 		}
@@ -247,12 +247,12 @@ func (model mssqlModel) UpdateRowCounts(database *schema.Database) (err error) {
 	return err
 }
 
-func (model mssqlModel) getRowCount(table *schema.Table) (rowCount int, err error) {
+func (model mssqlModel) getRowCount(databaseName string, table *schema.Table) (rowCount int, err error) {
 	// todo: parameterise where possible
 	// todo: whitelist-sanitize unparameterizable parts
 	sql := "select count(*) from [" + table.Schema + "].[" + table.Name + "]"
 
-	dbc, err := getConnection(model.connectionString)
+	dbc, err := getConnection(buildConnectionString(databaseName))
 	if dbc == nil {
 		log.Println(err)
 		panic("getConnection() returned nil")
@@ -278,8 +278,8 @@ func getConnection(connectionString string) (dbc *sql.DB, err error) {
 	return
 }
 
-func (model mssqlModel) CheckConnection() (err error) {
-	dbc, err := getConnection(model.connectionString)
+func (model mssqlModel) CheckConnection(databaseName string) (err error) {
+	dbc, err := getConnection(buildConnectionString(databaseName))
 	if dbc == nil {
 		log.Println(err)
 		panic("getConnection() returned nil")
@@ -368,8 +368,8 @@ func allFks(dbc *sql.DB, database *schema.Database) (allFks []*schema.Fk, err er
 	return
 }
 
-func (model mssqlModel) GetSqlRows(table *schema.Table, params *params.TableParams, peekFinder *reader.PeekLookup) (rows *sql.Rows, err error) {
-	dbc, err := getConnection(model.connectionString)
+func (model mssqlModel) GetSqlRows(databaseName string, table *schema.Table, params *params.TableParams, peekFinder *reader.PeekLookup) (rows *sql.Rows, err error) {
+	dbc, err := getConnection(buildConnectionString(databaseName))
 	if dbc == nil {
 		log.Println(err)
 		panic("getConnection() returned nil")
@@ -395,8 +395,8 @@ func (model mssqlModel) GetSqlRows(table *schema.Table, params *params.TablePara
 	return
 }
 
-func (model mssqlModel) GetRowCount(table *schema.Table, params *params.TableParams) (rowCount int, err error) {
-	dbc, err := getConnection(model.connectionString)
+func (model mssqlModel) GetRowCount(databaseName string, table *schema.Table, params *params.TableParams) (rowCount int, err error) {
+	dbc, err := getConnection(buildConnectionString(databaseName))
 	if err != nil {
 		log.Print("GetRows failed to get connection")
 		return
@@ -420,8 +420,8 @@ func (model mssqlModel) GetRowCount(table *schema.Table, params *params.TablePar
 	return
 }
 
-func (model mssqlModel) GetAnalysis(table *schema.Table) (analysis []schema.ColumnAnalysis, err error) {
-	dbc, err := getConnection(model.connectionString)
+func (model mssqlModel) GetAnalysis(databaseName string, table *schema.Table) (analysis []schema.ColumnAnalysis, err error) {
+	dbc, err := getConnection(buildConnectionString(databaseName))
 	if err != nil {
 		log.Print("GetAnalysis failed to get connection")
 		return

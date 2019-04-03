@@ -15,7 +15,6 @@ import (
 )
 
 type mysqlModel struct {
-	connectionString string
 }
 
 type mysqlOpts struct {
@@ -57,7 +56,12 @@ func newMysql() reader.DbReader {
 		options.ArgParser.WriteHelp(os.Stdout)
 		os.Exit(1)
 	}
-	// todo: move connection string buidler to own method in all drivers to allow db name override for every call
+	log.Println("Connecting to mysql db")
+	return mysqlModel{}
+}
+
+// optionally override db name with param
+func buildConnectionString(databaseName string) string {
 	var cs string
 	if opts.ConnectionString == nil {
 		if opts.User != nil {
@@ -74,7 +78,9 @@ func newMysql() reader.DbReader {
 			}
 		}
 		cs = fmt.Sprintf("%s/", cs)
-		if opts.Database != nil {
+		if databaseName != "" {
+			cs = fmt.Sprintf("%s%s", cs, databaseName)
+		} else if opts.Database != nil {
 			cs = fmt.Sprintf("%s%s", cs, *opts.Database)
 		}
 		if opts.Parameters != nil {
@@ -83,14 +89,11 @@ func newMysql() reader.DbReader {
 	} else {
 		cs = *opts.ConnectionString
 	}
-	log.Println("Connecting to mysql db")
-	return mysqlModel{
-		connectionString: cs,
-	}
+	return cs
 }
 
 func (model mysqlModel) ReadSchema(databaseName string) (database *schema.Database, err error) {
-	dbc, err := getConnection(model.connectionString)
+	dbc, err := getConnection(buildConnectionString(databaseName))
 	if err != nil {
 		return
 	}
@@ -144,7 +147,7 @@ func (model mysqlModel) CanSwitchDatabase() bool {
 func (model mysqlModel) ListDatabases() (databaseList []string, err error) {
 	sql := "select schema_name from information_schema.schemata where schema_name not in ('information_schema', 'mysql');"
 
-	dbc, err := getConnection(model.connectionString)
+	dbc, err := getConnection(buildConnectionString(""))
 	if dbc == nil {
 		log.Println(err)
 		panic("getConnection() returned nil")
@@ -169,7 +172,7 @@ func (model mysqlModel) DatabaseSelected() bool {
 
 func (model mysqlModel) UpdateRowCounts(database *schema.Database) (err error) {
 	for _, table := range database.Tables {
-		rowCount, err := model.getRowCount(table)
+		rowCount, err := model.getRowCount(database.Name, table)
 		if err != nil {
 			log.Printf("Failed to get row count for %s, %s", table, err)
 		}
@@ -178,12 +181,12 @@ func (model mysqlModel) UpdateRowCounts(database *schema.Database) (err error) {
 	return err
 }
 
-func (model mysqlModel) getRowCount(table *schema.Table) (rowCount int, err error) {
+func (model mysqlModel) getRowCount(databaseName string, table *schema.Table) (rowCount int, err error) {
 	// todo: parameterise where possible
 	// todo: whitelist-sanitize unparameterizable parts
 	sql := "select count(*) from `" + table.Name + "`"
 
-	dbc, err := getConnection(model.connectionString)
+	dbc, err := getConnection(buildConnectionString(databaseName))
 	if dbc == nil {
 		log.Println(err)
 		panic("getConnection() returned nil")
@@ -222,8 +225,8 @@ func getConnection(connectionString string) (dbc *sql.DB, err error) {
 	return
 }
 
-func (model mysqlModel) CheckConnection() (err error) {
-	dbc, err := getConnection(model.connectionString)
+func (model mysqlModel) CheckConnection(databaseName string) (err error) {
+	dbc, err := getConnection(buildConnectionString(databaseName))
 	if dbc == nil {
 		log.Println(err)
 		panic("getConnection() returned nil")
@@ -368,8 +371,8 @@ func readIndexes(dbc *sql.DB, database *schema.Database) (err error) {
 	return
 }
 
-func (model mysqlModel) GetSqlRows(table *schema.Table, params *params.TableParams, peekFinder *reader.PeekLookup) (rows *sql.Rows, err error) {
-	dbc, err := getConnection(model.connectionString)
+func (model mysqlModel) GetSqlRows(databaseName string, table *schema.Table, params *params.TableParams, peekFinder *reader.PeekLookup) (rows *sql.Rows, err error) {
+	dbc, err := getConnection(buildConnectionString(databaseName))
 	if err != nil {
 		log.Print("GetRows failed to get connection")
 		return
@@ -392,8 +395,8 @@ func (model mysqlModel) GetSqlRows(table *schema.Table, params *params.TablePara
 	return
 }
 
-func (model mysqlModel) GetRowCount(table *schema.Table, params *params.TableParams) (rowCount int, err error) {
-	dbc, err := getConnection(model.connectionString)
+func (model mysqlModel) GetRowCount(databaseName string, table *schema.Table, params *params.TableParams) (rowCount int, err error) {
+	dbc, err := getConnection(buildConnectionString(databaseName))
 	if err != nil {
 		log.Print("GetRows failed to get connection")
 		return
@@ -417,9 +420,9 @@ func (model mysqlModel) GetRowCount(table *schema.Table, params *params.TablePar
 	return
 }
 
-func (model mysqlModel) GetAnalysis(table *schema.Table) (analysis []schema.ColumnAnalysis, err error) {
+func (model mysqlModel) GetAnalysis(databaseName string, table *schema.Table) (analysis []schema.ColumnAnalysis, err error) {
 	// todo, might be good to stream this all the way to the http response
-	dbc, err := getConnection(model.connectionString)
+	dbc, err := getConnection(buildConnectionString(databaseName))
 	if err != nil {
 		log.Print("GetAnalysis failed to get connection")
 		return

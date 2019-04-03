@@ -58,7 +58,7 @@ func init() {
 
 func Test_CheckConnection(t *testing.T) {
 	reader := reader.GetDbReader()
-	err := reader.CheckConnection()
+	err := reader.CheckConnection("")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -468,7 +468,7 @@ func checkFilterAndSort(dbReader reader.DbReader, database *schema.Database, t *
 		Sort:     []params.SortCol{{Column: colourCol, Descending: false}, {Column: sizeCol, Descending: true}},
 		RowLimit: 10,
 	}
-	rows, _, err := reader.GetRows(dbReader, table, tableParams)
+	rows, _, err := reader.GetRows(dbReader, database.Name, table, tableParams)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -510,14 +510,14 @@ func checkPaging(dbReader reader.DbReader, database *schema.Database, t *testing
 		SkipRows: 3,
 	}
 	// check without sort (to check mssql hack for lack of offset capability)
-	pagingChecker(dbReader, table, tableParams, t, idCol)
+	pagingChecker(dbReader, database.Name, table, tableParams, t, idCol)
 	tableParams.Sort = []params.SortCol{{Column: idCol}} // have to sort to use paging for sql server
 	// check with sort
-	pagingChecker(dbReader, table, tableParams, t, idCol)
+	pagingChecker(dbReader, database.Name, table, tableParams, t, idCol)
 }
 
-func pagingChecker(dbReader reader.DbReader, table *schema.Table, tableParams *params.TableParams, t *testing.T, idCol *schema.Column) {
-	rows, _, err := reader.GetRows(dbReader, table, tableParams)
+func pagingChecker(dbReader reader.DbReader, databaseName string, table *schema.Table, tableParams *params.TableParams, t *testing.T, idCol *schema.Column) {
+	rows, _, err := reader.GetRows(dbReader, databaseName, table, tableParams)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -539,7 +539,7 @@ func checkFilteredRowCount(dbReader reader.DbReader, database *schema.Database, 
 	tableParams := &params.TableParams{
 		Filter: params.FieldFilterList{filter},
 	}
-	rowCount, err := dbReader.GetRowCount(table, tableParams)
+	rowCount, err := dbReader.GetRowCount(database.Name, table, tableParams)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -550,7 +550,7 @@ func checkTableAnalysis(dbReader reader.DbReader, database *schema.Database, t *
 	table := findTable(schema.Table{Schema: database.DefaultSchemaName, Name: "analysis_test"}, database, t)
 	colName := "colour"
 	_, col := table.FindColumn(colName)
-	analysis, err := dbReader.GetAnalysis(table)
+	analysis, err := dbReader.GetAnalysis(database.Name, table)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -610,7 +610,7 @@ func checkKeywordEscaping(dbReader reader.DbReader, database *schema.Database, t
 		Filter:   params.FieldFilterList{filter},
 		Sort:     []params.SortCol{{Column: col, Descending: false}},
 	}
-	rows, _, err := reader.GetRows(dbReader, table, params)
+	rows, _, err := reader.GetRows(dbReader, database.Name, table, params)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -632,7 +632,7 @@ func checkPeeking(dbReader reader.DbReader, database *schema.Database, t *testin
 		Filter:   params.FieldFilterList{{Field: filterColumn, Values: []string{"filtration"}}}, // add a filter to check where clauses join properly
 		Sort:     []params.SortCol{{Column: filterColumn, Descending: false}},                   // add a filter to check order by clauses works with peek joins
 	}
-	data, peek, err := reader.GetRows(dbReader, table, params)
+	data, peek, err := reader.GetRows(dbReader, database.Name, table, params)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -669,7 +669,7 @@ func checkInboundPeeking(dbReader reader.DbReader, database *schema.Database, t 
 		RowLimit: 999,
 		Sort:     []params.SortCol{{Column: idCol, Descending: false}},
 	}
-	data, _, err := reader.GetRows(dbReader, table, params)
+	data, _, err := reader.GetRows(dbReader, database.Name, table, params)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -782,7 +782,7 @@ func Test_GetRows(t *testing.T) {
 	params := &params.TableParams{
 		RowLimit: 999,
 	}
-	rows, _, err := reader.GetRows(dbReader, table, params)
+	rows, _, err := reader.GetRows(dbReader, database.Name, table, params)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -855,11 +855,12 @@ func findColumn(table *schema.Table, columnName string, t *testing.T) (column *s
 }
 
 func Test_Http(t *testing.T) {
-	router, database := serve.SetupRouter()
+	// todo: update for multi-db
+	router, _ := serve.SetupRouter()
 	var schemaPrefix string
-	if database.Supports.Schema {
-		schemaPrefix = database.DefaultSchemaName + "."
-	}
+	//if databases[""].Supports.Schema {
+	//	schemaPrefix = databases[""].DefaultSchemaName + "."
+	//}
 	CheckForOk("/", router, t)
 	CheckForOk(fmt.Sprintf("/tables/%sDataTypeTest", schemaPrefix), router, t)
 	CheckForOk(fmt.Sprintf("/tables/%sDataTypeTest/data", schemaPrefix), router, t)

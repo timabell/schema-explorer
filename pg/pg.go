@@ -229,8 +229,8 @@ func getConnection(connectionString string) (dbc *sql.DB, err error) {
 	return
 }
 
-func (model pgModel) CheckConnection() (err error) {
-	dbc, err := getConnection(buildConnectionString(""))
+func (model pgModel) CheckConnection(databaseName string) (err error) {
+	dbc, err := getConnection(buildConnectionString(databaseName))
 	if dbc == nil {
 		log.Println(err)
 		panic("getConnection() returned nil")

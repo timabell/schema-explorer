@@ -272,9 +272,9 @@ func ShowTableList(resp http.ResponseWriter, database *schema.Database, layoutDa
 
 func ShowTable(resp http.ResponseWriter, dbReader reader.DbReader, database *schema.Database, table *schema.Table, tableParams *params.TableParams, layoutData PageTemplateModel, dataOnly bool) error {
 	unfilteredParams := tableParams.ClearPaging()
-	filteredRowCount, err := dbReader.GetRowCount(table, &unfilteredParams)
-	totalRowCount, err := dbReader.GetRowCount(table, &params.TableParams{})
-	rowsData, peekFinder, err := reader.GetRows(dbReader, table, tableParams)
+	filteredRowCount, err := dbReader.GetRowCount(database.Name, table, &unfilteredParams)
+	totalRowCount, err := dbReader.GetRowCount(database.Name, table, &params.TableParams{})
+	rowsData, peekFinder, err := reader.GetRows(dbReader, database.Name, table, tableParams)
 	if err != nil {
 		return err
 	}
@@ -360,7 +360,7 @@ func ShowTableTrail(resp http.ResponseWriter, database *schema.Database, trailIn
 }
 
 func ShowTableAnalysis(resp http.ResponseWriter, dbReader reader.DbReader, database *schema.Database, table *schema.Table, layoutData PageTemplateModel) error {
-	analysis, err := dbReader.GetAnalysis(table)
+	analysis, err := dbReader.GetAnalysis(database.Name, table)
 	if err != nil {
 		return err
 	}

@@ -24,7 +24,7 @@ var Databases = make(map[string]*schema.Database)
 
 type DbReader interface {
 	// does select or something to make sure we have a working db connection
-	CheckConnection() (err error)
+	CheckConnection(databaseName string) (err error)
 
 	// parse the whole schema info into memory
 	ReadSchema(databaseName string) (database *schema.Database, err error)
@@ -76,7 +76,7 @@ func RegisterReader(driver *Driver) {
 func InitializeDatabase(databaseName string) (err error) {
 	dbReader := GetDbReader()
 	log.Println("Checking database connection...")
-	err = dbReader.CheckConnection()
+	err = dbReader.CheckConnection(databaseName)
 	if err != nil {
 		err = errors.New("check connection failed: " + err.Error())
 		return
@@ -145,7 +145,7 @@ func GetDbReader() DbReader {
 	return driver.CreateReader()
 }
 
-func GetRows(reader DbReader, table *schema.Table, params *params.TableParams) (rowsData []RowData, peekFinder *PeekLookup, err error) {
+func GetRows(reader DbReader, databaseName string, table *schema.Table, params *params.TableParams) (rowsData []RowData, peekFinder *PeekLookup, err error) {
 	// load up all the fks that we have peek info for
 	peekFinder = &PeekLookup{}
 	inboundPeekCount := 0
@@ -161,7 +161,7 @@ func GetRows(reader DbReader, table *schema.Table, params *params.TableParams) (
 	peekFinder.peekColumnCount = inboundPeekCount + len(table.InboundFks)
 	peekFinder.Table = table
 
-	rows, err := reader.GetSqlRows(table, params, peekFinder)
+	rows, err := reader.GetSqlRows(databaseName, table, params, peekFinder)
 	if rows == nil {
 		panic("GetSqlRows() returned nil")
 	}
