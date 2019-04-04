@@ -12,6 +12,7 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"net/url"
 	"time"
 )
 
@@ -24,7 +25,16 @@ func RunServer() {
 // Factored out to this combination to be able to test http calls without the built in http server.
 func SetupRouter() (*mux.Router, reader.SchemaCache) {
 	render.SetupTemplates()
-	return Router(), reader.Databases
+	r := Router()
+	f := func(routeName string, database string, pairs []string) *url.URL {
+		url, err := r.Get(routeName).URL(pairs...)
+		if err != nil {
+			panic(fmt.Sprintf("route finder failed: %s", err))
+		}
+		return url
+	}
+	render.SetRouterFinder(f)
+	return r, reader.Databases
 }
 
 func runHttpServer(r *mux.Router) {

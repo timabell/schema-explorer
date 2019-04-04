@@ -519,7 +519,7 @@ func buildFkCss(fk *schema.Fk, multiFkCol bool) string {
 func buildFkHref(databaseName string, table *schema.Table, query string, cssClass string, displayText string, peekHtml string) string {
 	suffix := "&_rowLimit=100#data"
 	var fkUrl *url.URL
-	var pairs = []string{"tableName", table.String()}
+	var pairs = []string{"database", databaseName, "tableName", table.String()}
 	fkUrl = urlBuilder("multidb-route-database-tables", databaseName, pairs)
 	return fmt.Sprintf("<a href='%s?%s%s' class='%s'>%s%s</a> ", fkUrl, query, suffix, cssClass, template.HTMLEscapeString(displayText), peekHtml)
 }
