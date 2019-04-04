@@ -145,7 +145,7 @@ func (model pgModel) ReadSchema(databaseName string) (database *schema.Database,
 }
 
 func (model pgModel) CanSwitchDatabase() bool {
-	return true
+	return opts.ConnectionString == nil && opts.Database == nil
 }
 
 func (model pgModel) ListDatabases() (databaseList []string, err error) {
