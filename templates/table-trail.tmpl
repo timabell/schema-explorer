@@ -4,12 +4,12 @@
         <nav>
             <ul>
                 <li>
-                    <a href="/table-trail?tables={{.Trail.AsCsv}}">
+                    <a href="{{if .LayoutData.CanSwitchDatabase}}/{{.LayoutData.DatabaseName}}{{end}}/table-trail?tables={{.Trail.AsCsv}}">
                         <i class="fas fa-link"></i>
                         Permalink</a>
                 </li>
                 <li>
-                    <a class="button" href="/table-trail/clear">
+                    <a class="button" href="{{if .LayoutData.CanSwitchDatabase}}/{{.LayoutData.DatabaseName}}{{end}}/table-trail/clear">
                         <i class="fas fa-eraser"></i>
                         Reset Trail</a>
                 </li>
@@ -28,7 +28,7 @@
             You must be new round here, welcome!
         </p>
         <p>
-            Go and <a href="/">look at some tables</a> and then come back here.
+            Go and <a href="{{if .LayoutData.CanSwitchDatabase}}/{{.LayoutData.DatabaseName}}{{end}}/">look at some tables</a> and then come back here.
         </p>
     {{end}}
     <p class="trail-info">
