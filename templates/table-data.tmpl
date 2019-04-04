@@ -15,7 +15,13 @@
             <i class="fas fa-angle-double-down"></i>
             Skip to Data Controls
         </a>
-        <a class="new-window-button button" href="/tables/{{$.Table}}?{{$.TableParams.AsQueryString}}#data">
+        <a class="new-window-button button"
+               {{if $.LayoutData.CanSwitchDatabase}}
+                   href="/{{$.LayoutData.DatabaseName}}/tables/{{$.Table}}?{{$.TableParams.AsQueryString}}#data"
+               {{else}}
+                   href="/tables/{{$.Table}}?{{$.TableParams.AsQueryString}}#data"
+               {{end}}
+            >
             View in context
             <i class="fas fa-expand-arrows-alt"></i>
         </a>
