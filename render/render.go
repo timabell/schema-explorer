@@ -389,13 +389,13 @@ func buildRow(databaseName string, rowData reader.RowData, peekFinder *reader.Pe
 		valueHTML := buildCell(databaseName, col, cellData, rowData, peekFinder)
 		row = append(row, template.HTML(valueHTML))
 	}
-	parentHTML := buildInwardCell(table.InboundFks, rowData, peekFinder)
+	parentHTML := buildInwardCell(databaseName, table.InboundFks, rowData, peekFinder)
 	row = append(row, template.HTML(parentHTML))
 	return row
 }
 
 // Groups fks by source table, adds table name for each followed by links for each inbound fk for that table
-func buildInwardCell(inboundFks []*schema.Fk, rowData []interface{}, peekFinder *reader.PeekLookup) string {
+func buildInwardCell(databaseName string, inboundFks []*schema.Fk, rowData []interface{}, peekFinder *reader.PeekLookup) string {
 	groupedFks := groupFksByTable(inboundFks)
 
 	// note.... for table, fks := range groupedFks { ... is an unstable sort, don't do it this way! https://stackoverflow.com/a/23332089/10245
@@ -415,7 +415,7 @@ func buildInwardCell(inboundFks []*schema.Fk, rowData []interface{}, peekFinder 
 		parentHTML = parentHTML + template.HTMLEscapeString(table.String()) + ":"
 		parentHTML = parentHTML + "</span> "
 		for _, fk := range fks {
-			parentHTML = parentHTML + buildInwardLink(fk, rowData, peekFinder) + " "
+			parentHTML = parentHTML + buildInwardLink(databaseName, fk, rowData, peekFinder) + " "
 		}
 		parentHTML = parentHTML + "<br/>"
 	}
@@ -436,7 +436,7 @@ func groupFksByTable(inboundFks []*schema.Fk) groupedFkMap {
 	return groupedFks
 }
 
-func buildInwardLink(fk *schema.Fk, rowData reader.RowData, peekFinder *reader.PeekLookup) string {
+func buildInwardLink(databaseName string, fk *schema.Fk, rowData reader.RowData, peekFinder *reader.PeekLookup) string {
 	var queryData []string
 	for ix, fkCol := range fk.SourceColumns {
 		destinationCol := fk.DestinationColumns[ix]
@@ -450,7 +450,9 @@ func buildInwardLink(fk *schema.Fk, rowData reader.RowData, peekFinder *reader.P
 	inboundPeekIndex := peekFinder.FindInbound(fk)
 	rowCount := rowData[inboundPeekIndex].(int64)
 	if rowCount > 0 {
-		return fmt.Sprintf("<a href='/tables/%s?%s%s' class='parent-fk-link'>%s - %d rows</a>", fk.SourceTable, joinedQueryData, suffix, fk.SourceColumns, rowCount)
+		var pairs = []string{"tableName", fk.SourceTable.String()}
+		fkUrl := urlBuilder("route-database-tables", databaseName, pairs)
+		return fmt.Sprintf("<a href='%s?%s%s' class='parent-fk-link'>%s - %d rows</a>", fkUrl, joinedQueryData, suffix, fk.SourceColumns, rowCount)
 	} else {
 		return fmt.Sprintf("%s - %d rows", fk.SourceColumns, rowCount)
 	}
@@ -519,8 +521,8 @@ func buildFkCss(fk *schema.Fk, multiFkCol bool) string {
 func buildFkHref(databaseName string, table *schema.Table, query string, cssClass string, displayText string, peekHtml string) string {
 	suffix := "&_rowLimit=100#data"
 	var fkUrl *url.URL
-	var pairs = []string{"database", databaseName, "tableName", table.String()}
-	fkUrl = urlBuilder("multidb-route-database-tables", databaseName, pairs)
+	var pairs = []string{"tableName", table.String()}
+	fkUrl = urlBuilder("route-database-tables", databaseName, pairs)
 	return fmt.Sprintf("<a href='%s?%s%s' class='%s'>%s%s</a> ", fkUrl, query, suffix, cssClass, template.HTMLEscapeString(displayText), peekHtml)
 }
 

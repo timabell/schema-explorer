@@ -26,7 +26,13 @@ func RunServer() {
 func SetupRouter() (*mux.Router, reader.SchemaCache) {
 	render.SetupTemplates()
 	r := Router()
-	f := func(routeName string, database string, pairs []string) *url.URL {
+	f := func(routeName string, databaseName string, pairs []string) *url.URL {
+		if databaseName != "" {
+			dbPair := []string{"database", databaseName}
+			pairs = append(dbPair, pairs...)
+			routeName = "multidb-" + routeName
+		}
+		//log.Printf("Getting route %s", routeName)
 		url, err := r.Get(routeName).URL(pairs...)
 		if err != nil {
 			panic(fmt.Sprintf("route finder failed: %s", err))
