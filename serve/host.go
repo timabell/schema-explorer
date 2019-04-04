@@ -74,7 +74,7 @@ func dbRequestSetup(databaseName string) (layoutData render.PageTemplateModel, d
 	dbReader = reader.GetDbReader()
 	if dbReader.CanSwitchDatabase() && databaseName == "" {
 		// no database needed yet, e.g. for database list page
-		layoutData = requestSetup(false, false) // turn off top navigation
+		layoutData = requestSetup(false, false, databaseName) // turn off top navigation
 		return
 	}
 	// if single database then "" will be db name, which will become the index, otherwise it's the db name
@@ -82,13 +82,13 @@ func dbRequestSetup(databaseName string) (layoutData render.PageTemplateModel, d
 		log.Print("Reading schema...")
 		err = reader.InitializeDatabase(databaseName)
 	}
-	layoutData = requestSetup(dbReader.CanSwitchDatabase(), true)
+	layoutData = requestSetup(dbReader.CanSwitchDatabase(), true, databaseName)
 	return
 }
 
-func requestSetup(canSwitchDatabase bool, dbReady bool) (layoutData render.PageTemplateModel) {
+func requestSetup(canSwitchDatabase bool, dbReady bool, databaseName string) (layoutData render.PageTemplateModel) {
 	licensing.EnforceLicensing()
-	layoutData = getLayoutData(canSwitchDatabase, dbReady)
+	layoutData = getLayoutData(canSwitchDatabase, dbReady, databaseName)
 	if !isCachingEnabled() {
 		render.SetupTemplates()
 	}
@@ -100,10 +100,12 @@ func isCachingEnabled() bool {
 	return cachingEnabled
 }
 
-func getLayoutData(canSwitchDatabase bool, dbReady bool) (layoutData render.PageTemplateModel) {
+func getLayoutData(canSwitchDatabase bool, dbReady bool, databaseName string) (layoutData render.PageTemplateModel) {
 	var connectionName string
 	if options.Options.ConnectionDisplayName != nil {
 		connectionName = *options.Options.ConnectionDisplayName
+	} else if databaseName != "" {
+		connectionName = databaseName
 	}
 	layoutData = render.PageTemplateModel{
 		Title:             connectionName + "|" + about.About.ProductName,

@@ -11,7 +11,7 @@ func SetupHandler(resp http.ResponseWriter, req *http.Request) {
 	if RedirectIfConfigured(resp, req) {
 		return
 	}
-	layoutData := requestSetup(false, false)
+	layoutData := requestSetup(false, false, "")
 	render.ShowSelectDriver(resp, layoutData)
 }
 
@@ -19,7 +19,7 @@ func SetupDriverHandler(resp http.ResponseWriter, req *http.Request) {
 	if RedirectIfConfigured(resp, req) {
 		return
 	}
-	layoutData := requestSetup(false, false)
+	layoutData := requestSetup(false, false, "")
 	driverName := mux.Vars(req)["driver"]
 	render.ShowSetupDriver(resp, layoutData, driverName, "")
 }
@@ -28,7 +28,7 @@ func SetupDriverPostHandler(resp http.ResponseWriter, req *http.Request) {
 	if RedirectIfConfigured(resp, req) {
 		return
 	}
-	layoutData := requestSetup(false, false)
+	layoutData := requestSetup(false, false, "")
 	driverName := mux.Vars(req)["driver"]
 	render.RunSetupDriver(resp, req, layoutData, driverName)
 }
