@@ -43,9 +43,15 @@
         {{end}}
         {{if .LayoutData.DbReady}}
         <li>
-            <a href='/'>
-                <i class="fas fa-database"></i>
-                Database</a>
+            {{if .LayoutData.CanSwitchDatabase}}
+                <a href='/{{.LayoutData.DatabaseName}}/'>
+                    <i class="fas fa-database"></i>
+                    Database</a>
+            {{else}}
+                <a href='/'>
+                    <i class="fas fa-database"></i>
+                    Database</a>
+            {{end}}
         </li>
         <li>
             <a href='/table-trail'>

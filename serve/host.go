@@ -116,6 +116,7 @@ func getLayoutData(canSwitchDatabase bool, dbReady bool, databaseName string) (l
 		Timestamp:         time.Now().String(),
 		CanSwitchDatabase: canSwitchDatabase,
 		DbReady:           dbReady,
+		DatabaseName:      databaseName,
 	}
 	return
 }

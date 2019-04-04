@@ -27,6 +27,7 @@ type PageTemplateModel struct {
 	Timestamp         string
 	CanSwitchDatabase bool
 	DbReady           bool
+	DatabaseName      string
 }
 
 type driverSelectionViewModel struct {
