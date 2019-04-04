@@ -35,5 +35,10 @@ func TableTrailHandler(resp http.ResponseWriter, req *http.Request) {
 
 func ClearTableTrailHandler(resp http.ResponseWriter, req *http.Request) {
 	ClearTrailCookie(resp)
-	http.Redirect(resp, req, "/table-trail", http.StatusFound)
+	databaseName := mux.Vars(req)["database"]
+	var urlPrefix string
+	if databaseName != "" {
+		urlPrefix = "/" + databaseName
+	}
+	http.Redirect(resp, req, urlPrefix+"/table-trail", http.StatusFound)
 }
