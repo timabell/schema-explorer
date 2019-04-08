@@ -154,8 +154,10 @@ func AnalyseTableHandler(resp http.ResponseWriter, req *http.Request) {
 	databaseName := mux.Vars(req)["database"]
 	layoutData, dbReader, err := dbRequestSetup(databaseName)
 	if err != nil {
-		// todo: client error
-		fmt.Println("setup error rendering table: ", err)
+		message := fmt.Sprintf("setup error rendering table: %s", err)
+		log.Print(message)
+		resp.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprint(resp, message)
 		return
 	}
 
@@ -170,7 +172,10 @@ func AnalyseTableHandler(resp http.ResponseWriter, req *http.Request) {
 
 	err = render.ShowTableAnalysis(resp, dbReader, reader.Databases[databaseName], table, layoutData)
 	if err != nil {
-		fmt.Println("error rendering table analysis: ", err)
+		message := fmt.Sprintf("error rendering table analysis: %s", err)
+		log.Print(message)
+		resp.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprint(resp, message)
 		return
 	}
 }
