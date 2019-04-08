@@ -155,7 +155,8 @@ func (model mssqlModel) ReadSchema(databaseName string) (database *schema.Databa
 }
 
 func (model mssqlModel) CanSwitchDatabase() bool {
-	return true // todo: return false for azure sql
+	// todo: return false for azure sql
+	return opts.ConnectionString == nil && opts.Database == nil
 }
 
 func (model mssqlModel) ListDatabases() (databaseList []string, err error) {

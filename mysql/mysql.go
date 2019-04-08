@@ -141,7 +141,7 @@ func (model mysqlModel) ReadSchema(databaseName string) (database *schema.Databa
 }
 
 func (model mysqlModel) CanSwitchDatabase() bool {
-	return true
+	return opts.ConnectionString == nil && opts.Database == nil
 }
 
 func (model mysqlModel) ListDatabases() (databaseList []string, err error) {
