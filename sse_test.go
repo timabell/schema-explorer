@@ -855,13 +855,15 @@ func findColumn(table *schema.Table, columnName string, t *testing.T) (column *s
 }
 
 func Test_Http(t *testing.T) {
-	// todo: update for multi-db
-	router, _ := serve.SetupRouter()
+	router, databases := serve.SetupRouter()
 	var schemaPrefix string
-	//if databases[""].Supports.Schema {
-	//	schemaPrefix = databases[""].DefaultSchemaName + "."
-	//}
+	// todo: multi-db paths
+	// run a get first to populate the schema cache so we can access supported feature list
 	CheckForOk("/", router, t)
+	database := databases[""]
+	if database.Supports.Schema {
+		schemaPrefix = database.DefaultSchemaName + "."
+	}
 	CheckForOk(fmt.Sprintf("/tables/%sDataTypeTest", schemaPrefix), router, t)
 	CheckForOk(fmt.Sprintf("/tables/%sDataTypeTest/data", schemaPrefix), router, t)
 	CheckForOk(fmt.Sprintf("/tables/%sDataTypeTest/analyse-data", schemaPrefix), router, t)
