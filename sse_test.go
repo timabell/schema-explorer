@@ -857,24 +857,40 @@ func findColumn(table *schema.Table, columnName string, t *testing.T) (column *s
 func Test_Http(t *testing.T) {
 	router, databases := serve.SetupRouter()
 	var schemaPrefix string
-	// todo: multi-db paths
+	var dbPrefix string
+	const dbName string = "ssetest"
+	r := reader.GetDbReader()
+	var database *schema.Database
+	if r.CanSwitchDatabase() {
+		reader.InitializeDatabase(dbName)
+		CheckForStatus("/", router, 302, t)
+		dbPrefix = "/" + dbName
+		database = databases[dbName]
+	} else {
+		reader.InitializeDatabase("")
+		database = databases[""]
+
+	}
 	// run a get first to populate the schema cache so we can access supported feature list
-	CheckForOk("/", router, t)
-	database := databases[""]
+	CheckForOk(fmt.Sprintf("%s/", dbPrefix), router, t)
 	if database.Supports.Schema {
 		schemaPrefix = database.DefaultSchemaName + "."
 	}
-	CheckForOk(fmt.Sprintf("/tables/%sDataTypeTest", schemaPrefix), router, t)
-	CheckForOk(fmt.Sprintf("/tables/%sDataTypeTest/data", schemaPrefix), router, t)
-	CheckForOk(fmt.Sprintf("/tables/%sDataTypeTest/analyse-data", schemaPrefix), router, t)
-	CheckForOk("/table-trail", router, t)
+	CheckForOk(fmt.Sprintf("%s/tables/%sDataTypeTest", dbPrefix, schemaPrefix), router, t)
+	CheckForOk(fmt.Sprintf("%s/tables/%sDataTypeTest/data", dbPrefix, schemaPrefix), router, t)
+	CheckForOk(fmt.Sprintf("%s/tables/%sDataTypeTest/analyse-data", dbPrefix, schemaPrefix), router, t)
+	CheckForOk(fmt.Sprintf("%s/table-trail", dbPrefix), router, t)
 }
 
 func CheckForOk(path string, router *mux.Router, t *testing.T) {
+	CheckForStatus(path, router, 200, t)
+}
+
+func CheckForStatus(path string, router *mux.Router, expectedStatus int, t *testing.T) {
 	request, _ := http.NewRequest("GET", path, nil)
 	response := httptest.NewRecorder()
 	router.ServeHTTP(response, request)
-	if response.Code != 200 {
-		t.Fatalf("%d status for %s", response.Code, path)
+	if response.Code != expectedStatus {
+		t.Fatalf("%d status for %s, expected %d", response.Code, path, expectedStatus)
 	}
 }
