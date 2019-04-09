@@ -110,6 +110,7 @@ func (model pgModel) ReadSchema(databaseName string) (database *schema.Database,
 			PagingWithoutSorting: true,
 		},
 		DefaultSchemaName: "public",
+		Name:              databaseName,
 	}
 
 	// load table list

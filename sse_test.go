@@ -66,7 +66,8 @@ func Test_CheckConnection(t *testing.T) {
 
 func Test_ReadSchema(t *testing.T) {
 	reader := reader.GetDbReader()
-	database, err := reader.ReadSchema("")
+	databaseName := getDatabaseName()
+	database, err := reader.ReadSchema(databaseName)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -771,7 +772,8 @@ var tests = []testCase{
 
 func Test_GetRows(t *testing.T) {
 	dbReader := reader.GetDbReader()
-	database, err := dbReader.ReadSchema("")
+	databaseName := getDatabaseName()
+	database, err := dbReader.ReadSchema(databaseName)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -782,7 +784,7 @@ func Test_GetRows(t *testing.T) {
 	params := &params.TableParams{
 		RowLimit: 999,
 	}
-	rows, _, err := reader.GetRows(dbReader, database.Name, table, params)
+	rows, _, err := reader.GetRows(dbReader, databaseName, table, params)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -858,17 +860,17 @@ func Test_Http(t *testing.T) {
 	router, databases := serve.SetupRouter()
 	var schemaPrefix string
 	var dbPrefix string
-	const dbName string = "ssetest"
 	r := reader.GetDbReader()
 	var database *schema.Database
+	databaseName := getDatabaseName()
 	if r.CanSwitchDatabase() {
-		reader.InitializeDatabase(dbName)
+		reader.InitializeDatabase(databaseName)
 		CheckForStatus("/", router, 302, t)
-		dbPrefix = "/" + dbName
-		database = databases[dbName]
+		dbPrefix = "/" + databaseName
+		database = databases[databaseName]
 	} else {
-		reader.InitializeDatabase("")
-		database = databases[""]
+		reader.InitializeDatabase(databaseName)
+		database = databases[databaseName]
 
 	}
 	// run a get first to populate the schema cache so we can access supported feature list
@@ -880,6 +882,14 @@ func Test_Http(t *testing.T) {
 	CheckForOk(fmt.Sprintf("%s/tables/%sDataTypeTest/data", dbPrefix, schemaPrefix), router, t)
 	CheckForOk(fmt.Sprintf("%s/tables/%sanalysis_test/analyse-data", dbPrefix, schemaPrefix), router, t)
 	CheckForOk(fmt.Sprintf("%s/table-trail", dbPrefix), router, t)
+}
+
+func getDatabaseName() string {
+	r := reader.GetDbReader()
+	if r.CanSwitchDatabase() {
+		return "ssetest"
+	}
+	return ""
 }
 
 func CheckForOk(path string, router *mux.Router, t *testing.T) {
