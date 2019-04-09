@@ -878,7 +878,7 @@ func Test_Http(t *testing.T) {
 	}
 	CheckForOk(fmt.Sprintf("%s/tables/%sDataTypeTest", dbPrefix, schemaPrefix), router, t)
 	CheckForOk(fmt.Sprintf("%s/tables/%sDataTypeTest/data", dbPrefix, schemaPrefix), router, t)
-	CheckForOk(fmt.Sprintf("%s/tables/%sDataTypeTest/analyse-data", dbPrefix, schemaPrefix), router, t)
+	CheckForOk(fmt.Sprintf("%s/tables/%sanalysis_test/analyse-data", dbPrefix, schemaPrefix), router, t)
 	CheckForOk(fmt.Sprintf("%s/table-trail", dbPrefix), router, t)
 }
 
