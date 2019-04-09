@@ -106,6 +106,7 @@ func (model mysqlModel) ReadSchema(databaseName string) (database *schema.Databa
 			FkNames:              true,
 			PagingWithoutSorting: true,
 		},
+		Name: databaseName,
 	}
 
 	// load table list

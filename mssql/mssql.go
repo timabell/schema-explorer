@@ -117,6 +117,7 @@ func (model mssqlModel) ReadSchema(databaseName string) (database *schema.Databa
 			PagingWithoutSorting: false,
 		},
 		DefaultSchemaName: "dbo",
+		Name:              databaseName,
 	}
 
 	database.Tables, err = getTables(dbc)
