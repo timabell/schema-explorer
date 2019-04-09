@@ -32,22 +32,29 @@
     {{end}}
 </div>
 
-{{if .LayoutData.DbReady}}
 <nav>
     <ul>
+        {{if .LayoutData.CanSwitchDatabase}}
         <li>
-            <a href='/'>
+            <a href='/databases'>
+                <i class="fas fa-clone"></i>
+                Databases</a>
+        </li>
+        {{end}}
+        {{if .LayoutData.DbReady}}
+        <li>
+                <a href='{{if .LayoutData.CanSwitchDatabase}}/{{.LayoutData.DatabaseName}}{{end}}/'>
                 <i class="fas fa-database"></i>
                 Database</a>
         </li>
         <li>
-            <a href='/table-trail'>
+            <a href='{{if .LayoutData.CanSwitchDatabase}}/{{.LayoutData.DatabaseName}}{{end}}/table-trail'>
                 <i class="fas fa-history"></i>
                 Visited Tables</a>
         </li>
+        {{end}}
     </ul>
 </nav>
-{{end}}
 
 {{end}}
 {{block "content" .}}

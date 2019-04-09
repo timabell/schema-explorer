@@ -11,6 +11,8 @@ cd mssql
 popd > /dev/null
 
 export schemaexplorer_driver=mssql
-export schemaexplorer_mssql_connection_string="server=localhost;user id=sa;password=GithubIs2broken;database=ssetest"
+export schemaexplorer_mssql_host=localhost
+export schemaexplorer_mssql_user=sa
+export schemaexplorer_mssql_password=GithubIs2broken
 go clean -testcache
 go test sse_test.go # -test.v

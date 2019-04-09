@@ -1,10 +1,15 @@
 {{define "common-headers"}}
 <div id="justTheDataHeaders">
-    <a href="/" class="context-link"><i class="fas fa-database"></i> {{.LayoutData.ConnectionName}}</a>
+    <a href="{{if .LayoutData.CanSwitchDatabase}}/{{.LayoutData.DatabaseName}}{{end}}/" class="context-link"><i class="fas fa-database"></i> {{.LayoutData.ConnectionName}}</a>
 
     &nbsp; &nbsp; &nbsp;
 
-    <a href="/tables/{{$.Table}}?_rowLimit=100" class="context-link"><i class="fas fa-table"></i> {{.Table.Name}}</a>
+    <a {{if $.LayoutData.CanSwitchDatabase}}
+                href="/{{$.LayoutData.DatabaseName}}/tables/{{$.Table}}?_rowLimit=100"
+            {{else}}
+                href="/tables/{{$.Table}}?_rowLimit=100"
+            {{end}}
+            class="context-link"><i class="fas fa-table"></i> {{.Table.Name}}</a>
 </div>
 {{end}}
 
@@ -15,7 +20,13 @@
             <i class="fas fa-angle-double-down"></i>
             Skip to Data Controls
         </a>
-        <a class="new-window-button button" href="/tables/{{$.Table}}?{{$.TableParams.AsQueryString}}#data">
+        <a class="new-window-button button"
+               {{if $.LayoutData.CanSwitchDatabase}}
+                   href="/{{$.LayoutData.DatabaseName}}/tables/{{$.Table}}?{{$.TableParams.AsQueryString}}#data"
+               {{else}}
+                   href="/tables/{{$.Table}}?{{$.TableParams.AsQueryString}}#data"
+               {{end}}
+            >
             View in context
             <i class="fas fa-expand-arrows-alt"></i>
         </a>

@@ -5,11 +5,13 @@ import (
 	"bitbucket.org/timabell/sql-data-viewer/render"
 	"bitbucket.org/timabell/sql-data-viewer/trail"
 	"fmt"
+	"github.com/gorilla/mux"
 	"net/http"
 )
 
 func TableTrailHandler(resp http.ResponseWriter, req *http.Request) {
-	layoutData, _, err := dbRequestSetup()
+	databaseName := mux.Vars(req)["database"]
+	layoutData, _, err := dbRequestSetup(databaseName)
 	if err != nil {
 		// todo: client error
 		fmt.Println("setup error rendering table: ", err)
@@ -21,10 +23,10 @@ func TableTrailHandler(resp http.ResponseWriter, req *http.Request) {
 	if tablesCsv != "" {
 		trail = trailFromCsv(tablesCsv)
 	} else {
-		trail = ReadTrail(req)
+		trail = ReadTrail(databaseName, req)
 		trail.Dynamic = true
 	}
-	err = render.ShowTableTrail(resp, reader.Database, trail, layoutData)
+	err = render.ShowTableTrail(resp, reader.Databases[databaseName], trail, layoutData)
 	if err != nil {
 		fmt.Println("error rendering trail: ", err)
 		return
@@ -32,6 +34,11 @@ func TableTrailHandler(resp http.ResponseWriter, req *http.Request) {
 }
 
 func ClearTableTrailHandler(resp http.ResponseWriter, req *http.Request) {
-	ClearTrailCookie(resp)
-	http.Redirect(resp, req, "/table-trail", http.StatusFound)
+	databaseName := mux.Vars(req)["database"]
+	ClearTrailCookie(databaseName, resp)
+	var urlPrefix string
+	if databaseName != "" {
+		urlPrefix = "/" + databaseName
+	}
+	http.Redirect(resp, req, urlPrefix+"/table-trail", http.StatusFound)
 }

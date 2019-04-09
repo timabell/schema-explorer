@@ -8,7 +8,7 @@ then
     database="$1"
     shift
 else
-    database="sse-regression-test"
+    database="ssetest"
 fi
 
 if [ "-f" == "$1" ];

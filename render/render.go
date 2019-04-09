@@ -13,18 +13,21 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"net/url"
 	"sort"
 	"strings"
 )
 
 type PageTemplateModel struct {
-	Title          string
-	ConnectionName string
-	About          about.AboutType
-	Copyright      string
-	LicenseText    string
-	Timestamp      string
-	DbReady        bool
+	Title             string
+	ConnectionName    string
+	About             about.AboutType
+	Copyright         string
+	LicenseText       string
+	Timestamp         string
+	CanSwitchDatabase bool
+	DbReady           bool
+	DatabaseName      string
 }
 
 type driverSelectionViewModel struct {
@@ -96,6 +99,17 @@ var tableAnalysisTemplate *template.Template
 var tableTrailTemplate *template.Template
 var selectDriverTemplate *template.Template
 var setupDriverTemplate *template.Template
+
+// global copy for reverse url lookups
+// use empty string for databaseName if not selected, irrelevant or not supported
+// pairs is route values as per gorilla mux's Get()
+type UrlBuilder func(routeName string, database string, pairs []string) *url.URL
+
+var urlBuilder UrlBuilder
+
+func SetRouterFinder(u UrlBuilder) {
+	urlBuilder = u
+}
 
 // Make minus available in templates to be able to convert len to slice index
 // https://stackoverflow.com/a/24838050/10245
@@ -194,33 +208,6 @@ func ShowSetupDriver(resp http.ResponseWriter, layoutData PageTemplateModel, dri
 	}
 }
 
-func RunDatabaseSelection(resp http.ResponseWriter, req *http.Request, databaseName string) {
-	opts := getDriverOptions(*options.Options.Driver)
-
-	for _, option := range opts {
-		if option.LongName == "database" {
-			err := option.Set(&databaseName)
-			if err != nil {
-				log.Fatal(err)
-			}
-		}
-	}
-
-	if options.Options.ConnectionDisplayName == nil {
-		options.Options.ConnectionDisplayName = &databaseName
-	}
-
-	err := reader.InitializeDatabase()
-	if err != nil {
-		log.Print(err)
-		resp.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprintf(resp, "Failed to connect to the selected database.\n\n%s", err)
-		return
-	}
-
-	http.Redirect(resp, req, "/", http.StatusFound)
-}
-
 func RunSetupDriver(resp http.ResponseWriter, req *http.Request, layoutData PageTemplateModel, driver string) {
 	opts := getDriverOptions(driver)
 
@@ -238,22 +225,6 @@ func RunSetupDriver(resp http.ResponseWriter, req *http.Request, layoutData Page
 				options.Options.ConnectionDisplayName = &val
 			}
 		}
-	}
-
-	err := reader.InitializeDatabase()
-	if err != nil {
-		log.Print(err)
-		resp.WriteHeader(http.StatusInternalServerError)
-		errorInfo := fmt.Sprintf("Failed to connect to the selected database.\n\n%s", err)
-		options.Options.Driver = nil
-		ShowSetupDriver(resp, layoutData, driver, errorInfo)
-		return
-	}
-
-	dbReader := reader.GetDbReader()
-	if !dbReader.DatabaseSelected() {
-		http.Redirect(resp, req, "/databases", http.StatusFound)
-		return
 	}
 
 	http.Redirect(resp, req, "/", http.StatusFound)
@@ -302,16 +273,16 @@ func ShowTableList(resp http.ResponseWriter, database *schema.Database, layoutDa
 
 func ShowTable(resp http.ResponseWriter, dbReader reader.DbReader, database *schema.Database, table *schema.Table, tableParams *params.TableParams, layoutData PageTemplateModel, dataOnly bool) error {
 	unfilteredParams := tableParams.ClearPaging()
-	filteredRowCount, err := dbReader.GetRowCount(table, &unfilteredParams)
-	totalRowCount, err := dbReader.GetRowCount(table, &params.TableParams{})
-	rowsData, peekFinder, err := reader.GetRows(dbReader, table, tableParams)
+	filteredRowCount, err := dbReader.GetRowCount(database.Name, table, &unfilteredParams)
+	totalRowCount, err := dbReader.GetRowCount(database.Name, table, &params.TableParams{})
+	rowsData, peekFinder, err := reader.GetRows(dbReader, database.Name, table, tableParams)
 	if err != nil {
 		return err
 	}
 
 	rows := []cells{}
 	for _, rowData := range rowsData {
-		row := buildRow(rowData, peekFinder, table)
+		row := buildRow(database.Name, rowData, peekFinder, table)
 		rows = append(rows, row)
 	}
 
@@ -390,7 +361,7 @@ func ShowTableTrail(resp http.ResponseWriter, database *schema.Database, trailIn
 }
 
 func ShowTableAnalysis(resp http.ResponseWriter, dbReader reader.DbReader, database *schema.Database, table *schema.Table, layoutData PageTemplateModel) error {
-	analysis, err := dbReader.GetAnalysis(table)
+	analysis, err := dbReader.GetAnalysis(database.Name, table)
 	if err != nil {
 		return err
 	}
@@ -412,20 +383,20 @@ func ShowTableAnalysis(resp http.ResponseWriter, dbReader reader.DbReader, datab
 	return nil
 }
 
-func buildRow(rowData reader.RowData, peekFinder *reader.PeekLookup, table *schema.Table) cells {
+func buildRow(databaseName string, rowData reader.RowData, peekFinder *reader.PeekLookup, table *schema.Table) cells {
 	row := cells{}
 	for colIndex, col := range table.Columns {
 		cellData := rowData[colIndex]
-		valueHTML := buildCell(col, cellData, rowData, peekFinder)
+		valueHTML := buildCell(databaseName, col, cellData, rowData, peekFinder)
 		row = append(row, template.HTML(valueHTML))
 	}
-	parentHTML := buildInwardCell(table.InboundFks, rowData, peekFinder)
+	parentHTML := buildInwardCell(databaseName, table.InboundFks, rowData, peekFinder)
 	row = append(row, template.HTML(parentHTML))
 	return row
 }
 
 // Groups fks by source table, adds table name for each followed by links for each inbound fk for that table
-func buildInwardCell(inboundFks []*schema.Fk, rowData []interface{}, peekFinder *reader.PeekLookup) string {
+func buildInwardCell(databaseName string, inboundFks []*schema.Fk, rowData []interface{}, peekFinder *reader.PeekLookup) string {
 	groupedFks := groupFksByTable(inboundFks)
 
 	// note.... for table, fks := range groupedFks { ... is an unstable sort, don't do it this way! https://stackoverflow.com/a/23332089/10245
@@ -445,7 +416,7 @@ func buildInwardCell(inboundFks []*schema.Fk, rowData []interface{}, peekFinder 
 		parentHTML = parentHTML + template.HTMLEscapeString(table.String()) + ":"
 		parentHTML = parentHTML + "</span> "
 		for _, fk := range fks {
-			parentHTML = parentHTML + buildInwardLink(fk, rowData, peekFinder) + " "
+			parentHTML = parentHTML + buildInwardLink(databaseName, fk, rowData, peekFinder) + " "
 		}
 		parentHTML = parentHTML + "<br/>"
 	}
@@ -466,7 +437,7 @@ func groupFksByTable(inboundFks []*schema.Fk) groupedFkMap {
 	return groupedFks
 }
 
-func buildInwardLink(fk *schema.Fk, rowData reader.RowData, peekFinder *reader.PeekLookup) string {
+func buildInwardLink(databaseName string, fk *schema.Fk, rowData reader.RowData, peekFinder *reader.PeekLookup) string {
 	var queryData []string
 	for ix, fkCol := range fk.SourceColumns {
 		destinationCol := fk.DestinationColumns[ix]
@@ -480,13 +451,15 @@ func buildInwardLink(fk *schema.Fk, rowData reader.RowData, peekFinder *reader.P
 	inboundPeekIndex := peekFinder.FindInbound(fk)
 	rowCount := rowData[inboundPeekIndex].(int64)
 	if rowCount > 0 {
-		return fmt.Sprintf("<a href='/tables/%s?%s%s' class='parent-fk-link'>%s - %d rows</a>", fk.SourceTable, joinedQueryData, suffix, fk.SourceColumns, rowCount)
+		var pairs = []string{"tableName", fk.SourceTable.String()}
+		fkUrl := urlBuilder("route-database-tables", databaseName, pairs)
+		return fmt.Sprintf("<a href='%s?%s%s' class='parent-fk-link'>%s - %d rows</a>", fkUrl, joinedQueryData, suffix, fk.SourceColumns, rowCount)
 	} else {
 		return fmt.Sprintf("%s - %d rows", fk.SourceColumns, rowCount)
 	}
 }
 
-func buildCell(col *schema.Column, cellData interface{}, rowData reader.RowData, peekFinder *reader.PeekLookup) string {
+func buildCell(databaseName string, col *schema.Column, cellData interface{}, rowData reader.RowData, peekFinder *reader.PeekLookup) string {
 	if cellData == nil {
 		return "<span class='null bare-value'>[null]</span>"
 	}
@@ -498,21 +471,21 @@ func buildCell(col *schema.Column, cellData interface{}, rowData reader.RowData,
 			valueHTML := "<span class='compound-value'>" + template.HTMLEscapeString(stringValue) + "</span> "
 			for _, fk := range col.Fks {
 				displayText := fmt.Sprintf("%s(%s)", fk.DestinationTable, fk.DestinationColumns)
-				valueHTML = valueHTML + buildCompleteFkHref(fk, multiFk, rowData, displayText, peekFinder)
+				valueHTML = valueHTML + buildCompleteFkHref(databaseName, fk, multiFk, rowData, displayText, peekFinder)
 			}
 			return valueHTML
 		} else {
 			// otherwise put it in the link
 			fk := col.Fks[0]
 			displayText := stringValue
-			return buildCompleteFkHref(fk, multiFk, rowData, displayText, peekFinder)
+			return buildCompleteFkHref(databaseName, fk, multiFk, rowData, displayText, peekFinder)
 		}
 	} else {
 		return "<span class='bare-value'>" + template.HTMLEscapeString(stringValue) + "</span> "
 	}
 }
 
-func buildCompleteFkHref(fk *schema.Fk, multiFk bool, rowData reader.RowData, displayText string, peekFinder *reader.PeekLookup) string {
+func buildCompleteFkHref(databaseName string, fk *schema.Fk, multiFk bool, rowData reader.RowData, displayText string, peekFinder *reader.PeekLookup) string {
 	cssClass := buildFkCss(fk, multiFk)
 	joinedQueryData := buildQueryData(fk, rowData)
 
@@ -531,7 +504,7 @@ func buildCompleteFkHref(fk *schema.Fk, multiFk bool, rowData reader.RowData, di
 		peekHtml = peekHtml + fmt.Sprintf("<span class='peek'>%s</span>", peekString)
 	}
 
-	return buildFkHref(fk.DestinationTable, joinedQueryData, cssClass, displayText, peekHtml)
+	return buildFkHref(databaseName, fk.DestinationTable, joinedQueryData, cssClass, displayText, peekHtml)
 }
 
 func buildFkCss(fk *schema.Fk, multiFkCol bool) string {
@@ -546,9 +519,12 @@ func buildFkCss(fk *schema.Fk, multiFkCol bool) string {
 	}
 }
 
-func buildFkHref(table *schema.Table, query string, cssClass string, displayText string, peekHtml string) string {
+func buildFkHref(databaseName string, table *schema.Table, query string, cssClass string, displayText string, peekHtml string) string {
 	suffix := "&_rowLimit=100#data"
-	return fmt.Sprintf("<a href='/tables/%s?%s%s' class='%s'>%s%s</a> ", table, query, suffix, cssClass, template.HTMLEscapeString(displayText), peekHtml)
+	var fkUrl *url.URL
+	var pairs = []string{"tableName", table.String()}
+	fkUrl = urlBuilder("route-database-tables", databaseName, pairs)
+	return fmt.Sprintf("<a href='%s?%s%s' class='%s'>%s%s</a> ", fkUrl, query, suffix, cssClass, template.HTMLEscapeString(displayText), peekHtml)
 }
 
 func buildQueryData(fk *schema.Fk, rowData reader.RowData) string {

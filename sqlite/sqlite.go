@@ -48,7 +48,7 @@ func newSqlite() reader.DbReader {
 	}
 }
 
-func (model sqliteModel) ReadSchema() (database *schema.Database, err error) {
+func (model sqliteModel) ReadSchema(databaseName string) (database *schema.Database, err error) {
 	dbc, err := getConnection(model.path)
 	if err != nil {
 		return
@@ -118,6 +118,10 @@ func (model sqliteModel) ReadSchema() (database *schema.Database, err error) {
 	return
 }
 
+func (model sqliteModel) CanSwitchDatabase() bool {
+	return false
+}
+
 func (model sqliteModel) ListDatabases() (databaseList []string, err error) {
 	panic("not available for sqlite")
 }
@@ -180,7 +184,15 @@ func getConnection(path string) (dbc *sql.DB, err error) {
 	return
 }
 
-func (model sqliteModel) CheckConnection() (err error) {
+func (model sqliteModel) SetDatabase(databaseName string) {
+	// n/a
+}
+
+func (model sqliteModel) GetDatabaseName() string {
+	return "" // n/a
+}
+
+func (model sqliteModel) CheckConnection(databaseName string) (err error) {
 	dbc, err := getConnection(model.path)
 	if dbc == nil {
 		log.Println(err)
@@ -295,7 +307,7 @@ func getIndexInfo(dbc *sql.DB, index *schema.Index, table *schema.Table) (err er
 	return
 }
 
-func (model sqliteModel) GetSqlRows(table *schema.Table, params *params.TableParams, peekFinder *reader.PeekLookup) (rows *sql.Rows, err error) {
+func (model sqliteModel) GetSqlRows(databaseName string, table *schema.Table, params *params.TableParams, peekFinder *reader.PeekLookup) (rows *sql.Rows, err error) {
 	dbc, err := getConnection(model.path)
 	if err != nil {
 		log.Print("GetRows failed to get connection")
@@ -313,7 +325,7 @@ func (model sqliteModel) GetSqlRows(table *schema.Table, params *params.TablePar
 	return
 }
 
-func (model sqliteModel) GetRowCount(table *schema.Table, params *params.TableParams) (rowCount int, err error) {
+func (model sqliteModel) GetRowCount(databaseName string, table *schema.Table, params *params.TableParams) (rowCount int, err error) {
 	dbc, err := getConnection(model.path)
 	if err != nil {
 		log.Print("GetRows failed to get connection")
@@ -338,7 +350,7 @@ func (model sqliteModel) GetRowCount(table *schema.Table, params *params.TablePa
 	return
 }
 
-func (model sqliteModel) GetAnalysis(table *schema.Table) (analysis []schema.ColumnAnalysis, err error) {
+func (model sqliteModel) GetAnalysis(databaseName string, table *schema.Table) (analysis []schema.ColumnAnalysis, err error) {
 	// todo, might be good to stream this all the way to the http response
 	dbc, err := getConnection(model.path)
 	if err != nil {

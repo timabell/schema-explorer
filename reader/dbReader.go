@@ -16,33 +16,35 @@ import (
 	"strings"
 )
 
-// global in-memory cache of database structure
-var Database *schema.Database
+type SchemaCache map[string]*schema.Database
+
+// Global in-memory cache of database structures, keyed on database name.
+// If multiple databases aren't supported then ignore the name and just use index zero for storage.
+var Databases = make(map[string]*schema.Database)
 
 type DbReader interface {
 	// does select or something to make sure we have a working db connection
-	CheckConnection() (err error)
+	CheckConnection(databaseName string) (err error)
 
 	// parse the whole schema info into memory
-	ReadSchema() (database *schema.Database, err error)
+	ReadSchema(databaseName string) (database *schema.Database, err error)
 
 	// populate the table row counts
 	UpdateRowCounts(database *schema.Database) (err error)
 
 	// get some data, obeying sorting, filtering etc in the table params
-	GetSqlRows(table *schema.Table, params *params.TableParams, peekFinder *PeekLookup) (rows *sql.Rows, err error)
+	GetSqlRows(databaseName string, table *schema.Table, params *params.TableParams, peekFinder *PeekLookup) (rows *sql.Rows, err error)
 
 	// get a count for the supplied filters, for use with paging and overview info
-	GetRowCount(table *schema.Table, params *params.TableParams) (rowCount int, err error)
+	GetRowCount(databaseName string, table *schema.Table, params *params.TableParams) (rowCount int, err error)
 
 	// get breakdown of most common values in each column
-	GetAnalysis(table *schema.Table) (analysis []schema.ColumnAnalysis, err error)
+	GetAnalysis(databaseName string, table *schema.Table) (analysis []schema.ColumnAnalysis, err error)
 
 	// get list of databases on this server (if supported)
 	ListDatabases() (databaseList []string, err error)
 
-	// whether a database has already been chosen
-	DatabaseSelected() bool
+	CanSwitchDatabase() bool
 }
 
 type CreateReader func() DbReader
@@ -71,22 +73,23 @@ func RegisterReader(driver *Driver) {
 	group.EnvNamespace = driver.Name
 }
 
-func InitializeDatabase() (err error) {
+func InitializeDatabase(databaseName string) (err error) {
 	dbReader := GetDbReader()
 	log.Println("Checking database connection...")
-	err = dbReader.CheckConnection()
+	err = dbReader.CheckConnection(databaseName)
 	if err != nil {
 		err = errors.New("check connection failed: " + err.Error())
 		return
 	}
 
 	log.Print("Reading schema, this may take a while...")
-	Database, err = dbReader.ReadSchema()
+	Databases[databaseName], err = dbReader.ReadSchema(databaseName)
 	if err != nil {
 		err = errors.New("error reading schema: " + err.Error())
 		return
 	}
-	setupPeekList(Database)
+	Databases[databaseName].Name = databaseName
+	setupPeekList(Databases[databaseName])
 	return
 }
 
@@ -142,7 +145,7 @@ func GetDbReader() DbReader {
 	return driver.CreateReader()
 }
 
-func GetRows(reader DbReader, table *schema.Table, params *params.TableParams) (rowsData []RowData, peekFinder *PeekLookup, err error) {
+func GetRows(reader DbReader, databaseName string, table *schema.Table, params *params.TableParams) (rowsData []RowData, peekFinder *PeekLookup, err error) {
 	// load up all the fks that we have peek info for
 	peekFinder = &PeekLookup{}
 	inboundPeekCount := 0
@@ -158,7 +161,7 @@ func GetRows(reader DbReader, table *schema.Table, params *params.TableParams) (
 	peekFinder.peekColumnCount = inboundPeekCount + len(table.InboundFks)
 	peekFinder.Table = table
 
-	rows, err := reader.GetSqlRows(table, params, peekFinder)
+	rows, err := reader.GetSqlRows(databaseName, table, params, peekFinder)
 	if rows == nil {
 		panic("GetSqlRows() returned nil")
 	}

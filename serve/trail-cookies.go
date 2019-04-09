@@ -7,22 +7,22 @@ import (
 	"time"
 )
 
-const trailCookieName = "table-trail"
+const trailCookieName = "table-trail-"
 
-func ReadTrail(req *http.Request) *trail.TrailLog {
-	trailCookie, _ := req.Cookie(trailCookieName)
+func ReadTrail(databaseName string, req *http.Request) *trail.TrailLog {
+	trailCookie, _ := req.Cookie(trailCookieName + databaseName)
 	if trailCookie != nil && trailCookie.Value != "" {
 		return trailFromCsv(trailCookie.Value)
 	}
 	return &trail.TrailLog{}
 }
 
-func SetTrailCookie(trail *trail.TrailLog, resp http.ResponseWriter) {
-	trailCookie := &http.Cookie{Name: trailCookieName, Value: trailString(trail), Path: "/"}
+func SetTrailCookie(databaseName string, trail *trail.TrailLog, resp http.ResponseWriter) {
+	trailCookie := &http.Cookie{Name: trailCookieName + databaseName, Value: trailString(trail), Path: "/"}
 	http.SetCookie(resp, trailCookie)
 }
-func ClearTrailCookie(resp http.ResponseWriter) {
-	trailCookie := &http.Cookie{Name: trailCookieName, Value: "", Path: "/", Expires: time.Now().Add(-10000)}
+func ClearTrailCookie(databaseName string, resp http.ResponseWriter) {
+	trailCookie := &http.Cookie{Name: trailCookieName + databaseName, Value: "", Path: "/", Expires: time.Now().Add(-10000)}
 	http.SetCookie(resp, trailCookie)
 }
 

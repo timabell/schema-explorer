@@ -13,6 +13,7 @@ type SupportedFeatures struct {
 }
 
 type Database struct {
+	Name              string // if available, used for url building
 	Tables            []*Table
 	Fks               []*Fk
 	Indexes           []*Index

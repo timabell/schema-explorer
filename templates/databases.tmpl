@@ -1,20 +1,24 @@
 {{define "content"}}
-<h2 id="databaseList">Select a database</h2>
-<form action="/databases/select" method="post">
-<table class="tableList clicky-cells tablesorter">
-    <thead>
-    <tr>
-        <th>Name</th>
-    </tr>
-    </thead>
-    <tbody>
-{{range .DatabaseList}}
-        <tr>
-            <td><button name="database" value='{{.}}'>{{.}}</button></td>
-        </tr>
-{{end}}
-    </tbody>
-</table>
 
-</form>
+{{if .DatabaseList}}
+    <h2 id="databaseList">Select a database</h2>
+    <table class="tableList clicky-cells tablesorter">
+        <thead>
+        <tr>
+            <th>Name</th>
+        </tr>
+        </thead>
+        <tbody>
+    {{range .DatabaseList}}
+            <tr>
+                <td>
+                    <a class="button" href="/{{.}}/">{{.}}</a>
+                </td>
+            </tr>
+    {{end}}
+        </tbody>
+    </table>
+{{else}}
+    <p>No databases found on this server</p>
+{{end}}
 {{end}}

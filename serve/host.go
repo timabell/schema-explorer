@@ -7,12 +7,12 @@ import (
 	"bitbucket.org/timabell/sql-data-viewer/options"
 	"bitbucket.org/timabell/sql-data-viewer/reader"
 	"bitbucket.org/timabell/sql-data-viewer/render"
-	"bitbucket.org/timabell/sql-data-viewer/schema"
 	"fmt"
 	"github.com/gorilla/mux"
 	"log"
 	"net"
 	"net/http"
+	"net/url"
 	"time"
 )
 
@@ -23,21 +23,24 @@ func RunServer() {
 
 // Runs setup code then builds router.
 // Factored out to this combination to be able to test http calls without the built in http server.
-func SetupRouter() (*mux.Router, *schema.Database) {
-	err := Setup()
-	if err != nil {
-		// todo: send 500 error for all requests
-		panic("SetupRouter failed: " + err.Error())
-	}
-	return Router(), reader.Database
-}
-
-func Setup() (err error) {
+func SetupRouter() (*mux.Router, reader.SchemaCache) {
 	render.SetupTemplates()
-	if options.Options.Driver != nil {
-		err = reader.InitializeDatabase()
+	r := Router()
+	f := func(routeName string, databaseName string, pairs []string) *url.URL {
+		if databaseName != "" {
+			dbPair := []string{"database", databaseName}
+			pairs = append(dbPair, pairs...)
+			routeName = "multidb-" + routeName
+		}
+		//log.Printf("Getting route %s", routeName)
+		url, err := r.Get(routeName).URL(pairs...)
+		if err != nil {
+			panic(fmt.Sprintf("route finder failed: %s", err))
+		}
+		return url
 	}
-	return
+	render.SetRouterFinder(f)
+	return r, reader.Databases
 }
 
 func runHttpServer(r *mux.Router) {
@@ -67,19 +70,25 @@ func runHttpServer(r *mux.Router) {
 	log.Fatal(srv.Serve(listener))
 }
 
-func dbRequestSetup() (layoutData render.PageTemplateModel, dbReader reader.DbReader, err error) {
-	layoutData = requestSetup()
+func dbRequestSetup(databaseName string) (layoutData render.PageTemplateModel, dbReader reader.DbReader, err error) {
 	dbReader = reader.GetDbReader()
-	if !isCachingEnabled() {
-		log.Print("Re-reading schema because caching is disabled, this may take a while...")
-		err = reader.InitializeDatabase()
+	if dbReader.CanSwitchDatabase() && databaseName == "" {
+		// no database needed yet, e.g. for database list page
+		layoutData = requestSetup(false, false, databaseName) // turn off top navigation
+		return
 	}
+	// if single database then "" will be db name, which will become the index, otherwise it's the db name
+	if reader.Databases[databaseName] == nil || !isCachingEnabled() {
+		log.Print("Reading schema...")
+		err = reader.InitializeDatabase(databaseName)
+	}
+	layoutData = requestSetup(dbReader.CanSwitchDatabase(), true, databaseName)
 	return
 }
 
-func requestSetup() (layoutData render.PageTemplateModel) {
+func requestSetup(canSwitchDatabase bool, dbReady bool, databaseName string) (layoutData render.PageTemplateModel) {
 	licensing.EnforceLicensing()
-	layoutData = getLayoutData()
+	layoutData = getLayoutData(canSwitchDatabase, dbReady, databaseName)
 	if !isCachingEnabled() {
 		render.SetupTemplates()
 	}
@@ -91,19 +100,23 @@ func isCachingEnabled() bool {
 	return cachingEnabled
 }
 
-func getLayoutData() (layoutData render.PageTemplateModel) {
+func getLayoutData(canSwitchDatabase bool, dbReady bool, databaseName string) (layoutData render.PageTemplateModel) {
 	var connectionName string
 	if options.Options.ConnectionDisplayName != nil {
 		connectionName = *options.Options.ConnectionDisplayName
+	} else if databaseName != "" {
+		connectionName = databaseName
 	}
 	layoutData = render.PageTemplateModel{
-		Title:          connectionName + "|" + about.About.ProductName,
-		ConnectionName: connectionName,
-		About:          about.About,
-		Copyright:      licensing.CopyrightText(),
-		LicenseText:    licensing.LicenseText(),
-		Timestamp:      time.Now().String(),
-		DbReady:        reader.Database != nil,
+		Title:             connectionName + "|" + about.About.ProductName,
+		ConnectionName:    connectionName,
+		About:             about.About,
+		Copyright:         licensing.CopyrightText(),
+		LicenseText:       licensing.LicenseText(),
+		Timestamp:         time.Now().String(),
+		CanSwitchDatabase: canSwitchDatabase,
+		DbReady:           dbReady,
+		DatabaseName:      databaseName,
 	}
 	return
 }
