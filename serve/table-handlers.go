@@ -65,9 +65,9 @@ func TableHandler(resp http.ResponseWriter, req *http.Request, dataOnly bool) {
 		return
 	}
 
-	trail := ReadTrail(req)
+	trail := ReadTrail(databaseName, req)
 	trail.AddTable(table)
-	SetTrailCookie(trail, resp)
+	SetTrailCookie(databaseName, trail, resp)
 
 	err = render.ShowTable(resp, dbReader, reader.Databases[databaseName], table, params, layoutData, dataOnly)
 	if err != nil {

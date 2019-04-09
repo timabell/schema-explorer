@@ -23,7 +23,7 @@ func TableTrailHandler(resp http.ResponseWriter, req *http.Request) {
 	if tablesCsv != "" {
 		trail = trailFromCsv(tablesCsv)
 	} else {
-		trail = ReadTrail(req)
+		trail = ReadTrail(databaseName, req)
 		trail.Dynamic = true
 	}
 	err = render.ShowTableTrail(resp, reader.Databases[databaseName], trail, layoutData)
@@ -34,8 +34,8 @@ func TableTrailHandler(resp http.ResponseWriter, req *http.Request) {
 }
 
 func ClearTableTrailHandler(resp http.ResponseWriter, req *http.Request) {
-	ClearTrailCookie(resp)
 	databaseName := mux.Vars(req)["database"]
+	ClearTrailCookie(databaseName, resp)
 	var urlPrefix string
 	if databaseName != "" {
 		urlPrefix = "/" + databaseName
