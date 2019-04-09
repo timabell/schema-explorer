@@ -8,7 +8,6 @@ import (
 	"bitbucket.org/timabell/sql-data-viewer/schema"
 	"fmt"
 	"github.com/gorilla/mux"
-	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -85,9 +84,7 @@ func RootHandler(resp http.ResponseWriter, req *http.Request) {
 
 	_, dbReader, err := dbRequestSetup("")
 	if err != nil {
-		log.Print(err)
-		resp.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprintf(resp, "Root request setup failed.\n\n%s", err)
+		serverError(resp, "Root request setup failed", err)
 		return
 	}
 
@@ -107,16 +104,12 @@ func DatabaseListHandler(resp http.ResponseWriter, req *http.Request) {
 	}
 	layoutData, dbReader, err := dbRequestSetup("")
 	if err != nil {
-		log.Print(err)
-		resp.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprintf(resp, "Database list request setup failed.\n\n%s", err)
+		serverError(resp, "Database list request setup failed", err)
 		return
 	}
 	databaseList, err := dbReader.ListDatabases()
 	if err != nil {
-		log.Print(err)
-		resp.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprintf(resp, "Error getting list of databases.\n\n%s", err)
+		serverError(resp, "Error getting list of databases", err)
 		return
 	}
 	render.ShowDatabaseList(resp, layoutData, databaseList)
@@ -131,9 +124,7 @@ func TableListHandler(resp http.ResponseWriter, req *http.Request) {
 	databaseName := mux.Vars(req)["database"]
 	layoutData, dbReader, err := dbRequestSetup(databaseName)
 	if err != nil {
-		log.Print(err)
-		resp.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprintf(resp, "Failed to connect to the selected database.\n\n%s", err)
+		serverError(resp, "Failed to connect to the selected database", err)
 		return
 	}
 
@@ -154,10 +145,7 @@ func AnalyseTableHandler(resp http.ResponseWriter, req *http.Request) {
 	databaseName := mux.Vars(req)["database"]
 	layoutData, dbReader, err := dbRequestSetup(databaseName)
 	if err != nil {
-		message := fmt.Sprintf("setup error rendering table: %s", err)
-		log.Print(message)
-		resp.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprint(resp, message)
+		serverError(resp, "setup error rendering table", err)
 		return
 	}
 
@@ -172,10 +160,7 @@ func AnalyseTableHandler(resp http.ResponseWriter, req *http.Request) {
 
 	err = render.ShowTableAnalysis(resp, dbReader, reader.Databases[databaseName], table, layoutData)
 	if err != nil {
-		message := fmt.Sprintf("error rendering table analysis: %s", err)
-		log.Print(message)
-		resp.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprint(resp, message)
+		serverError(resp, "error rendering table analysis", err)
 		return
 	}
 }
