@@ -866,6 +866,7 @@ func Test_Http(t *testing.T) {
 	if r.CanSwitchDatabase() {
 		reader.InitializeDatabase(databaseName)
 		CheckForStatus("/", router, 302, t)
+		CheckForOk("/databases", router, t)
 		dbPrefix = "/" + databaseName
 		database = databases[databaseName]
 	} else {
