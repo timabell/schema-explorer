@@ -161,7 +161,7 @@ func (model mssqlModel) CanSwitchDatabase() bool {
 }
 
 func (model mssqlModel) ListDatabases() (databaseList []string, err error) {
-	sql := "select name from sys.databases where database_id > 4;" // https://stackoverflow.com/questions/147659/get-list-of-databases-from-sql-server/147707#147707
+	sql := "select name from sys.databases where database_id > 4 order by name;" // https://stackoverflow.com/questions/147659/get-list-of-databases-from-sql-server/147707#147707
 
 	dbc, err := getConnection(buildConnectionString(""))
 	if dbc == nil {
