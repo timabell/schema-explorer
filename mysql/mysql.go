@@ -146,7 +146,7 @@ func (model mysqlModel) CanSwitchDatabase() bool {
 }
 
 func (model mysqlModel) ListDatabases() (databaseList []string, err error) {
-	sql := "select schema_name from information_schema.schemata where schema_name not in ('information_schema', 'mysql');"
+	sql := "select schema_name from information_schema.schemata where schema_name not in ('information_schema', 'mysql') order by schema_name;"
 
 	dbc, err := getConnection(buildConnectionString(""))
 	if dbc == nil {
