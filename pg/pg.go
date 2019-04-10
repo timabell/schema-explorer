@@ -150,7 +150,7 @@ func (model pgModel) CanSwitchDatabase() bool {
 }
 
 func (model pgModel) ListDatabases() (databaseList []string, err error) {
-	sql := "select datname from pg_database where datistemplate = false;"
+	sql := "select datname from pg_database where datistemplate = false order by datname;"
 
 	dbc, err := getConnection(buildConnectionString(""))
 	if dbc == nil {
