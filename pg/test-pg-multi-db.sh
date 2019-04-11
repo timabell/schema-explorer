@@ -4,7 +4,8 @@ echo "=================="
 echo "postgres multi-db"
 echo "=================="
 
-(cd pg/ && ./setup-ssetest.sh)
+./setup-ssetest.sh
+cd ..
 
 export schemaexplorer_driver=pg
 # connect with socket and no pre-specified database

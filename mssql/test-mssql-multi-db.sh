@@ -5,11 +5,9 @@ echo "mssql"
 echo "=================="
 
 echo "running mssql/test-setup.sh..."
-pushd . > /dev/null
-cd mssql
 ./test-setup.sh
-popd > /dev/null
 
+cd ..
 export schemaexplorer_driver=mssql
 export schemaexplorer_mssql_host=localhost
 export schemaexplorer_mssql_user=sa

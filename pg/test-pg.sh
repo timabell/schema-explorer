@@ -4,7 +4,8 @@ echo "=================="
 echo "postgres"
 echo "=================="
 
-(cd pg/ && ./setup-ssetest.sh)
+./setup-ssetest.sh
+cd ..
 
 export schemaexplorer_driver=pg
 export schemaexplorer_pg_connection_string="postgres://ssetestusr:ssetestusr@localhost/ssetest"
