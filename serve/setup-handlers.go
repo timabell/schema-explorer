@@ -5,6 +5,7 @@ import (
 	"bitbucket.org/timabell/sql-data-viewer/options"
 	"bitbucket.org/timabell/sql-data-viewer/reader"
 	"bitbucket.org/timabell/sql-data-viewer/render"
+	"fmt"
 	"github.com/gorilla/mux"
 	"net/http"
 )
@@ -63,7 +64,9 @@ func runSetupDriver(resp http.ResponseWriter, req *http.Request, driver string) 
 
 	err := r.CheckConnection("")
 	if err != nil {
-		serverError(resp, "Failed to connect", err)
+		layoutData := requestSetup(false, false, "")
+		driverName := mux.Vars(req)["driver"]
+		render.ShowSetupDriver(resp, layoutData, driverName, fmt.Sprintf("Failed to connect. %s", err))
 		return
 	}
 
