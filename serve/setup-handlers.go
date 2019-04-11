@@ -3,6 +3,7 @@ package serve
 import (
 	"bitbucket.org/timabell/sql-data-viewer/drivers"
 	"bitbucket.org/timabell/sql-data-viewer/options"
+	"bitbucket.org/timabell/sql-data-viewer/reader"
 	"bitbucket.org/timabell/sql-data-viewer/render"
 	"github.com/gorilla/mux"
 	"net/http"
@@ -57,6 +58,13 @@ func runSetupDriver(resp http.ResponseWriter, req *http.Request, driver string) 
 				options.Options.ConnectionDisplayName = val
 			}
 		}
+	}
+	r := reader.GetDbReader()
+
+	err := r.CheckConnection("")
+	if err != nil {
+		serverError(resp, "Failed to connect", err)
+		return
 	}
 
 	http.Redirect(resp, req, "/", http.StatusFound)
