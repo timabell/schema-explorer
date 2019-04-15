@@ -1,4 +1,5 @@
 // +build !darwin
+// +build !skip_sqlite
 
 // This package depends on go-sqlite3 which wraps the C library which I can't
 // get to build for mac so it is excluded with the above build tag.
