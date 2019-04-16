@@ -1,3 +1,5 @@
+// +build !skip_mysql
+
 package mysql
 
 import (

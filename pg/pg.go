@@ -1,3 +1,5 @@
+// +build !skip_pg
+
 package pg
 
 import (

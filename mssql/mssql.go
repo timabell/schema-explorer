@@ -1,3 +1,5 @@
+// +build !skip_mssql
+
 package mssql
 
 import (
