@@ -9,7 +9,7 @@ import (
 	"bitbucket.org/timabell/sql-data-viewer/schema"
 	"bitbucket.org/timabell/sql-data-viewer/trail"
 	"fmt"
-	"github.com/jessevdk/go-flags"
+	"jessevdk/go-flags"
 	"html/template"
 	"log"
 	"net/http"
