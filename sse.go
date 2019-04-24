@@ -20,7 +20,7 @@ import (
 	_ "bitbucket.org/timabell/sql-data-viewer/pg"
 	"bitbucket.org/timabell/sql-data-viewer/serve"
 	_ "bitbucket.org/timabell/sql-data-viewer/sqlite"
-	"github.com/jessevdk/go-flags"
+	"jessevdk/go-flags"
 	"log"
 	"os"
 )

@@ -1,6 +1,6 @@
 package options
 
-import "github.com/jessevdk/go-flags"
+import "jessevdk/go-flags"
 
 func init() {
 	ArgParser.EnvNamespace = "schemaexplorer"
