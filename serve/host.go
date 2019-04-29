@@ -48,6 +48,10 @@ func runHttpServer(r *mux.Router) {
 	if options.Options.ListenOnPort != nil {
 		port = *options.Options.ListenOnPort
 	}
+	address := "localhost" // secure by default - don't listen for connections from other machines
+	if options.Options.ListenOnAddress != nil {
+		address = *options.Options.ListenOnAddress
+	}
 
 	// e.g. localhost:8080 or 0.0.0.0:80
 
@@ -57,14 +61,14 @@ func runHttpServer(r *mux.Router) {
 		ReadTimeout:  300 * time.Second,
 	}
 
-	listener, err := net.Listen("tcp", fmt.Sprintf("%s:%d", *options.Options.ListenOnAddress, port))
+	listener, err := net.Listen("tcp", fmt.Sprintf("%s:%d", address, port))
 	if err != nil {
 		log.Fatal(err)
 	}
 	if port == 0 {
 		port = listener.Addr().(*net.TCPAddr).Port
 	}
-	url := fmt.Sprintf("http://%s:%d/", *options.Options.ListenOnAddress, port)
+	url := fmt.Sprintf("http://%s:%d/", address, port)
 	log.Printf("Starting web-server, point your browser at %s\nPress Ctrl-C to exit schemaexplorer.\n", url)
 	browser.LaunchBrowser(url) // probably won't beat the server coming up.
 	log.Fatal(srv.Serve(listener))
