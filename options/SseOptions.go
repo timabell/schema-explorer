@@ -1,10 +1,6 @@
 package options
 
-import "jessevdk/go-flags"
-
 func init() {
-	ArgParser.EnvNamespace = "schemaexplorer"
-	ArgParser.NamespaceDelimiter = "-"
 }
 
 type SseOptions struct {
@@ -17,4 +13,4 @@ type SseOptions struct {
 }
 
 var Options = &SseOptions{}
-var ArgParser = flags.NewParser(Options, flags.Default)
+//var ArgParser = flags.NewParser(Options, flags.Default)

@@ -3,7 +3,6 @@
 package pg
 
 import (
-	"bitbucket.org/timabell/sql-data-viewer/options"
 	"bitbucket.org/timabell/sql-data-viewer/params"
 	"bitbucket.org/timabell/sql-data-viewer/reader"
 	"bitbucket.org/timabell/sql-data-viewer/schema"
@@ -48,7 +47,6 @@ func (opts pgOpts) hasAnyDetails() bool {
 var opts = &pgOpts{}
 
 func init() {
-	// https://github.com/jessevdk/go-flags/blob/master/group_test.go#L33
 	reader.RegisterReader(&reader.Driver{Name: "pg", Options: opts, CreateReader: newPg, FullName: "Postgres"})
 }
 
@@ -56,7 +54,7 @@ func newPg() reader.DbReader {
 	err := opts.validate()
 	if err != nil {
 		log.Printf("Pg args error: %s", err)
-		options.ArgParser.WriteHelp(os.Stdout)
+		//options.ArgParser.WriteHelp(os.Stdout)
 		os.Exit(1)
 	}
 	log.Println("Connecting to pg db")

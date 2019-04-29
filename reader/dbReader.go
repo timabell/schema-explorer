@@ -65,12 +65,12 @@ var Drivers = make(map[string]*Driver)
 // They should call this in their init() function
 func RegisterReader(driver *Driver) {
 	Drivers[driver.Name] = driver
-	group, err := options.ArgParser.AddGroup(driver.Name, fmt.Sprintf("Options for %s database", driver.Name), driver.Options)
-	if err != nil {
-		panic(err)
-	}
-	group.Namespace = driver.Name
-	group.EnvNamespace = driver.Name
+	//group, err := options.ArgParser.AddGroup(driver.Name, fmt.Sprintf("Options for %s database", driver.Name), driver.Options)
+	//if err != nil {
+	//	panic(err)
+	//}
+	//group.Namespace = driver.Name
+	//group.EnvNamespace = driver.Name
 }
 
 func InitializeDatabase(databaseName string) (err error) {

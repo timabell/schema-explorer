@@ -29,7 +29,6 @@ type sqliteOpts struct {
 var opts = &sqliteOpts{}
 
 func init() {
-	// https://github.com/jessevdk/go-flags/blob/master/group_test.go#L33
 	reader.RegisterReader(&reader.Driver{Name: "sqlite", Options: opts, CreateReader: newSqlite, FullName: "SQLite"})
 }
 

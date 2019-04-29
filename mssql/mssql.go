@@ -34,7 +34,6 @@ type mssqlOpts struct {
 var opts = &mssqlOpts{}
 
 func init() {
-	// https://github.com/jessevdk/go-flags/blob/master/group_test.go#L33
 	reader.RegisterReader(&reader.Driver{Name: "mssql", Options: opts, CreateReader: newMssql, FullName: "Microsoft SQL Server / Azure SQL"})
 }
 
