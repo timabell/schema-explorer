@@ -44,9 +44,30 @@ func main() {
 	//	os.Exit(1)
 	//}
 
-	port := flag.Int("port", 0, "blah")
+	driver := flag.String("driver", "", "Driver to use") // todo: list loaded drivers
+	port := flag.Int("listen-on-port", 0, "Port to listen on. Defaults to random unused high-number.")
+	address := flag.String("listen-on-address", "", "Address to listen on. Set to 0.0.0.0 to allow access to schema-explorer from other computers. Listens on localhost by default only allow connections from this machine.")
+	live := flag.Bool("live", false, "Update html templates & schema information on from every page load.")
+	name := flag.String("display-name", "", "A display name for this connection.")
+	peekPath := flag.String("peek-config-path", "", "Path to peek configuration file. Defaults to the file included with schema explorer.")
+
+	//Driver                *string `short:"d" long:"driver" description:"Driver to use" choice:"mssql" choice:"mysql" choice:"pg" choice:"sqlite" env:"schemaexplorer_driver"`
+	//Live                  *bool   `short:"l" long:"live" description:"update html templates & schema information from disk on every page load" env:"schemaexplorer_live"`
+	//ConnectionDisplayName *string `short:"n" long:"display-name" description:"A display name for this connection" env:"schemaexplorer_display_name"`
+	//ListenOnAddress       *string `short:"a" long:"listen-on-address" description:"address to listen on" default:"localhost" env:"schemaexplorer_listen_on_address"` // localhost so that it's secure by default, only listen for local connections
+	//ListenOnPort          *int    `short:"p" long:"listen-on-port" description:"port to listen on" env:"schemaexplorer_listen_on_port"`
+	//PeekConfigPath        *string `long:"peek-config-path" description:"path to peek configuration file" env:"schemaexplorer_peek_config_path"`
 	flag.Parse()
+	if *driver != "" {
+		options.Options.Driver = driver
+	}
 	options.Options.ListenOnPort = port
+	if *address != "" {
+		options.Options.ListenOnAddress = address
+	}
+	options.Options.Live = live
+	options.Options.ConnectionDisplayName = name
+	options.Options.PeekConfigPath = peekPath
 
 	log.Printf("%s\n  %s\n  %s\n  Feeback/support/contact: <%s>",
 		about.About.Summary(),
