@@ -23,6 +23,7 @@ import (
 	"flag"
 	"log"
 	"os"
+	"strconv"
 )
 
 func main() {
@@ -49,6 +50,31 @@ func main() {
 		envDriver := os.Getenv("schemaexplorer_driver")
 		options.Options.Driver = &envDriver
 	}
+	if os.Getenv("schemaexplorer_listen_on_port") != "" {
+		envPort := os.Getenv("schemaexplorer_listen_on_port")
+		portInt64, err := strconv.ParseInt(envPort, 0, 0)
+		if err != nil {
+			panic(err)
+		}
+		portInt := int(portInt64)
+		options.Options.ListenOnPort = &portInt
+	}
+	if os.Getenv("schemaexplorer_live") != "" {
+		envLive := os.Getenv("schemaexplorer_live")
+		boolLive, err := strconv.ParseBool(envLive)
+		if err != nil {
+			panic(err)
+		}
+		options.Options.Live = &boolLive
+	}
+	if os.Getenv("schemaexplorer_display_name") != "" {
+		envName := os.Getenv("schemaexplorer_display_name")
+		options.Options.ConnectionDisplayName = &envName
+	}
+	if os.Getenv("schemaexplorer_peek_config_path") != "" {
+		envPeek := os.Getenv("schemaexplorer_Peek")
+		options.Options.PeekConfigPath = &envPeek
+	}
 
 	driver := flag.String("driver", "", "Driver to use") // todo: list loaded drivers
 	port := flag.Int("listen-on-port", 0, "Port to listen on. Defaults to random unused high-number.")
@@ -57,12 +83,6 @@ func main() {
 	name := flag.String("display-name", "", "A display name for this connection.")
 	peekPath := flag.String("peek-config-path", "", "Path to peek configuration file. Defaults to the file included with schema explorer.")
 
-	//Driver                *string `short:"d" long:"driver" description:"Driver to use" choice:"mssql" choice:"mysql" choice:"pg" choice:"sqlite" env:"schemaexplorer_driver"`
-	//Live                  *bool   `short:"l" long:"live" description:"update html templates & schema information from disk on every page load" env:"schemaexplorer_live"`
-	//ConnectionDisplayName *string `short:"n" long:"display-name" description:"A display name for this connection" env:"schemaexplorer_display_name"`
-	//ListenOnAddress       *string `short:"a" long:"listen-on-address" description:"address to listen on" default:"localhost" env:"schemaexplorer_listen_on_address"` // localhost so that it's secure by default, only listen for local connections
-	//ListenOnPort          *int    `short:"p" long:"listen-on-port" description:"port to listen on" env:"schemaexplorer_listen_on_port"`
-	//PeekConfigPath        *string `long:"peek-config-path" description:"path to peek configuration file" env:"schemaexplorer_peek_config_path"`
 	flag.Parse()
 	if options.Options.Driver == nil && *driver != "" {
 		options.Options.Driver = driver
