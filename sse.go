@@ -22,6 +22,7 @@ import (
 	_ "bitbucket.org/timabell/sql-data-viewer/sqlite"
 	"flag"
 	"log"
+	"os"
 )
 
 func main() {
@@ -44,6 +45,11 @@ func main() {
 	//	os.Exit(1)
 	//}
 
+	if os.Getenv("schemaexplorer_driver") != "" {
+		envDriver := os.Getenv("schemaexplorer_driver")
+		options.Options.Driver = &envDriver
+	}
+
 	driver := flag.String("driver", "", "Driver to use") // todo: list loaded drivers
 	port := flag.Int("listen-on-port", 0, "Port to listen on. Defaults to random unused high-number.")
 	address := flag.String("listen-on-address", "", "Address to listen on. Set to 0.0.0.0 to allow access to schema-explorer from other computers. Listens on localhost by default only allow connections from this machine.")
@@ -58,7 +64,7 @@ func main() {
 	//ListenOnPort          *int    `short:"p" long:"listen-on-port" description:"port to listen on" env:"schemaexplorer_listen_on_port"`
 	//PeekConfigPath        *string `long:"peek-config-path" description:"path to peek configuration file" env:"schemaexplorer_peek_config_path"`
 	flag.Parse()
-	if *driver != "" {
+	if options.Options.Driver == nil && *driver != "" {
 		options.Options.Driver = driver
 	}
 	options.Options.ListenOnPort = port
