@@ -13,4 +13,5 @@ type SseOptions struct {
 }
 
 var Options = &SseOptions{}
+
 //var ArgParser = flags.NewParser(Options, flags.Default)

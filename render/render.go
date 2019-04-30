@@ -38,7 +38,7 @@ type driverSetupViewModel struct {
 	LayoutData PageTemplateModel
 	Driver     *reader.Driver
 	//Options    []*flags.Option
-	Errors     string
+	Errors string
 }
 
 type databaseListViewModel struct {
@@ -200,7 +200,7 @@ func ShowSetupDriver(resp http.ResponseWriter, layoutData PageTemplateModel, dri
 		LayoutData: layoutData,
 		Driver:     reader.Drivers[driver],
 		//Options:    opts,
-		Errors:     errors,
+		Errors: errors,
 	}
 	err := setupDriverTemplate.ExecuteTemplate(resp, "layout", model)
 	if err != nil {
