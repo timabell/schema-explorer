@@ -9,7 +9,6 @@ package sqlite
 // Sqlite doesn't support schema so table.schema is ignored throughout
 
 import (
-	"bitbucket.org/timabell/sql-data-viewer/options"
 	"bitbucket.org/timabell/sql-data-viewer/params"
 	"bitbucket.org/timabell/sql-data-viewer/reader"
 	"bitbucket.org/timabell/sql-data-viewer/schema"
@@ -18,7 +17,6 @@ import (
 	"fmt"
 	_ "github.com/mattn/go-sqlite3"
 	"log"
-	"os"
 	"strings"
 )
 
@@ -37,11 +35,11 @@ type sqliteModel struct {
 }
 
 func newSqlite() reader.DbReader {
-	if opts.Path == nil {
-		log.Printf("Error: sqlite file is required")
-		options.ArgParser.WriteHelp(os.Stdout)
-		os.Exit(1)
-	}
+	//if opts.Path == nil {
+	//	log.Printf("Error: sqlite file is required")
+	//	options.ArgParser.WriteHelp(os.Stdout)
+	//	os.Exit(1)
+	//}
 	log.Printf("Connecting to sqlite file %s", *opts.Path)
 	return sqliteModel{
 		path: *opts.Path,

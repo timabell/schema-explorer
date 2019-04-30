@@ -3,7 +3,6 @@
 package mysql
 
 import (
-	"bitbucket.org/timabell/sql-data-viewer/options"
 	"bitbucket.org/timabell/sql-data-viewer/params"
 	"bitbucket.org/timabell/sql-data-viewer/reader"
 	"bitbucket.org/timabell/sql-data-viewer/schema"
@@ -12,7 +11,6 @@ import (
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	"log"
-	"os"
 	"strings"
 )
 
@@ -51,12 +49,12 @@ func init() {
 }
 
 func newMysql() reader.DbReader {
-	err := opts.validate()
-	if err != nil {
-		log.Printf("Mysql args error: %s", err)
-		options.ArgParser.WriteHelp(os.Stdout)
-		os.Exit(1)
-	}
+	//err := opts.validate()
+	//if err != nil {
+	//	log.Printf("Mysql args error: %s", err)
+	//	options.ArgParser.WriteHelp(os.Stdout)
+	//	os.Exit(1)
+	//}
 	log.Println("Connecting to mysql db")
 	return mysqlModel{}
 }

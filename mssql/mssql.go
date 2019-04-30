@@ -4,7 +4,6 @@ package mssql
 
 import (
 	"bitbucket.org/timabell/sql-data-viewer/about"
-	"bitbucket.org/timabell/sql-data-viewer/options"
 	"bitbucket.org/timabell/sql-data-viewer/params"
 	"bitbucket.org/timabell/sql-data-viewer/reader"
 	"bitbucket.org/timabell/sql-data-viewer/schema"
@@ -13,7 +12,6 @@ import (
 	"fmt"
 	_ "github.com/denisenkom/go-mssqldb"
 	"log"
-	"os"
 	"strconv"
 	"strings"
 )
@@ -53,12 +51,12 @@ func (opts mssqlOpts) hasAnyDetails() bool {
 }
 
 func newMssql() reader.DbReader {
-	err := opts.validate()
-	if err != nil {
-		log.Printf("Mssql args error: %s", err)
-		options.ArgParser.WriteHelp(os.Stdout)
-		os.Exit(1)
-	}
+	//err := opts.validate()
+	//if err != nil {
+	//	log.Printf("Mssql args error: %s", err)
+	//	options.ArgParser.WriteHelp(os.Stdout)
+	//	os.Exit(1)
+	//}
 	log.Println("Connecting to mssql db")
 	return mssqlModel{}
 }
