@@ -20,6 +20,7 @@ import (
 	_ "bitbucket.org/timabell/sql-data-viewer/pg"
 	"bitbucket.org/timabell/sql-data-viewer/serve"
 	_ "bitbucket.org/timabell/sql-data-viewer/sqlite"
+	"flag"
 	"log"
 )
 
@@ -42,6 +43,10 @@ func main() {
 	//	os.Stdout.WriteString("\n")
 	//	os.Exit(1)
 	//}
+
+	port := flag.Int("port", 0, "blah")
+	flag.Parse()
+	options.Options.ListenOnPort = port
 
 	log.Printf("%s\n  %s\n  %s\n  Feeback/support/contact: <%s>",
 		about.About.Summary(),
