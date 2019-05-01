@@ -87,13 +87,21 @@ func main() {
 	if options.Options.Driver == nil && *driver != "" {
 		options.Options.Driver = driver
 	}
-	options.Options.ListenOnPort = port
-	if *address != "" {
+	if options.Options.ListenOnPort == nil {
+		options.Options.ListenOnPort = port
+	}
+	if options.Options.ListenOnAddress == nil && *address != "" {
 		options.Options.ListenOnAddress = address
 	}
-	options.Options.Live = live
-	options.Options.ConnectionDisplayName = name
-	options.Options.PeekConfigPath = peekPath
+	if options.Options.Live == nil {
+		options.Options.Live = live
+	}
+	if options.Options.ConnectionDisplayName == nil {
+		options.Options.ConnectionDisplayName = name
+	}
+	if options.Options.PeekConfigPath == nil {
+		options.Options.PeekConfigPath = peekPath
+	}
 
 	log.Printf("%s\n  %s\n  %s\n  Feeback/support/contact: <%s>",
 		about.About.Summary(),
