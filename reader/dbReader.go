@@ -54,6 +54,16 @@ type Driver struct {
 	FullName     string
 	CreateReader CreateReader // factory method for creating this driver's DbReader implementation
 	Options      interface{}
+	NewOptions   DriverOpts
+}
+
+// The list of options a driver supports
+type DriverOpts []DriverOpt
+
+type DriverOpt struct {
+	Name        string // set by the driver and used to build UI
+	Description string // set by the driver and used to build UI
+	Value       string // set by the UI for use by the driver
 }
 
 // Single row of data
