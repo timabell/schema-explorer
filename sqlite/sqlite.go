@@ -35,12 +35,7 @@ type sqliteModel struct {
 }
 
 func newSqlite() reader.DbReader {
-	//if opts.Path == nil {
-	//	log.Printf("Error: sqlite file is required")
-	//	options.ArgParser.WriteHelp(os.Stdout)
-	//	os.Exit(1)
-	//}
-	log.Printf("Connecting to sqlite file %s", *opts.Path)
+	//log.Printf("Connecting to sqlite file %s", *opts.Path)
 	return sqliteModel{
 		path: *opts.Path,
 	}
