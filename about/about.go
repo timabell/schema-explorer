@@ -12,7 +12,7 @@ var About = AboutType{
 	ProductName: "Sql Schema Explorer",
 	Version:     "0.63-" + gitVersion,
 	Website:     "http://schemaexplorer.io/",
-	Email:       "sse@timwise.co.uk",
+	Email:       "tim@schemaexplorer.io",
 }
 
 func (about AboutType) Summary() string {
