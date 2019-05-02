@@ -111,7 +111,7 @@
             cy.panningEnabled(false);
         });
         cy.on('tap','node',function(e){
-            window.location = '/tables/' + e.target.data().id + '?_rowLimit=100';
+            window.location = '{{if .LayoutData.CanSwitchDatabase}}/{{.LayoutData.DatabaseName}}{{end}}/tables/' + e.target.data().id + '?_rowLimit=100';
         });
         // https://stackoverflow.com/questions/19532031/how-do-i-change-cursor-to-pointer-when-mouse-is-over-a-node/51235755#51235755
         cy.on('mouseover', 'node', function(e){

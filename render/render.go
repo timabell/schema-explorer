@@ -57,6 +57,7 @@ type tableListViewModel struct {
 type diagramViewModel struct {
 	Tables     []*schema.Table
 	TableLinks []fkViewModel
+	LayoutData PageTemplateModel
 }
 
 type fkViewModel struct {
@@ -262,7 +263,7 @@ func ShowTableList(resp http.ResponseWriter, database *schema.Database, layoutDa
 	model := tableListViewModel{
 		LayoutData: layoutData,
 		Database:   database,
-		Diagram:    diagramViewModel{Tables: database.Tables, TableLinks: tableLinks},
+		Diagram:    diagramViewModel{Tables: database.Tables, TableLinks: tableLinks, LayoutData: layoutData},
 	}
 
 	err := tablesTemplate.ExecuteTemplate(resp, "layout", model)
@@ -310,7 +311,7 @@ func ShowTable(resp http.ResponseWriter, dbReader reader.DbReader, database *sch
 		DisplayedRowCount: len(rows),
 		HasPrevPage:       tableParams.SkipRows > 0,
 		HasNextPage:       tableParams.ToRow() < filteredRowCount,
-		Diagram:           diagramViewModel{Tables: diagramTables, TableLinks: tableLinks},
+		Diagram:           diagramViewModel{Tables: diagramTables, TableLinks: tableLinks, LayoutData: layoutData},
 	}
 
 	viewModel.LayoutData.Title = fmt.Sprintf("%s | %s", table.String(), viewModel.LayoutData.Title)
@@ -345,7 +346,7 @@ func ShowTableTrail(resp http.ResponseWriter, database *schema.Database, trailIn
 
 	viewModel := trailViewModel{
 		LayoutData: layoutData,
-		Diagram:    diagramViewModel{Tables: diagramTables, TableLinks: tableLinks},
+		Diagram:    diagramViewModel{Tables: diagramTables, TableLinks: tableLinks, LayoutData: layoutData},
 		Trail:      trailInfo,
 	}
 
