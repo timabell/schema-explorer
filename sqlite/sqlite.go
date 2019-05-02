@@ -20,14 +20,16 @@ import (
 	"strings"
 )
 
-type sqliteOpts struct {
-	Path *string `short:"f" long:"file" description:"Path to sqlite db file" env:"file"`
+var pathVal = ""
+
+const filePathConfigKey = "file"
+
+var newOpts = reader.DriverOpts{
+	filePathConfigKey: reader.DriverOpt{Description: "Path to sqlite db file", Value: &pathVal},
 }
 
-var opts = &sqliteOpts{}
-
 func init() {
-	reader.RegisterReader(&reader.Driver{Name: "sqlite", Options: opts, CreateReader: newSqlite, FullName: "SQLite"})
+	reader.RegisterReader(&reader.Driver{Name: "sqlite", NewOptions: newOpts, CreateReader: newSqlite, FullName: "SQLite"})
 }
 
 type sqliteModel struct {
@@ -35,10 +37,9 @@ type sqliteModel struct {
 }
 
 func newSqlite() reader.DbReader {
-	//log.Printf("Connecting to sqlite file %s", *opts.Path)
-	return sqliteModel{
-		path: *opts.Path,
-	}
+	path := newOpts[filePathConfigKey].Value
+	log.Printf("Connecting to sqlite file: '%s'", path)
+	return sqliteModel{path: *path}
 }
 
 func (model sqliteModel) ReadSchema(databaseName string) (database *schema.Database, err error) {
@@ -186,6 +187,9 @@ func (model sqliteModel) GetDatabaseName() string {
 }
 
 func (model sqliteModel) CheckConnection(databaseName string) (err error) {
+	if model.path == "" {
+		return errors.New("sqlite file path not set")
+	}
 	dbc, err := getConnection(model.path)
 	if dbc == nil {
 		log.Println(err)

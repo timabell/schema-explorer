@@ -18,12 +18,15 @@ import (
 	_ "bitbucket.org/timabell/sql-data-viewer/mysql"
 	"bitbucket.org/timabell/sql-data-viewer/options"
 	_ "bitbucket.org/timabell/sql-data-viewer/pg"
+	"bitbucket.org/timabell/sql-data-viewer/reader"
 	"bitbucket.org/timabell/sql-data-viewer/serve"
 	_ "bitbucket.org/timabell/sql-data-viewer/sqlite"
 	"flag"
+	"fmt"
 	"log"
 	"os"
 	"strconv"
+	"strings"
 )
 
 func main() {
@@ -76,7 +79,18 @@ func main() {
 		options.Options.PeekConfigPath = &envPeek
 	}
 
-	driver := flag.String("driver", "", "Driver to use") // todo: list loaded drivers
+	var driverStrings []string
+	for _, driver := range reader.Drivers {
+		driverStrings = append(driverStrings, driver.Name)
+	}
+	for _, driver := range reader.Drivers {
+		for key, driverOpt := range driver.NewOptions {
+			flag.StringVar(driverOpt.Value, fmt.Sprintf("%s-%s", driver.Name, key), "", driverOpt.Description)
+		}
+	}
+
+	supportedDrivers := strings.Join(driverStrings, ", ")
+	driver := flag.String("driver", "", "Driver to use. Available drivers: "+supportedDrivers)
 	port := flag.Int("listen-on-port", 0, "Port to listen on. Defaults to random unused high-number.")
 	address := flag.String("listen-on-address", "", "Address to listen on. Set to 0.0.0.0 to allow access to schema-explorer from other computers. Listens on localhost by default only allow connections from this machine.")
 	live := flag.Bool("live", false, "Update html templates & schema information on from every page load.")
@@ -84,6 +98,20 @@ func main() {
 	peekPath := flag.String("peek-config-path", "", "Path to peek configuration file. Defaults to the file included with schema explorer.")
 
 	flag.Parse()
+
+	for _, driver := range reader.Drivers {
+		for key, driverOpt := range driver.NewOptions {
+			if *driverOpt.Value != ""{
+				continue // command line flags take precedence over environment
+			}
+			envKey := fmt.Sprintf("schemaexplorer_%s_%s", driver.Name, strings.Replace(key, "-", "_", 0))
+			if os.Getenv(envKey) != "" {
+				envValue := os.Getenv(envKey)
+				*driverOpt.Value = envValue
+			}
+		}
+	}
+
 	if options.Options.Driver == nil && *driver != "" {
 		options.Options.Driver = driver
 	}
