@@ -43,6 +43,27 @@ func SetupArgs() {
 	//	os.Exit(1)
 	//}
 
+	var driverStrings []string
+	for _, driver := range reader.Drivers {
+		driverStrings = append(driverStrings, driver.Name)
+	}
+	supportedDrivers := strings.Join(driverStrings, ", ")
+	driver = flag.String("driver", "", "Driver to use. Available drivers: "+supportedDrivers)
+	port = flag.Int("listen-on-port", 0, "Port to listen on. Defaults to random unused high-number.")
+	address = flag.String("listen-on-address", "", "Address to listen on. Set to 0.0.0.0 to allow access to schema-explorer from other computers. Listens on localhost by default only allow connections from this machine.")
+	live = flag.Bool("live", false, "Update html templates & schema information on from every page load.")
+	name = flag.String("display-name", "", "A display name for this connection.")
+	peekPath = flag.String("peek-config-path", "", "Path to peek configuration file. Defaults to the file included with schema explorer.")
+}
+
+var driver *string
+var port *int
+var address *string
+var live *bool
+var name *string
+var peekPath *string
+
+func ReadArgs() {
 	if os.Getenv("schemaexplorer_driver") != "" {
 		envDriver := os.Getenv("schemaexplorer_driver")
 		Options.Driver = &envDriver
@@ -73,34 +94,12 @@ func SetupArgs() {
 		Options.PeekConfigPath = &envPeek
 	}
 
-	var driverStrings []string
-	drivers := reader.Drivers
-	for _, driver := range drivers {
-		driverStrings = append(driverStrings, driver.Name)
-	}
-	for _, driver := range drivers {
+	for _, driver := range reader.Drivers {
 		for key, driverOpt := range driver.NewOptions {
 			flag.StringVar(driverOpt.Value, fmt.Sprintf("%s-%s", driver.Name, key), "", driverOpt.Description)
 		}
 	}
 
-	supportedDrivers := strings.Join(driverStrings, ", ")
-	driver = flag.String("driver", "", "Driver to use. Available drivers: "+supportedDrivers)
-	port = flag.Int("listen-on-port", 0, "Port to listen on. Defaults to random unused high-number.")
-	address = flag.String("listen-on-address", "", "Address to listen on. Set to 0.0.0.0 to allow access to schema-explorer from other computers. Listens on localhost by default only allow connections from this machine.")
-	live = flag.Bool("live", false, "Update html templates & schema information on from every page load.")
-	name = flag.String("display-name", "", "A display name for this connection.")
-	peekPath = flag.String("peek-config-path", "", "Path to peek configuration file. Defaults to the file included with schema explorer.")
-}
-
-var driver *string
-var port *int
-var address *string
-var live *bool
-var name *string
-var peekPath *string
-
-func ReadArgs() {
 	flag.Parse()
 
 	for _, driver := range reader.Drivers {

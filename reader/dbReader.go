@@ -1,6 +1,7 @@
 package reader
 
 import (
+	"bitbucket.org/timabell/sql-data-viewer/drivers"
 	"bitbucket.org/timabell/sql-data-viewer/options"
 	"bitbucket.org/timabell/sql-data-viewer/params"
 	"bitbucket.org/timabell/sql-data-viewer/resources"
@@ -47,34 +48,13 @@ type DbReader interface {
 	CanSwitchDatabase() bool
 }
 
-type CreateReader func() DbReader
-
-type Driver struct {
-	Name         string
-	FullName     string
-	CreateReader CreateReader // factory method for creating this driver's DbReader implementation
-	Options      interface{}  // todo: remove
-	NewOptions   DriverOpts
-}
-
-// The list of options a driver supports
-// Key is the name of the option
-type DriverOpts map[string]DriverOpt
-
-type DriverOpt struct {
-	Description string  // set by the driver and used to build UI
-	Value       *string // set by the UI for use by the driver
-}
-
 // Single row of data
 type RowData []interface{}
 
-var Drivers = make(map[string]*Driver)
-
 // This is how implementations for reading different RDBMS systems can register themselves.
 // They should call this in their init() function
-func RegisterReader(driver *Driver) {
-	Drivers[driver.Name] = driver
+func RegisterReader(driver *drivers.Driver) {
+	drivers.Drivers[driver.Name] = driver
 	//group, err := options.ArgParser.AddGroup(driver.Name, fmt.Sprintf("Options for %s database", driver.Name), driver.Options)
 	//if err != nil {
 	//	panic(err)
@@ -147,7 +127,7 @@ func GetDbReader() DbReader {
 	if options.Options == nil || (*options.Options).Driver == nil {
 		panic("driver option missing")
 	}
-	driver := Drivers[*options.Options.Driver]
+	driver := drivers.Drivers[*options.Options.Driver]
 	if driver == nil {
 		log.Printf("Unknown reader '%s'", *options.Options.Driver)
 		os.Exit(1)
