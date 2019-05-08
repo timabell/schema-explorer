@@ -38,7 +38,6 @@ import (
 	"log"
 	"net/http"
 	"net/http/httptest"
-	"os"
 	"reflect"
 	"strings"
 	"testing"
@@ -48,12 +47,13 @@ var testDb string
 var testDbDriver string
 
 func init() {
-	_, err := options.ArgParser.ParseArgs([]string{})
-	if err != nil {
-		os.Stderr.WriteString("Note that running sse under test only supports environment variables because command line args clash with the go-test args.\n\n")
-		options.ArgParser.WriteHelp(os.Stdout)
-		os.Exit(1)
-	}
+	options.SetupArgs()
+	options.ReadArgs()
+	//if err != nil {
+	//	os.Stderr.WriteString("Note that running sse under test only supports environment variables because command line args clash with the go-test args.\n\n")
+	//	options.ArgParser.WriteHelp(os.Stdout)
+	//	os.Exit(1)
+	//}
 	log.Printf("%s is the driver", *options.Options.Driver)
 }
 
