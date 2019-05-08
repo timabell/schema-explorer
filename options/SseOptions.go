@@ -1,7 +1,7 @@
 package options
 
 import (
-	"bitbucket.org/timabell/sql-data-viewer/reader"
+	"bitbucket.org/timabell/sql-data-viewer/drivers"
 	"flag"
 	"fmt"
 	"os"
@@ -44,7 +44,7 @@ func SetupArgs() {
 	//}
 
 	var driverStrings []string
-	for _, driver := range reader.Drivers {
+	for _, driver := range drivers.Drivers {
 		driverStrings = append(driverStrings, driver.Name)
 	}
 	supportedDrivers := strings.Join(driverStrings, ", ")
@@ -94,7 +94,7 @@ func ReadArgs() {
 		Options.PeekConfigPath = &envPeek
 	}
 
-	for _, driver := range reader.Drivers {
+	for _, driver := range drivers.Drivers {
 		for key, driverOpt := range driver.NewOptions {
 			flag.StringVar(driverOpt.Value, fmt.Sprintf("%s-%s", driver.Name, key), "", driverOpt.Description)
 		}
@@ -102,7 +102,7 @@ func ReadArgs() {
 
 	flag.Parse()
 
-	for _, driver := range reader.Drivers {
+	for _, driver := range drivers.Drivers {
 		for key, driverOpt := range driver.NewOptions {
 			if *driverOpt.Value != "" {
 				continue // command line flags take precedence over environment

@@ -4,6 +4,8 @@ package mssql
 
 import (
 	"bitbucket.org/timabell/sql-data-viewer/about"
+	"bitbucket.org/timabell/sql-data-viewer/driver_interface"
+	"bitbucket.org/timabell/sql-data-viewer/drivers"
 	"bitbucket.org/timabell/sql-data-viewer/params"
 	"bitbucket.org/timabell/sql-data-viewer/reader"
 	"bitbucket.org/timabell/sql-data-viewer/schema"
@@ -32,7 +34,7 @@ type mssqlOpts struct {
 var opts = &mssqlOpts{}
 
 func init() {
-	reader.RegisterReader(&reader.Driver{Name: "mssql", Options: opts, CreateReader: newMssql, FullName: "Microsoft SQL Server / Azure SQL"})
+	reader.RegisterReader(&drivers.Driver{Name: "mssql", Options: opts, CreateReader: newMssql, FullName: "Microsoft SQL Server / Azure SQL"})
 }
 
 func (opts mssqlOpts) validate() error {
@@ -50,7 +52,7 @@ func (opts mssqlOpts) hasAnyDetails() bool {
 		opts.Password != nil
 }
 
-func newMssql() reader.DbReader {
+func newMssql() driver_interface.DbReader {
 	//err := opts.validate()
 	//if err != nil {
 	//	log.Printf("Mssql args error: %s", err)
@@ -369,7 +371,7 @@ func allFks(dbc *sql.DB, database *schema.Database) (allFks []*schema.Fk, err er
 	return
 }
 
-func (model mssqlModel) GetSqlRows(databaseName string, table *schema.Table, params *params.TableParams, peekFinder *reader.PeekLookup) (rows *sql.Rows, err error) {
+func (model mssqlModel) GetSqlRows(databaseName string, table *schema.Table, params *params.TableParams, peekFinder *driver_interface.PeekLookup) (rows *sql.Rows, err error) {
 	dbc, err := getConnection(buildConnectionString(databaseName))
 	if dbc == nil {
 		log.Println(err)
@@ -404,7 +406,7 @@ func (model mssqlModel) GetRowCount(databaseName string, table *schema.Table, pa
 	}
 	defer dbc.Close()
 
-	sql, values := buildQuery(table, params, &reader.PeekLookup{})
+	sql, values := buildQuery(table, params, &driver_interface.PeekLookup{})
 	sql = "select count(*) from (" + sql + ") as x"
 	rows, err := dbc.Query(sql, values...)
 	if err != nil {
@@ -457,7 +459,7 @@ func (model mssqlModel) GetAnalysis(databaseName string, table *schema.Table) (a
 	return
 }
 
-func buildQuery(table *schema.Table, params *params.TableParams, peekFinder *reader.PeekLookup) (sql string, values []interface{}) {
+func buildQuery(table *schema.Table, params *params.TableParams, peekFinder *driver_interface.PeekLookup) (sql string, values []interface{}) {
 	// Limitation: we can't support paging (offset/skip) without a sort order so
 	// 		params.SkipRows will be ignored if there is no sorting supplied.
 	// As a less performant alternative to keep things consistent we'll fetch the preceding rows and throw them away

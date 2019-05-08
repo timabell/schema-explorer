@@ -1,6 +1,6 @@
 package drivers
 
-import "bitbucket.org/timabell/sql-data-viewer/reader"
+import "bitbucket.org/timabell/sql-data-viewer/driver_interface"
 
 type Driver struct {
 	Name         string
@@ -21,4 +21,4 @@ type DriverOpt struct {
 
 var Drivers = make(map[string]*Driver)
 
-type CreateReader func() reader.DbReader
+type CreateReader func() driver_interface.DbReader

@@ -2,6 +2,8 @@ package render
 
 import (
 	"bitbucket.org/timabell/sql-data-viewer/about"
+	"bitbucket.org/timabell/sql-data-viewer/driver_interface"
+	"bitbucket.org/timabell/sql-data-viewer/drivers"
 	"bitbucket.org/timabell/sql-data-viewer/options"
 	"bitbucket.org/timabell/sql-data-viewer/params"
 	"bitbucket.org/timabell/sql-data-viewer/reader"
@@ -31,12 +33,12 @@ type PageTemplateModel struct {
 
 type driverSelectionViewModel struct {
 	LayoutData PageTemplateModel
-	Drivers    []*reader.Driver
+	Drivers    []*drivers.Driver
 }
 
 type driverSetupViewModel struct {
 	LayoutData PageTemplateModel
-	Driver     *reader.Driver
+	Driver     *drivers.Driver
 	//Options    []*flags.Option
 	Errors string
 }
@@ -179,18 +181,18 @@ func ShowSelectDriver(resp http.ResponseWriter, layoutData PageTemplateModel) {
 	}
 }
 
-func getDrivers() []*reader.Driver {
-	var drivers []*reader.Driver
+func getDrivers() []*drivers.Driver {
+	var driverList []*drivers.Driver
 	// stable sort:
 	var keys []string
-	for name, _ := range reader.Drivers {
+	for name, _ := range drivers.Drivers {
 		keys = append(keys, name)
 	}
 	sort.Strings(keys)
 	for _, name := range keys {
-		drivers = append(drivers, reader.Drivers[name])
+		driverList = append(driverList, drivers.Drivers[name])
 	}
-	return drivers
+	return driverList
 }
 
 func ShowSetupDriver(resp http.ResponseWriter, layoutData PageTemplateModel, driver string, errors string) {
@@ -198,7 +200,7 @@ func ShowSetupDriver(resp http.ResponseWriter, layoutData PageTemplateModel, dri
 
 	model := driverSetupViewModel{
 		LayoutData: layoutData,
-		Driver:     reader.Drivers[driver],
+		Driver:     drivers.Drivers[driver],
 		//Options:    opts,
 		Errors: errors,
 	}
@@ -271,7 +273,7 @@ func ShowTableList(resp http.ResponseWriter, database *schema.Database, layoutDa
 	}
 }
 
-func ShowTable(resp http.ResponseWriter, dbReader reader.DbReader, database *schema.Database, table *schema.Table, tableParams *params.TableParams, layoutData PageTemplateModel, dataOnly bool) error {
+func ShowTable(resp http.ResponseWriter, dbReader driver_interface.DbReader, database *schema.Database, table *schema.Table, tableParams *params.TableParams, layoutData PageTemplateModel, dataOnly bool) error {
 	unfilteredParams := tableParams.ClearPaging()
 	filteredRowCount, err := dbReader.GetRowCount(database.Name, table, &unfilteredParams)
 	totalRowCount, err := dbReader.GetRowCount(database.Name, table, &params.TableParams{})
@@ -360,7 +362,7 @@ func ShowTableTrail(resp http.ResponseWriter, database *schema.Database, trailIn
 	return nil
 }
 
-func ShowTableAnalysis(resp http.ResponseWriter, dbReader reader.DbReader, database *schema.Database, table *schema.Table, layoutData PageTemplateModel) error {
+func ShowTableAnalysis(resp http.ResponseWriter, dbReader driver_interface.DbReader, database *schema.Database, table *schema.Table, layoutData PageTemplateModel) error {
 	analysis, err := dbReader.GetAnalysis(database.Name, table)
 	if err != nil {
 		return err
@@ -383,7 +385,7 @@ func ShowTableAnalysis(resp http.ResponseWriter, dbReader reader.DbReader, datab
 	return nil
 }
 
-func buildRow(databaseName string, rowData reader.RowData, peekFinder *reader.PeekLookup, table *schema.Table) cells {
+func buildRow(databaseName string, rowData reader.RowData, peekFinder *driver_interface.PeekLookup, table *schema.Table) cells {
 	row := cells{}
 	for colIndex, col := range table.Columns {
 		cellData := rowData[colIndex]
@@ -396,7 +398,7 @@ func buildRow(databaseName string, rowData reader.RowData, peekFinder *reader.Pe
 }
 
 // Groups fks by source table, adds table name for each followed by links for each inbound fk for that table
-func buildInwardCell(databaseName string, inboundFks []*schema.Fk, rowData []interface{}, peekFinder *reader.PeekLookup) string {
+func buildInwardCell(databaseName string, inboundFks []*schema.Fk, rowData []interface{}, peekFinder *driver_interface.PeekLookup) string {
 	groupedFks := groupFksByTable(inboundFks)
 
 	// note.... for table, fks := range groupedFks { ... is an unstable sort, don't do it this way! https://stackoverflow.com/a/23332089/10245
@@ -437,7 +439,7 @@ func groupFksByTable(inboundFks []*schema.Fk) groupedFkMap {
 	return groupedFks
 }
 
-func buildInwardLink(databaseName string, fk *schema.Fk, rowData reader.RowData, peekFinder *reader.PeekLookup) string {
+func buildInwardLink(databaseName string, fk *schema.Fk, rowData reader.RowData, peekFinder *driver_interface.PeekLookup) string {
 	var queryData []string
 	for ix, fkCol := range fk.SourceColumns {
 		destinationCol := fk.DestinationColumns[ix]
@@ -459,7 +461,7 @@ func buildInwardLink(databaseName string, fk *schema.Fk, rowData reader.RowData,
 	}
 }
 
-func buildCell(databaseName string, col *schema.Column, cellData interface{}, rowData reader.RowData, peekFinder *reader.PeekLookup) string {
+func buildCell(databaseName string, col *schema.Column, cellData interface{}, rowData reader.RowData, peekFinder *driver_interface.PeekLookup) string {
 	if cellData == nil {
 		return "<span class='null bare-value'>[null]</span>"
 	}
@@ -485,7 +487,7 @@ func buildCell(databaseName string, col *schema.Column, cellData interface{}, ro
 	}
 }
 
-func buildCompleteFkHref(databaseName string, fk *schema.Fk, multiFk bool, rowData reader.RowData, displayText string, peekFinder *reader.PeekLookup) string {
+func buildCompleteFkHref(databaseName string, fk *schema.Fk, multiFk bool, rowData reader.RowData, displayText string, peekFinder *driver_interface.PeekLookup) string {
 	cssClass := buildFkCss(fk, multiFk)
 	joinedQueryData := buildQueryData(fk, rowData)
 

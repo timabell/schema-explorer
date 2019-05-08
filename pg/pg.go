@@ -3,6 +3,8 @@
 package pg
 
 import (
+	"bitbucket.org/timabell/sql-data-viewer/driver_interface"
+	"bitbucket.org/timabell/sql-data-viewer/drivers"
 	"bitbucket.org/timabell/sql-data-viewer/params"
 	"bitbucket.org/timabell/sql-data-viewer/reader"
 	"bitbucket.org/timabell/sql-data-viewer/schema"
@@ -47,10 +49,10 @@ func (opts pgOpts) hasAnyDetails() bool {
 var opts = &pgOpts{}
 
 func init() {
-	reader.RegisterReader(&reader.Driver{Name: "pg", Options: opts, CreateReader: newPg, FullName: "Postgres"})
+	reader.RegisterReader(&drivers.Driver{Name: "pg", Options: opts, CreateReader: newPg, FullName: "Postgres"})
 }
 
-func newPg() reader.DbReader {
+func newPg() driver_interface.DbReader {
 	err := opts.validate()
 	if err != nil {
 		log.Printf("Pg args error: %s", err)
@@ -401,7 +403,7 @@ func readIndexes(dbc *sql.DB, database *schema.Database) (err error) {
 	return
 }
 
-func (model pgModel) GetSqlRows(databaseName string, table *schema.Table, params *params.TableParams, peekFinder *reader.PeekLookup) (rows *sql.Rows, err error) {
+func (model pgModel) GetSqlRows(databaseName string, table *schema.Table, params *params.TableParams, peekFinder *driver_interface.PeekLookup) (rows *sql.Rows, err error) {
 	dbc, err := getConnection(buildConnectionString(databaseName))
 	if err != nil {
 		log.Print("GetRows failed to get connection")
@@ -427,7 +429,7 @@ func (model pgModel) GetRowCount(databaseName string, table *schema.Table, param
 	}
 	defer dbc.Close()
 
-	sql, values := buildQuery(table, params, &reader.PeekLookup{})
+	sql, values := buildQuery(table, params, &driver_interface.PeekLookup{})
 	sql = "select count(*) from (" + sql + ") as x"
 	rows, err := dbc.Query(sql, values...)
 	if err != nil {
@@ -481,7 +483,7 @@ func (model pgModel) GetAnalysis(databaseName string, table *schema.Table) (anal
 	return
 }
 
-func buildQuery(table *schema.Table, params *params.TableParams, peekFinder *reader.PeekLookup) (sql string, values []interface{}) {
+func buildQuery(table *schema.Table, params *params.TableParams, peekFinder *driver_interface.PeekLookup) (sql string, values []interface{}) {
 	sql = "select t.*"
 
 	// peek cols

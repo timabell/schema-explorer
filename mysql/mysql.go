@@ -3,6 +3,8 @@
 package mysql
 
 import (
+	"bitbucket.org/timabell/sql-data-viewer/driver_interface"
+	"bitbucket.org/timabell/sql-data-viewer/drivers"
 	"bitbucket.org/timabell/sql-data-viewer/params"
 	"bitbucket.org/timabell/sql-data-viewer/reader"
 	"bitbucket.org/timabell/sql-data-viewer/schema"
@@ -45,10 +47,10 @@ func (opts mysqlOpts) hasAnyDetails() bool {
 var opts = &mysqlOpts{}
 
 func init() {
-	reader.RegisterReader(&reader.Driver{Name: "mysql", Options: opts, CreateReader: newMysql, FullName: "MySql"})
+	reader.RegisterReader(&drivers.Driver{Name: "mysql", Options: opts, CreateReader: newMysql, FullName: "MySql"})
 }
 
-func newMysql() reader.DbReader {
+func newMysql() driver_interface.DbReader {
 	//err := opts.validate()
 	//if err != nil {
 	//	log.Printf("Mysql args error: %s", err)
@@ -371,7 +373,7 @@ func readIndexes(dbc *sql.DB, database *schema.Database) (err error) {
 	return
 }
 
-func (model mysqlModel) GetSqlRows(databaseName string, table *schema.Table, params *params.TableParams, peekFinder *reader.PeekLookup) (rows *sql.Rows, err error) {
+func (model mysqlModel) GetSqlRows(databaseName string, table *schema.Table, params *params.TableParams, peekFinder *driver_interface.PeekLookup) (rows *sql.Rows, err error) {
 	dbc, err := getConnection(buildConnectionString(databaseName))
 	if err != nil {
 		log.Print("GetRows failed to get connection")
@@ -403,7 +405,7 @@ func (model mysqlModel) GetRowCount(databaseName string, table *schema.Table, pa
 	}
 	defer dbc.Close()
 
-	sql, values := buildQuery(table, params, &reader.PeekLookup{})
+	sql, values := buildQuery(table, params, &driver_interface.PeekLookup{})
 	sql = "select count(*) from (" + sql + ") as x"
 	rows, err := dbc.Query(sql, values...)
 	if err != nil {
@@ -457,7 +459,7 @@ func (model mysqlModel) GetAnalysis(databaseName string, table *schema.Table) (a
 	return
 }
 
-func buildQuery(table *schema.Table, params *params.TableParams, peekFinder *reader.PeekLookup) (sql string, values []interface{}) {
+func buildQuery(table *schema.Table, params *params.TableParams, peekFinder *driver_interface.PeekLookup) (sql string, values []interface{}) {
 	sql = "select t.*"
 
 	// peek cols

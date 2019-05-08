@@ -3,6 +3,7 @@ package serve
 import (
 	"bitbucket.org/timabell/sql-data-viewer/about"
 	"bitbucket.org/timabell/sql-data-viewer/browser"
+	"bitbucket.org/timabell/sql-data-viewer/driver_interface"
 	"bitbucket.org/timabell/sql-data-viewer/licensing"
 	"bitbucket.org/timabell/sql-data-viewer/options"
 	"bitbucket.org/timabell/sql-data-viewer/reader"
@@ -74,7 +75,7 @@ func runHttpServer(r *mux.Router) {
 	log.Fatal(srv.Serve(listener))
 }
 
-func dbRequestSetup(databaseName string) (layoutData render.PageTemplateModel, dbReader reader.DbReader, err error) {
+func dbRequestSetup(databaseName string) (layoutData render.PageTemplateModel, dbReader driver_interface.DbReader, err error) {
 	dbReader = reader.GetDbReader()
 	if dbReader.CanSwitchDatabase() && databaseName == "" {
 		// no database needed yet, e.g. for database list page

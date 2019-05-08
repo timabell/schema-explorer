@@ -9,6 +9,8 @@ package sqlite
 // Sqlite doesn't support schema so table.schema is ignored throughout
 
 import (
+	"bitbucket.org/timabell/sql-data-viewer/driver_interface"
+	"bitbucket.org/timabell/sql-data-viewer/drivers"
 	"bitbucket.org/timabell/sql-data-viewer/params"
 	"bitbucket.org/timabell/sql-data-viewer/reader"
 	"bitbucket.org/timabell/sql-data-viewer/schema"
@@ -24,19 +26,19 @@ var pathVal = ""
 
 const filePathConfigKey = "file"
 
-var newOpts = reader.DriverOpts{
-	filePathConfigKey: reader.DriverOpt{Description: "Path to sqlite db file", Value: &pathVal},
+var newOpts = drivers.DriverOpts{
+	filePathConfigKey: drivers.DriverOpt{Description: "Path to sqlite db file", Value: &pathVal},
 }
 
 func init() {
-	reader.RegisterReader(&reader.Driver{Name: "sqlite", NewOptions: newOpts, CreateReader: newSqlite, FullName: "SQLite"})
+	reader.RegisterReader(&drivers.Driver{Name: "sqlite", NewOptions: newOpts, CreateReader: newSqlite, FullName: "SQLite"})
 }
 
 type sqliteModel struct {
 	path string
 }
 
-func newSqlite() reader.DbReader {
+func newSqlite() driver_interface.DbReader {
 	path := newOpts[filePathConfigKey].Value
 	log.Printf("Connecting to sqlite file: '%s'", *path)
 	return sqliteModel{path: *path}
@@ -304,7 +306,7 @@ func getIndexInfo(dbc *sql.DB, index *schema.Index, table *schema.Table) (err er
 	return
 }
 
-func (model sqliteModel) GetSqlRows(databaseName string, table *schema.Table, params *params.TableParams, peekFinder *reader.PeekLookup) (rows *sql.Rows, err error) {
+func (model sqliteModel) GetSqlRows(databaseName string, table *schema.Table, params *params.TableParams, peekFinder *driver_interface.PeekLookup) (rows *sql.Rows, err error) {
 	dbc, err := getConnection(model.path)
 	if err != nil {
 		log.Print("GetRows failed to get connection")
@@ -330,7 +332,7 @@ func (model sqliteModel) GetRowCount(databaseName string, table *schema.Table, p
 	}
 	defer dbc.Close()
 
-	sql, values := buildQuery(table, params, &reader.PeekLookup{})
+	sql, values := buildQuery(table, params, &driver_interface.PeekLookup{})
 	sql = "select count(*) from (" + sql + ")"
 	rows, err := dbc.Query(sql, values...)
 	if err != nil {
@@ -384,7 +386,7 @@ func (model sqliteModel) GetAnalysis(databaseName string, table *schema.Table) (
 	return
 }
 
-func buildQuery(table *schema.Table, params *params.TableParams, peekFinder *reader.PeekLookup) (sql string, values []interface{}) {
+func buildQuery(table *schema.Table, params *params.TableParams, peekFinder *driver_interface.PeekLookup) (sql string, values []interface{}) {
 	sql = "select t.*"
 
 	// peek cols
