@@ -30,4 +30,3 @@ type DbReader interface {
 
 	CanSwitchDatabase() bool
 }
-

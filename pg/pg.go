@@ -18,38 +18,48 @@ import (
 	"strings"
 )
 
+var newOpts = drivers.DriverOpts{
+	"host":             drivers.DriverOpt{Description: "Postgres host", Value: &opts.Host},
+	"port":             drivers.DriverOpt{Description: "Postgres port", Value: &opts.Port},
+	"database":         drivers.DriverOpt{Description: "Postgres database name", Value: &opts.Database},
+	"user":             drivers.DriverOpt{Description: "Postgres username", Value: &opts.User},
+	"password":         drivers.DriverOpt{Description: "Postgres password", Value: &opts.Password},
+	"sslMode":          drivers.DriverOpt{Description: "Postgres ssl mode. Set this to 'disable' if you are connecting to a server that doesn't have ssl enabled.'", Value: &opts.SslMode},
+	"connectionString": drivers.DriverOpt{Description: "Postgres connection string. Use this instead of host, port etc for advanced driver options. See https://godoc.org/github.com/lib/pq for connection-string options.", Value: &opts.ConnectionString},
+}
+
 type pgModel struct {
 }
 
 type pgOpts struct {
-	Host             *string `long:"host" description:"Postgres host" env:"host"`
-	Port             *int    `long:"port" description:"Postgres port" env:"port"`
-	Database         *string `long:"database" description:"Postgres database name" env:"database"`
-	User             *string `long:"user" description:"Postgres username" env:"user"`
-	Password         *string `long:"password" description:"Postgres password" env:"password"`
-	SslMode          *string `long:"sslmode" description:"Postgres ssl mode. Set this to 'disable' if you are connecting to a server that doesn't have ssl enabled.'" env:"sslmode"`
-	ConnectionString *string `long:"connection-string" description:"Postgres connection string. Use this instead of host, port etc for advanced driver options. See https://godoc.org/github.com/lib/pq for connection-string options." env:"connection_string"`
+	Host             string
+	Port             string
+	Database         string
+	User             string
+	Password         string
+	SslMode          string
+	ConnectionString string
 }
 
 func (opts pgOpts) validate() error {
-	if opts.hasAnyDetails() && opts.ConnectionString != nil {
+	if opts.hasAnyDetails() && opts.ConnectionString != "" {
 		return errors.New("Specify either a connection string or host etc, not both.")
 	}
 	return nil
 }
 
 func (opts pgOpts) hasAnyDetails() bool {
-	return opts.Host != nil ||
-		opts.Port != nil ||
-		opts.Database != nil ||
-		opts.User != nil ||
-		opts.Password != nil
+	return opts.Host != "" ||
+		opts.Port != "" ||
+		opts.Database != "" ||
+		opts.User != "" ||
+		opts.Password != ""
 }
 
 var opts = &pgOpts{}
 
 func init() {
-	reader.RegisterReader(&drivers.Driver{Name: "pg", Options: opts, CreateReader: newPg, FullName: "Postgres"})
+	reader.RegisterReader(&drivers.Driver{Name: "pg", NewOptions: newOpts, CreateReader: newPg, FullName: "Postgres"})
 }
 
 func newPg() driver_interface.DbReader {
@@ -65,30 +75,30 @@ func newPg() driver_interface.DbReader {
 
 // optionally override db name with param
 func buildConnectionString(databaseName string) string {
-	if opts.ConnectionString != nil {
-		return *opts.ConnectionString
+	if opts.ConnectionString != "" {
+		return opts.ConnectionString
 	}
 
 	optList := make(map[string]string)
-	if opts.Host != nil {
-		optList["host"] = *opts.Host
+	if opts.Host != "" {
+		optList["host"] = opts.Host
 	}
-	if opts.Port != nil {
-		optList["port"] = strconv.Itoa(*opts.Port)
+	if opts.Port != "" {
+		optList["port"] = opts.Port
 	}
 	if databaseName != "" {
 		optList["dbname"] = databaseName
-	} else if opts.Database != nil {
-		optList["dbname"] = *opts.Database
+	} else if opts.Database != "" {
+		optList["dbname"] = opts.Database
 	}
-	if opts.User != nil {
-		optList["user"] = *opts.User
+	if opts.User != "" {
+		optList["user"] = opts.User
 	}
-	if opts.Password != nil {
-		optList["password"] = *opts.Password
+	if opts.Password != "" {
+		optList["password"] = opts.Password
 	}
-	if opts.SslMode != nil {
-		optList["sslmode"] = *opts.SslMode
+	if opts.SslMode != "" {
+		optList["sslmode"] = opts.SslMode
 	}
 	pairs := []string{}
 	for key, value := range optList {
@@ -148,7 +158,7 @@ func (model pgModel) ReadSchema(databaseName string) (database *schema.Database,
 }
 
 func (model pgModel) CanSwitchDatabase() bool {
-	return opts.ConnectionString == nil && opts.Database == nil
+	return opts.ConnectionString == "" && opts.Database == ""
 }
 
 func (model pgModel) ListDatabases() (databaseList []string, err error) {
@@ -174,7 +184,7 @@ func (model pgModel) ListDatabases() (databaseList []string, err error) {
 }
 
 func (model pgModel) DatabaseSelected() bool {
-	return opts.Database != nil || opts.ConnectionString != nil
+	return opts.Database != "" || opts.ConnectionString != ""
 }
 
 func (model pgModel) UpdateRowCounts(database *schema.Database) (err error) {
