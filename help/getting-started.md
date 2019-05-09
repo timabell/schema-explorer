@@ -36,6 +36,20 @@ Please [get in touch](mailto:sse@timwise.co.uk) if you have any problems getting
 1. Run `.\sdv-linux-x64`
 1. You should see the help text displayed
 
+### Mac
+
+1. Download the zip file
+1. Unzip the zip file
+1. Double-click the application file: `sse/mac/schemaexplorer`
+1. You'll get a warning about untrusted developers, press ok to dismiss the warning
+1. Go to system preferences in the apple menu
+1. Open "Security & Privacy"
+1. An "open anyway" button will have appeared for "schemaexplorer" - click it to run schema explorer
+
+See https://www.wikihow.com/Install-Software-from-Unsigned-Developers-on-a-Mac for detailed instructions and screenshots for unblocking untrusted programs.
+
+Note: that you should avoid doing the above as a rule, but until I see enough demand from mac users it's not worth investing in figuring out how to sign the executables to keep OSX happy.
+
 ## 3. Connecting
 
 Windows/linux have different binary names, use the the relevant one. The arguments are the same either way.
