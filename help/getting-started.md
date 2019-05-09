@@ -46,7 +46,7 @@ Please [get in touch](mailto:sse@timwise.co.uk) if you have any problems getting
 1. Open "Security & Privacy"
 1. An "open anyway" button will have appeared for "schemaexplorer" - click it to run schema explorer
 
-See https://www.wikihow.com/Install-Software-from-Unsigned-Developers-on-a-Mac for detailed instructions and screenshots for unblocking untrusted programs.
+See [https://www.wikihow.com/Install-Software-from-Unsigned-Developers-on-a-Mac](https://www.wikihow.com/Install-Software-from-Unsigned-Developers-on-a-Mac) for detailed instructions and screenshots for unblocking untrusted programs.
 
 Note: that you should avoid doing the above as a rule, but until I see enough demand from mac users it's not worth investing in figuring out how to sign the executables to keep OSX happy.
 
