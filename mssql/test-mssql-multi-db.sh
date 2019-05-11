@@ -1,7 +1,7 @@
 #!/bin/bash
 
 echo "=================="
-echo "mssql"
+echo "mssql multidb"
 echo "=================="
 
 echo "running mssql/test-setup.sh..."

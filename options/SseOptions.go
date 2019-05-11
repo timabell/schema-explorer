@@ -54,6 +54,12 @@ func SetupArgs() {
 	live = flag.Bool("live", false, "Update html templates & schema information on from every page load.")
 	name = flag.String("display-name", "", "A display name for this connection.")
 	peekPath = flag.String("peek-config-path", "", "Path to peek configuration file. Defaults to the file included with schema explorer.")
+
+	for _, driver := range drivers.Drivers {
+		for key, driverOpt := range driver.NewOptions {
+			flag.StringVar(driverOpt.Value, fmt.Sprintf("%s-%s", driver.Name, key), "", driverOpt.Description)
+		}
+	}
 }
 
 var driver *string
@@ -94,12 +100,6 @@ func ReadArgs() {
 		Options.PeekConfigPath = &envPeek
 	}
 
-	for _, driver := range drivers.Drivers {
-		for key, driverOpt := range driver.NewOptions {
-			flag.StringVar(driverOpt.Value, fmt.Sprintf("%s-%s", driver.Name, key), "", driverOpt.Description)
-		}
-	}
-
 	flag.Parse()
 
 	for _, driver := range drivers.Drivers {
@@ -107,7 +107,7 @@ func ReadArgs() {
 			if *driverOpt.Value != "" {
 				continue // command line flags take precedence over environment
 			}
-			envKey := fmt.Sprintf("schemaexplorer_%s_%s", driver.Name, strings.Replace(key, "-", "_", 0))
+			envKey := fmt.Sprintf("schemaexplorer_%s_%s", driver.Name, strings.Replace(key, "-", "_", -1))
 			if os.Getenv(envKey) != "" {
 				envValue := os.Getenv(envKey)
 				*driverOpt.Value = envValue
