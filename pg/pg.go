@@ -19,13 +19,13 @@ import (
 )
 
 var newOpts = drivers.DriverOpts{
-	"host":             drivers.DriverOpt{Description: "Postgres host", Value: &opts.Host},
-	"port":             drivers.DriverOpt{Description: "Postgres port", Value: &opts.Port},
-	"database":         drivers.DriverOpt{Description: "Postgres database name", Value: &opts.Database},
-	"user":             drivers.DriverOpt{Description: "Postgres username", Value: &opts.User},
-	"password":         drivers.DriverOpt{Description: "Postgres password", Value: &opts.Password},
-	"sslMode":          drivers.DriverOpt{Description: "Postgres ssl mode. Set this to 'disable' if you are connecting to a server that doesn't have ssl enabled.'", Value: &opts.SslMode},
-	"connectionString": drivers.DriverOpt{Description: "Postgres connection string. Use this instead of host, port etc for advanced driver options. See https://godoc.org/github.com/lib/pq for connection-string options.", Value: &opts.ConnectionString},
+	"host":              drivers.DriverOpt{Description: "Postgres host", Value: &opts.Host},
+	"port":              drivers.DriverOpt{Description: "Postgres port", Value: &opts.Port},
+	"database":          drivers.DriverOpt{Description: "Postgres database name", Value: &opts.Database},
+	"user":              drivers.DriverOpt{Description: "Postgres username", Value: &opts.User},
+	"password":          drivers.DriverOpt{Description: "Postgres password", Value: &opts.Password},
+	"ssl-mode":          drivers.DriverOpt{Description: "Postgres ssl mode. Set this to 'disable' if you are connecting to a server that doesn't have ssl enabled.'", Value: &opts.SslMode},
+	"connection-string": drivers.DriverOpt{Description: "Postgres connection string. Use this instead of host, port etc for advanced driver options. See https://godoc.org/github.com/lib/pq for connection-string options.", Value: &opts.ConnectionString},
 }
 
 type pgModel struct {
