@@ -24,7 +24,7 @@ echo -n "$(tput sgr0)"
 echo "Ctrl-C to tear them all down again."
 
 cd sqlite
-./run-sqlite.sh &
+./run-sqlite-env.sh &
 sleep 0.5
 ./run-sqlite-test.sh &
 sleep 0.5
