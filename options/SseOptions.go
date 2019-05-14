@@ -56,7 +56,7 @@ func SetupArgs() {
 	flag.StringVar(&Options.PeekConfigPath, "peek-config-path", "", "Path to peek configuration file. Defaults to the file included with schema explorer.")
 
 	for _, driver := range drivers.Drivers {
-		for key, driverOpt := range driver.NewOptions {
+		for key, driverOpt := range driver.Options {
 			flag.StringVar(driverOpt.Value, fmt.Sprintf("%s-%s", driver.Name, key), "", driverOpt.Description)
 		}
 	}
@@ -91,7 +91,7 @@ func ReadArgs() {
 	}
 
 	for _, driver := range drivers.Drivers {
-		for key, driverOpt := range driver.NewOptions {
+		for key, driverOpt := range driver.Options {
 			if *driverOpt.Value != "" {
 				continue // command line flags take precedence over environment
 			}

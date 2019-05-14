@@ -26,12 +26,12 @@ var pathVal = ""
 
 const filePathConfigKey = "file"
 
-var newOpts = drivers.DriverOpts{
+var driverOpts = drivers.DriverOpts{
 	filePathConfigKey: drivers.DriverOpt{Description: "Path to sqlite db file", Value: &pathVal},
 }
 
 func init() {
-	reader.RegisterReader(&drivers.Driver{Name: "sqlite", NewOptions: newOpts, CreateReader: newSqlite, FullName: "SQLite"})
+	reader.RegisterReader(&drivers.Driver{Name: "sqlite", Options: driverOpts, CreateReader: newSqlite, FullName: "SQLite"})
 }
 
 type sqliteModel struct {
@@ -39,7 +39,7 @@ type sqliteModel struct {
 }
 
 func newSqlite() driver_interface.DbReader {
-	path := newOpts[filePathConfigKey].Value
+	path := driverOpts[filePathConfigKey].Value
 	log.Printf("Connecting to sqlite file: '%s'", *path)
 	return sqliteModel{path: *path}
 }

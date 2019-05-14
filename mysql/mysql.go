@@ -16,7 +16,7 @@ import (
 	"strings"
 )
 
-var newOpts = drivers.DriverOpts{
+var driverOpts = drivers.DriverOpts{
 	"host":              drivers.DriverOpt{Description: "MySql host", Value: &opts.Host},
 	"port":              drivers.DriverOpt{Description: "MySql port", Value: &opts.Port},
 	"database":          drivers.DriverOpt{Description: "MySql database name", Value: &opts.Database},
@@ -57,7 +57,7 @@ func (opts mysqlOpts) hasAnyDetails() bool {
 var opts = &mysqlOpts{}
 
 func init() {
-	reader.RegisterReader(&drivers.Driver{Name: "mysql", NewOptions: newOpts, CreateReader: newMysql, FullName: "MySql"})
+	reader.RegisterReader(&drivers.Driver{Name: "mysql", Options: driverOpts, CreateReader: newMysql, FullName: "MySql"})
 }
 
 func newMysql() driver_interface.DbReader {

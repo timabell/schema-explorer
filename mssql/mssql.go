@@ -18,7 +18,7 @@ import (
 	"strings"
 )
 
-var newOpts = drivers.DriverOpts{
+var driverOpts = drivers.DriverOpts{
 	"host":              drivers.DriverOpt{Description: "SqlServer host or address", Value: &opts.Host},
 	"port":              drivers.DriverOpt{Description: "SqlServer port", Value: &opts.Port},
 	"database":          drivers.DriverOpt{Description: "SqlServer database name", Value: &opts.Database},
@@ -44,7 +44,7 @@ type mssqlOpts struct {
 var opts = &mssqlOpts{}
 
 func init() {
-	reader.RegisterReader(&drivers.Driver{Name: "mssql", NewOptions: newOpts, CreateReader: newMssql, FullName: "Microsoft SQL Server / Azure SQL"})
+	reader.RegisterReader(&drivers.Driver{Name: "mssql", Options: driverOpts, CreateReader: newMssql, FullName: "Microsoft SQL Server / Azure SQL"})
 }
 
 func (opts mssqlOpts) validate() error {

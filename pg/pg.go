@@ -18,7 +18,7 @@ import (
 	"strings"
 )
 
-var newOpts = drivers.DriverOpts{
+var driverOpts = drivers.DriverOpts{
 	"host":              drivers.DriverOpt{Description: "Postgres host", Value: &opts.Host},
 	"port":              drivers.DriverOpt{Description: "Postgres port", Value: &opts.Port},
 	"database":          drivers.DriverOpt{Description: "Postgres database name", Value: &opts.Database},
@@ -59,7 +59,7 @@ func (opts pgOpts) hasAnyDetails() bool {
 var opts = &pgOpts{}
 
 func init() {
-	reader.RegisterReader(&drivers.Driver{Name: "pg", NewOptions: newOpts, CreateReader: newPg, FullName: "Postgres"})
+	reader.RegisterReader(&drivers.Driver{Name: "pg", Options: driverOpts, CreateReader: newPg, FullName: "Postgres"})
 }
 
 func newPg() driver_interface.DbReader {
