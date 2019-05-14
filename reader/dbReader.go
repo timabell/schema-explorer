@@ -64,10 +64,10 @@ func setupPeekList(database *schema.Database) {
 		panic("options is nil")
 	}
 	var peekFilename string
-	if (*options.Options).PeekConfigPath == nil {
+	if (*options.Options).PeekConfigPath == "" {
 		peekFilename = path.Join(resources.BasePath, "config/peek-config.txt")
 	} else {
-		peekFilename = *options.Options.PeekConfigPath
+		peekFilename = options.Options.PeekConfigPath
 	}
 	log.Printf("Loading peek config from %s ...", peekFilename)
 	file, err := os.Open(peekFilename)
@@ -100,12 +100,12 @@ func setupPeekList(database *schema.Database) {
 }
 
 func GetDbReader() driver_interface.DbReader {
-	if options.Options == nil || (*options.Options).Driver == nil {
+	if options.Options == nil || (*options.Options).Driver == "" {
 		panic("driver option missing")
 	}
-	driver := drivers.Drivers[*options.Options.Driver]
+	driver := drivers.Drivers[options.Options.Driver]
 	if driver == nil {
-		log.Printf("Unknown reader '%s'", *options.Options.Driver)
+		log.Printf("Unknown reader '%s'", options.Options.Driver)
 		os.Exit(1)
 	}
 	return driver.CreateReader()

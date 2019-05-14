@@ -13,12 +13,12 @@ func init() {
 }
 
 type SseOptions struct {
-	Driver                *string `short:"d" long:"driver" description:"Driver to use" choice:"mssql" choice:"mysql" choice:"pg" choice:"sqlite" env:"schemaexplorer_driver"`
-	Live                  *bool   `short:"l" long:"live" description:"update html templates & schema information from disk on every page load" env:"schemaexplorer_live"`
-	ConnectionDisplayName *string `short:"n" long:"display-name" description:"A display name for this connection" env:"schemaexplorer_display_name"`
-	ListenOnAddress       *string `short:"a" long:"listen-on-address" description:"address to listen on" default:"localhost" env:"schemaexplorer_listen_on_address"` // localhost so that it's secure by default, only listen for local connections
-	ListenOnPort          *int    `short:"p" long:"listen-on-port" description:"port to listen on" env:"schemaexplorer_listen_on_port"`
-	PeekConfigPath        *string `long:"peek-config-path" description:"path to peek configuration file" env:"schemaexplorer_peek_config_path"`
+	Driver                string
+	Live                  bool
+	ConnectionDisplayName string
+	ListenOnAddress       string
+	ListenOnPort          string
+	PeekConfigPath        string
 }
 
 var Options = &SseOptions{}
@@ -48,12 +48,12 @@ func SetupArgs() {
 		driverStrings = append(driverStrings, driver.Name)
 	}
 	supportedDrivers := strings.Join(driverStrings, ", ")
-	driver = flag.String("driver", "", "Driver to use. Available drivers: "+supportedDrivers)
-	port = flag.Int("listen-on-port", 0, "Port to listen on. Defaults to random unused high-number.")
-	address = flag.String("listen-on-address", "", "Address to listen on. Set to 0.0.0.0 to allow access to schema-explorer from other computers. Listens on localhost by default only allow connections from this machine.")
-	live = flag.Bool("live", false, "Update html templates & schema information on from every page load.")
-	name = flag.String("display-name", "", "A display name for this connection.")
-	peekPath = flag.String("peek-config-path", "", "Path to peek configuration file. Defaults to the file included with schema explorer.")
+	flag.StringVar(&Options.Driver, "driver", "", "Driver to use. Available drivers: "+supportedDrivers)
+	flag.StringVar(&Options.ListenOnPort, "listen-on-port", "", "Port to listen on. Defaults to random unused high-number.")
+	flag.StringVar(&Options.ListenOnAddress, "listen-on-address", "", "Address to listen on. Set to 0.0.0.0 to allow access to schema-explorer from other computers. Listens on localhost by default only allow connections from this machine.")
+	flag.BoolVar(&Options.Live, "live", false, "Update html templates & schema information on from every page load. (Row counts and data are always updated).")
+	flag.StringVar(&Options.ConnectionDisplayName, "display-name", "", "A display name for this connection.")
+	flag.StringVar(&Options.PeekConfigPath, "peek-config-path", "", "Path to peek configuration file. Defaults to the file included with schema explorer.")
 
 	for _, driver := range drivers.Drivers {
 		for key, driverOpt := range driver.NewOptions {
@@ -62,45 +62,33 @@ func SetupArgs() {
 	}
 }
 
-var driver *string
-var port *int
-var address *string
-var live *bool
-var name *string
-var peekPath *string
-
 func ReadArgs() {
-	if os.Getenv("schemaexplorer_driver") != "" {
+	flag.Parse()
+
+	if Options.Driver == "" && os.Getenv("schemaexplorer_driver") != "" {
 		envDriver := os.Getenv("schemaexplorer_driver")
-		Options.Driver = &envDriver
+		Options.Driver = envDriver
 	}
-	if os.Getenv("schemaexplorer_listen_on_port") != "" {
+	if Options.ListenOnPort == "" && os.Getenv("schemaexplorer_listen_on_port") != "" {
 		envPort := os.Getenv("schemaexplorer_listen_on_port")
-		portInt64, err := strconv.ParseInt(envPort, 0, 0)
-		if err != nil {
-			panic(err)
-		}
-		portInt := int(portInt64)
-		Options.ListenOnPort = &portInt
+		Options.ListenOnPort = envPort
 	}
-	if os.Getenv("schemaexplorer_live") != "" {
+	if !Options.Live && os.Getenv("schemaexplorer_live") != "" {
 		envLive := os.Getenv("schemaexplorer_live")
 		boolLive, err := strconv.ParseBool(envLive)
 		if err != nil {
 			panic(err)
 		}
-		Options.Live = &boolLive
+		Options.Live = boolLive
 	}
-	if os.Getenv("schemaexplorer_display_name") != "" {
+	if Options.ConnectionDisplayName == "" && os.Getenv("schemaexplorer_display_name") != "" {
 		envName := os.Getenv("schemaexplorer_display_name")
-		Options.ConnectionDisplayName = &envName
+		Options.ConnectionDisplayName = envName
 	}
-	if os.Getenv("schemaexplorer_peek_config_path") != "" {
+	if Options.PeekConfigPath == "" && os.Getenv("schemaexplorer_peek_config_path") != "" {
 		envPeek := os.Getenv("schemaexplorer_Peek")
-		Options.PeekConfigPath = &envPeek
+		Options.PeekConfigPath = envPeek
 	}
-
-	flag.Parse()
 
 	for _, driver := range drivers.Drivers {
 		for key, driverOpt := range driver.NewOptions {
@@ -113,24 +101,5 @@ func ReadArgs() {
 				*driverOpt.Value = envValue
 			}
 		}
-	}
-
-	if Options.Driver == nil && *driver != "" {
-		Options.Driver = driver
-	}
-	if Options.ListenOnPort == nil {
-		Options.ListenOnPort = port
-	}
-	if Options.ListenOnAddress == nil && *address != "" {
-		Options.ListenOnAddress = address
-	}
-	if Options.Live == nil {
-		Options.Live = live
-	}
-	if Options.ConnectionDisplayName == nil {
-		Options.ConnectionDisplayName = name
-	}
-	if Options.PeekConfigPath == nil {
-		Options.PeekConfigPath = peekPath
 	}
 }

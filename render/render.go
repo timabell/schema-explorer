@@ -214,7 +214,7 @@ func RunSetupDriver(resp http.ResponseWriter, req *http.Request, layoutData Page
 	//opts := getDriverOptions(driver)
 
 	// configure global things
-	options.Options.Driver = &driver
+	options.Options.Driver = driver
 
 	//for _, option := range opts {
 	//	val := req.FormValue(option.LongName)

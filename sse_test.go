@@ -54,7 +54,7 @@ func init() {
 	//	options.ArgParser.WriteHelp(os.Stdout)
 	//	os.Exit(1)
 	//}
-	log.Printf("%s is the driver", *options.Options.Driver)
+	log.Printf("%s is the driver", options.Options.Driver)
 }
 
 func Test_CheckConnection(t *testing.T) {

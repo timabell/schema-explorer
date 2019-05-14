@@ -36,13 +36,13 @@ func main() {
 		about.About.Email)
 
 	// only spit out connection info if configured from env/args
-	if options.Options.Driver != nil {
+	if options.Options.Driver != "" {
 		connectionName := ""
-		if options.Options.ConnectionDisplayName != nil {
-			connectionName = *options.Options.ConnectionDisplayName
+		if options.Options.ConnectionDisplayName != "" {
+			connectionName = options.Options.ConnectionDisplayName
 		}
 		log.Printf("Driver: %s, connection name: \"%s\"\n",
-			*options.Options.Driver,
+			options.Options.Driver,
 			connectionName)
 	}
 
