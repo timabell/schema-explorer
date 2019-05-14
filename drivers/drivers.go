@@ -6,7 +6,6 @@ type Driver struct {
 	Name         string
 	FullName     string
 	CreateReader CreateReader // factory method for creating this driver's DbReader implementation
-	Options      interface{}  // todo: remove
 	NewOptions   DriverOpts
 }
 
