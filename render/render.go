@@ -195,13 +195,10 @@ func getDrivers() []*drivers.Driver {
 }
 
 func ShowSetupDriver(resp http.ResponseWriter, layoutData PageTemplateModel, driver string, errors string) {
-	//opts := getDriverOptions(driver)
-
 	model := driverSetupViewModel{
 		LayoutData: layoutData,
 		Driver:     drivers.Drivers[driver],
-		//Options:    opts,
-		Errors: errors,
+		Errors:     errors,
 	}
 	err := setupDriverTemplate.ExecuteTemplate(resp, "layout", model)
 	if err != nil {
@@ -210,38 +207,23 @@ func ShowSetupDriver(resp http.ResponseWriter, layoutData PageTemplateModel, dri
 }
 
 func RunSetupDriver(resp http.ResponseWriter, req *http.Request, layoutData PageTemplateModel, driver string) {
-	//opts := getDriverOptions(driver)
+	opts := drivers.Drivers[driver].Options
 
 	// configure global things
 	options.Options.Driver = driver
 
-	//for _, option := range opts {
-	//	val := req.FormValue(option.LongName)
-	//	if val != "" {
-	//		err := option.Set(&val) // depends on modified flags library that exposes set as a public method
-	//		if err != nil {
-	//			log.Fatal(err)
-	//		}
-	//		if option.LongName == "database" && options.Options.ConnectionDisplayName == nil {
-	//			options.Options.ConnectionDisplayName = &val
-	//		}
-	//	}
-	//}
+	for name, option := range opts {
+		val := req.FormValue(name)
+		if val != "" {
+			*option.Value = val
+			if name == "database" && options.Options.ConnectionDisplayName == "" {
+				options.Options.ConnectionDisplayName = val
+			}
+		}
+	}
 
 	http.Redirect(resp, req, "/", http.StatusFound)
 }
-
-//func getDriverOptions(driver string) []*flags.Option {
-//	groups := options.ArgParser.Groups()
-//	var driverArgs *flags.Group
-//	for _, group := range groups {
-//		if group.Namespace == driver {
-//			driverArgs = group
-//		}
-//	}
-//	opts := driverArgs.Options()
-//	return opts
-//}
 
 func ShowDatabaseList(resp http.ResponseWriter, layoutData PageTemplateModel, databaseList []string) {
 	model := databaseListViewModel{
