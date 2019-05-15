@@ -60,7 +60,7 @@ func SetupArgs() {
 	}
 }
 
-func ReadArgs() {
+func ReadArgsAndEnv() {
 	flag.Parse()
 
 	if Options.Driver == "" && os.Getenv("schemaexplorer_driver") != "" {

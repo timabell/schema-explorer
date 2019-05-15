@@ -48,7 +48,7 @@ var testDbDriver string
 
 func init() {
 	options.SetupArgs()
-	options.ReadArgs()
+	options.ReadArgsAndEnv()
 	//if err != nil {
 	//	os.Stderr.WriteString("Note that running sse under test only supports environment variables because command line args clash with the go-test args.\n\n")
 	//	options.ArgParser.WriteHelp(os.Stdout)

@@ -27,7 +27,7 @@ func main() {
 	licensing.EnforceLicensing()
 
 	options.SetupArgs()
-	options.ReadArgs()
+	options.ReadArgsAndEnv()
 
 	log.Printf("%s\n  %s\n  %s\n  Feeback/support/contact: <%s>",
 		about.About.Summary(),
