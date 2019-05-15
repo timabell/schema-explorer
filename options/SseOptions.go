@@ -23,8 +23,6 @@ type SseOptions struct {
 
 var Options = &SseOptions{}
 
-//var ArgParser = flags.NewParser(Options, flags.Default)
-
 func SetupArgs() {
 	//_, err := options.ArgParser.ParseArgs(os.Args)
 	//if err != nil {
