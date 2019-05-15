@@ -39,8 +39,7 @@ type driverSelectionViewModel struct {
 type driverSetupViewModel struct {
 	LayoutData PageTemplateModel
 	Driver     *drivers.Driver
-	//Options    []*flags.Option
-	Errors string
+	Errors     string
 }
 
 type databaseListViewModel struct {
