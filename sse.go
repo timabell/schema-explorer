@@ -36,7 +36,7 @@ func main() {
 		about.About.Email)
 
 	// only spit out connection info if configured from env/args
-	if options.Options.Driver != "" {
+	if options.Options.IsConfigured() {
 		connectionName := ""
 		if options.Options.ConnectionDisplayName != "" {
 			connectionName = options.Options.ConnectionDisplayName

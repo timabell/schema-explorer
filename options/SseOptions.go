@@ -101,3 +101,7 @@ func ReadArgs() {
 		}
 	}
 }
+
+func (options SseOptions) IsConfigured() bool {
+	return options.Driver != ""
+}
