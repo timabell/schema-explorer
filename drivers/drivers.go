@@ -14,8 +14,8 @@ type Driver struct {
 type DriverOpts map[string]DriverOpt
 
 type DriverOpt struct {
-	Description string  // set by the driver and used to build UI
-	Value       *string // set by the UI for use by the driver
+	Description string  // set by the driver and used to build UI - user friendly explanation of this option
+	Value       *string // set by the UI for use by the driver - the actual configured value once the application has been configured in some way
 }
 
 var Drivers = make(map[string]*Driver)

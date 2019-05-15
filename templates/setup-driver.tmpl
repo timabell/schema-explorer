@@ -11,13 +11,13 @@
         </div>
     {{end}}
     <form action="/setup/{{.Driver.Name}}" method="post" id="driverSetup">
-        {{range .Options}}
+        {{range $name, $opt := .Driver.Options}}
     <div>
-        <label for="{{.LongName}}">{{.LongName}}:</label>
-        {{if eq .LongName "password"}}
-            <input name="{{.LongName}}" type="password"/>
+        <label for="{{$name}}">{{$name}}:</label>
+        {{if eq $name "password"}}
+            <input name="{{$name}}" type="password"/>
         {{else}}
-            <input name="{{.LongName}}" type="text"/>
+            <input name="{{$name}}" type="text"/>
         {{end}}
         <br/>
         <div class="description">
