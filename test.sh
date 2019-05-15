@@ -1,7 +1,8 @@
 #!/bin/bash
 pushd . > /dev/null
 cd sqlite
-./test-sqlite.sh
+./test-sqlite-env.sh
+./test-sqlite-flags.sh
 ./test-sqlite-live.sh
 popd > /dev/null
 

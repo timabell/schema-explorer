@@ -1,6 +1,8 @@
 package reader
 
 import (
+	"bitbucket.org/timabell/sql-data-viewer/driver_interface"
+	"bitbucket.org/timabell/sql-data-viewer/drivers"
 	"bitbucket.org/timabell/sql-data-viewer/options"
 	"bitbucket.org/timabell/sql-data-viewer/params"
 	"bitbucket.org/timabell/sql-data-viewer/resources"
@@ -22,55 +24,19 @@ type SchemaCache map[string]*schema.Database
 // If multiple databases aren't supported then ignore the name and just use index zero for storage.
 var Databases = make(map[string]*schema.Database)
 
-type DbReader interface {
-	// does select or something to make sure we have a working db connection
-	CheckConnection(databaseName string) (err error)
-
-	// parse the whole schema info into memory
-	ReadSchema(databaseName string) (database *schema.Database, err error)
-
-	// populate the table row counts
-	UpdateRowCounts(database *schema.Database) (err error)
-
-	// get some data, obeying sorting, filtering etc in the table params
-	GetSqlRows(databaseName string, table *schema.Table, params *params.TableParams, peekFinder *PeekLookup) (rows *sql.Rows, err error)
-
-	// get a count for the supplied filters, for use with paging and overview info
-	GetRowCount(databaseName string, table *schema.Table, params *params.TableParams) (rowCount int, err error)
-
-	// get breakdown of most common values in each column
-	GetAnalysis(databaseName string, table *schema.Table) (analysis []schema.ColumnAnalysis, err error)
-
-	// get list of databases on this server (if supported)
-	ListDatabases() (databaseList []string, err error)
-
-	CanSwitchDatabase() bool
-}
-
-type CreateReader func() DbReader
-
-type Driver struct {
-	Name         string
-	FullName     string
-	CreateReader CreateReader // factory method for creating this driver's DbReader implementation
-	Options      interface{}
-}
-
 // Single row of data
 type RowData []interface{}
 
-var Drivers = make(map[string]*Driver)
-
 // This is how implementations for reading different RDBMS systems can register themselves.
 // They should call this in their init() function
-func RegisterReader(driver *Driver) {
-	Drivers[driver.Name] = driver
-	group, err := options.ArgParser.AddGroup(driver.Name, fmt.Sprintf("Options for %s database", driver.Name), driver.Options)
-	if err != nil {
-		panic(err)
-	}
-	group.Namespace = driver.Name
-	group.EnvNamespace = driver.Name
+func RegisterReader(driver *drivers.Driver) {
+	drivers.Drivers[driver.Name] = driver
+	//group, err := options.ArgParser.AddGroup(driver.Name, fmt.Sprintf("Options for %s database", driver.Name), driver.Options)
+	//if err != nil {
+	//	panic(err)
+	//}
+	//group.Namespace = driver.Name
+	//group.EnvNamespace = driver.Name
 }
 
 func InitializeDatabase(databaseName string) (err error) {
@@ -98,10 +64,10 @@ func setupPeekList(database *schema.Database) {
 		panic("options is nil")
 	}
 	var peekFilename string
-	if (*options.Options).PeekConfigPath == nil {
+	if (*options.Options).PeekConfigPath == "" {
 		peekFilename = path.Join(resources.BasePath, "config/peek-config.txt")
 	} else {
-		peekFilename = *options.Options.PeekConfigPath
+		peekFilename = options.Options.PeekConfigPath
 	}
 	log.Printf("Loading peek config from %s ...", peekFilename)
 	file, err := os.Open(peekFilename)
@@ -133,21 +99,21 @@ func setupPeekList(database *schema.Database) {
 	}
 }
 
-func GetDbReader() DbReader {
-	if options.Options == nil || (*options.Options).Driver == nil {
+func GetDbReader() driver_interface.DbReader {
+	if options.Options == nil || (*options.Options).Driver == "" {
 		panic("driver option missing")
 	}
-	driver := Drivers[*options.Options.Driver]
+	driver := drivers.Drivers[options.Options.Driver]
 	if driver == nil {
-		log.Printf("Unknown reader '%s'", *options.Options.Driver)
+		log.Printf("Unknown reader '%s'", options.Options.Driver)
 		os.Exit(1)
 	}
 	return driver.CreateReader()
 }
 
-func GetRows(reader DbReader, databaseName string, table *schema.Table, params *params.TableParams) (rowsData []RowData, peekFinder *PeekLookup, err error) {
+func GetRows(reader driver_interface.DbReader, databaseName string, table *schema.Table, params *params.TableParams) (rowsData []RowData, peekFinder *driver_interface.PeekLookup, err error) {
 	// load up all the fks that we have peek info for
-	peekFinder = &PeekLookup{}
+	peekFinder = &driver_interface.PeekLookup{}
 	inboundPeekCount := 0
 	for _, fk := range table.Fks {
 		if len(fk.DestinationTable.PeekColumns) == 0 {
@@ -156,9 +122,9 @@ func GetRows(reader DbReader, databaseName string, table *schema.Table, params *
 		peekFinder.Fks = append(peekFinder.Fks, fk)
 		inboundPeekCount += len(fk.DestinationTable.PeekColumns)
 	}
-	peekFinder.outboundPeekStartIndex = len(table.Columns)
-	peekFinder.inboundPeekStartIndex = peekFinder.outboundPeekStartIndex + inboundPeekCount
-	peekFinder.peekColumnCount = inboundPeekCount + len(table.InboundFks)
+	peekFinder.OutboundPeekStartIndex = len(table.Columns)
+	peekFinder.InboundPeekStartIndex = peekFinder.OutboundPeekStartIndex + inboundPeekCount
+	peekFinder.PeekColumnCount = inboundPeekCount + len(table.InboundFks)
 	peekFinder.Table = table
 
 	rows, err := reader.GetSqlRows(databaseName, table, params, peekFinder)
@@ -169,7 +135,7 @@ func GetRows(reader DbReader, databaseName string, table *schema.Table, params *
 	if len(table.Columns) == 0 {
 		panic("No columns found when reading table data table")
 	}
-	rowsData, err = getAllData(len(table.Columns)+peekFinder.peekColumnCount, rows)
+	rowsData, err = getAllData(len(table.Columns)+peekFinder.PeekColumnCount, rows)
 	if err != nil {
 		return nil, nil, err
 	}

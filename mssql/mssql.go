@@ -4,7 +4,8 @@ package mssql
 
 import (
 	"bitbucket.org/timabell/sql-data-viewer/about"
-	"bitbucket.org/timabell/sql-data-viewer/options"
+	"bitbucket.org/timabell/sql-data-viewer/driver_interface"
+	"bitbucket.org/timabell/sql-data-viewer/drivers"
 	"bitbucket.org/timabell/sql-data-viewer/params"
 	"bitbucket.org/timabell/sql-data-viewer/reader"
 	"bitbucket.org/timabell/sql-data-viewer/schema"
@@ -13,88 +14,96 @@ import (
 	"fmt"
 	_ "github.com/denisenkom/go-mssqldb"
 	"log"
-	"os"
 	"strconv"
 	"strings"
 )
+
+var driverOpts = drivers.DriverOpts{
+	"host":              drivers.DriverOpt{Description: "SqlServer host or address", Value: &opts.Host},
+	"port":              drivers.DriverOpt{Description: "SqlServer port", Value: &opts.Port},
+	"database":          drivers.DriverOpt{Description: "SqlServer database name", Value: &opts.Database},
+	"user":              drivers.DriverOpt{Description: "SqlServer username for sql-auth. Leave blank to use integrated auth.", Value: &opts.User},
+	"password":          drivers.DriverOpt{Description: "SqlServer password for sql-auth", Value: &opts.Password},
+	"instance":          drivers.DriverOpt{Description: "SqlServer instance name", Value: &opts.Instance},
+	"connection-string": drivers.DriverOpt{Description: "SqlServer connection string. Use this instead of host, port etc for advanced driver options. See https://github.com/simnalamburt/go-mssqldb#connection-parameters-and-dsn for connection-string options.", Value: &opts.ConnectionString},
+}
 
 type mssqlModel struct {
 }
 
 type mssqlOpts struct {
-	Host             *string `long:"host" description:"Sql Server host or address" env:"host"`
-	Port             *int    `long:"port" description:"Sql Server port" env:"port"`
-	Instance         *string `long:"instance" description:"Sql Server instance name" env:"instance"`
-	Database         *string `long:"database" description:"Sql Server database name" env:"database"`
-	User             *string `long:"user" description:"Sql Server username for sql-auth. Leave out to use integrated auth." env:"user"`
-	Password         *string `long:"password" description:"Sql Server password for sql-auth" env:"password"`
-	ConnectionString *string `long:"connection-string" description:"Sql Server connection string. Use this instead of host, port etc for advanced driver options. See https://github.com/simnalamburt/go-mssqldb#connection-parameters-and-dsn for connection-string options." env:"connection_string"`
+	Host             string
+	Port             string
+	Instance         string
+	Database         string
+	User             string
+	Password         string
+	ConnectionString string
 }
 
 var opts = &mssqlOpts{}
 
 func init() {
-	// https://github.com/jessevdk/go-flags/blob/master/group_test.go#L33
-	reader.RegisterReader(&reader.Driver{Name: "mssql", Options: opts, CreateReader: newMssql, FullName: "Microsoft SQL Server / Azure SQL"})
+	reader.RegisterReader(&drivers.Driver{Name: "mssql", Options: driverOpts, CreateReader: newMssql, FullName: "Microsoft SQL Server / Azure SQL"})
 }
 
 func (opts mssqlOpts) validate() error {
-	if opts.hasAnyDetails() && opts.ConnectionString != nil {
+	if opts.hasAnyDetails() && opts.ConnectionString != "" {
 		return errors.New("Specify either a connection string or host etc, not both.")
 	}
 	return nil
 }
 
 func (opts mssqlOpts) hasAnyDetails() bool {
-	return opts.Host != nil ||
-		opts.Port != nil ||
-		opts.Database != nil ||
-		opts.User != nil ||
-		opts.Password != nil
+	return opts.Host != "" ||
+		opts.Port != "" ||
+		opts.Database != "" ||
+		opts.User != "" ||
+		opts.Password != ""
 }
 
-func newMssql() reader.DbReader {
-	err := opts.validate()
-	if err != nil {
-		log.Printf("Mssql args error: %s", err)
-		options.ArgParser.WriteHelp(os.Stdout)
-		os.Exit(1)
-	}
+func newMssql() driver_interface.DbReader {
+	//err := opts.validate()
+	//if err != nil {
+	//	log.Printf("Mssql args error: %s", err)
+	//	options.ArgParser.WriteHelp(os.Stdout)
+	//	os.Exit(1)
+	//}
 	log.Println("Connecting to mssql db")
 	return mssqlModel{}
 }
 
 // optionally override db name with param
 func buildConnectionString(databaseName string) string {
-	if opts.ConnectionString != nil {
-		return *opts.ConnectionString
+	if opts.ConnectionString != "" {
+		return opts.ConnectionString
 	}
 
 	optList := make(map[string]string)
-	if opts.Host != nil {
-		if opts.Instance != nil {
-			optList["server"] = fmt.Sprintf("%s\\%s", *opts.Host, *opts.Instance)
+	if opts.Host != "" {
+		if opts.Instance != "" {
+			optList["server"] = fmt.Sprintf("%s\\%s", opts.Host, opts.Instance)
 		} else {
-			optList["server"] = *opts.Host
+			optList["server"] = opts.Host
 		}
 	} else {
-		if opts.Instance != nil {
-			optList["server"] = fmt.Sprintf("localhost\\%s", *opts.Instance)
+		if opts.Instance != "" {
+			optList["server"] = fmt.Sprintf("localhost\\%s", opts.Instance)
 		}
 	}
-	if opts.Port != nil {
-		optList["port"] = strconv.Itoa(*opts.Port)
+	if opts.Port != "" {
+		optList["port"] = opts.Port
 	}
 	if databaseName != "" {
 		optList["database"] = databaseName
-	} else if opts.Database != nil {
-		optList["database"] = *opts.Database
+	} else if opts.Database != "" {
+		optList["database"] = opts.Database
 	}
-	if opts.User != nil {
-		optList["user id"] = *opts.User
+	if opts.User != "" {
+		optList["user id"] = opts.User
 	}
-	if opts.Password != nil {
-		optList["password"] = *opts.Password
+	if opts.Password != "" {
+		optList["password"] = opts.Password
 	}
 	optList["app-name"] = about.About.Summary()
 	pairs := []string{}
@@ -159,7 +168,7 @@ func (model mssqlModel) ReadSchema(databaseName string) (database *schema.Databa
 
 func (model mssqlModel) CanSwitchDatabase() bool {
 	// todo: return false for azure sql
-	return opts.ConnectionString == nil && opts.Database == nil
+	return opts.ConnectionString == "" && opts.Database == ""
 }
 
 func (model mssqlModel) ListDatabases() (databaseList []string, err error) {
@@ -185,7 +194,7 @@ func (model mssqlModel) ListDatabases() (databaseList []string, err error) {
 }
 
 func (model mssqlModel) DatabaseSelected() bool {
-	return opts.Database != nil || opts.ConnectionString != nil
+	return opts.Database != "" || opts.ConnectionString != ""
 }
 
 func addDescriptions(dbc *sql.DB, database *schema.Database) error {
@@ -372,7 +381,7 @@ func allFks(dbc *sql.DB, database *schema.Database) (allFks []*schema.Fk, err er
 	return
 }
 
-func (model mssqlModel) GetSqlRows(databaseName string, table *schema.Table, params *params.TableParams, peekFinder *reader.PeekLookup) (rows *sql.Rows, err error) {
+func (model mssqlModel) GetSqlRows(databaseName string, table *schema.Table, params *params.TableParams, peekFinder *driver_interface.PeekLookup) (rows *sql.Rows, err error) {
 	dbc, err := getConnection(buildConnectionString(databaseName))
 	if dbc == nil {
 		log.Println(err)
@@ -407,7 +416,7 @@ func (model mssqlModel) GetRowCount(databaseName string, table *schema.Table, pa
 	}
 	defer dbc.Close()
 
-	sql, values := buildQuery(table, params, &reader.PeekLookup{})
+	sql, values := buildQuery(table, params, &driver_interface.PeekLookup{})
 	sql = "select count(*) from (" + sql + ") as x"
 	rows, err := dbc.Query(sql, values...)
 	if err != nil {
@@ -460,7 +469,7 @@ func (model mssqlModel) GetAnalysis(databaseName string, table *schema.Table) (a
 	return
 }
 
-func buildQuery(table *schema.Table, params *params.TableParams, peekFinder *reader.PeekLookup) (sql string, values []interface{}) {
+func buildQuery(table *schema.Table, params *params.TableParams, peekFinder *driver_interface.PeekLookup) (sql string, values []interface{}) {
 	// Limitation: we can't support paging (offset/skip) without a sort order so
 	// 		params.SkipRows will be ignored if there is no sorting supplied.
 	// As a less performant alternative to keep things consistent we'll fetch the preceding rows and throw them away

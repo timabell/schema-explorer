@@ -2,6 +2,3 @@
 	path = vendor/denisenkom/go-mssqldb
 	url = git@github.com:timabell/go-mssqldb
 	branch = named-pipes
-[submodule "vendor/jessevdk/go-flags"]
-	path = vendor/jessevdk/go-flags
-	url = git@github.com:timabell/go-flags.git

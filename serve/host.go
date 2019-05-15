@@ -3,6 +3,7 @@ package serve
 import (
 	"bitbucket.org/timabell/sql-data-viewer/about"
 	"bitbucket.org/timabell/sql-data-viewer/browser"
+	"bitbucket.org/timabell/sql-data-viewer/driver_interface"
 	"bitbucket.org/timabell/sql-data-viewer/licensing"
 	"bitbucket.org/timabell/sql-data-viewer/options"
 	"bitbucket.org/timabell/sql-data-viewer/reader"
@@ -13,6 +14,7 @@ import (
 	"net"
 	"net/http"
 	"net/url"
+	"strconv"
 	"time"
 )
 
@@ -45,8 +47,16 @@ func SetupRouter() (*mux.Router, reader.SchemaCache) {
 
 func runHttpServer(r *mux.Router) {
 	port := 0 // i.e. pick a random port - https://stackoverflow.com/questions/43424787/how-to-use-next-available-port-in-http-listenandserve/43425461#43425461
-	if options.Options.ListenOnPort != nil {
-		port = *options.Options.ListenOnPort
+	if options.Options.ListenOnPort != "" {
+		port64, err := strconv.ParseInt(options.Options.ListenOnPort, 0, 0)
+		if err != nil {
+			panic(fmt.Sprintf("invalid listen-on-port value %s", options.Options.ListenOnPort))
+		}
+		port = int(port64)
+	}
+	address := "localhost" // secure by default - don't listen for connections from other machines
+	if options.Options.ListenOnAddress != "" {
+		address = options.Options.ListenOnAddress
 	}
 
 	// e.g. localhost:8080 or 0.0.0.0:80
@@ -57,20 +67,20 @@ func runHttpServer(r *mux.Router) {
 		ReadTimeout:  300 * time.Second,
 	}
 
-	listener, err := net.Listen("tcp", fmt.Sprintf("%s:%d", *options.Options.ListenOnAddress, port))
+	listener, err := net.Listen("tcp", fmt.Sprintf("%s:%d", address, port))
 	if err != nil {
 		log.Fatal(err)
 	}
 	if port == 0 {
 		port = listener.Addr().(*net.TCPAddr).Port
 	}
-	url := fmt.Sprintf("http://%s:%d/", *options.Options.ListenOnAddress, port)
+	url := fmt.Sprintf("http://%s:%d/", address, port)
 	log.Printf("Starting web-server, point your browser at %s\nPress Ctrl-C to exit schemaexplorer.\n", url)
 	browser.LaunchBrowser(url) // probably won't beat the server coming up.
 	log.Fatal(srv.Serve(listener))
 }
 
-func dbRequestSetup(databaseName string) (layoutData render.PageTemplateModel, dbReader reader.DbReader, err error) {
+func dbRequestSetup(databaseName string) (layoutData render.PageTemplateModel, dbReader driver_interface.DbReader, err error) {
 	dbReader = reader.GetDbReader()
 	if dbReader.CanSwitchDatabase() && databaseName == "" {
 		// no database needed yet, e.g. for database list page
@@ -96,14 +106,14 @@ func requestSetup(canSwitchDatabase bool, dbReady bool, databaseName string) (la
 }
 
 func isCachingEnabled() bool {
-	cachingEnabled := options.Options.Live == nil || !*options.Options.Live
+	cachingEnabled := !options.Options.Live
 	return cachingEnabled
 }
 
 func getLayoutData(canSwitchDatabase bool, dbReady bool, databaseName string) (layoutData render.PageTemplateModel) {
 	var connectionName string
-	if options.Options.ConnectionDisplayName != nil {
-		connectionName = *options.Options.ConnectionDisplayName
+	if options.Options.ConnectionDisplayName != "" {
+		connectionName = options.Options.ConnectionDisplayName
 	} else if databaseName != "" {
 		connectionName = databaseName
 	}

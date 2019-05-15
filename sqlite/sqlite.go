@@ -9,7 +9,8 @@ package sqlite
 // Sqlite doesn't support schema so table.schema is ignored throughout
 
 import (
-	"bitbucket.org/timabell/sql-data-viewer/options"
+	"bitbucket.org/timabell/sql-data-viewer/driver_interface"
+	"bitbucket.org/timabell/sql-data-viewer/drivers"
 	"bitbucket.org/timabell/sql-data-viewer/params"
 	"bitbucket.org/timabell/sql-data-viewer/reader"
 	"bitbucket.org/timabell/sql-data-viewer/schema"
@@ -18,35 +19,29 @@ import (
 	"fmt"
 	_ "github.com/mattn/go-sqlite3"
 	"log"
-	"os"
 	"strings"
 )
 
-type sqliteOpts struct {
-	Path *string `short:"f" long:"file" description:"Path to sqlite db file" env:"file"`
+var pathVal = ""
+
+const filePathConfigKey = "file"
+
+var driverOpts = drivers.DriverOpts{
+	filePathConfigKey: drivers.DriverOpt{Description: "Path to sqlite db file", Value: &pathVal},
 }
 
-var opts = &sqliteOpts{}
-
 func init() {
-	// https://github.com/jessevdk/go-flags/blob/master/group_test.go#L33
-	reader.RegisterReader(&reader.Driver{Name: "sqlite", Options: opts, CreateReader: newSqlite, FullName: "SQLite"})
+	reader.RegisterReader(&drivers.Driver{Name: "sqlite", Options: driverOpts, CreateReader: newSqlite, FullName: "SQLite"})
 }
 
 type sqliteModel struct {
 	path string
 }
 
-func newSqlite() reader.DbReader {
-	if opts.Path == nil {
-		log.Printf("Error: sqlite file is required")
-		options.ArgParser.WriteHelp(os.Stdout)
-		os.Exit(1)
-	}
-	log.Printf("Connecting to sqlite file %s", *opts.Path)
-	return sqliteModel{
-		path: *opts.Path,
-	}
+func newSqlite() driver_interface.DbReader {
+	path := driverOpts[filePathConfigKey].Value
+	log.Printf("Connecting to sqlite file: '%s'", *path)
+	return sqliteModel{path: *path}
 }
 
 func (model sqliteModel) ReadSchema(databaseName string) (database *schema.Database, err error) {
@@ -194,6 +189,9 @@ func (model sqliteModel) GetDatabaseName() string {
 }
 
 func (model sqliteModel) CheckConnection(databaseName string) (err error) {
+	if model.path == "" {
+		return errors.New("sqlite file path not set")
+	}
 	dbc, err := getConnection(model.path)
 	if dbc == nil {
 		log.Println(err)
@@ -308,7 +306,7 @@ func getIndexInfo(dbc *sql.DB, index *schema.Index, table *schema.Table) (err er
 	return
 }
 
-func (model sqliteModel) GetSqlRows(databaseName string, table *schema.Table, params *params.TableParams, peekFinder *reader.PeekLookup) (rows *sql.Rows, err error) {
+func (model sqliteModel) GetSqlRows(databaseName string, table *schema.Table, params *params.TableParams, peekFinder *driver_interface.PeekLookup) (rows *sql.Rows, err error) {
 	dbc, err := getConnection(model.path)
 	if err != nil {
 		log.Print("GetRows failed to get connection")
@@ -334,7 +332,7 @@ func (model sqliteModel) GetRowCount(databaseName string, table *schema.Table, p
 	}
 	defer dbc.Close()
 
-	sql, values := buildQuery(table, params, &reader.PeekLookup{})
+	sql, values := buildQuery(table, params, &driver_interface.PeekLookup{})
 	sql = "select count(*) from (" + sql + ")"
 	rows, err := dbc.Query(sql, values...)
 	if err != nil {
@@ -388,7 +386,7 @@ func (model sqliteModel) GetAnalysis(databaseName string, table *schema.Table) (
 	return
 }
 
-func buildQuery(table *schema.Table, params *params.TableParams, peekFinder *reader.PeekLookup) (sql string, values []interface{}) {
+func buildQuery(table *schema.Table, params *params.TableParams, peekFinder *driver_interface.PeekLookup) (sql string, values []interface{}) {
 	sql = "select t.*"
 
 	// peek cols

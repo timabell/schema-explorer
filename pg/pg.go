@@ -3,7 +3,8 @@
 package pg
 
 import (
-	"bitbucket.org/timabell/sql-data-viewer/options"
+	"bitbucket.org/timabell/sql-data-viewer/driver_interface"
+	"bitbucket.org/timabell/sql-data-viewer/drivers"
 	"bitbucket.org/timabell/sql-data-viewer/params"
 	"bitbucket.org/timabell/sql-data-viewer/reader"
 	"bitbucket.org/timabell/sql-data-viewer/schema"
@@ -17,46 +18,55 @@ import (
 	"strings"
 )
 
+var driverOpts = drivers.DriverOpts{
+	"host":              drivers.DriverOpt{Description: "Postgres host", Value: &opts.Host},
+	"port":              drivers.DriverOpt{Description: "Postgres port", Value: &opts.Port},
+	"database":          drivers.DriverOpt{Description: "Postgres database name", Value: &opts.Database},
+	"user":              drivers.DriverOpt{Description: "Postgres username", Value: &opts.User},
+	"password":          drivers.DriverOpt{Description: "Postgres password", Value: &opts.Password},
+	"ssl-mode":          drivers.DriverOpt{Description: "Postgres ssl mode. Set this to 'disable' if you are connecting to a server that doesn't have ssl enabled.'", Value: &opts.SslMode},
+	"connection-string": drivers.DriverOpt{Description: "Postgres connection string. Use this instead of host, port etc for advanced driver options. See https://godoc.org/github.com/lib/pq for connection-string options.", Value: &opts.ConnectionString},
+}
+
 type pgModel struct {
 }
 
 type pgOpts struct {
-	Host             *string `long:"host" description:"Postgres host" env:"host"`
-	Port             *int    `long:"port" description:"Postgres port" env:"port"`
-	Database         *string `long:"database" description:"Postgres database name" env:"database"`
-	User             *string `long:"user" description:"Postgres username" env:"user"`
-	Password         *string `long:"password" description:"Postgres password" env:"password"`
-	SslMode          *string `long:"sslmode" description:"Postgres ssl mode. Set this to 'disable' if you are connecting to a server that doesn't have ssl enabled.'" env:"sslmode"`
-	ConnectionString *string `long:"connection-string" description:"Postgres connection string. Use this instead of host, port etc for advanced driver options. See https://godoc.org/github.com/lib/pq for connection-string options." env:"connection_string"`
+	Host             string
+	Port             string
+	Database         string
+	User             string
+	Password         string
+	SslMode          string
+	ConnectionString string
 }
 
 func (opts pgOpts) validate() error {
-	if opts.hasAnyDetails() && opts.ConnectionString != nil {
+	if opts.hasAnyDetails() && opts.ConnectionString != "" {
 		return errors.New("Specify either a connection string or host etc, not both.")
 	}
 	return nil
 }
 
 func (opts pgOpts) hasAnyDetails() bool {
-	return opts.Host != nil ||
-		opts.Port != nil ||
-		opts.Database != nil ||
-		opts.User != nil ||
-		opts.Password != nil
+	return opts.Host != "" ||
+		opts.Port != "" ||
+		opts.Database != "" ||
+		opts.User != "" ||
+		opts.Password != ""
 }
 
 var opts = &pgOpts{}
 
 func init() {
-	// https://github.com/jessevdk/go-flags/blob/master/group_test.go#L33
-	reader.RegisterReader(&reader.Driver{Name: "pg", Options: opts, CreateReader: newPg, FullName: "Postgres"})
+	reader.RegisterReader(&drivers.Driver{Name: "pg", Options: driverOpts, CreateReader: newPg, FullName: "Postgres"})
 }
 
-func newPg() reader.DbReader {
+func newPg() driver_interface.DbReader {
 	err := opts.validate()
 	if err != nil {
 		log.Printf("Pg args error: %s", err)
-		options.ArgParser.WriteHelp(os.Stdout)
+		//options.ArgParser.WriteHelp(os.Stdout)
 		os.Exit(1)
 	}
 	log.Println("Connecting to pg db")
@@ -65,30 +75,30 @@ func newPg() reader.DbReader {
 
 // optionally override db name with param
 func buildConnectionString(databaseName string) string {
-	if opts.ConnectionString != nil {
-		return *opts.ConnectionString
+	if opts.ConnectionString != "" {
+		return opts.ConnectionString
 	}
 
 	optList := make(map[string]string)
-	if opts.Host != nil {
-		optList["host"] = *opts.Host
+	if opts.Host != "" {
+		optList["host"] = opts.Host
 	}
-	if opts.Port != nil {
-		optList["port"] = strconv.Itoa(*opts.Port)
+	if opts.Port != "" {
+		optList["port"] = opts.Port
 	}
 	if databaseName != "" {
 		optList["dbname"] = databaseName
-	} else if opts.Database != nil {
-		optList["dbname"] = *opts.Database
+	} else if opts.Database != "" {
+		optList["dbname"] = opts.Database
 	}
-	if opts.User != nil {
-		optList["user"] = *opts.User
+	if opts.User != "" {
+		optList["user"] = opts.User
 	}
-	if opts.Password != nil {
-		optList["password"] = *opts.Password
+	if opts.Password != "" {
+		optList["password"] = opts.Password
 	}
-	if opts.SslMode != nil {
-		optList["sslmode"] = *opts.SslMode
+	if opts.SslMode != "" {
+		optList["sslmode"] = opts.SslMode
 	}
 	pairs := []string{}
 	for key, value := range optList {
@@ -148,7 +158,7 @@ func (model pgModel) ReadSchema(databaseName string) (database *schema.Database,
 }
 
 func (model pgModel) CanSwitchDatabase() bool {
-	return opts.ConnectionString == nil && opts.Database == nil
+	return opts.ConnectionString == "" && opts.Database == ""
 }
 
 func (model pgModel) ListDatabases() (databaseList []string, err error) {
@@ -174,7 +184,7 @@ func (model pgModel) ListDatabases() (databaseList []string, err error) {
 }
 
 func (model pgModel) DatabaseSelected() bool {
-	return opts.Database != nil || opts.ConnectionString != nil
+	return opts.Database != "" || opts.ConnectionString != ""
 }
 
 func (model pgModel) UpdateRowCounts(database *schema.Database) (err error) {
@@ -403,7 +413,7 @@ func readIndexes(dbc *sql.DB, database *schema.Database) (err error) {
 	return
 }
 
-func (model pgModel) GetSqlRows(databaseName string, table *schema.Table, params *params.TableParams, peekFinder *reader.PeekLookup) (rows *sql.Rows, err error) {
+func (model pgModel) GetSqlRows(databaseName string, table *schema.Table, params *params.TableParams, peekFinder *driver_interface.PeekLookup) (rows *sql.Rows, err error) {
 	dbc, err := getConnection(buildConnectionString(databaseName))
 	if err != nil {
 		log.Print("GetRows failed to get connection")
@@ -429,7 +439,7 @@ func (model pgModel) GetRowCount(databaseName string, table *schema.Table, param
 	}
 	defer dbc.Close()
 
-	sql, values := buildQuery(table, params, &reader.PeekLookup{})
+	sql, values := buildQuery(table, params, &driver_interface.PeekLookup{})
 	sql = "select count(*) from (" + sql + ") as x"
 	rows, err := dbc.Query(sql, values...)
 	if err != nil {
@@ -483,7 +493,7 @@ func (model pgModel) GetAnalysis(databaseName string, table *schema.Table) (anal
 	return
 }
 
-func buildQuery(table *schema.Table, params *params.TableParams, peekFinder *reader.PeekLookup) (sql string, values []interface{}) {
+func buildQuery(table *schema.Table, params *params.TableParams, peekFinder *driver_interface.PeekLookup) (sql string, values []interface{}) {
 	sql = "select t.*"
 
 	// peek cols

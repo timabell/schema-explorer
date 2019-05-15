@@ -23,6 +23,7 @@ aren't silently missing any of the supported data types.
 */
 
 import (
+	"bitbucket.org/timabell/sql-data-viewer/driver_interface"
 	_ "bitbucket.org/timabell/sql-data-viewer/mssql"
 	_ "bitbucket.org/timabell/sql-data-viewer/mysql"
 	"bitbucket.org/timabell/sql-data-viewer/options"
@@ -37,7 +38,6 @@ import (
 	"log"
 	"net/http"
 	"net/http/httptest"
-	"os"
 	"reflect"
 	"strings"
 	"testing"
@@ -47,13 +47,14 @@ var testDb string
 var testDbDriver string
 
 func init() {
-	_, err := options.ArgParser.ParseArgs([]string{})
-	if err != nil {
-		os.Stderr.WriteString("Note that running sse under test only supports environment variables because command line args clash with the go-test args.\n\n")
-		options.ArgParser.WriteHelp(os.Stdout)
-		os.Exit(1)
-	}
-	log.Printf("%s is the driver", *options.Options.Driver)
+	options.SetupArgs()
+	options.ReadArgs()
+	//if err != nil {
+	//	os.Stderr.WriteString("Note that running sse under test only supports environment variables because command line args clash with the go-test args.\n\n")
+	//	options.ArgParser.WriteHelp(os.Stdout)
+	//	os.Exit(1)
+	//}
+	log.Printf("%s is the driver", options.Options.Driver)
 }
 
 func Test_CheckConnection(t *testing.T) {
@@ -243,7 +244,7 @@ func checkNullable(database *schema.Database, t *testing.T) {
 	}
 }
 
-func checkTableRowCount(reader reader.DbReader, database *schema.Database, t *testing.T) {
+func checkTableRowCount(reader driver_interface.DbReader, database *schema.Database, t *testing.T) {
 	table := findTable(schema.Table{Schema: database.DefaultSchemaName, Name: "SortFilterTest"}, database, t)
 
 	// before load should be nil
@@ -457,7 +458,7 @@ type testCase struct {
 	expectedString string
 }
 
-func checkFilterAndSort(dbReader reader.DbReader, database *schema.Database, t *testing.T) {
+func checkFilterAndSort(dbReader driver_interface.DbReader, database *schema.Database, t *testing.T) {
 	table := findTable(schema.Table{Schema: database.DefaultSchemaName, Name: "SortFilterTest"}, database, t)
 
 	_, patternCol := table.FindColumn("pattern")
@@ -502,7 +503,7 @@ func checkFilterAndSort(dbReader reader.DbReader, database *schema.Database, t *
 	}
 }
 
-func checkPaging(dbReader reader.DbReader, database *schema.Database, t *testing.T) {
+func checkPaging(dbReader driver_interface.DbReader, database *schema.Database, t *testing.T) {
 	table := findTable(schema.Table{Schema: database.DefaultSchemaName, Name: "SortFilterTest"}, database, t)
 	_, idCol := table.FindColumn("id")
 
@@ -517,7 +518,7 @@ func checkPaging(dbReader reader.DbReader, database *schema.Database, t *testing
 	pagingChecker(dbReader, database.Name, table, tableParams, t, idCol)
 }
 
-func pagingChecker(dbReader reader.DbReader, databaseName string, table *schema.Table, tableParams *params.TableParams, t *testing.T, idCol *schema.Column) {
+func pagingChecker(dbReader driver_interface.DbReader, databaseName string, table *schema.Table, tableParams *params.TableParams, t *testing.T, idCol *schema.Column) {
 	rows, _, err := reader.GetRows(dbReader, databaseName, table, tableParams)
 	if err != nil {
 		t.Fatal(err)
@@ -533,7 +534,7 @@ func dbString(value interface{}) string {
 	return fmt.Sprintf("%s", value)
 }
 
-func checkFilteredRowCount(dbReader reader.DbReader, database *schema.Database, t *testing.T) {
+func checkFilteredRowCount(dbReader driver_interface.DbReader, database *schema.Database, t *testing.T) {
 	table := findTable(schema.Table{Schema: database.DefaultSchemaName, Name: "SortFilterTest"}, database, t)
 	_, colourCol := table.FindColumn("colour")
 	filter := params.FieldFilter{Field: colourCol, Values: []string{"blue"}}
@@ -547,7 +548,7 @@ func checkFilteredRowCount(dbReader reader.DbReader, database *schema.Database, 
 	checkInt(3, rowCount, "blue rows", t)
 }
 
-func checkTableAnalysis(dbReader reader.DbReader, database *schema.Database, t *testing.T) {
+func checkTableAnalysis(dbReader driver_interface.DbReader, database *schema.Database, t *testing.T) {
 	table := findTable(schema.Table{Schema: database.DefaultSchemaName, Name: "analysis_test"}, database, t)
 	colName := "colour"
 	_, col := table.FindColumn(colName)
@@ -583,7 +584,7 @@ func checkTableAnalysis(dbReader reader.DbReader, database *schema.Database, t *
 
 // Poke all the things that might fall over if a bit of escaping has been missed.
 // The names in here are necessarily confusing and misleading because the table has sql keywords for names.
-func checkKeywordEscaping(dbReader reader.DbReader, database *schema.Database, t *testing.T) {
+func checkKeywordEscaping(dbReader driver_interface.DbReader, database *schema.Database, t *testing.T) {
 	schemaName := database.DefaultSchemaName
 	if database.Supports.Schema {
 		schemaName = "identity"
@@ -620,7 +621,7 @@ func checkKeywordEscaping(dbReader reader.DbReader, database *schema.Database, t
 	checkStr("times", val, "incorrect value in keyword row", t)
 }
 
-func checkPeeking(dbReader reader.DbReader, database *schema.Database, t *testing.T) {
+func checkPeeking(dbReader driver_interface.DbReader, database *schema.Database, t *testing.T) {
 	table := findTable(schema.Table{Schema: database.DefaultSchemaName, Name: "peek"}, database, t)
 	peekFk := table.Fks[0]
 	peekTable := peekFk.DestinationTable
@@ -661,7 +662,7 @@ func checkPeeking(dbReader reader.DbReader, database *schema.Database, t *testin
 	}
 }
 
-func checkInboundPeeking(dbReader reader.DbReader, database *schema.Database, t *testing.T) {
+func checkInboundPeeking(dbReader driver_interface.DbReader, database *schema.Database, t *testing.T) {
 	table := findTable(schema.Table{Schema: database.DefaultSchemaName, Name: "poke"}, database, t)
 	idCol := findColumn(table, "id", t)
 	checkInt(2, len(table.InboundFks), "inbound fks on table "+table.String(), t)

@@ -36,7 +36,7 @@ func SetupDriverPostHandler(resp http.ResponseWriter, req *http.Request) {
 func RedirectIfConfigured(resp http.ResponseWriter, req *http.Request) (isConfigured bool) {
 	// Security: Don't allow use of setup if already configured.
 	// This allows local users to easily configure on startup, but prevents admin-configured copies from being modified by wayward web users.
-	if options.Options.Driver != nil {
+	if options.Options.Driver != "" {
 		http.Redirect(resp, req, "/", http.StatusFound)
 		return true
 	}

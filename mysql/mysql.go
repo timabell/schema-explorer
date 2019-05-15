@@ -3,7 +3,8 @@
 package mysql
 
 import (
-	"bitbucket.org/timabell/sql-data-viewer/options"
+	"bitbucket.org/timabell/sql-data-viewer/driver_interface"
+	"bitbucket.org/timabell/sql-data-viewer/drivers"
 	"bitbucket.org/timabell/sql-data-viewer/params"
 	"bitbucket.org/timabell/sql-data-viewer/reader"
 	"bitbucket.org/timabell/sql-data-viewer/schema"
@@ -12,52 +13,60 @@ import (
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	"log"
-	"os"
 	"strings"
 )
+
+var driverOpts = drivers.DriverOpts{
+	"host":              drivers.DriverOpt{Description: "MySql host", Value: &opts.Host},
+	"port":              drivers.DriverOpt{Description: "MySql port", Value: &opts.Port},
+	"database":          drivers.DriverOpt{Description: "MySql database name", Value: &opts.Database},
+	"user":              drivers.DriverOpt{Description: "MySql username", Value: &opts.User},
+	"password":          drivers.DriverOpt{Description: "MySql password", Value: &opts.Password},
+	"parameters":        drivers.DriverOpt{Description: "MySql extra parameters", Value: &opts.Parameters},
+	"connection-string": drivers.DriverOpt{Description: "MySql connection string. Use this instead of host, port etc for advanced driver options. See https://github.com/Go-SQL-Driver/MySQL/#dsn-data-source-name for connection-string options.", Value: &opts.ConnectionString},
+}
 
 type mysqlModel struct {
 }
 
 type mysqlOpts struct {
-	Host             *string `long:"host" description:"MySql host" env:"host"`
-	Port             *int    `long:"port" description:"MySql port" env:"port"`
-	Database         *string `long:"database" description:"MySql database name" env:"database"`
-	User             *string `long:"user" description:"MySql username" env:"user"`
-	Password         *string `long:"password" description:"MySql password" env:"password"`
-	Parameters       *string `long:"parameters" description:"MySql extra parameters" env:"parameters"`
-	ConnectionString *string `long:"connection-string" description:"MySql connection string. Use this instead of host, port etc for advanced driver options. See https://github.com/Go-SQL-Driver/MySQL/#dsn-data-source-name for connection-string options." env:"connection_string"`
+	Host             string
+	Port             string
+	Database         string
+	User             string
+	Password         string
+	Parameters       string
+	ConnectionString string
 }
 
 func (opts mysqlOpts) validate() error {
-	if opts.hasAnyDetails() && opts.ConnectionString != nil {
+	if opts.hasAnyDetails() && opts.ConnectionString != "" {
 		return errors.New("Specify either a connection string or host etc, not both.")
 	}
 	return nil
 }
 
 func (opts mysqlOpts) hasAnyDetails() bool {
-	return opts.Host != nil ||
-		opts.Port != nil ||
-		opts.Database != nil ||
-		opts.User != nil ||
-		opts.Password != nil
+	return opts.Host != "" ||
+		opts.Port != "" ||
+		opts.Database != "" ||
+		opts.User != "" ||
+		opts.Password != ""
 }
 
 var opts = &mysqlOpts{}
 
 func init() {
-	// https://github.com/jessevdk/go-flags/blob/master/group_test.go#L33
-	reader.RegisterReader(&reader.Driver{Name: "mysql", Options: opts, CreateReader: newMysql, FullName: "MySql"})
+	reader.RegisterReader(&drivers.Driver{Name: "mysql", Options: driverOpts, CreateReader: newMysql, FullName: "MySql"})
 }
 
-func newMysql() reader.DbReader {
-	err := opts.validate()
-	if err != nil {
-		log.Printf("Mysql args error: %s", err)
-		options.ArgParser.WriteHelp(os.Stdout)
-		os.Exit(1)
-	}
+func newMysql() driver_interface.DbReader {
+	//err := opts.validate()
+	//if err != nil {
+	//	log.Printf("Mysql args error: %s", err)
+	//	options.ArgParser.WriteHelp(os.Stdout)
+	//	os.Exit(1)
+	//}
 	log.Println("Connecting to mysql db")
 	return mysqlModel{}
 }
@@ -65,31 +74,31 @@ func newMysql() reader.DbReader {
 // optionally override db name with param
 func buildConnectionString(databaseName string) string {
 	var cs string
-	if opts.ConnectionString == nil {
-		if opts.User != nil {
-			cs = *opts.User
-			if opts.Password != nil {
-				cs = fmt.Sprintf("%s:%s", cs, *opts.Password)
+	if opts.ConnectionString == "" {
+		if opts.User != "" {
+			cs = opts.User
+			if opts.Password != "" {
+				cs = fmt.Sprintf("%s:%s", cs, opts.Password)
 			}
 			cs = fmt.Sprintf("%s@", cs)
 		}
-		if opts.Host != nil {
-			cs = fmt.Sprintf("%s%s", cs, *opts.Host)
-			if opts.Port != nil {
-				cs = fmt.Sprintf("%s:%d", cs, *opts.Port)
+		if opts.Host != "" {
+			cs = fmt.Sprintf("%s%s", cs, opts.Host)
+			if opts.Port != "" {
+				cs = fmt.Sprintf("%s:%d", cs, opts.Port)
 			}
 		}
 		cs = fmt.Sprintf("%s/", cs)
 		if databaseName != "" {
 			cs = fmt.Sprintf("%s%s", cs, databaseName)
-		} else if opts.Database != nil {
-			cs = fmt.Sprintf("%s%s", cs, *opts.Database)
+		} else if opts.Database != "" {
+			cs = fmt.Sprintf("%s%s", cs, opts.Database)
 		}
-		if opts.Parameters != nil {
-			cs = fmt.Sprintf("%s?%s", cs, *opts.Parameters)
+		if opts.Parameters != "" {
+			cs = fmt.Sprintf("%s?%s", cs, opts.Parameters)
 		}
 	} else {
-		cs = *opts.ConnectionString
+		cs = opts.ConnectionString
 	}
 	return cs
 }
@@ -144,7 +153,7 @@ func (model mysqlModel) ReadSchema(databaseName string) (database *schema.Databa
 }
 
 func (model mysqlModel) CanSwitchDatabase() bool {
-	return opts.ConnectionString == nil && opts.Database == nil
+	return opts.ConnectionString == "" && opts.Database == ""
 }
 
 func (model mysqlModel) ListDatabases() (databaseList []string, err error) {
@@ -170,7 +179,7 @@ func (model mysqlModel) ListDatabases() (databaseList []string, err error) {
 }
 
 func (model mysqlModel) DatabaseSelected() bool {
-	return opts.Database != nil || opts.ConnectionString != nil
+	return opts.Database != "" || opts.ConnectionString != ""
 }
 
 func (model mysqlModel) UpdateRowCounts(database *schema.Database) (err error) {
@@ -374,7 +383,7 @@ func readIndexes(dbc *sql.DB, database *schema.Database) (err error) {
 	return
 }
 
-func (model mysqlModel) GetSqlRows(databaseName string, table *schema.Table, params *params.TableParams, peekFinder *reader.PeekLookup) (rows *sql.Rows, err error) {
+func (model mysqlModel) GetSqlRows(databaseName string, table *schema.Table, params *params.TableParams, peekFinder *driver_interface.PeekLookup) (rows *sql.Rows, err error) {
 	dbc, err := getConnection(buildConnectionString(databaseName))
 	if err != nil {
 		log.Print("GetRows failed to get connection")
@@ -406,7 +415,7 @@ func (model mysqlModel) GetRowCount(databaseName string, table *schema.Table, pa
 	}
 	defer dbc.Close()
 
-	sql, values := buildQuery(table, params, &reader.PeekLookup{})
+	sql, values := buildQuery(table, params, &driver_interface.PeekLookup{})
 	sql = "select count(*) from (" + sql + ") as x"
 	rows, err := dbc.Query(sql, values...)
 	if err != nil {
@@ -460,7 +469,7 @@ func (model mysqlModel) GetAnalysis(databaseName string, table *schema.Table) (a
 	return
 }
 
-func buildQuery(table *schema.Table, params *params.TableParams, peekFinder *reader.PeekLookup) (sql string, values []interface{}) {
+func buildQuery(table *schema.Table, params *params.TableParams, peekFinder *driver_interface.PeekLookup) (sql string, values []interface{}) {
 	sql = "select t.*"
 
 	// peek cols
@@ -529,7 +538,7 @@ func buildQuery(table *schema.Table, params *params.TableParams, peekFinder *rea
 func (model mysqlModel) getColumns(dbc *sql.DB, table *schema.Table) (cols []*schema.Column, err error) {
 	// todo: parameterise
 	// todo: read all tables' columns in one query hit
-	sql := fmt.Sprintf("select column_name, data_type, is_nullable, character_maximum_length from information_schema.columns where table_schema = '%s' and table_name='%s' order by ordinal_position;", *opts.Database, table.Name)
+	sql := fmt.Sprintf("select column_name, data_type, is_nullable, character_maximum_length from information_schema.columns where table_schema = '%s' and table_name='%s' order by ordinal_position;", opts.Database, table.Name)
 
 	rows, err := dbc.Query(sql)
 	if err != nil {
