@@ -77,7 +77,7 @@ func TableHandler(resp http.ResponseWriter, req *http.Request, dataOnly bool) {
 }
 
 func RootHandler(resp http.ResponseWriter, req *http.Request) {
-	if options.Options.Driver == "" {
+	if !options.Options.IsConfigured() {
 		http.Redirect(resp, req, "/setup", http.StatusFound)
 		return
 	}
@@ -98,7 +98,7 @@ func RootHandler(resp http.ResponseWriter, req *http.Request) {
 }
 
 func DatabaseListHandler(resp http.ResponseWriter, req *http.Request) {
-	if options.Options.Driver == "" {
+	if !options.Options.IsConfigured() {
 		http.Redirect(resp, req, "/setup", http.StatusFound)
 		return
 	}
@@ -116,7 +116,7 @@ func DatabaseListHandler(resp http.ResponseWriter, req *http.Request) {
 }
 
 func TableListHandler(resp http.ResponseWriter, req *http.Request) {
-	if options.Options.Driver == "" {
+	if !options.Options.IsConfigured() {
 		http.Redirect(resp, req, "/setup", http.StatusFound)
 		return
 	}
