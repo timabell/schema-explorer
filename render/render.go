@@ -4,7 +4,6 @@ import (
 	"bitbucket.org/timabell/sql-data-viewer/about"
 	"bitbucket.org/timabell/sql-data-viewer/driver_interface"
 	"bitbucket.org/timabell/sql-data-viewer/drivers"
-	"bitbucket.org/timabell/sql-data-viewer/options"
 	"bitbucket.org/timabell/sql-data-viewer/params"
 	"bitbucket.org/timabell/sql-data-viewer/reader"
 	"bitbucket.org/timabell/sql-data-viewer/resources"
@@ -204,25 +203,6 @@ func ShowSetupDriver(resp http.ResponseWriter, layoutData PageTemplateModel, dri
 	if err != nil {
 		log.Fatal(err)
 	}
-}
-
-func RunSetupDriver(resp http.ResponseWriter, req *http.Request, layoutData PageTemplateModel, driver string) {
-	opts := drivers.Drivers[driver].Options
-
-	// configure global things
-	options.Options.Driver = driver
-
-	for name, option := range opts {
-		val := req.FormValue(name)
-		if val != "" {
-			*option.Value = val
-			if name == "database" && options.Options.ConnectionDisplayName == "" {
-				options.Options.ConnectionDisplayName = val
-			}
-		}
-	}
-
-	http.Redirect(resp, req, "/", http.StatusFound)
 }
 
 func ShowDatabaseList(resp http.ResponseWriter, layoutData PageTemplateModel, databaseList []string) {

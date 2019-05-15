@@ -1,6 +1,7 @@
 package serve
 
 import (
+	"bitbucket.org/timabell/sql-data-viewer/drivers"
 	"bitbucket.org/timabell/sql-data-viewer/options"
 	"bitbucket.org/timabell/sql-data-viewer/render"
 	"github.com/gorilla/mux"
@@ -28,9 +29,8 @@ func SetupDriverPostHandler(resp http.ResponseWriter, req *http.Request) {
 	if RedirectIfConfigured(resp, req) {
 		return
 	}
-	layoutData := requestSetup(false, false, "")
 	driverName := mux.Vars(req)["driver"]
-	render.RunSetupDriver(resp, req, layoutData, driverName)
+	runSetupDriver(resp, req, driverName)
 }
 
 func RedirectIfConfigured(resp http.ResponseWriter, req *http.Request) (isConfigured bool) {
@@ -41,4 +41,23 @@ func RedirectIfConfigured(resp http.ResponseWriter, req *http.Request) (isConfig
 		return true
 	}
 	return false
+}
+
+func runSetupDriver(resp http.ResponseWriter, req *http.Request, driver string) {
+	opts := drivers.Drivers[driver].Options
+
+	// configure global things
+	options.Options.Driver = driver
+
+	for name, option := range opts {
+		val := req.FormValue(name)
+		if val != "" {
+			*option.Value = val
+			if name == "database" && options.Options.ConnectionDisplayName == "" {
+				options.Options.ConnectionDisplayName = val
+			}
+		}
+	}
+
+	http.Redirect(resp, req, "/", http.StatusFound)
 }
