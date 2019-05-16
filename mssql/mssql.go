@@ -29,6 +29,7 @@ var driverOpts = drivers.DriverOpts{
 }
 
 type mssqlModel struct {
+	connected bool // todo: technically it's a connection string per db so we could end up in multiple states, ignore for now
 }
 
 type mssqlOpts struct {
@@ -70,7 +71,7 @@ func newMssql() driver_interface.DbReader {
 	//	os.Exit(1)
 	//}
 	log.Println("Connecting to mssql db")
-	return mssqlModel{}
+	return mssqlModel{connected: false}
 }
 
 // optionally override db name with param
@@ -299,7 +300,14 @@ func (model mssqlModel) CheckConnection(databaseName string) (err error) {
 	}
 	defer dbc.Close()
 	err = showVersion(dbc)
+	if err != nil {
+		model.connected = true
+	}
 	return
+}
+
+func (model mssqlModel) Connected() bool {
+	return model.connected
 }
 
 func showVersion(dbc *sql.DB) (err error) {

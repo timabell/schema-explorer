@@ -35,13 +35,14 @@ func init() {
 }
 
 type sqliteModel struct {
-	path string
+	path      string
+	connected bool // todo: technically it's a connection string per db so we could end up in multiple states, ignore for now
 }
 
 func newSqlite() driver_interface.DbReader {
 	path := driverOpts[filePathConfigKey].Value
 	log.Printf("Connecting to sqlite file: '%s'", *path)
-	return sqliteModel{path: *path}
+	return sqliteModel{path: *path, connected: false}
 }
 
 func (model sqliteModel) ReadSchema(databaseName string) (database *schema.Database, err error) {
@@ -213,8 +214,13 @@ func (model sqliteModel) CheckConnection(databaseName string) (err error) {
 		err = errors.New("no tables found. (SQLite will create an empty db if the specified file doesn't exist)")
 		return
 	}
+	model.connected = true
 	log.Println("Connected.", len(tables), "tables found")
 	return
+}
+
+func (model sqliteModel) Connected() bool {
+	return model.connected
 }
 
 func getFks(dbc *sql.DB, sourceTable *schema.Table, database *schema.Database) (fks []*schema.Fk, err error) {

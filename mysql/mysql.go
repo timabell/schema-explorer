@@ -27,6 +27,7 @@ var driverOpts = drivers.DriverOpts{
 }
 
 type mysqlModel struct {
+	connected bool // todo: technically it's a connection string per db so we could end up in multiple states, ignore for now
 }
 
 type mysqlOpts struct {
@@ -68,7 +69,7 @@ func newMysql() driver_interface.DbReader {
 	//	os.Exit(1)
 	//}
 	log.Println("Connecting to mysql db")
-	return mysqlModel{}
+	return mysqlModel{connected: false}
 }
 
 // optionally override db name with param
@@ -244,9 +245,16 @@ func (model mysqlModel) CheckConnection(databaseName string) (err error) {
 		panic("getConnection() returned nil")
 	}
 	defer dbc.Close()
-	dbc.Ping()
-	log.Println("Connected.")
+	err = dbc.Ping()
+	if err != nil {
+		model.connected = true
+		log.Println("Connected.")
+	}
 	return
+}
+
+func (model mysqlModel) Connected() bool {
+	return model.connected
 }
 
 func readConstraints(dbc *sql.DB, database *schema.Database) (err error) {
