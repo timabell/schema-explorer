@@ -29,6 +29,7 @@ var driverOpts = drivers.DriverOpts{
 }
 
 type pgModel struct {
+	connected bool // todo: technically it's a connection string per db so we could end up in multiple states, ignore for now
 }
 
 type pgOpts struct {
@@ -57,7 +58,6 @@ func (opts pgOpts) hasAnyDetails() bool {
 }
 
 var opts = &pgOpts{}
-var connected = false
 
 func init() {
 	reader.RegisterReader(&drivers.Driver{Name: "pg", Options: driverOpts, CreateReader: newPg, FullName: "Postgres"})
@@ -71,7 +71,7 @@ func newPg() driver_interface.DbReader {
 		os.Exit(1)
 	}
 	log.Println("Connecting to pg db")
-	return pgModel{}
+	return pgModel{connected: false}
 }
 
 // optionally override db name with param
@@ -255,13 +255,13 @@ func (model pgModel) CheckConnection(databaseName string) (err error) {
 		err = errors.New("getTables() failed - " + err.Error())
 		return
 	}
-	connected = true
+	model.connected = true
 	log.Println("Connected.", len(tables), "tables found")
 	return
 }
 
 func (model pgModel) Connected() bool {
-	return connected
+	return model.connected
 }
 
 func readConstraints(dbc *sql.DB, database *schema.Database) (err error) {
