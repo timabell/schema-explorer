@@ -57,6 +57,7 @@ func (opts pgOpts) hasAnyDetails() bool {
 }
 
 var opts = &pgOpts{}
+var connected = false
 
 func init() {
 	reader.RegisterReader(&drivers.Driver{Name: "pg", Options: driverOpts, CreateReader: newPg, FullName: "Postgres"})
@@ -254,8 +255,13 @@ func (model pgModel) CheckConnection(databaseName string) (err error) {
 		err = errors.New("getTables() failed - " + err.Error())
 		return
 	}
+	connected = true
 	log.Println("Connected.", len(tables), "tables found")
 	return
+}
+
+func (model pgModel) Connected() bool {
+	return connected
 }
 
 func readConstraints(dbc *sql.DB, database *schema.Database) (err error) {

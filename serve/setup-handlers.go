@@ -11,39 +11,39 @@ import (
 )
 
 func SetupHandler(resp http.ResponseWriter, req *http.Request) {
-	if RedirectIfConfigured(resp, req) {
-		return
-	}
+	//if RedirectIfConfigured(resp, req) {
+	//	return
+	//}
 	layoutData := requestSetup(false, false, "")
 	render.ShowSelectDriver(resp, layoutData)
 }
 
 func SetupDriverHandler(resp http.ResponseWriter, req *http.Request) {
-	if RedirectIfConfigured(resp, req) {
-		return
-	}
+	//if RedirectIfConfigured(resp, req) {
+	//	return
+	//}
 	layoutData := requestSetup(false, false, "")
 	driverName := mux.Vars(req)["driver"]
 	render.ShowSetupDriver(resp, layoutData, driverName, "")
 }
 
 func SetupDriverPostHandler(resp http.ResponseWriter, req *http.Request) {
-	if RedirectIfConfigured(resp, req) {
-		return
-	}
+	//if RedirectIfConfigured(resp, req) {
+	//	return
+	//}
 	driverName := mux.Vars(req)["driver"]
 	runSetupDriver(resp, req, driverName)
 }
 
-func RedirectIfConfigured(resp http.ResponseWriter, req *http.Request) (isConfigured bool) {
-	// Security: Don't allow use of setup if already configured.
-	// This allows local users to easily configure on startup, but prevents admin-configured copies from being modified by wayward web users.
-	if options.Options.Driver != "" {
-		http.Redirect(resp, req, "/", http.StatusFound)
-		return true
-	}
-	return false
-}
+//func RedirectIfConfigured(resp http.ResponseWriter, req *http.Request) (isConfigured bool) {
+//	// Security: Don't allow use of setup if already configured.
+//	// This allows local users to easily configure on startup, but prevents admin-configured copies from being modified by wayward web users.
+//	if options.Options.Driver != "" {
+//		http.Redirect(resp, req, "/", http.StatusFound)
+//		return true
+//	}
+//	return false
+//}
 
 func runSetupDriver(resp http.ResponseWriter, req *http.Request, driver string) {
 	opts := drivers.Drivers[driver].Options

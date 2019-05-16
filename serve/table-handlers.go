@@ -77,12 +77,17 @@ func TableHandler(resp http.ResponseWriter, req *http.Request, dataOnly bool) {
 }
 
 func RootHandler(resp http.ResponseWriter, req *http.Request) {
-	if !options.Options.IsConfigured() {
+	if options.Options.Driver == "" {
+		http.Redirect(resp, req, "/setup", http.StatusFound)
+		return
+	}
+	_, dbReader, err := dbRequestSetup("")
+
+	if !dbReader.Connected() {
 		http.Redirect(resp, req, "/setup", http.StatusFound)
 		return
 	}
 
-	_, dbReader, err := dbRequestSetup("")
 	if err != nil {
 		serverError(resp, "Root request setup failed", err)
 		return
