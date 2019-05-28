@@ -250,13 +250,12 @@ func (model pgModel) CheckConnection(databaseName string) (err error) {
 		panic("getConnection() returned nil")
 	}
 	defer dbc.Close()
-	tables, err := model.getTables(dbc)
+	err = dbc.Ping()
 	if err != nil {
-		err = errors.New("getTables() failed - " + err.Error())
 		return
 	}
 	model.connected = true
-	log.Println("Connected.", len(tables), "tables found")
+	log.Println("Postgres connected.")
 	return
 }
 
