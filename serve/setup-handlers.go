@@ -24,7 +24,9 @@ func SetupDriverHandler(resp http.ResponseWriter, req *http.Request) {
 	//}
 	layoutData := requestSetup(false, false, "")
 	driverName := mux.Vars(req)["driver"]
-	render.ShowSetupDriver(resp, layoutData, driverName, "")
+	// grab err from querystring
+	errors := req.URL.Query().Get("err") // todo: check for possible injection vuln?
+	render.ShowSetupDriver(resp, layoutData, driverName, errors)
 }
 
 func SetupDriverPostHandler(resp http.ResponseWriter, req *http.Request) {

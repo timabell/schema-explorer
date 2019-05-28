@@ -84,8 +84,11 @@ func RootHandler(resp http.ResponseWriter, req *http.Request) {
 	_, dbReader, err := dbRequestSetup("")
 
 	if !dbReader.Connected() {
-		http.Redirect(resp, req, "/setup/" + options.Options.Driver, http.StatusFound)
-		return
+		err := dbReader.CheckConnection("")
+		if err != nil {
+			http.Redirect(resp, req, fmt.Sprintf("/setup/%s?err=%s", options.Options.Driver, err), http.StatusFound)
+			return
+		}
 	}
 
 	if err != nil {
