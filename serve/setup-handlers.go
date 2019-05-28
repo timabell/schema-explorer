@@ -52,6 +52,7 @@ func runSetupDriver(resp http.ResponseWriter, req *http.Request, driver string) 
 
 	// configure global things
 	options.Options.Driver = driver
+	var databaseName string
 
 	for name, option := range opts {
 		val := req.FormValue(name)
@@ -59,14 +60,15 @@ func runSetupDriver(resp http.ResponseWriter, req *http.Request, driver string) 
 			*option.Value = val
 			if name == "database" && options.Options.ConnectionDisplayName == "" {
 				options.Options.ConnectionDisplayName = val
+				databaseName = val
 			}
 		}
 	}
 	r := reader.GetDbReader()
 
-	err := r.CheckConnection("")
+	err := r.CheckConnection(databaseName)
 	if err != nil {
-		layoutData := requestSetup(false, false, "")
+		layoutData := requestSetup(false, false, databaseName)
 		driverName := mux.Vars(req)["driver"]
 		render.ShowSetupDriver(resp, layoutData, driverName, fmt.Sprintf("Failed to connect. %s", err))
 		return
