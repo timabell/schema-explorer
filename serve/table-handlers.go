@@ -84,7 +84,7 @@ func RootHandler(resp http.ResponseWriter, req *http.Request) {
 	_, dbReader, err := dbRequestSetup("")
 
 	if !dbReader.Connected() {
-		http.Redirect(resp, req, "/setup", http.StatusFound)
+		http.Redirect(resp, req, "/setup/" + options.Options.Driver, http.StatusFound)
 		return
 	}
 
