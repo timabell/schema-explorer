@@ -37,13 +37,10 @@ func main() {
 
 	// only spit out connection info if configured
 	if options.Options.Driver != "" {
-		connectionName := ""
+		log.Printf("Driver: %s", options.Options.Driver)
 		if options.Options.ConnectionDisplayName != "" {
-			connectionName = options.Options.ConnectionDisplayName
+			log.Printf("Connection name: \"%s\"", options.Options.ConnectionDisplayName)
 		}
-		log.Printf("Driver: %s, connection name: \"%s\"\n",
-			options.Options.Driver,
-			connectionName)
 	}
 
 	serve.RunServer()
