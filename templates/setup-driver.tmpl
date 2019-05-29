@@ -17,7 +17,7 @@
         {{if eq $name "password"}}
             <input name="{{$name}}" type="password"/>
         {{else}}
-            <input name="{{$name}}" type="text"/>
+            <input name="{{$name}}" type="text" value="{{$opt.Value}}"/>
         {{end}}
         <br/>
         <div class="description">
