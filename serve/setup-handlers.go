@@ -57,8 +57,7 @@ func runSetupDriver(resp http.ResponseWriter, req *http.Request, driver string) 
 	for name, option := range opts {
 		val := req.FormValue(name)
 		*option.Value = val
-		if name == "database" && options.Options.ConnectionDisplayName == "" {
-			options.Options.ConnectionDisplayName = val
+		if name == "database" {
 			databaseName = val
 		}
 	}
