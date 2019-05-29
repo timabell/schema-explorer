@@ -117,8 +117,12 @@ func getLayoutData(canSwitchDatabase bool, dbReady bool, databaseName string) (l
 	} else if databaseName != "" {
 		connectionName = databaseName
 	}
+	title := about.About.ProductName
+	if connectionName != "" {
+		title = connectionName + " | " + title
+	}
 	layoutData = render.PageTemplateModel{
-		Title:             connectionName + "|" + about.About.ProductName,
+		Title:             title,
 		ConnectionName:    connectionName,
 		About:             about.About,
 		Copyright:         licensing.CopyrightText(),
