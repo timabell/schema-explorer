@@ -192,7 +192,9 @@ func (model pgModel) UpdateRowCounts(database *schema.Database) (err error) {
 	for _, table := range database.Tables {
 		rowCount, err := model.getRowCount(database.Name, table)
 		if err != nil {
+			// todo: aggregate errors to return
 			log.Printf("Failed to get row count for %s, %s", table, err)
+			rowCount = -1
 		}
 		table.RowCount = &rowCount
 	}
