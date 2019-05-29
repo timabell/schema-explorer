@@ -29,6 +29,7 @@ var driverOpts = drivers.DriverOpts{
 }
 
 type mssqlModel struct {
+	connected bool // todo: technically it's a connection string per db so we could end up in multiple states, ignore for now
 }
 
 type mssqlOpts struct {
@@ -70,7 +71,7 @@ func newMssql() driver_interface.DbReader {
 	//	os.Exit(1)
 	//}
 	log.Println("Connecting to mssql db")
-	return mssqlModel{}
+	return mssqlModel{connected: false}
 }
 
 // optionally override db name with param
@@ -171,6 +172,10 @@ func (model mssqlModel) CanSwitchDatabase() bool {
 	return opts.ConnectionString == "" && opts.Database == ""
 }
 
+func (model mssqlModel) GetConfiguredDatabaseName() string {
+	return opts.Database
+}
+
 func (model mssqlModel) ListDatabases() (databaseList []string, err error) {
 	sql := "select name from sys.databases where database_id > 4 order by name;" // https://stackoverflow.com/questions/147659/get-list-of-databases-from-sql-server/147707#147707
 
@@ -253,7 +258,9 @@ func (model mssqlModel) UpdateRowCounts(database *schema.Database) (err error) {
 	for _, table := range database.Tables {
 		rowCount, err := model.getRowCount(database.Name, table)
 		if err != nil {
-			log.Printf("Failed to get row count for %s", table)
+			// todo: aggregate errors to return
+			log.Printf("Failed to get row count for %s, %s", table, err)
+			rowCount = -1
 		}
 		table.RowCount = &rowCount
 	}
@@ -299,7 +306,14 @@ func (model mssqlModel) CheckConnection(databaseName string) (err error) {
 	}
 	defer dbc.Close()
 	err = showVersion(dbc)
+	if err != nil {
+		model.connected = true
+	}
 	return
+}
+
+func (model mssqlModel) Connected() bool {
+	return model.connected
 }
 
 func showVersion(dbc *sql.DB) (err error) {

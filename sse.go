@@ -27,7 +27,7 @@ func main() {
 	licensing.EnforceLicensing()
 
 	options.SetupArgs()
-	options.ReadArgs()
+	options.ReadArgsAndEnv()
 
 	log.Printf("%s\n  %s\n  %s\n  Feeback/support/contact: <%s>",
 		about.About.Summary(),
@@ -35,15 +35,12 @@ func main() {
 		licensing.LicenseText(),
 		about.About.Email)
 
-	// only spit out connection info if configured from env/args
+	// only spit out connection info if configured
 	if options.Options.Driver != "" {
-		connectionName := ""
+		log.Printf("Driver: %s", options.Options.Driver)
 		if options.Options.ConnectionDisplayName != "" {
-			connectionName = options.Options.ConnectionDisplayName
+			log.Printf("Connection name: \"%s\"", options.Options.ConnectionDisplayName)
 		}
-		log.Printf("Driver: %s, connection name: \"%s\"\n",
-			options.Options.Driver,
-			connectionName)
 	}
 
 	serve.RunServer()

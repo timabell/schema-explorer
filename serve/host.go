@@ -92,6 +92,10 @@ func dbRequestSetup(databaseName string) (layoutData render.PageTemplateModel, d
 		log.Print("Reading schema...")
 		err = reader.InitializeDatabase(databaseName)
 	}
+	if databaseName == "" {
+		// not selected from url so fall back to pre-configured name if any for layout setup
+		databaseName = dbReader.GetConfiguredDatabaseName()
+	}
 	layoutData = requestSetup(dbReader.CanSwitchDatabase(), true, databaseName)
 	return
 }
@@ -117,8 +121,12 @@ func getLayoutData(canSwitchDatabase bool, dbReady bool, databaseName string) (l
 	} else if databaseName != "" {
 		connectionName = databaseName
 	}
+	title := about.About.ProductName
+	if connectionName != "" {
+		title = connectionName + " | " + title
+	}
 	layoutData = render.PageTemplateModel{
-		Title:             connectionName + "|" + about.About.ProductName,
+		Title:             title,
 		ConnectionName:    connectionName,
 		About:             about.About,
 		Copyright:         licensing.CopyrightText(),

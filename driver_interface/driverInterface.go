@@ -7,8 +7,12 @@ import (
 )
 
 type DbReader interface {
-	// does select or something to make sure we have a working db connection
+	// does select or something to make sure we have a working db connection,
+	// after this has succeeded Connected() will return true
 	CheckConnection(databaseName string) (err error)
+
+	// true if CheckConnection() has been run and succeeded
+	Connected() bool
 
 	// parse the whole schema info into memory
 	ReadSchema(databaseName string) (database *schema.Database, err error)
@@ -29,4 +33,6 @@ type DbReader interface {
 	ListDatabases() (databaseList []string, err error)
 
 	CanSwitchDatabase() bool
+
+	GetConfiguredDatabaseName() string
 }

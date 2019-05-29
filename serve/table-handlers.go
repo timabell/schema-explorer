@@ -81,8 +81,16 @@ func RootHandler(resp http.ResponseWriter, req *http.Request) {
 		http.Redirect(resp, req, "/setup", http.StatusFound)
 		return
 	}
-
 	_, dbReader, err := dbRequestSetup("")
+
+	if !dbReader.Connected() {
+		err := dbReader.CheckConnection("")
+		if err != nil {
+			http.Redirect(resp, req, fmt.Sprintf("/setup/%s?err=%s", options.Options.Driver, err), http.StatusFound)
+			return
+		}
+	}
+
 	if err != nil {
 		serverError(resp, "Root request setup failed", err)
 		return
@@ -98,7 +106,7 @@ func RootHandler(resp http.ResponseWriter, req *http.Request) {
 }
 
 func DatabaseListHandler(resp http.ResponseWriter, req *http.Request) {
-	if options.Options.Driver == "" {
+	if !options.Options.IsConfigured() {
 		http.Redirect(resp, req, "/setup", http.StatusFound)
 		return
 	}
@@ -116,7 +124,7 @@ func DatabaseListHandler(resp http.ResponseWriter, req *http.Request) {
 }
 
 func TableListHandler(resp http.ResponseWriter, req *http.Request) {
-	if options.Options.Driver == "" {
+	if !options.Options.IsConfigured() {
 		http.Redirect(resp, req, "/setup", http.StatusFound)
 		return
 	}

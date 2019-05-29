@@ -29,6 +29,7 @@ var driverOpts = drivers.DriverOpts{
 }
 
 type pgModel struct {
+	connected bool // todo: technically it's a connection string per db so we could end up in multiple states, ignore for now
 }
 
 type pgOpts struct {
@@ -70,7 +71,7 @@ func newPg() driver_interface.DbReader {
 		os.Exit(1)
 	}
 	log.Println("Connecting to pg db")
-	return pgModel{}
+	return pgModel{connected: false}
 }
 
 // optionally override db name with param
@@ -161,6 +162,10 @@ func (model pgModel) CanSwitchDatabase() bool {
 	return opts.ConnectionString == "" && opts.Database == ""
 }
 
+func (model pgModel) GetConfiguredDatabaseName() string {
+	return opts.Database
+}
+
 func (model pgModel) ListDatabases() (databaseList []string, err error) {
 	sql := "select datname from pg_database where datistemplate = false order by datname;"
 
@@ -191,7 +196,9 @@ func (model pgModel) UpdateRowCounts(database *schema.Database) (err error) {
 	for _, table := range database.Tables {
 		rowCount, err := model.getRowCount(database.Name, table)
 		if err != nil {
+			// todo: aggregate errors to return
 			log.Printf("Failed to get row count for %s, %s", table, err)
+			rowCount = -1
 		}
 		table.RowCount = &rowCount
 	}
@@ -249,13 +256,17 @@ func (model pgModel) CheckConnection(databaseName string) (err error) {
 		panic("getConnection() returned nil")
 	}
 	defer dbc.Close()
-	tables, err := model.getTables(dbc)
+	err = dbc.Ping()
 	if err != nil {
-		err = errors.New("getTables() failed - " + err.Error())
 		return
 	}
-	log.Println("Connected.", len(tables), "tables found")
+	model.connected = true
+	log.Println("Postgres connected.")
 	return
+}
+
+func (model pgModel) Connected() bool {
+	return model.connected
 }
 
 func readConstraints(dbc *sql.DB, database *schema.Database) (err error) {

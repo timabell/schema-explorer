@@ -27,6 +27,7 @@ var driverOpts = drivers.DriverOpts{
 }
 
 type mysqlModel struct {
+	connected bool // todo: technically it's a connection string per db so we could end up in multiple states, ignore for now
 }
 
 type mysqlOpts struct {
@@ -68,7 +69,7 @@ func newMysql() driver_interface.DbReader {
 	//	os.Exit(1)
 	//}
 	log.Println("Connecting to mysql db")
-	return mysqlModel{}
+	return mysqlModel{connected: false}
 }
 
 // optionally override db name with param
@@ -156,6 +157,10 @@ func (model mysqlModel) CanSwitchDatabase() bool {
 	return opts.ConnectionString == "" && opts.Database == ""
 }
 
+func (model mysqlModel) GetConfiguredDatabaseName() string {
+	return opts.Database
+}
+
 func (model mysqlModel) ListDatabases() (databaseList []string, err error) {
 	sql := "select schema_name from information_schema.schemata where schema_name not in ('information_schema', 'mysql') order by schema_name;"
 
@@ -186,7 +191,9 @@ func (model mysqlModel) UpdateRowCounts(database *schema.Database) (err error) {
 	for _, table := range database.Tables {
 		rowCount, err := model.getRowCount(database.Name, table)
 		if err != nil {
+			// todo: aggregate errors to return
 			log.Printf("Failed to get row count for %s, %s", table, err)
+			rowCount = -1
 		}
 		table.RowCount = &rowCount
 	}
@@ -244,9 +251,16 @@ func (model mysqlModel) CheckConnection(databaseName string) (err error) {
 		panic("getConnection() returned nil")
 	}
 	defer dbc.Close()
-	dbc.Ping()
-	log.Println("Connected.")
+	err = dbc.Ping()
+	if err != nil {
+		model.connected = true
+		log.Println("Connected.")
+	}
 	return
+}
+
+func (model mysqlModel) Connected() bool {
+	return model.connected
 }
 
 func readConstraints(dbc *sql.DB, database *schema.Database) (err error) {
