@@ -33,4 +33,6 @@ type DbReader interface {
 	ListDatabases() (databaseList []string, err error)
 
 	CanSwitchDatabase() bool
+
+	GetConfiguredDatabaseName() string
 }

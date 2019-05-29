@@ -162,6 +162,10 @@ func (model pgModel) CanSwitchDatabase() bool {
 	return opts.ConnectionString == "" && opts.Database == ""
 }
 
+func (model pgModel) GetConfiguredDatabaseName() string {
+	return opts.Database
+}
+
 func (model pgModel) ListDatabases() (databaseList []string, err error) {
 	sql := "select datname from pg_database where datistemplate = false order by datname;"
 

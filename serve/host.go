@@ -92,6 +92,10 @@ func dbRequestSetup(databaseName string) (layoutData render.PageTemplateModel, d
 		log.Print("Reading schema...")
 		err = reader.InitializeDatabase(databaseName)
 	}
+	if databaseName == "" {
+		// not selected from url so fall back to pre-configured name if any for layout setup
+		databaseName = dbReader.GetConfiguredDatabaseName()
+	}
 	layoutData = requestSetup(dbReader.CanSwitchDatabase(), true, databaseName)
 	return
 }
