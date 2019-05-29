@@ -157,6 +157,10 @@ func (model mysqlModel) CanSwitchDatabase() bool {
 	return opts.ConnectionString == "" && opts.Database == ""
 }
 
+func (model mysqlModel) GetConfiguredDatabaseName() string {
+	return opts.Database
+}
+
 func (model mysqlModel) ListDatabases() (databaseList []string, err error) {
 	sql := "select schema_name from information_schema.schemata where schema_name not in ('information_schema', 'mysql') order by schema_name;"
 

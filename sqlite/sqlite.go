@@ -119,6 +119,10 @@ func (model sqliteModel) CanSwitchDatabase() bool {
 	return false
 }
 
+func (model sqliteModel) GetConfiguredDatabaseName() string {
+	return ""
+}
+
 func (model sqliteModel) ListDatabases() (databaseList []string, err error) {
 	panic("not available for sqlite")
 }

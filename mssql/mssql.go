@@ -172,6 +172,10 @@ func (model mssqlModel) CanSwitchDatabase() bool {
 	return opts.ConnectionString == "" && opts.Database == ""
 }
 
+func (model mssqlModel) GetConfiguredDatabaseName() string {
+	return opts.Database
+}
+
 func (model mssqlModel) ListDatabases() (databaseList []string, err error) {
 	sql := "select name from sys.databases where database_id > 4 order by name;" // https://stackoverflow.com/questions/147659/get-list-of-databases-from-sql-server/147707#147707
 
