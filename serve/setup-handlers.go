@@ -48,12 +48,10 @@ func DenyIfConfigured(resp http.ResponseWriter, req *http.Request) (isConfigured
 }
 
 func runSetupDriver(resp http.ResponseWriter, req *http.Request, driver string) {
+	options.Options.Driver = driver
 	opts := drivers.Drivers[driver].Options
 
-	// configure global things
-	options.Options.Driver = driver
 	var databaseName string
-
 	for name, option := range opts {
 		val := req.FormValue(name)
 		*option.Value = val
@@ -61,10 +59,11 @@ func runSetupDriver(resp http.ResponseWriter, req *http.Request, driver string) 
 			databaseName = val
 		}
 	}
-	r := reader.GetDbReader()
 
+	r := reader.GetDbReader()
 	err := r.CheckConnection(databaseName)
 	if err != nil {
+		options.Options.Driver = "" // unconfigure as failed to connect
 		layoutData := requestSetup(false, false, databaseName)
 		driverName := mux.Vars(req)["driver"]
 		render.ShowSetupDriver(resp, layoutData, driverName, fmt.Sprintf("Failed to connect. %s", err))
