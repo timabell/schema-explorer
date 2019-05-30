@@ -11,7 +11,7 @@ import (
 )
 
 func SetupHandler(resp http.ResponseWriter, req *http.Request) {
-	if RedirectIfConfigured(resp, req) {
+	if DenyIfConfigured(resp, req) {
 		return
 	}
 	layoutData := requestSetup(false, false, "")
@@ -19,7 +19,7 @@ func SetupHandler(resp http.ResponseWriter, req *http.Request) {
 }
 
 func SetupDriverHandler(resp http.ResponseWriter, req *http.Request) {
-	if RedirectIfConfigured(resp, req) {
+	if DenyIfConfigured(resp, req) {
 		return
 	}
 	layoutData := requestSetup(false, false, "")
@@ -30,14 +30,14 @@ func SetupDriverHandler(resp http.ResponseWriter, req *http.Request) {
 }
 
 func SetupDriverPostHandler(resp http.ResponseWriter, req *http.Request) {
-	if RedirectIfConfigured(resp, req) {
+	if DenyIfConfigured(resp, req) {
 		return
 	}
 	driverName := mux.Vars(req)["driver"]
 	runSetupDriver(resp, req, driverName)
 }
 
-func RedirectIfConfigured(resp http.ResponseWriter, req *http.Request) (isConfigured bool) {
+func DenyIfConfigured(resp http.ResponseWriter, req *http.Request) (isConfigured bool) {
 	// Security: Don't allow use of setup if already configured.
 	// This allows local users to easily configure on startup, but prevents admin-configured copies from being modified by wayward web users.
 	if options.Options.Driver != "" {
