@@ -10,7 +10,7 @@ var gitVersion = "local-dev-build"
 
 var About = AboutType{
 	ProductName: "Sql Schema Explorer",
-	Version:     "0.63-" + gitVersion,
+	Version:     "0.64-" + gitVersion,
 	Website:     "http://schemaexplorer.io/",
 	Email:       "tim@schemaexplorer.io",
 }
