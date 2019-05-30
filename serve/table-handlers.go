@@ -25,8 +25,7 @@ func TableHandler(resp http.ResponseWriter, req *http.Request, dataOnly bool) {
 	databaseName := mux.Vars(req)["database"]
 	layoutData, dbReader, err := dbRequestSetup(databaseName)
 	if err != nil {
-		// todo: client error
-		fmt.Println("setup error rendering table: ", err)
+		serverError(resp, "setup error rendering table", err)
 		return
 	}
 
