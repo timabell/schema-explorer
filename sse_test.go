@@ -884,6 +884,9 @@ func Test_Http(t *testing.T) {
 	CheckForOk(fmt.Sprintf("%s/tables/%sDataTypeTest/data", dbPrefix, schemaPrefix), router, t)
 	CheckForOk(fmt.Sprintf("%s/tables/%sanalysis_test/analyse-data", dbPrefix, schemaPrefix), router, t)
 	CheckForOk(fmt.Sprintf("%s/table-trail", dbPrefix), router, t)
+	CheckForStatus("/setup", router, 403, t)
+	CheckForStatus("/setup/pg", router, 403, t)
+	CheckForStatusWithMethod("/setup/pg", "POST", router, 403, t)
 }
 
 func getDatabaseName() string {
@@ -899,7 +902,11 @@ func CheckForOk(path string, router *mux.Router, t *testing.T) {
 }
 
 func CheckForStatus(path string, router *mux.Router, expectedStatus int, t *testing.T) {
-	request, _ := http.NewRequest("GET", path, nil)
+	CheckForStatusWithMethod(path, "GET", router, expectedStatus, t)
+}
+
+func CheckForStatusWithMethod(path string, method string, router *mux.Router, expectedStatus int, t *testing.T) {
+	request, _ := http.NewRequest(method, path, nil)
 	response := httptest.NewRecorder()
 	router.ServeHTTP(response, request)
 	if response.Code != expectedStatus {
