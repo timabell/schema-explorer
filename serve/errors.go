@@ -17,3 +17,13 @@ func serverError(resp http.ResponseWriter, message string, err error) {
 	resp.WriteHeader(http.StatusInternalServerError)
 	fmt.Fprint(resp, fmt.Sprintf("%s:\n\n%s", message, err))
 }
+
+func deniedError(resp http.ResponseWriter, message string) {
+	// log
+	denied := "403 Access denied"
+	log.Print(fmt.Sprintf("%s: %s", denied, message))
+
+	// set http response
+	resp.WriteHeader(http.StatusForbidden)
+	fmt.Fprint(resp, fmt.Sprintf("%s:\n\n%s", denied, message))
+}
