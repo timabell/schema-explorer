@@ -82,14 +82,7 @@ func RootHandler(resp http.ResponseWriter, req *http.Request) {
 	}
 	_, dbReader, err := dbRequestSetup("")
 
-	if !dbReader.Connected() {
-		err := dbReader.CheckConnection("")
-		if err != nil {
-			http.Redirect(resp, req, fmt.Sprintf("/setup/%s?err=%s", options.Options.Driver, err), http.StatusFound)
-			return
-		}
-	}
-
+	err = dbReader.CheckConnection("")
 	if err != nil {
 		serverError(resp, "Root request setup failed", err)
 		return
