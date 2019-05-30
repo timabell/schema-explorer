@@ -75,8 +75,8 @@ func runHttpServer(r *mux.Router) {
 		port = listener.Addr().(*net.TCPAddr).Port
 	}
 	url := fmt.Sprintf("http://%s:%d/", address, port)
-	log.Printf("Starting web-server, point your browser at %s\nPress Ctrl-C to exit schemaexplorer.\n", url)
 	browser.LaunchBrowser(url) // probably won't beat the server coming up.
+	log.Printf("Starting web-server, point your browser at %s\nPress Ctrl-C to exit schemaexplorer.\n", url)
 	log.Fatal(srv.Serve(listener))
 }
 
