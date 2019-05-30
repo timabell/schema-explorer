@@ -67,6 +67,10 @@ func ReadArgsAndEnv() {
 		envDriver := os.Getenv("schemaexplorer_driver")
 		Options.Driver = envDriver
 	}
+	if Options.ListenOnAddress == "" && os.Getenv("schemaexplorer_listen_on_address") != "" {
+		envAddress := os.Getenv("schemaexplorer_listen_on_address")
+		Options.ListenOnAddress = envAddress
+	}
 	if Options.ListenOnPort == "" && os.Getenv("schemaexplorer_listen_on_port") != "" {
 		envPort := os.Getenv("schemaexplorer_listen_on_port")
 		Options.ListenOnPort = envPort
