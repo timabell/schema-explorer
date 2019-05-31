@@ -88,9 +88,10 @@
             e.target.dataset.unchanged = e.target.innerText.trim();
         });
         $("body").on("blur", ".editable-doc", function(e){
-            if (e.target.dataset.unchanged != e.target.innerText.trim()){
-                console.log(e.target.dataset.unchanged);
-                console.log(e.target.innerText.trim());
+            var update = e.target.innerText.trim();
+            if (e.target.dataset.unchanged != update){
+                var url = e.target.dataset.url
+                $.post(url, update);
             }
         });
     });
