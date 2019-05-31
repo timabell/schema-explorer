@@ -82,22 +82,16 @@
 <script>
     $(document).ready(function() {
         $(".tablesorter").tablesorter();
-        $(".editable").click(function(e){
-            var container = e.target;
-            var descriptionHtml = container.innerHTML;
-            var input = "<input type='text' class='description-editor' value='" + descriptionHtml + "'/>";
-            container.innerHTML = input;
+
+        $("body").on("focus", ".editable-doc", function(e){
+            // save a copy so we can see if there's anything to send to the server
+            e.target.dataset.unchanged = e.target.innerText.trim();
         });
-        $("body").on("blur", ".description-editor", function(e){
-            console.log(e);
-            var input = e.target;
-            console.log(input);
-            var container = input.parent();
-            console.log(container);
-            var description = input.value;
-            // todo: send to server
-            console.log(description);
-            container.innerHTML = description;
+        $("body").on("blur", ".editable-doc", function(e){
+            if (e.target.dataset.unchanged != e.target.innerText.trim()){
+                console.log(e.target.dataset.unchanged);
+                console.log(e.target.innerText.trim());
+            }
         });
     });
 </script>
