@@ -82,6 +82,23 @@
 <script>
     $(document).ready(function() {
         $(".tablesorter").tablesorter();
+        $(".editable").click(function(e){
+            var container = e.target;
+            var descriptionHtml = container.innerHTML;
+            var input = "<input type='text' class='description-editor' value='" + descriptionHtml + "'/>";
+            container.innerHTML = input;
+        });
+        $("body").on("blur", ".description-editor", function(e){
+            console.log(e);
+            var input = e.target;
+            console.log(input);
+            var container = input.parent();
+            console.log(container);
+            var description = input.value;
+            // todo: send to server
+            console.log(description);
+            container.innerHTML = description;
+        });
     });
 </script>
 </body>
