@@ -8,6 +8,8 @@ import (
 	"bitbucket.org/timabell/sql-data-viewer/schema"
 	"fmt"
 	"github.com/gorilla/mux"
+	"io/ioutil"
+	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -163,6 +165,16 @@ func AnalyseTableHandler(resp http.ResponseWriter, req *http.Request) {
 		serverError(resp, "error rendering table analysis", err)
 		return
 	}
+}
+func TableDescriptionHandler(resp http.ResponseWriter, req *http.Request) {
+	databaseName := mux.Vars(req)["database"]
+	tableName := mux.Vars(req)["tableName"]
+	description, err := ioutil.ReadAll(req.Body)
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Printf("new description for %s.%s: %s", databaseName, tableName, description)
+
 }
 
 // Split dot-separated name into schema + table name

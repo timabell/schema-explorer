@@ -46,6 +46,7 @@ func registerDatbaseRoutes(routerBase *mux.Router, namePrefix string) {
 	tables.HandleFunc("", TableInfoHandler).Name(namePrefix + "route-database-tables")
 	tables.HandleFunc("/data", TableDataHandler)
 	tables.HandleFunc("/analyse-data", AnalyseTableHandler)
+	tables.HandleFunc("/description", TableDescriptionHandler).Methods("POST")
 	trail := routerBase.PathPrefix("/table-trail").Subrouter()
 	trail.HandleFunc("", TableTrailHandler)
 	trail.HandleFunc("/clear", ClearTableTrailHandler)
