@@ -593,3 +593,7 @@ func (model pgModel) getColumns(dbc *sql.DB, table *schema.Table) (cols []*schem
 	}
 	return
 }
+
+func (model pgModel) SetTableDescription(database string, table string, description string) (err error) {
+	return
+}

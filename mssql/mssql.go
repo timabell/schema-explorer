@@ -664,3 +664,8 @@ func getIndexes(dbc *sql.DB, database *schema.Database) {
 		}
 	}
 }
+
+func (model mssqlModel) SetTableDescription(database string, table string, description string) (err error) {
+	// todo: https://gist.github.com/timabell/6fbd85431925b5724d2f#file-ms_descriptions-sql-L187
+	return
+}

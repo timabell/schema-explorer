@@ -576,3 +576,7 @@ func (model mysqlModel) getColumns(dbc *sql.DB, table *schema.Table) (cols []*sc
 	}
 	return
 }
+
+func (model mysqlModel) SetTableDescription(database string, table string, description string) (err error) {
+	return
+}

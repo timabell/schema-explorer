@@ -35,4 +35,6 @@ type DbReader interface {
 	CanSwitchDatabase() bool
 
 	GetConfiguredDatabaseName() string
+
+	SetTableDescription(database string, table string, description string) (err error)
 }

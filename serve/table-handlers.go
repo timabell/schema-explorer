@@ -169,12 +169,22 @@ func AnalyseTableHandler(resp http.ResponseWriter, req *http.Request) {
 func TableDescriptionHandler(resp http.ResponseWriter, req *http.Request) {
 	databaseName := mux.Vars(req)["database"]
 	tableName := mux.Vars(req)["tableName"]
-	description, err := ioutil.ReadAll(req.Body)
+	descriptionBytes, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		log.Fatal(err)
+		return
 	}
-	log.Printf("new description for %s.%s: %s", databaseName, tableName, description)
-
+	description := string(descriptionBytes)
+	_, dbReader, err := dbRequestSetup(databaseName)
+	if err != nil {
+		serverError(resp, "setup error setting table description", err)
+		return
+	}
+	err = dbReader.SetTableDescription(databaseName, tableName, description)
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
 }
 
 // Split dot-separated name into schema + table name
