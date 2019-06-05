@@ -888,7 +888,9 @@ func Test_Http(t *testing.T) {
 	CheckForStatus("/setup/pg", router, 403, t)
 	CheckForStatusWithMethod("/setup/pg", "POST", router, 403, t)
 
-	descriptionTests(dbPrefix, schemaPrefix, router, t, databaseName, database)
+	if database.Supports.Descriptions {
+		descriptionTests(dbPrefix, schemaPrefix, router, t, databaseName, database)
+	}
 }
 
 func descriptionTests(dbPrefix string, schemaPrefix string, router *mux.Router, t *testing.T, databaseName string, database *schema.Database) {
