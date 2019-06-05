@@ -667,5 +667,17 @@ func getIndexes(dbc *sql.DB, database *schema.Database) {
 
 func (model mssqlModel) SetTableDescription(database string, table string, description string) (err error) {
 	// todo: https://gist.github.com/timabell/6fbd85431925b5724d2f#file-ms_descriptions-sql-L187
+	dbc, err := getConnection(buildConnectionString(database))
+	if err != nil {
+		return
+	}
+	defer dbc.Close()
+	splittable := schema.TableFromString(table)
+	// from https://gist.github.com/timabell/6fbd85431925b5724d2f#file-ms_descriptions-sql-L211
+	_, err = dbc.Exec("exec sys.sp_updateextendedproperty @name=N'MS_Description', @level0type=N'SCHEMA', @level1type=N'TABLE', @level0name=$schema, @level1name=$table, @value=$newDescription",
+		sql.Named("schema", splittable.Schema),
+		sql.Named("table", splittable.Name),
+		sql.Named("newDescription", description),
+	)
 	return
 }

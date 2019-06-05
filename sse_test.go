@@ -416,7 +416,7 @@ func checkInt64(expected int64, actual int64, subject string, t *testing.T) {
 // e.g. 4 foos in bar, expected 3
 func checkStr(expected string, actual string, subject string, t *testing.T) {
 	if expected != actual {
-		t.Errorf("%s %s expected %s", actual, subject, expected)
+		t.Errorf("Got '%s' for %s, expected '%s'", actual, subject, expected)
 	}
 }
 
@@ -887,6 +887,12 @@ func Test_Http(t *testing.T) {
 	CheckForStatus("/setup", router, 403, t)
 	CheckForStatus("/setup/pg", router, 403, t)
 	CheckForStatusWithMethod("/setup/pg", "POST", router, 403, t)
+	newDescription := "updated-description"
+	CheckForStatusWithMethodAndBody(fmt.Sprintf("%s/tables/%sperson/description", dbPrefix, schemaPrefix), "POST", router, 200, newDescription, t)
+	reader.InitializeDatabase(databaseName)
+	table := schema.Table{Schema: database.DefaultSchemaName, Name: "person"}
+	updatedDescription := reader.Databases[databaseName].FindTable(&table).Description
+	checkStr(newDescription, updatedDescription, "description of "+table.String(), t)
 }
 
 func getDatabaseName() string {
@@ -906,7 +912,11 @@ func CheckForStatus(path string, router *mux.Router, expectedStatus int, t *test
 }
 
 func CheckForStatusWithMethod(path string, method string, router *mux.Router, expectedStatus int, t *testing.T) {
-	request, _ := http.NewRequest(method, path, nil)
+	CheckForStatusWithMethodAndBody(path, "GET", router, expectedStatus, "", t)
+
+}
+func CheckForStatusWithMethodAndBody(path string, method string, router *mux.Router, expectedStatus int, body string, t *testing.T) {
+	request, _ := http.NewRequest(method, path, strings.NewReader(body))
 	response := httptest.NewRecorder()
 	router.ServeHTTP(response, request)
 	if response.Code != expectedStatus {
