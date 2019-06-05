@@ -664,3 +664,52 @@ func getIndexes(dbc *sql.DB, database *schema.Database) {
 		}
 	}
 }
+
+func (model mssqlModel) SetTableDescription(database string, table string, description string) (err error) {
+	// todo: https://gist.github.com/timabell/6fbd85431925b5724d2f#file-ms_descriptions-sql-L187
+	dbc, err := getConnection(buildConnectionString(database))
+	if err != nil {
+		return
+	}
+	defer dbc.Close()
+	tableStub := schema.TableFromString(table)
+
+	if description == "" {
+		_, err = dbc.Exec(`
+				if exists(
+					select 1 from sys.extended_properties ep
+						inner join sys.objects tbl on tbl.object_id = ep.major_id
+						inner join sys.schemas sch on sch.schema_id = tbl.schema_id
+					where ep.name = 'MS_Description' and ep.minor_id = 0
+						and sch.name = $schema
+						and tbl.name = $table)
+				begin
+					exec sys.sp_dropextendedproperty @name=N'MS_Description', @level0type=N'SCHEMA', @level1type=N'TABLE', @level0name=$schema, @level1name=$table
+				end`,
+			sql.Named("schema", tableStub.Schema),
+			sql.Named("table", tableStub.Name),
+		)
+	} else {
+		// from https://gist.github.com/timabell/6fbd85431925b5724d2f#file-ms_descriptions-sql-L211
+		_, err = dbc.Exec(`
+				if exists(
+					select 1 from sys.extended_properties ep
+						inner join sys.objects tbl on tbl.object_id = ep.major_id
+						inner join sys.schemas sch on sch.schema_id = tbl.schema_id
+					where ep.name = 'MS_Description' and ep.minor_id = 0
+						and sch.name = $schema
+						and tbl.name = $table)
+				begin
+					exec sys.sp_updateextendedproperty @name=N'MS_Description', @level0type=N'SCHEMA', @level1type=N'TABLE', @level0name=$schema, @level1name=$table, @value=$newDescription
+				end
+				else
+				begin
+					exec sys.sp_addextendedproperty @name=N'MS_Description', @level0type=N'SCHEMA', @level1type=N'TABLE', @level0name=$schema, @level1name=$table, @value=$newDescription
+				end`,
+			sql.Named("schema", tableStub.Schema),
+			sql.Named("table", tableStub.Name),
+			sql.Named("newDescription", description),
+		)
+	}
+	return
+}

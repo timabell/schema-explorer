@@ -7,7 +7,7 @@
     <title>{{.LayoutData.Title}}</title>
     <link rel="stylesheet" type="text/css" href="/static/sse.css"/>
     <link rel="icon" type="image/png" href="/static/schemaexplorer-favicon.png"/>
-    <script src="/static/vendor/jquery/jquery-3.2.1.slim.min.js" type="application/javascript"></script>
+    <script src="/static/vendor/jquery/jquery-3.4.1.min.js" type="application/javascript"></script>
     <script src="/static/vendor/cytoscape/cytoscape-3.2.7.min.js" type="application/javascript"></script>
     <script src="/static/vendor/cytoscape-dagre/dagre.min.js"></script>
     <script src="/static/vendor/cytoscape-dagre/cytoscape-dagre.js"></script>
@@ -82,6 +82,18 @@
 <script>
     $(document).ready(function() {
         $(".tablesorter").tablesorter();
+
+        $("body").on("focus", ".editable-doc", function(e){
+            // save a copy so we can see if there's anything to send to the server
+            e.target.dataset.unchanged = e.target.innerText.trim();
+        });
+        $("body").on("blur", ".editable-doc", function(e){
+            var update = e.target.innerText.trim();
+            if (e.target.dataset.unchanged != update){
+                var url = e.target.dataset.url
+                $.post(url, update);
+            }
+        });
     });
 </script>
 </body>

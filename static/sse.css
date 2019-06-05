@@ -366,3 +366,12 @@ footer *, footer a, footer a:visited{
 .errors *{
     color: #ee1111;
 }
+.editable-doc:hover{
+    border: 1px solid #999;
+
+}
+.editable-doc{
+    /*stop empty editables collapsing*/
+    min-width: 8em;
+    min-height: 1em;
+}
