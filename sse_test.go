@@ -887,11 +887,29 @@ func Test_Http(t *testing.T) {
 	CheckForStatus("/setup", router, 403, t)
 	CheckForStatus("/setup/pg", router, 403, t)
 	CheckForStatusWithMethod("/setup/pg", "POST", router, 403, t)
+
+	descriptionTests(dbPrefix, schemaPrefix, router, t, databaseName, database)
+}
+
+func descriptionTests(dbPrefix string, schemaPrefix string, router *mux.Router, t *testing.T, databaseName string, database *schema.Database) {
+	table := schema.Table{Schema: database.DefaultSchemaName, Name: "person"}
+	// update
 	newDescription := "updated-description"
 	CheckForStatusWithMethodAndBody(fmt.Sprintf("%s/tables/%sperson/description", dbPrefix, schemaPrefix), "POST", router, 200, newDescription, t)
 	reader.InitializeDatabase(databaseName)
-	table := schema.Table{Schema: database.DefaultSchemaName, Name: "person"}
 	updatedDescription := reader.Databases[databaseName].FindTable(&table).Description
+	checkStr(newDescription, updatedDescription, "description of "+table.String(), t)
+	// delete
+	newDescription = ""
+	CheckForStatusWithMethodAndBody(fmt.Sprintf("%s/tables/%sperson/description", dbPrefix, schemaPrefix), "POST", router, 200, newDescription, t)
+	reader.InitializeDatabase(databaseName)
+	updatedDescription = reader.Databases[databaseName].FindTable(&table).Description
+	checkStr(newDescription, updatedDescription, "description of "+table.String(), t)
+	// add
+	newDescription = "updated-description re-added"
+	CheckForStatusWithMethodAndBody(fmt.Sprintf("%s/tables/%sperson/description", dbPrefix, schemaPrefix), "POST", router, 200, newDescription, t)
+	reader.InitializeDatabase(databaseName)
+	updatedDescription = reader.Databases[databaseName].FindTable(&table).Description
 	checkStr(newDescription, updatedDescription, "description of "+table.String(), t)
 }
 
