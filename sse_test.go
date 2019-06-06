@@ -895,24 +895,50 @@ func Test_Http(t *testing.T) {
 
 func descriptionTests(dbPrefix string, schemaPrefix string, router *mux.Router, t *testing.T, databaseName string, database *schema.Database) {
 	table := schema.Table{Schema: database.DefaultSchemaName, Name: "person"}
+	// add
+	newDescription := "table-description"
+	testTableEndpoint(dbPrefix, schemaPrefix, router, newDescription, t, databaseName, table)
 	// update
-	newDescription := "updated-description"
-	CheckForStatusWithMethodAndBody(fmt.Sprintf("%s/tables/%sperson/description", dbPrefix, schemaPrefix), "POST", router, 200, newDescription, t)
+	newDescription = "table-description-modified"
+	testTableEndpoint(dbPrefix, schemaPrefix, router, newDescription, t, databaseName, table)
+	// delete
+	newDescription = ""
+	testTableEndpoint(dbPrefix, schemaPrefix, router, newDescription, t, databaseName, table)
+
+	columnName := "favouritePetId"
+	// add
+	newDescription = "col-description"
+	testColumnEndpoint(dbPrefix, schemaPrefix, router, newDescription, t, databaseName, table, columnName)
+	// update
+	newDescription = "col-description-modified"
+	testColumnEndpoint(dbPrefix, schemaPrefix, router, newDescription, t, databaseName, table, columnName)
+	// delete
+	newDescription = ""
+	testColumnEndpoint(dbPrefix, schemaPrefix, router, newDescription, t, databaseName, table, columnName)
+}
+
+func testTableEndpoint(dbPrefix string, schemaPrefix string, router *mux.Router, newDescription string, t *testing.T, databaseName string, table schema.Table) {
+	tableEndpoint := fmt.Sprintf("%s/tables/%sperson/description", dbPrefix, schemaPrefix)
+	testDocEndpoint(tableEndpoint, router, newDescription, t, databaseName, table)
+
 	reader.InitializeDatabase(databaseName)
 	updatedDescription := reader.Databases[databaseName].FindTable(&table).Description
 	checkStr(newDescription, updatedDescription, "description of "+table.String(), t)
-	// delete
-	newDescription = ""
-	CheckForStatusWithMethodAndBody(fmt.Sprintf("%s/tables/%sperson/description", dbPrefix, schemaPrefix), "POST", router, 200, newDescription, t)
+}
+
+func testColumnEndpoint(dbPrefix string, schemaPrefix string, router *mux.Router, newDescription string, t *testing.T, databaseName string, table schema.Table, columnName string) {
+	colEndpoint := fmt.Sprintf("%s/tables/%sperson/columns/%s/description", dbPrefix, schemaPrefix, columnName)
+	testDocEndpoint(colEndpoint, router, newDescription, t, databaseName, table)
+
 	reader.InitializeDatabase(databaseName)
-	updatedDescription = reader.Databases[databaseName].FindTable(&table).Description
+	_, col := reader.Databases[databaseName].FindTable(&table).FindColumn(columnName)
+	updatedDescription := col.Description
 	checkStr(newDescription, updatedDescription, "description of "+table.String(), t)
-	// add
-	newDescription = "updated-description re-added"
-	CheckForStatusWithMethodAndBody(fmt.Sprintf("%s/tables/%sperson/description", dbPrefix, schemaPrefix), "POST", router, 200, newDescription, t)
-	reader.InitializeDatabase(databaseName)
-	updatedDescription = reader.Databases[databaseName].FindTable(&table).Description
-	checkStr(newDescription, updatedDescription, "description of "+table.String(), t)
+}
+
+func testDocEndpoint(docEndpoint string, router *mux.Router, newDescription string, t *testing.T, databaseName string, table schema.Table) {
+	t.Logf("testing %s with description '%s'", docEndpoint, newDescription)
+	CheckForStatusWithMethodAndBody(docEndpoint, "POST", router, 200, newDescription, t)
 }
 
 func getDatabaseName() string {

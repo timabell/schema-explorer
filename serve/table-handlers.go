@@ -8,6 +8,7 @@ import (
 	"bitbucket.org/timabell/sql-data-viewer/schema"
 	"fmt"
 	"github.com/gorilla/mux"
+	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -169,12 +170,11 @@ func AnalyseTableHandler(resp http.ResponseWriter, req *http.Request) {
 func TableDescriptionHandler(resp http.ResponseWriter, req *http.Request) {
 	databaseName := mux.Vars(req)["database"]
 	tableName := mux.Vars(req)["tableName"]
-	descriptionBytes, err := ioutil.ReadAll(req.Body)
+	err, description := bodyToString(req.Body)
 	if err != nil {
 		log.Fatal(err)
 		return
 	}
-	description := string(descriptionBytes)
 	_, dbReader, err := dbRequestSetup(databaseName)
 	if err != nil {
 		serverError(resp, "setup error setting table description", err)
@@ -185,6 +185,33 @@ func TableDescriptionHandler(resp http.ResponseWriter, req *http.Request) {
 		log.Fatal(err)
 		return
 	}
+}
+
+func ColumnDescriptionHandler(resp http.ResponseWriter, req *http.Request) {
+	databaseName := mux.Vars(req)["database"]
+	tableName := mux.Vars(req)["tableName"]
+	columnName := mux.Vars(req)["columnName"]
+	err, description := bodyToString(req.Body)
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+	_, dbReader, err := dbRequestSetup(databaseName)
+	if err != nil {
+		serverError(resp, "setup error setting table description", err)
+		return
+	}
+	err = dbReader.SetColumnDescription(databaseName, tableName, columnName, description)
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+}
+
+func bodyToString(closer io.ReadCloser) (error, string) {
+	descriptionBytes, err := ioutil.ReadAll(closer)
+	description := string(descriptionBytes)
+	return err, description
 }
 
 // Split dot-separated name into schema + table name

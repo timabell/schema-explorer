@@ -496,3 +496,7 @@ func (model sqliteModel) getColumns(dbc *sql.DB, table *schema.Table) (cols []*s
 func (model sqliteModel) SetTableDescription(database string, table string, description string) (err error) {
 	return
 }
+
+func (model sqliteModel) SetColumnDescription(database string, table string, column string, description string) (err error) {
+	return
+}

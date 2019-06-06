@@ -37,4 +37,6 @@ type DbReader interface {
 	GetConfiguredDatabaseName() string
 
 	SetTableDescription(database string, table string, description string) (err error)
+
+	SetColumnDescription(database string, table string, column string, description string) (err error)
 }
