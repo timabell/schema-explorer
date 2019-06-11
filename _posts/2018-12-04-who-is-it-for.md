@@ -5,8 +5,6 @@ description: A guide to people and usages for Sql Schema Explorer
 category: blog
 ---
 
-# Is Schema Explorer for you?
-
 If you are one of the following (or similar) you should give Schema Explorer a try.
 
 ## The database-guru coder

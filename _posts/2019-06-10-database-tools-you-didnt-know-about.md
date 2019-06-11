@@ -5,13 +5,13 @@ description: A complete list of tools for database people and developers
 category: blog
 ---
 
-# But you already know all the tools don't you?
+But you already know all the tools don't you?
 
 That's what I thought too before I started working on [SQL Schema Explorer](http://schemaexplorer.io/). Even after 18 years working with databases it turns out I only knew a fraction of the tools that are out there. Below is all the things I've found and that have been shared with me as I've been on this journey and a few I already knew. Hopefully there's more than a few that you didn't know of and maybe you'll pick a few up and add them to your toolbox to up your database game.
 
-## Microsoft Sql Server
+### Microsoft Sql Server
 
-### Running MSSQL on open source
+#### Running MSSQL on open source
 
 Did you know Microsoft SQL Server (aka mssql) is now available on both linux natively and in docker containers? It's the real deal, not like mono vs .net
 
@@ -24,17 +24,17 @@ Here's all it takes to fire up mssql, the only pre-requisite is docker itself.
 	-p 1433:1433 --name mssql1 \
 	-d mcr.microsoft.com/mssql/server:2017-latest
 
-### Management studio
+#### Management studio
 
 Okay you know this one but I have to mention it.
 
 It has awkward but functional diagram support. You can version control these diagrams and move them between servers with https://github.com/timabell/database-diagram-scm which is worth knowing about if you ever use the ssms diagrams.
 
-### SSMS Tools Pack
+#### SSMS Tools Pack
 
 * https://www.ssmstoolspack.com/
 
-## Cross-database / todo
+### Cross-database / todo
 
 * 2012 announce https://www.postgresql.org/about/news/1429/
 * EZ data browser - http://www.softimum-solutions.com/Data-Browser/Purchase.aspx
@@ -71,18 +71,18 @@ It has awkward but functional diagram support. You can version control these dia
 * razorsql
 * redgate sql prompt
 
-## Places to find even more database tools
+### Places to find even more database tools
 
 * https://en.wikipedia.org/wiki/Comparison_of_database_tools
 * https://www.quora.com/How-do-I-generate-an-entity-relationship-diagram-for-a-SQLite-database-file?share=1
 * https://www.quora.com/What-are-some-good-online-database-schema-design-tool-with-larger-days-of-expiry
 * https://alternativeto.net/software/mysql-workbench/
 
-## Are you being paid?
+### Are you being paid?
 
 I'm not being paid to promote these, these are not affiliate links, I share this learning with you all for free so that we can all enjoy our work with databases more, and create better more reliable databases for ourselves, our clients and our projects.
 
-## Contribute additions
+### Contribute additions
 
 Did I miss something? If you wish to improve this article please ping me a PR with additions here: https://github.com/timabell/sdv-website or just email me at tim@timwise.co.uk
 
