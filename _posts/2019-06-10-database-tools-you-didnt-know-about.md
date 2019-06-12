@@ -1,11 +1,11 @@
 ---
 layout: article
-title: Database tools you didn't know about
+title: Database tools I was surprised existed
 description: A complete list of tools for database people and developers
 category: blog
 ---
 
-But you already know all the tools don't you?
+But you already know all the tools for working with databases don't you?
 
 That's what I thought too before I started working on [SQL Schema
 Explorer](http://schemaexplorer.io/). Even after 18 years working with
