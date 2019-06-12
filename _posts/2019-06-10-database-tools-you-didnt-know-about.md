@@ -15,9 +15,9 @@ been on this journey and a few I already knew. Hopefully there's more than a
 few that you didn't know of and maybe you'll pick a few up and add them to your
 toolbox to up your database game.
 
-### Microsoft Sql Server
+## Microsoft Sql Server
 
-#### You can now run MSSQL on open source
+### You can now run MSSQL on open source
 
 Did you know Microsoft SQL Server (aka mssql) is now available on both linux
 natively and in docker containers? It's the real deal, not like mono vs .net
@@ -35,7 +35,7 @@ I don't know about you but one less reason to fire up the Windows VM sure does
 make me happy. Combined with dotnet core I haven't fired up Windows in months
 now.
 
-#### Management studio
+### Management studio
 
 Okay you know this one but I have to mention it.
 
@@ -44,11 +44,11 @@ diagrams and move them between servers with
 https://github.com/timabell/database-diagram-scm which is worth knowing about
 if you ever use the ssms diagrams.
 
-#### SSMS Tools Pack
+### SSMS Tools Pack
 
 * https://www.ssmstoolspack.com/
 
-### Cross-database / todo
+## Cross-database / todo
 
 * 2012 announce https://www.postgresql.org/about/news/1429/
 * EZ data browser - http://www.softimum-solutions.com/Data-Browser/Purchase.aspx
@@ -85,14 +85,14 @@ if you ever use the ssms diagrams.
 * razorsql
 * redgate sql prompt
 
-### Places to find even more database tools
+## Places to find even more database tools
 
 * https://en.wikipedia.org/wiki/Comparison_of_database_tools
 * https://www.quora.com/How-do-I-generate-an-entity-relationship-diagram-for-a-SQLite-database-file?share=1
 * https://www.quora.com/What-are-some-good-online-database-schema-design-tool-with-larger-days-of-expiry
 * https://alternativeto.net/software/mysql-workbench/
 
-### The end
+## The end
 
 I hope you found at least a few you didn't know about and that they make your life better in some way. Please do tell me the story of how this helped you on [email](tim@schemaexplorer.io) or [twitter](https://twitter.com/tim_abell).
 Did I miss something? If you wish to improve this article please ping me a PR with additions here: https://github.com/timabell/sdv-website or just [email me](tim@schemaexplorer.io).
