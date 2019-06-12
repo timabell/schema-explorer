@@ -23,7 +23,8 @@ h2 * {
   color: #f8f8f8;
   margin-right: 0.15em;
 }
-h2{
+h2,
+main h1 {
   background-color: #823331;
   color: #f8f8f8;
   padding: 0.5em 16px;
