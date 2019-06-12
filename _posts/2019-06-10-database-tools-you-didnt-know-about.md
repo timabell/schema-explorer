@@ -41,56 +41,54 @@ Okay you know this one but I have to mention it.
 
 It has awkward but functional diagram support. You can version control these
 diagrams and move them between servers with
-https://github.com/timabell/database-diagram-scm which is worth knowing about
+<https://github.com/timabell/database-diagram-scm> which is worth knowing about
 if you ever use the ssms diagrams.
 
 ### SSMS Tools Pack
 
-* https://www.ssmstoolspack.com/
+* <https://www.ssmstoolspack.com/>
 
 ## Cross-database / todo
 
-* 2012 announce https://www.postgresql.org/about/news/1429/
-* EZ data browser - http://www.softimum-solutions.com/Data-Browser/Purchase.aspx
-* http://sqleo.sourceforge.net/ - https://www.youtube.com/watch?v=emDrdj0IxNI
-* http://sqlfiddle.com/
-* http://www.dbschema.com/sqlite-designer-tool.html
-* http://www.magereverse.com/
-* http://www.sqlservercentral.com/articles/Tools/157911/
-* https://dataedo.com/
-* https://dbvis.com/
-* https://docs.microsoft.com/en-us/sql/azure-data-studio
-* https://github.com/ajdeziel/SQL-Data-Viewer - abandoned
-* https://github.com/preston/railroady/
-* https://help.talend.com/reader/ISPDm8GQ6s0HN0348QulWg/Ij~7tBlW8im63rAGnGHT3A
-* https://portableapps.com/apps/development/database_browser_portable
-* https://redash.io/
-* https://sequelpro.com/
-* https://softwarerecs.stackexchange.com/questions/11346/tool-to-visualize-sql-database-schema
-* https://sqldbm.com/en/
-* https://sqlitestudio.pl/
-* https://www.codediesel.com/data/5-tools-to-visualize-database-schemas/
-* https://www.codediesel.com/data/5-tools-to-visualize-database-schemas/
-* https://www.datasparc.com/
-* https://www.dbsoftlab.com/online-tutorials/active-table-editor-online-tutorials.html
-* https://www.devart.com/dbforge/sql/studio/
-* https://www.idera.com/er-studio-data-architect-saftware
-* https://www.idera.com/er-studio-data-architect-software
-* https://www.jetbrains.com/datagrip/ - https://www.youtube.com/watch?v=Xb9K8IAdZNg
-* https://www.metabase.com/
-* https://www.navicat.com/en/products/navicat-data-modeler
-* https://www.schemacrawler.com/
-* https://www.sqlservercentral.com/articles/microsoft-sql-server-utilities-and-tools-1
+* 2012 announce <https://www.postgresql.org/about/news/1429/>
+* EZ data browser - <http://www.softimum-solutions.com/Data-Browser/Purchase.aspx>
+* <http://sqleo.sourceforge.net/> - <https://www.youtube.com/watch?v=emDrdj0IxNI>
+* <http://sqlfiddle.com/>
+* <http://www.dbschema.com/sqlite-designer-tool.html>
+* <http://www.magereverse.com/>
+* <http://www.sqlservercentral.com/articles/Tools/157911/>
+* <https://dataedo.com/>
+* <https://dbvis.com/>
+* <https://docs.microsoft.com/en-us/sql/azure-data-studio>
+* <https://github.com/ajdeziel/SQL-Data-Viewer> - abandoned
+* <https://github.com/preston/railroady/>
+* <https://help.talend.com/reader/ISPDm8GQ6s0HN0348QulWg/Ij~7tBlW8im63rAGnGHT3A>
+* <https://portableapps.com/apps/development/database_browser_portable>
+* <https://redash.io/>
+* <https://sequelpro.com/>
+* <https://softwarerecs.stackexchange.com/questions/11346/tool-to-visualize-sql-database-schema>
+* <https://sqldbm.com/en/>
+* <https://sqlitestudio.pl/>
+* <https://www.codediesel.com/data/5-tools-to-visualize-database-schemas/>
+* <https://www.datasparc.com/>
+* <https://www.dbsoftlab.com/online-tutorials/active-table-editor-online-tutorials.html>
+* <https://www.devart.com/dbforge/sql/studio/>
+* <https://www.idera.com/er-studio-data-architect-saftware>
+* <https://www.jetbrains.com/datagrip/> - <https://www.youtube.com/watch?v=Xb9K8IAdZNg>
+* <https://www.metabase.com/>
+* <https://www.navicat.com/en/products/navicat-data-modeler>
+* <https://www.schemacrawler.com/>
+* <https://www.sqlservercentral.com/articles/microsoft-sql-server-utilities-and-tools-1>
 * intellij/rider/rubymine etc all have the datagrip capabilities built in
 * razorsql
 * redgate sql prompt
 
 ## Places to find even more database tools
 
-* https://en.wikipedia.org/wiki/Comparison_of_database_tools
-* https://www.quora.com/How-do-I-generate-an-entity-relationship-diagram-for-a-SQLite-database-file?share=1
-* https://www.quora.com/What-are-some-good-online-database-schema-design-tool-with-larger-days-of-expiry
-* https://alternativeto.net/software/mysql-workbench/
+* <https://en.wikipedia.org/wiki/Comparison_of_database_tools>
+* <https://www.quora.com/How-do-I-generate-an-entity-relationship-diagram-for-a-SQLite-database-file?share=1>
+* <https://www.quora.com/What-are-some-good-online-database-schema-design-tool-with-larger-days-of-expiry>
+* <https://alternativeto.net/software/mysql-workbench/>
 
 ## The end
 
