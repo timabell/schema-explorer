@@ -17,6 +17,22 @@ toolbox to up your database game.
 
 ## Microsoft Sql Server
 
+### SSMS Tools Pack
+
+<https://www.ssmstoolspack.com/>
+
+* [€30 for first computer to €5000 for unlimited enterprise use](https://www.ssmstoolspack.com/Licensing)
+
+
+### Sql Server Management Studio (SSMS)
+
+Okay you know this one but I have to mention it.
+
+It has awkward but functional diagram support. You can version control these
+diagrams and move them between servers with
+<https://github.com/timabell/database-diagram-scm> which is worth knowing about
+if you ever use the ssms diagrams.
+
 ### You can now run MSSQL on open source
 
 Did you know Microsoft SQL Server (aka mssql) is now available on both linux
@@ -35,18 +51,6 @@ I don't know about you but one less reason to fire up the Windows VM sure does
 make me happy. Combined with dotnet core I haven't fired up Windows in months
 now.
 
-### Management studio
-
-Okay you know this one but I have to mention it.
-
-It has awkward but functional diagram support. You can version control these
-diagrams and move them between servers with
-<https://github.com/timabell/database-diagram-scm> which is worth knowing about
-if you ever use the ssms diagrams.
-
-### SSMS Tools Pack
-
-* <https://www.ssmstoolspack.com/>
 
 ## Cross-database
 
