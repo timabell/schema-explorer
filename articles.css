@@ -30,6 +30,12 @@ main h1 {
   padding: 0.5em 16px;
   margin: 1.5em -16px;
 }
+h2:before{
+  content:  "\f1c0 ";
+  font-family: "Font Awesome 5 Free";
+  font-weight: 900;
+  margin-right: 0.5em;
+}
 
 table {
     border: 1px solid #666;
