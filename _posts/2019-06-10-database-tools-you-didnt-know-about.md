@@ -48,10 +48,26 @@ if you ever use the ssms diagrams.
 
 * <https://www.ssmstoolspack.com/>
 
-## Cross-database / todo
+## Cross-database
 
-* 2012 announce <https://www.postgresql.org/about/news/1429/>
-* EZ data browser - <http://www.softimum-solutions.com/Data-Browser/Purchase.aspx>
+### Razor Sql
+
+![Razor Sql Screenshot](https://www.razorsql.com/images/razorsql/main45.jpg){:height="200px"}
+
+<http://www.razorsql.com/>
+
+### EZ Data Browser
+
+![EZ Data Browser Screenshot](http://www.softimum-solutions.com/Content/Images/Overview.png){:height="200px"}
+
+<http://www.softimum-solutions.com/Data-Browser/Overview.aspx>
+
+* $29.99 per computer
+* Licence key by email
+* pay via PayPal of credit card
+
+## Unsorted (wip)
+
 * <http://sqleo.sourceforge.net/> - <https://www.youtube.com/watch?v=emDrdj0IxNI>
 * <http://sqlfiddle.com/>
 * <http://www.dbschema.com/sqlite-designer-tool.html>
