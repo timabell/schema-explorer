@@ -126,9 +126,33 @@ Live online sql editor / runner
 
 * <http://sqlfiddle.com/>
 
+### DbSchema
+
+![DbSchema screenshot](https://www.dbschema.com/images/screenshots/database-er-diagram.png){:height="200px"}
+
+* <http://www.dbschema.com/>
+
+> "DbSchema is an SQL and No-SQL database designer featuring interactive
+> diagrams, HTML and PDF documentation, schema versioning and migration,
+> relational data browse, random data generator, visual query builder, SQL
+> editor and database reports."
+
+### DbPrompt
+
+![DbPrompt screenshot](http://www.dbschema.com/images/dbprompt.png){:height="200px"}
+
+* <http://www.dbschema.com/dbprompt.html>
+
+> "Free Universal Multi-Database SQL Prompt - DbPrompt can execute queries on
+> multiple databases, transfer data between databases, upload result files on
+> ftp servers, execute complex SQL scripts using Java Groovy and cron-schedule
+> scripts for execution and report failures per email. DbPrompt supports all
+> SQL and NoSQL databases, like MySql, Cassandra, PostgreSql, MongoDb,
+> Redshift, SqlServer, Azure, Oracle, Teradata and more. DbPrompt can work on
+> all operating systems. DbPrompt is free of charge. "
+
 ## Unsorted (wip)
 
-* <http://www.dbschema.com/sqlite-designer-tool.html>
 * <http://www.magereverse.com/>
 * <http://www.sqlservercentral.com/articles/Tools/157911/>
 * <https://dataedo.com/>
