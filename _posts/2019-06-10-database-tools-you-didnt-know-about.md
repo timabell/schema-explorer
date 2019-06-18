@@ -94,6 +94,8 @@ now.
 * Licence key by email
 * pay via PayPal of credit card
 
+> "software from Softimum Solutions to help users to browse and to edit SQL Server databases quickly and easily"
+
 ## Unsorted (wip)
 
 * <http://sqleo.sourceforge.net/> - <https://www.youtube.com/watch?v=emDrdj0IxNI>
