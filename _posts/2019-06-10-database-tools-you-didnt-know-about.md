@@ -10,10 +10,20 @@ But you already know all the tools for working with databases don't you?
 That's what I thought too before I started working on [SQL Schema
 Explorer](http://schemaexplorer.io/). Even after 18 years working with
 databases it turns out I only knew a fraction of the tools that are out there.
-Below is all the things I've found and that have been shared with me as I've
-been on this journey and a few I already knew. Hopefully there's more than a
-few that you didn't know of and maybe you'll pick a few up and add them to your
-toolbox to up your database game.
+
+Working on SQL Schema Explorer gave me a reason I didn't have before to search
+the internet in new ways relating to databases, and now that I'm reaching out
+to people about SQL Schema Explorer people are in turn sharing their favourite
+tools with me.
+
+I'd hate for this gift to sit hidden away in my private product trello board,
+so I've turned it into this article so that you can skip the wilderness years
+and gain a zen-like awareness of all the tools of your trade. I'm sure you
+won't like or use all of them, and many overlap in function, but the following
+list will allow you to try out and asses each one against your needs; perhaps
+you'll find a new tool that will save you hours, or make your job that much
+more enjoyable. Never again will you have to say to a new colleague "oh I
+hadn't heard of that one!".
 
 ## Microsoft Sql Server
 
