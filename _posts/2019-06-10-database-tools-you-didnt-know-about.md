@@ -63,10 +63,13 @@ Here's all it takes to fire up mssql, the only pre-requisite is docker itself.
 	-p 1433:1433 --name mssql1 \
 	-d mcr.microsoft.com/mssql/server:2017-latest
 
+This isn't a tool per-se, but this is too important to not mention, especially
+as it's quite new and not everyone is aware of this exciting change from
+redmond.
+
 I don't know about you but one less reason to fire up the Windows VM sure does
 make me happy. Combined with dotnet core I haven't fired up Windows in months
 now.
-
 
 ## Cross-database
 
