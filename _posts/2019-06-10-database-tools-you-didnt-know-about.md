@@ -117,9 +117,17 @@ Cross-database query builder/analyser. Feature rich - data/schema compare, pivot
 * Sourceforge page (ugh) <https://sourceforge.net/projects/sqleo/>
 * Fork on github <https://github.com/ojwanganto/SQLeo>
 
-## Unsorted (wip)
+
+### SQL Fiddle
+
+Live online sql editor / runner
+
+![SQL Fiddle screenshot](/blog/img/tools/sqlfiddle-screenshot.png){:height="200px"}
 
 * <http://sqlfiddle.com/>
+
+## Unsorted (wip)
+
 * <http://www.dbschema.com/sqlite-designer-tool.html>
 * <http://www.magereverse.com/>
 * <http://www.sqlservercentral.com/articles/Tools/157911/>
