@@ -31,8 +31,14 @@ hadn't heard of that one!".
 
 <https://www.ssmstoolspack.com/>
 
-* [€30 for first computer to €5000 for unlimited enterprise use](https://www.ssmstoolspack.com/Licensing)
+An add-on to management studio that improves many pieces of of ssms and adds new capabilities.
 
+![Screenshot of CRUD generation in SSMS Tools](https://www.ssmstoolspack.com/Content/Images/Features/CRUD.png){:height="200px"}
+
+* €30 for first computer to €5000 for unlimited enterprise use ([SSMS Toolpack
+  Pricing page](https://www.ssmstoolspack.com/Licensing))
+
+A friend of mine saved many hours using the "CRUD" stored procedure generation capabilities.
 
 ### Sql Server Management Studio (SSMS)
 
