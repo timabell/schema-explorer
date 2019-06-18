@@ -103,7 +103,12 @@ body .button {
   max-width: 58em;
   margin: 0 auto;
 }
-blockquote {
+.layout-article blockquote {
+  background-color: #eee;
+  padding: 0.5em 16px;
+  margin: 1em -16px 0.5em -16px;
+}
+.layout-default blockquote {
   font-size: 1.25em;
   background-color: #eee;
   padding: 1em;

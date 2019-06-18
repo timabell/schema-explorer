@@ -79,6 +79,11 @@ now.
 
 <http://www.razorsql.com/>
 
+> "RazorSQL is an SQL query tool, database browser, SQL editor, and database
+> administration tool for Windows, macOS, Mac OS X, Linux, and Solaris.
+> RazorSQL has been tested on over 40 databases, can connect to databases via
+> either JDBC or ODBC"
+
 ### EZ Data Browser
 
 ![EZ Data Browser Screenshot](http://www.softimum-solutions.com/Content/Images/Overview.png){:height="200px"}
