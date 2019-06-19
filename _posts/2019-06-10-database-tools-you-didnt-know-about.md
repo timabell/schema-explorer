@@ -182,6 +182,8 @@ Live online sql editor / runner
 * redgate sql prompt
 * <https://www.oracle.com/database/technologies/appdev/datamodeler.html>
 * <https://erwin.com/products/erwin-data-modeler/>
+* DBeaver
+* Azure Data Studio - PostgreSQL extension
 
 ## Places to find even more database tools
 
