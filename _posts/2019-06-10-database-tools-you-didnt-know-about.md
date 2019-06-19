@@ -184,14 +184,20 @@ Live online sql editor / runner
 * <https://erwin.com/products/erwin-data-modeler/>
 * DBeaver
 * Azure Data Studio - PostgreSQL extension
+* SAP PowerDesigner <https://www.sap.com/products/powerdesigner-data-modeling-tools.html> - I have no idea what this is. Sounds enterprisey.
+  * <https://en.wikipedia.org/wiki/PowerDesigner>
 
-## Places to find even more database tools
+## Places to find even more database tools and learn more
 
 * <https://en.wikipedia.org/wiki/Comparison_of_database_tools>
 * <https://www.quora.com/How-do-I-generate-an-entity-relationship-diagram-for-a-SQLite-database-file?share=1>
 * <https://www.quora.com/What-are-some-good-online-database-schema-design-tool-with-larger-days-of-expiry>
 * <https://alternativeto.net/software/mysql-workbench/>
 * <https://www.datasciencecentral.com/profiles/blogs/top-6-data-modeling-tools>
+* <https://www.educba.com/9-best-data-modeling-tools/>
+* <http://www.agiledata.org/essays/dataModeling101.html> - I had no idea what data modelling really meant before reading this.
+
+
 
 ## The end
 
