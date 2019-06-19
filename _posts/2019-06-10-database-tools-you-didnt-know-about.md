@@ -180,6 +180,8 @@ Live online sql editor / runner
 * intellij/rider/rubymine etc all have the datagrip capabilities built in
 * razorsql
 * redgate sql prompt
+* <https://www.oracle.com/database/technologies/appdev/datamodeler.html>
+* <https://erwin.com/products/erwin-data-modeler/>
 
 ## Places to find even more database tools
 
@@ -187,6 +189,7 @@ Live online sql editor / runner
 * <https://www.quora.com/How-do-I-generate-an-entity-relationship-diagram-for-a-SQLite-database-file?share=1>
 * <https://www.quora.com/What-are-some-good-online-database-schema-design-tool-with-larger-days-of-expiry>
 * <https://alternativeto.net/software/mysql-workbench/>
+* <https://www.datasciencecentral.com/profiles/blogs/top-6-data-modeling-tools>
 
 ## The end
 
