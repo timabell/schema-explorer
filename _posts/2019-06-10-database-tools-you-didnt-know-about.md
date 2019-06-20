@@ -186,6 +186,10 @@ Live online sql editor / runner
 * Azure Data Studio - PostgreSQL extension
 * SAP PowerDesigner <https://www.sap.com/products/powerdesigner-data-modeling-tools.html> - I have no idea what this is. Sounds enterprisey.
   * <https://en.wikipedia.org/wiki/PowerDesigner>
+* <https://www.idera.com/er-studio-enterprise-data-modeling-and-architecture-tools>
+* <https://www.idera.com/er-studio-data-architect-software>
+* <https://sparxsystems.com/products/ea/>
+* <https://www.ibm.com/us-en/marketplace/infosphere-data-architect>
 
 ## Places to find even more database tools and learn more
 
