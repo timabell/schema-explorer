@@ -154,7 +154,6 @@ Live online sql editor / runner
 ## Unsorted (wip)
 
 * <http://www.magereverse.com/>
-* <http://www.sqlservercentral.com/articles/Tools/157911/>
 * <https://dataedo.com/>
 * <https://dbvis.com/>
 * <https://docs.microsoft.com/en-us/sql/azure-data-studio>
@@ -190,6 +189,7 @@ Live online sql editor / runner
 * <https://www.idera.com/er-studio-data-architect-software>
 * <https://sparxsystems.com/products/ea/>
 * <https://www.ibm.com/us-en/marketplace/infosphere-data-architect>
+* <https://www.postgrescompare.com/>
 
 ## Places to find even more database tools and learn more
 
@@ -200,6 +200,8 @@ Live online sql editor / runner
 * <https://www.datasciencecentral.com/profiles/blogs/top-6-data-modeling-tools>
 * <https://www.educba.com/9-best-data-modeling-tools/>
 * <http://www.agiledata.org/essays/dataModeling101.html> - I had no idea what data modelling really meant before reading this.
+* <http://www.sqlservercentral.com/articles/Tools/157911/>
+* <https://www.apgdiff.com/>
 
 
 
