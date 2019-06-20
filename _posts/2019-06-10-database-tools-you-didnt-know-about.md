@@ -151,7 +151,7 @@ Live online sql editor / runner
 > Redshift, SqlServer, Azure, Oracle, Teradata and more. DbPrompt can work on
 > all operating systems. DbPrompt is free of charge. "
 
-## Unsorted (wip)
+## Unsorted - omg will it never end
 
 * <http://www.magereverse.com/>
 * <https://dataedo.com/>
@@ -176,9 +176,8 @@ Live online sql editor / runner
 * <https://www.navicat.com/en/products/navicat-data-modeler>
 * <https://www.schemacrawler.com/>
 * <https://www.sqlservercentral.com/articles/microsoft-sql-server-utilities-and-tools-1>
-* intellij/rider/rubymine etc all have the datagrip capabilities built in
-* razorsql
-* redgate sql prompt
+* <https://jetbrains.com/> intellij/rider/rubymine etc all have the datagrip capabilities built in
+* <https://www.red-gate.com/> sql prompt etc
 * <https://www.oracle.com/database/technologies/appdev/datamodeler.html>
 * <https://erwin.com/products/erwin-data-modeler/>
 * DBeaver
@@ -202,16 +201,38 @@ Live online sql editor / runner
 * <http://www.agiledata.org/essays/dataModeling101.html> - I had no idea what data modelling really meant before reading this.
 * <http://www.sqlservercentral.com/articles/Tools/157911/>
 * <https://www.apgdiff.com/>
+* <http://toolsfordatabases.com/>
+* <https://www.webfx.com/blog/web-design/top-five-best-database-management-tools/>
+* <https://solutionsreview.com/data-management/data-management-solutions-directory/>
+* <https://www.softwaretestinghelp.com/tools/26-best-data-integration-tools/>
 
 
+## Information overload
+
+If you got this far you probably need to get back to work. It's clear this
+article is a bit ridiculous now so I'm not going to carry on sorting it out.
+The internet is littered with catalog articles of varying completeness and
+quality. To make it complete and good would make it dull and endless.
+
+Watch this space, I think I'll try and work out what people actually are trying
+to do and cater for that. Maybe we can all build a collaborative index
+somewhere.
 
 ## The end
 
-I hope you found at least a few you didn't know about and that they make your life better in some way. Please do tell me the story of how this helped you on [email](tim@schemaexplorer.io) or [twitter](https://twitter.com/tim_abell).
-Did I miss something? If you wish to improve this article please ping me a PR with additions here: https://github.com/timabell/sdv-website or just [email me](tim@schemaexplorer.io).
+I hope you found at least a few you didn't know about and that they make your
+life better in some way. Please do tell me the story of how this helped you on
+[email](tim@schemaexplorer.io) or [twitter](https://twitter.com/tim_abell).
+Did I miss something? If you wish to improve this article please ping me a PR
+with additions here: https://github.com/timabell/sdv-website or just [email
+me](tim@schemaexplorer.io).
 
-I'm not being paid to promote these, these are not affiliate links, I share this learning with you all for free so that we can all enjoy our work with databases more, and create better more reliable databases for ourselves, our clients and our projects.
+I'm not being paid to promote these, these are not affiliate links, I share
+this learning with you all for free so that we can all enjoy our work with
+databases more, and create better more reliable databases for ourselves, our
+clients and our projects.
 
-If you want to be notified of new articles, sign up to the mailing list (which currently is also the trial download list).
+If you want to be notified of new articles, sign up to the mailing list (which
+currently is also the trial download list).
 
 Till next time!
