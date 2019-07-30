@@ -4,6 +4,10 @@ Copyright 2015-19 Tim Abell
 
 [http://schemaexplorer.io/](http://schemaexplorer.io/)
 
+SQL Schema Explorer is licenced under the [Affero-GPL v3](static/agpl-3.0.txt)
+
+Included libraries remain under their [respective licenses](static/license.html)
+
 # No Warranty
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
