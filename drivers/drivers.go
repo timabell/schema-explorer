@@ -1,6 +1,6 @@
 package drivers
 
-import "bitbucket.org/timabell/sql-data-viewer/driver_interface"
+import "github.com/timabell/schema-explorer/driver_interface"
 
 type Driver struct {
 	Name         string

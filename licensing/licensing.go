@@ -1,7 +1,7 @@
 package licensing
 
 import (
-	"bitbucket.org/timabell/sql-data-viewer/about"
+	"github.com/timabell/schema-explorer/about"
 	"fmt"
 	"log"
 	"time"

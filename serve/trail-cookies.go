@@ -1,7 +1,7 @@
 package serve
 
 import (
-	"bitbucket.org/timabell/sql-data-viewer/trail"
+	"github.com/timabell/schema-explorer/trail"
 	"net/http"
 	"strings"
 	"time"

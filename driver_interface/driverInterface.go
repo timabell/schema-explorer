@@ -1,8 +1,8 @@
 package driver_interface
 
 import (
-	"bitbucket.org/timabell/sql-data-viewer/params"
-	"bitbucket.org/timabell/sql-data-viewer/schema"
+	"github.com/timabell/schema-explorer/params"
+	"github.com/timabell/schema-explorer/schema"
 	"database/sql"
 )
 

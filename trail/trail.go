@@ -1,7 +1,7 @@
 package trail
 
 import (
-	"bitbucket.org/timabell/sql-data-viewer/schema"
+	"github.com/timabell/schema-explorer/schema"
 	"strings"
 )
 

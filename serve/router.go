@@ -1,7 +1,7 @@
 package serve
 
 import (
-	"bitbucket.org/timabell/sql-data-viewer/resources"
+	"github.com/timabell/schema-explorer/resources"
 	"github.com/gorilla/mux"
 	"net/http"
 )

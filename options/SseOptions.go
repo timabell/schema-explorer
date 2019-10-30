@@ -1,7 +1,7 @@
 package options
 
 import (
-	"bitbucket.org/timabell/sql-data-viewer/drivers"
+	"github.com/timabell/schema-explorer/drivers"
 	"flag"
 	"fmt"
 	"os"
