@@ -1,9 +1,9 @@
 package serve
 
 import (
-	"bitbucket.org/timabell/sql-data-viewer/reader"
-	"bitbucket.org/timabell/sql-data-viewer/render"
-	"bitbucket.org/timabell/sql-data-viewer/trail"
+	"github.com/timabell/schema-explorer/reader"
+	"github.com/timabell/schema-explorer/render"
+	"github.com/timabell/schema-explorer/trail"
 	"fmt"
 	"github.com/gorilla/mux"
 	"net/http"

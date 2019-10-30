@@ -3,11 +3,11 @@
 package pg
 
 import (
-	"bitbucket.org/timabell/sql-data-viewer/driver_interface"
-	"bitbucket.org/timabell/sql-data-viewer/drivers"
-	"bitbucket.org/timabell/sql-data-viewer/params"
-	"bitbucket.org/timabell/sql-data-viewer/reader"
-	"bitbucket.org/timabell/sql-data-viewer/schema"
+	"github.com/timabell/schema-explorer/driver_interface"
+	"github.com/timabell/schema-explorer/drivers"
+	"github.com/timabell/schema-explorer/params"
+	"github.com/timabell/schema-explorer/reader"
+	"github.com/timabell/schema-explorer/schema"
 	"database/sql"
 	"errors"
 	"fmt"

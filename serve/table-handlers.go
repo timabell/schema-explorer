@@ -1,11 +1,11 @@
 package serve
 
 import (
-	"bitbucket.org/timabell/sql-data-viewer/options"
-	"bitbucket.org/timabell/sql-data-viewer/params"
-	"bitbucket.org/timabell/sql-data-viewer/reader"
-	"bitbucket.org/timabell/sql-data-viewer/render"
-	"bitbucket.org/timabell/sql-data-viewer/schema"
+	"github.com/timabell/schema-explorer/options"
+	"github.com/timabell/schema-explorer/params"
+	"github.com/timabell/schema-explorer/reader"
+	"github.com/timabell/schema-explorer/render"
+	"github.com/timabell/schema-explorer/schema"
 	"fmt"
 	"github.com/gorilla/mux"
 	"io"

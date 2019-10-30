@@ -1,13 +1,13 @@
 package serve
 
 import (
-	"bitbucket.org/timabell/sql-data-viewer/about"
-	"bitbucket.org/timabell/sql-data-viewer/browser"
-	"bitbucket.org/timabell/sql-data-viewer/driver_interface"
-	"bitbucket.org/timabell/sql-data-viewer/licensing"
-	"bitbucket.org/timabell/sql-data-viewer/options"
-	"bitbucket.org/timabell/sql-data-viewer/reader"
-	"bitbucket.org/timabell/sql-data-viewer/render"
+	"github.com/timabell/schema-explorer/about"
+	"github.com/timabell/schema-explorer/browser"
+	"github.com/timabell/schema-explorer/driver_interface"
+	"github.com/timabell/schema-explorer/licensing"
+	"github.com/timabell/schema-explorer/options"
+	"github.com/timabell/schema-explorer/reader"
+	"github.com/timabell/schema-explorer/render"
 	"fmt"
 	"github.com/gorilla/mux"
 	"log"

@@ -1,7 +1,7 @@
 package driver_interface
 
 import (
-	"bitbucket.org/timabell/sql-data-viewer/schema"
+	"github.com/timabell/schema-explorer/schema"
 	"fmt"
 )
 

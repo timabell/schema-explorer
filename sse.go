@@ -12,14 +12,14 @@ defined in the database's schema.
 package main
 
 import (
-	"bitbucket.org/timabell/sql-data-viewer/about"
-	"bitbucket.org/timabell/sql-data-viewer/licensing"
-	_ "bitbucket.org/timabell/sql-data-viewer/mssql"
-	_ "bitbucket.org/timabell/sql-data-viewer/mysql"
-	"bitbucket.org/timabell/sql-data-viewer/options"
-	_ "bitbucket.org/timabell/sql-data-viewer/pg"
-	"bitbucket.org/timabell/sql-data-viewer/serve"
-	_ "bitbucket.org/timabell/sql-data-viewer/sqlite"
+	"github.com/timabell/schema-explorer/about"
+	"github.com/timabell/schema-explorer/licensing"
+	_ "github.com/timabell/schema-explorer/mssql"
+	_ "github.com/timabell/schema-explorer/mysql"
+	"github.com/timabell/schema-explorer/options"
+	_ "github.com/timabell/schema-explorer/pg"
+	"github.com/timabell/schema-explorer/serve"
+	_ "github.com/timabell/schema-explorer/sqlite"
 	"log"
 )
 

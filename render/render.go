@@ -1,14 +1,14 @@
 package render
 
 import (
-	"bitbucket.org/timabell/sql-data-viewer/about"
-	"bitbucket.org/timabell/sql-data-viewer/driver_interface"
-	"bitbucket.org/timabell/sql-data-viewer/drivers"
-	"bitbucket.org/timabell/sql-data-viewer/params"
-	"bitbucket.org/timabell/sql-data-viewer/reader"
-	"bitbucket.org/timabell/sql-data-viewer/resources"
-	"bitbucket.org/timabell/sql-data-viewer/schema"
-	"bitbucket.org/timabell/sql-data-viewer/trail"
+	"github.com/timabell/schema-explorer/about"
+	"github.com/timabell/schema-explorer/driver_interface"
+	"github.com/timabell/schema-explorer/drivers"
+	"github.com/timabell/schema-explorer/params"
+	"github.com/timabell/schema-explorer/reader"
+	"github.com/timabell/schema-explorer/resources"
+	"github.com/timabell/schema-explorer/schema"
+	"github.com/timabell/schema-explorer/trail"
 	"fmt"
 	"html/template"
 	"log"
