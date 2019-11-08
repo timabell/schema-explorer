@@ -7,18 +7,9 @@ sudo apt install sqlite3
 
 # ================
 
-# Install https://github.com/moovweb/gvm
+# Install asdf version manaager
 
-sudo apt-get install curl git mercurial make binutils bison gcc build-essential
-
-bash < <(curl -s -S -L https://raw.githubusercontent.com/moovweb/gvm/master/binscripts/gvm-installer)
-source /home/tim/.gvm/scripts/gvm
-
-gvm install go1.4 -B
-gvm use go1.4
-export GOROOT_BOOTSTRAP=$GOROOT
-gvm install go1.9.4
-gvm use go1.9.4 --default
+# https://asdf-vm.com/
 
 # ================
 
