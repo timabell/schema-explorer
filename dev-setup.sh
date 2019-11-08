@@ -7,9 +7,10 @@ sudo apt install sqlite3
 
 # ================
 
-# Install asdf version manaager
+# Install asdf version manaager and golang plugin
 
 # https://asdf-vm.com/
+# https://github.com/kennyp/asdf-golang
 
 # ================
 
