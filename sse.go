@@ -24,8 +24,6 @@ import (
 )
 
 func main() {
-	licensing.EnforceLicensing()
-
 	options.SetupArgs()
 	options.ReadArgsAndEnv()
 

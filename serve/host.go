@@ -101,7 +101,6 @@ func dbRequestSetup(databaseName string) (layoutData render.PageTemplateModel, d
 }
 
 func requestSetup(canSwitchDatabase bool, dbReady bool, databaseName string) (layoutData render.PageTemplateModel) {
-	licensing.EnforceLicensing()
 	layoutData = getLayoutData(canSwitchDatabase, dbReady, databaseName)
 	if !isCachingEnabled() {
 		render.SetupTemplates()
