@@ -1,5 +1,5 @@
 #!/bin/sh
-echo "drop database if exists ssetest;" | mysql -u ssetestusr -pssetestusrpass
-echo "create database ssetest;" | mysql -u ssetestusr -pssetestusrpass
-mysql -u ssetestusr -pssetestusrpass ssetest < test-db.sql
+docker exec sse-mysql mysql -pomgroot -e "drop database if exists ssetest;"
+docker exec sse-mysql mysql -pomgroot -e "create database ssetest;"
+docker exec -i sse-mysql mysql -pomgroot ssetest < test-db.sql
 

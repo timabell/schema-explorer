@@ -1,2 +1,2 @@
 #!/bin/sh
-mysql -p < setup-user.sql
+docker exec -i sse-mysql mysql -pomgroot < setup-user.sql
