@@ -48,6 +48,7 @@ var testDbDriver string
 
 func init() {
 	options.SetupArgs()
+	testing.Init() // so that flags for golang's testing package are defined before we Parse. https://stackoverflow.com/a/58192326/10245
 	options.ReadArgsAndEnv()
 	//if err != nil {
 	//	os.Stderr.WriteString("Note that running sse under test only supports environment variables because command line args clash with the go-test args.\n\n")
