@@ -193,8 +193,14 @@ func (model pgModel) DatabaseSelected() bool {
 }
 
 func (model pgModel) UpdateRowCounts(database *schema.Database) (err error) {
+	dbc, err := getConnection(buildConnectionString(database.Name))
+	if dbc == nil {
+		log.Println(err)
+		panic("getConnection() returned nil")
+	}
+	defer dbc.Close()
 	for _, table := range database.Tables {
-		rowCount, err := model.getRowCount(database.Name, table)
+		rowCount, err := model.getRowCount(database.Name, table, dbc)
 		if err != nil {
 			// todo: aggregate errors to return
 			log.Printf("Failed to get row count for %s, %s", table, err)
@@ -205,17 +211,10 @@ func (model pgModel) UpdateRowCounts(database *schema.Database) (err error) {
 	return err
 }
 
-func (model pgModel) getRowCount(databaseName string, table *schema.Table) (rowCount int, err error) {
+func (model pgModel) getRowCount(databaseName string, table *schema.Table, dbc *sql.DB) (rowCount int, err error) {
 	// todo: parameterise where possible
 	// todo: whitelist-sanitize unparameterizable parts
 	sql := "select count(*) from \"" + table.Schema + "\".\"" + table.Name + "\""
-
-	dbc, err := getConnection(buildConnectionString(databaseName))
-	if dbc == nil {
-		log.Println(err)
-		panic("getConnection() returned nil")
-	}
-	defer dbc.Close()
 	rows, err := dbc.Query(sql)
 	if err != nil {
 		return 0, err
