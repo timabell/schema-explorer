@@ -23,7 +23,7 @@ create table DataTypeTest (
 	field_nvarchar nvarchar(100),
 	field_text text,
 	field_clob clob,
-	field_blob blob,
+-- 	field_blob blob,
 	field_real real,
 	field_double double,
 	field_doubleprecision double precision,
@@ -58,7 +58,7 @@ insert into DataTypeTest(
 	field_nvarchar,
 	field_text,
 	field_clob,
-	field_blob,
+-- 	field_blob,
 	field_real,
 	field_double,
 	field_doubleprecision,
@@ -71,7 +71,7 @@ insert into DataTypeTest(
 	field_not_null_int
 )values(
 	10, --intpk
-	31, --col_count
+	30, --col_count
 	20, --INT
 	30, --INTEGER
 	50, --TINYINT
@@ -89,7 +89,7 @@ insert into DataTypeTest(
 	'a_NVARCHAR', --NVARCHAR
 	'a_TEXT', --TEXT
 	'a_CLOB', --CLOB
-	'a_BLOB', --BLOB
+-- 	'a_BLOB', --BLOB
 	1.234, --REAL
 	1.234, --DOUBLE
 	1.234, --DOUBLE PRECISION
@@ -120,7 +120,7 @@ insert into DataTypeTest(
 	null, --NVARCHAR
 	null, --TEXT
 	null, --CLOB
-	null, --BLOB
+-- 	null, --BLOB
 	null, --REAL
 	null, --DOUBLE
 	null, --DOUBLE PRECISION
