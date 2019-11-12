@@ -1,0 +1,15 @@
+version: '3'
+services:
+  mssql1:
+    build: container/mssql
+    ports:
+      - "1433:1433"
+    environment:
+      ACCEPT_EULA: Y
+      SA_PASSWORD: GithubIs2broken
+  mysql1:
+    build: container/mysql
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: omgroot
