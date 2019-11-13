@@ -43,6 +43,9 @@ TESTS = $(addprefix test, $(DRIVERS))
 
 test: $(TESTS)
 
+unittest:
+	go test ./... -tags=unit
+
 test-containers: containers test
 
 testsqlite:
