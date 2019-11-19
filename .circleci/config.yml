@@ -1,0 +1,85 @@
+# Golang CircleCI 2.0 configuration file
+#
+# Check https://circleci.com/docs/2.0/language-go/ for more details
+version: 2
+jobs:
+  build:
+    # branches:
+    #   ignore: 
+    #     - "ci/travis"
+
+    docker:
+      # specify the version
+      - image: circleci/golang:1.13
+        environment:
+          POSTGRES_USER: sse-admin
+          PG_URL: postgresql://sse-admin@localhost/
+          MYSQL_OPTS: -v -P 3306 -h 127.0.0.1
+          MYSQL_ROOT_PASSWORD: sse-admin-pwd
+
+
+      # Service dependencies
+      - image: circleci/postgres:9.4
+        environment:
+          POSTGRES_USER: sse-admin
+      - image: circleci/mysql:5 # there are some password protocol issues with version 8
+        environment:
+          MYSQL_ROOT_PASSWORD: sse-admin-pwd
+      - image: mcr.microsoft.com/mssql/server:2017-latest-ubuntu
+        environment:
+          ACCEPT_EULA: "Y"
+          SA_PASSWORD: "GithubIs2broken"
+
+    #### TEMPLATE_NOTE: go expects specific checkout path representing url
+    working_directory: /go/src/github.com/timabell/schema-explorer
+
+    environment: # environment variables for the build itself
+      TESTDIR: /tmp/test-results # path to where test results will be saved
+
+    steps:
+      - checkout
+      - run: mkdir -p $TESTDIR # create the test results directory
+      - run:
+          name: install dockerize
+          command: wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz && sudo tar -C /usr/local/bin -xzvf dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz && rm dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz
+          environment:
+            DOCKERIZE_VERSION: v0.6.1
+
+      - run:
+          name: Install sqlite and other deps
+          command: sudo apt-get update && sudo apt-get install -y sqlite3 postgresql-client default-mysql-client
+
+      - run: 
+          name: Initializing postgres
+          command: bash ./.circleci/init-pg.sh
+
+      - run: 
+          name: Initializing mysql
+          command: bash ./.circleci/init-mysql.sh
+
+      - run: 
+          name: Initializing mssql
+          command: bash ./.circleci/init-mssql.sh
+      
+     
+
+      # testing stuff here
+      - run: make test-units
+      - run: make test-sqlite
+      - run: make test-pg
+      - run: make test-mysql
+      - run: make test-mssql
+
+      - store_artifacts: # upload test summary for display in Artifacts
+          path: /tmp/test-results
+          destination: raw-test-output
+
+      - store_test_results: # upload test results for display in Test Summary
+          path: /tmp/test-results
+
+      # build it, if this fails everything else will fail as well
+      - run: make build
+
+      - store_artifacts:
+          path: build/sse
+          destination: builds
