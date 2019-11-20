@@ -1,5 +1,5 @@
 # Makefile for schema-explorer
-# Needs python3 IF DOCKER_host environment variable is set
+# Needs python3 IF DOCKER_HOST environment variable is set
 # https://github.com/gotestyourself/gotestsum/releases
 
 
@@ -57,11 +57,11 @@ GIT_VERSION = $(shell git rev-parse HEAD)
 DC = docker-compose -p sse -f testdata/docker-compose.yml
 HOSTNAME:=127.0.0.1
 
-# Find out DOCKER_host address to use as hostname for testing database servers
+# Find out DOCKER_HOST address to use as hostname for testing database servers
 # Used if your docker_host is not same as localhost.
 # This will happen for example if you are using `docker-machine`
-ifdef DOCKER_host
-	SCRIPT:=python3 -c "from urllib.parse import urlparse; data = urlparse('${DOCKER_host}'); print(data.netloc.replace(':' + str(data.port), ''))"
+ifdef DOCKER_HOST
+	SCRIPT:=python3 -c "from urllib.parse import urlparse; data = urlparse('${DOCKER_HOST}'); print(data.netloc.replace(':' + str(data.port), ''))"
 	HOSTNAME:=$(shell $(SCRIPT))
 endif
 
