@@ -5,11 +5,13 @@
 
 .DEFAULT_GOAL := usage
 
+# GCC on windows for using with CGO
 # TDM-GCC-64 - http://tdm-gcc.tdragon.net/download
+# MSYS2 - http://www.msys2.org/
 
-
-# make some commands work on windows as well as *nix
-ifdef SystemRoot
+# try to be os agnostic
+ifeq ($(OS),Windows_NT)
+	# aliases
 	RM = del /q
 	RMDIR = rmdir /s /q
 	DEVNUL := NUL
@@ -19,12 +21,18 @@ ifdef SystemRoot
 	CPR = xcopy /s /e /y /i
 	MKDIR = mkdir
 	CP = copy
-	FixPath = $(subst /,\,$1)
-	# based upon https://stackoverflow.com/questions/1672338/how-to-sleep-for-five-seconds-in-a-batch-file-cmd
-	Sleep = ping 192.0.2.0 -n 1 -w $1000
-	PLATFORM = windows
 	ZIP = @echo Windows should learn how to zip
+	NEWLINE = echo.
+	# functions
+	FixPath = $(subst /,\,$1)
+	Sleep = ping 192.0.2.0 -n 1 -w $1000
+
+	# variables
+	CGO_windows ?= 1
+	CGO_linux ?= 0
+	CGO_darwin ?= 0
 else
+	# aliases
 	RM = rm -f
 	RMDIR = rm -Rf
 	CAT = cat
@@ -34,11 +42,29 @@ else
 	MKDIR = mkdir -p
 	CPR = cp -r
 	CP = cp
+	ZIP = zip -rq 
+	NEWLINE = printf "\n"
+	# functions
 	FixPath = $1
 	Sleep = sleep $1
-	PLATFORM = linux
-	ZIP = zip -rq 
+
+	# os specific
+	UNAME_S := $(shell uname -s)
+	ifeq ($(UNAME_S),Linux)
+		CGO_windows ?= 1
+		CGO_linux ?= 1
+		CGO_darwin ?= 0
+	endif
+	ifeq ($(UNAME_S),Darwin)
+        CGO_windows ?= 1
+		CGO_linux ?= 1
+		CGO_darwin ?= 1
+    endif
 endif
+
+CC_windows ?= x86_64-w64-mingw32-gcc
+CC_linux := $(CC)
+CC_darwin := $(CC)
 
 EXT_windows = ".exe"
 
@@ -65,7 +91,6 @@ ifdef DOCKER_HOST
 	HOSTNAME:=$(shell $(SCRIPT))
 endif
 
-
 TEST_USR=ssetestusr
 TEST_PWD=ssetestusrpass
 TEST_DB=ssetest
@@ -77,7 +102,8 @@ PG_CNN:=postgres://${TEST_USR}:${TEST_PWD}@${HOSTNAME}/${TEST_DB}?sslmode=disabl
 PG_CNN_MULTI:=postgres://${TEST_USR}:${TEST_PWD}@${HOSTNAME}/?sslmode=disable
 MYSQL_CNN:="${TEST_USR}:${TEST_PWD}@tcp(${HOSTNAME}:3306)/${TEST_DB}"
 
-PLATFORMS = linux darwin windows
+
+PLATFORMS = windows darwin linux
 BUILDS = $(addprefix build-, $(PLATFORMS))
 FILES = $(addprefix files-, $(PLATFORMS))
 
@@ -87,7 +113,7 @@ TESTS = $(addprefix test-, $(DRIVERS))
 .SUFFIXES:
 .PHONY: test $(TESTS)
 
-ifeq ($(shell ${WHICH} gcc 2>${DEVNUL}),)
+ifeq ($(shell ${WHICH} gcc --version 2>${DEVNUL}),)
 $(info You don't have 'gcc' on your PATH. Please install first.)
 $(info On windows you could use http://tdm-gcc.tdragon.net/download)
 $(info On Debian/Ubuntu try sudo apt-get install build-essential)
@@ -98,8 +124,12 @@ $(TESTDIR):
 	$(MKDIR) $(call FixPath,$@)
 
 usage:
+	@echo ---- usage ----
+	@echo OS=$(OS) UNAME_S=$(UNAME_S) GOTEST=$(GOTEST)
+	@$(NEWLINE)
 	@echo Check the contents of TESTING.md for usage
 	@echo Or try "make clean", "make test", or "make build"
+	@$(NEWLINE)
 
 build: $(BUILDS)
 
@@ -123,8 +153,11 @@ clean-all: clean docker-clean
 ## Below are "extra" hackery stuff that everything above depends on
 
 build-%: export GOOS=$*
+build-%: export CGO_ENABLED=$(CGO_$*)
+build-%: export CC=$(CC_$*)
 build-%: 
-	@echo Will build for '$*' platform.
+	@$(NEWLINE)
+	@echo Will build for '$*' platform on $(OS) using CGO_ENABLED=$(CGO_ENABLED) and CC=$(CC)
 	go build -ldflags "-X github.com/timabell/schema-explorer/about.gitVersion=$(GIT_VERSION)" -o build/sse/$*/schemaexplorer${EXT_$*} sse.go
 
 files-%:
