@@ -70,7 +70,7 @@ TEST_USR=ssetestusr
 TEST_PWD=ssetestusrpass
 TEST_DB=ssetest
 
-SQLITE_DB:=$(call FixPath,db/test.db)
+SQLITE_DB:=$(call FixPath,./db/test.db)
 SQLITE_SCRIPT:=$(call FixPath,sqlite/test-db.sql)
 MSSQL_CNN:=sqlserver://sa:GithubIs2broken@${HOSTNAME}?database=${TEST_DB}
 PG_CNN:=postgres://${TEST_USR}:${TEST_PWD}@${HOSTNAME}/${TEST_DB}?sslmode=disable
@@ -134,16 +134,22 @@ files-%:
 	$(CPR) config $(call FixPath,build/sse/$*/config/)
 
 
-
 test-units: $(TESTDIR)
 	$(GOTEST) ./... -tags=unit
 	
 
 #### Sqlite
 
+sqlitedb:
+	-$(RMDIR) $(call FixPath,./db)
+	$(MKDIR) db
+	$(CAT) $(SQLITE_SCRIPT) | sqlite3 $(SQLITE_DB)
+
+
 test-sqlite: test-sqlite-flags test-sqlite-env
 
-test-sqlite-flags: $(TESTDIR)
+
+test-sqlite-flags: sqlitedb $(TESTDIR)
 	@echo $@
 	-$(RMDIR) $(call FixPath,./db)
 	$(MKDIR) db
@@ -157,7 +163,7 @@ test-sqlite-flags: $(TESTDIR)
 test-sqlite-env: export schemaexplorer_driver=sqlite
 test-sqlite-env: export schemaexplorer_live=false
 test-sqlite-env: export schemaexplorer_sqlite_file=${SQLITE_DB}
-test-sqlite-env: $(TESTDIR)
+test-sqlite-env: sqlitedb $(TESTDIR)
 	@echo $@
 	-$(RMDIR) $(call FixPath,./db)
 	$(MKDIR) db
