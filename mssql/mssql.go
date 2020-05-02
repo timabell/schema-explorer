@@ -569,6 +569,9 @@ func getColumns(dbc *sql.DB, table *schema.Table) (cols []*schema.Column, err er
 order by c.column_id`
 
 	rows, err := dbc.Query(sqlText)
+	if err != nil {
+		return
+	}
 	defer rows.Close()
 	cols = []*schema.Column{}
 	colIndex := 0
