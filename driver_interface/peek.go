@@ -1,8 +1,8 @@
 package driver_interface
 
 import (
-	"github.com/timabell/schema-explorer/schema"
 	"fmt"
+	"github.com/timabell/schema-explorer/schema"
 )
 
 // GetRows adds extra columns for peeking over foreign keys in the selected table,

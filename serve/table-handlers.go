@@ -1,13 +1,13 @@
 package serve
 
 import (
+	"fmt"
+	"github.com/gorilla/mux"
 	"github.com/timabell/schema-explorer/options"
 	"github.com/timabell/schema-explorer/params"
 	"github.com/timabell/schema-explorer/reader"
 	"github.com/timabell/schema-explorer/render"
 	"github.com/timabell/schema-explorer/schema"
-	"fmt"
-	"github.com/gorilla/mux"
 	"io"
 	"io/ioutil"
 	"log"

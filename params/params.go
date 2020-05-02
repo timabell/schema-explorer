@@ -1,8 +1,8 @@
 package params
 
 import (
-	"github.com/timabell/schema-explorer/schema"
 	"fmt"
+	"github.com/timabell/schema-explorer/schema"
 	"html/template"
 	"net/url"
 	"strconv"

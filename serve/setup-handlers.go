@@ -1,12 +1,12 @@
 package serve
 
 import (
+	"fmt"
+	"github.com/gorilla/mux"
 	"github.com/timabell/schema-explorer/drivers"
 	"github.com/timabell/schema-explorer/options"
 	"github.com/timabell/schema-explorer/reader"
 	"github.com/timabell/schema-explorer/render"
-	"fmt"
-	"github.com/gorilla/mux"
 	"net/http"
 )
 

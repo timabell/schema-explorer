@@ -3,15 +3,15 @@
 package mysql
 
 import (
+	"database/sql"
+	"errors"
+	"fmt"
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/timabell/schema-explorer/driver_interface"
 	"github.com/timabell/schema-explorer/drivers"
 	"github.com/timabell/schema-explorer/params"
 	"github.com/timabell/schema-explorer/reader"
 	"github.com/timabell/schema-explorer/schema"
-	"database/sql"
-	"errors"
-	"fmt"
-	_ "github.com/go-sql-driver/mysql"
 	"log"
 	"strings"
 )

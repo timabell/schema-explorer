@@ -1,11 +1,11 @@
 package serve
 
 import (
+	"fmt"
+	"github.com/gorilla/mux"
 	"github.com/timabell/schema-explorer/reader"
 	"github.com/timabell/schema-explorer/render"
 	"github.com/timabell/schema-explorer/trail"
-	"fmt"
-	"github.com/gorilla/mux"
 	"net/http"
 )
 

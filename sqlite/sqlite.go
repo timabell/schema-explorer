@@ -9,15 +9,15 @@ package sqlite
 // Sqlite doesn't support schema so table.schema is ignored throughout
 
 import (
+	"database/sql"
+	"errors"
+	"fmt"
+	_ "github.com/mattn/go-sqlite3"
 	"github.com/timabell/schema-explorer/driver_interface"
 	"github.com/timabell/schema-explorer/drivers"
 	"github.com/timabell/schema-explorer/params"
 	"github.com/timabell/schema-explorer/reader"
 	"github.com/timabell/schema-explorer/schema"
-	"database/sql"
-	"errors"
-	"fmt"
-	_ "github.com/mattn/go-sqlite3"
 	"log"
 	"strings"
 )

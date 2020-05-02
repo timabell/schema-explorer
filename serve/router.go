@@ -1,8 +1,8 @@
 package serve
 
 import (
-	"github.com/timabell/schema-explorer/resources"
 	"github.com/gorilla/mux"
+	"github.com/timabell/schema-explorer/resources"
 	"net/http"
 )
 

@@ -1,9 +1,9 @@
 package options
 
 import (
-	"github.com/timabell/schema-explorer/drivers"
 	"flag"
 	"fmt"
+	"github.com/timabell/schema-explorer/drivers"
 	"os"
 	"strconv"
 	"strings"

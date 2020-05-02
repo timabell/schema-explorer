@@ -1,6 +1,8 @@
 package serve
 
 import (
+	"fmt"
+	"github.com/gorilla/mux"
 	"github.com/timabell/schema-explorer/about"
 	"github.com/timabell/schema-explorer/browser"
 	"github.com/timabell/schema-explorer/driver_interface"
@@ -8,8 +10,6 @@ import (
 	"github.com/timabell/schema-explorer/options"
 	"github.com/timabell/schema-explorer/reader"
 	"github.com/timabell/schema-explorer/render"
-	"fmt"
-	"github.com/gorilla/mux"
 	"log"
 	"net"
 	"net/http"

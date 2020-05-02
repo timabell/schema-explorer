@@ -1,9 +1,9 @@
 package driver_interface
 
 import (
+	"database/sql"
 	"github.com/timabell/schema-explorer/params"
 	"github.com/timabell/schema-explorer/schema"
-	"database/sql"
 )
 
 type DbReader interface {

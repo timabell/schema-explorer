@@ -23,6 +23,8 @@ aren't silently missing any of the supported data types.
 */
 
 import (
+	"fmt"
+	"github.com/gorilla/mux"
 	"github.com/timabell/schema-explorer/driver_interface"
 	_ "github.com/timabell/schema-explorer/mssql"
 	_ "github.com/timabell/schema-explorer/mysql"
@@ -33,8 +35,6 @@ import (
 	"github.com/timabell/schema-explorer/schema"
 	"github.com/timabell/schema-explorer/serve"
 	_ "github.com/timabell/schema-explorer/sqlite"
-	"fmt"
-	"github.com/gorilla/mux"
 	"log"
 	"net/http"
 	"net/http/httptest"

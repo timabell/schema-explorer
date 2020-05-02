@@ -1,16 +1,16 @@
 package reader
 
 import (
+	"bufio"
+	"database/sql"
+	"errors"
+	"fmt"
 	"github.com/timabell/schema-explorer/driver_interface"
 	"github.com/timabell/schema-explorer/drivers"
 	"github.com/timabell/schema-explorer/options"
 	"github.com/timabell/schema-explorer/params"
 	"github.com/timabell/schema-explorer/resources"
 	"github.com/timabell/schema-explorer/schema"
-	"bufio"
-	"database/sql"
-	"errors"
-	"fmt"
 	"log"
 	"os"
 	"path"

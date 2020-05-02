@@ -3,15 +3,15 @@
 package pg
 
 import (
+	"database/sql"
+	"errors"
+	"fmt"
+	_ "github.com/lib/pq"
 	"github.com/timabell/schema-explorer/driver_interface"
 	"github.com/timabell/schema-explorer/drivers"
 	"github.com/timabell/schema-explorer/params"
 	"github.com/timabell/schema-explorer/reader"
 	"github.com/timabell/schema-explorer/schema"
-	"database/sql"
-	"errors"
-	"fmt"
-	_ "github.com/lib/pq"
 	"log"
 	"os"
 	"strconv"
