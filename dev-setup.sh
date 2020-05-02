@@ -16,22 +16,11 @@ sudo apt install sqlite3
 
 # Manually Download & run https://www.jetbrains.com/go/
 
-# manually set goroot & gopath in goland
+# manually set goroot in goland
 echo $GOROOT
-# /home/tim/.gvm/gos/go1.9.4
-echo $GOPATH
-# /home/tim/.gvm/pkgsets/go1.9.4/global:/home/tim/repo/go
-
-# ================
-
-# run this from project root
-go get
+# e.g. /home/tim/.gvm/gos/go1.9.4
 
 # ================
 
 # for windows build
-
-# don't know why this isn't fetched with go-get
-go get gopkg.in/natefinch/npipe.v2
-
 sudo apt install gcc-mingw-w64-x86-64
