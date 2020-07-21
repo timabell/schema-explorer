@@ -8,7 +8,7 @@ category: blog
 But you already know all the tools for working with databases don't you?
 
 That's what I thought too before I started working on [SQL Schema
-Explorer](http://schemaexplorer.io/). Even after 18 years working with
+Explorer](https://timabell.github.io/schema-explorer/). Even after 18 years working with
 databases it turns out I only knew a fraction of the tools that are out there.
 
 Working on SQL Schema Explorer gave me a reason I didn't have before to search
