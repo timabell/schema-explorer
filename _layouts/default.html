@@ -24,7 +24,7 @@
 </head>
 <body class="layout-{{page.layout}}">
 <div id="container">
-<h1><a href="http://schemaexplorer.io/"><img src="/logo.svg" alt="SQL Schema Explorer by Tim Abell" style="max-height: 4em;"/></a></h1>
+<h1><a href="{{ '/' | relative_url }}"><img src="{{ 'logo.svg' | relative_url }}" alt="SQL Schema Explorer by Tim Abell" style="max-height: 4em;"/></a></h1>
 
 <main>
 {{content}}
