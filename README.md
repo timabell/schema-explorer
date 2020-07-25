@@ -7,3 +7,7 @@ Copyright 2015-20 Tim Abell
 SQL Schema Explorer is licenced under the [Affero-GPL v3](static/agpl-3.0.txt)
 
 Included libraries remain under their [respective licenses](static/license.html)
+
+## Download
+
+Grab a download from <https://github.com/timabell/schema-explorer/releases/latest>
