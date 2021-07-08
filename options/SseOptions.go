@@ -99,7 +99,7 @@ func ReadArgsAndEnv() {
 			}
 			envKey := fmt.Sprintf("schemaexplorer_%s_%s", driver.Name, strings.Replace(key, "-", "_", -1))
 			if os.Getenv(envKey) != "" {
-				envValue := os.Getenv(envKey)
+				envValue := strings.Trim(os.Getenv(envKey), "\"")
 				*driverOpt.Value = envValue
 			}
 		}
