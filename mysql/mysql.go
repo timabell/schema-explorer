@@ -84,10 +84,11 @@ func buildConnectionString(databaseName string) string {
 			cs = fmt.Sprintf("%s@", cs)
 		}
 		if opts.Host != "" {
-			cs = fmt.Sprintf("%s%s", cs, opts.Host)
+			cs = fmt.Sprintf("%stcp(%s", cs, opts.Host)
 			if opts.Port != "" {
 				cs = fmt.Sprintf("%s:%s", cs, opts.Port)
 			}
+			cs += ")"
 		}
 		cs = fmt.Sprintf("%s/", cs)
 		if databaseName != "" {
