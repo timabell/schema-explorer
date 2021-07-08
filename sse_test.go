@@ -896,6 +896,7 @@ func Test_Http(t *testing.T) {
 
 func descriptionTests(dbPrefix string, schemaPrefix string, router *mux.Router, t *testing.T, databaseName string, database *schema.Database) {
 	table := schema.Table{Schema: database.DefaultSchemaName, Name: "person"}
+	tableDescription := database.FindTable(&table).Description
 	// add
 	newDescription := "table-description"
 	testTableEndpoint(dbPrefix, schemaPrefix, router, newDescription, t, databaseName, table)
@@ -905,6 +906,9 @@ func descriptionTests(dbPrefix string, schemaPrefix string, router *mux.Router, 
 	// delete
 	newDescription = ""
 	testTableEndpoint(dbPrefix, schemaPrefix, router, newDescription, t, databaseName, table)
+
+	// restore
+	testTableEndpoint(dbPrefix, schemaPrefix, router, tableDescription, t, databaseName, table)
 
 	columnName := "favouritePetId"
 	// add
