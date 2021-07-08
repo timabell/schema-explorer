@@ -552,7 +552,11 @@ func buildQuery(table *schema.Table, params *params.TableParams, peekFinder *dri
 func (model mysqlModel) getColumns(dbc *sql.DB, table *schema.Table) (cols []*schema.Column, err error) {
 	// todo: parameterise
 	// todo: read all tables' columns in one query hit
-	sql := fmt.Sprintf("select column_name, data_type, is_nullable, character_maximum_length from information_schema.columns where table_schema = '%s' and table_name='%s' order by ordinal_position;", opts.Database, table.Name)
+	dbname := opts.Database
+	if dbname == "" {
+		dbname, _ = model.getSelectedDatabase(dbc)
+	}
+	sql := fmt.Sprintf("select column_name, data_type, is_nullable, character_maximum_length from information_schema.columns where table_schema = '%s' and table_name='%s' order by ordinal_position;", dbname, table.Name)
 
 	rows, err := dbc.Query(sql)
 	if err != nil {
@@ -582,5 +586,19 @@ func (model mysqlModel) SetTableDescription(database string, table string, descr
 }
 
 func (model mysqlModel) SetColumnDescription(database string, table string, column string, description string) (err error) {
+	return
+}
+
+func (model mysqlModel) getSelectedDatabase(dbc *sql.DB) (name string, err error) {
+	sql := "SELECT DATABASE();"
+	rows, err := dbc.Query(sql)
+	if err != nil {
+		log.Print(sql)
+		return
+	}
+	defer rows.Close()
+	for rows.Next() {
+		rows.Scan(&name)
+	}
 	return
 }
