@@ -1,6 +1,7 @@
 #!/bin/bash
 pushd . > /dev/null
 cd sqlite
+# test the three ways of configuring schemaexplorer
 ./test-sqlite-env.sh
 ./test-sqlite-flags.sh
 ./test-sqlite-live.sh
