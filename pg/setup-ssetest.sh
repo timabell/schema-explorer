@@ -1,6 +1,10 @@
 #!/bin/sh
 usr=ssetestusr
 db=ssetest
+# config for pg in docker as per dev-setup.sh
+export PGUSER=postgres
+export PGPASSWORD=postgres
+export PGHOST=localhost
 # echo "removing old test db"
 dropdb $db
 dropuser $usr

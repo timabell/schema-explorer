@@ -5,12 +5,16 @@
 # needed to set up the test db
 sudo apt install sqlite3
 
+# needed for pg test scripts even if pg is running in docker
+sudo apt install postgresql-client
 # ================
 
 # Install asdf version manaager and golang plugin
 
 # https://asdf-vm.com/
 # https://github.com/kennyp/asdf-golang
+
+asdf plugin add golang
 
 # ================
 
@@ -24,3 +28,12 @@ echo $GOROOT
 
 # for windows build
 sudo apt install gcc-mingw-w64-x86-64
+
+# setup docker images to run tests and try things locally
+pg/docker-start.sh
+mysql/docker-first-run.sh
+
+(
+	cd mssql
+	./docker-first-run.sh
+)

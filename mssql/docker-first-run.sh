@@ -4,6 +4,8 @@
 
 # map current folder in so that we can run sql files with sqlcmd
 
+# must be run from this folder to correctly map volume
+
 docker run -e 'ACCEPT_EULA=Y' -e 'SA_PASSWORD=GithubIs2broken' \
    -p 1433:1433 --name mssql1 \
    -v `pwd`:/src \

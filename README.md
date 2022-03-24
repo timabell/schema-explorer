@@ -11,3 +11,9 @@ Included libraries remain under their [respective licenses](static/license.html)
 ## Download
 
 Grab a download from <https://github.com/timabell/schema-explorer/releases/latest>
+
+## Development
+
+Local setup guide/script [dev-setup.sh](dev-setup.sh)
+
+TDD all the things, starting point [test.sh](test.sh)
