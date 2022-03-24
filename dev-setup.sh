@@ -5,6 +5,8 @@
 # needed to set up the test db
 sudo apt install sqlite3
 
+# needed for pg test scripts even if pg is running in docker
+sudo apt install postgresql-client
 # ================
 
 # Install asdf version manaager and golang plugin
