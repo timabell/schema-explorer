@@ -183,7 +183,7 @@ func getDrivers() []*drivers.Driver {
 	var driverList []*drivers.Driver
 	// stable sort:
 	var keys []string
-	for name, _ := range drivers.Drivers {
+	for name := range drivers.Drivers {
 		keys = append(keys, name)
 	}
 	sort.Strings(keys)
@@ -366,7 +366,7 @@ func buildInwardCell(databaseName string, inboundFks []*schema.Fk, rowData []int
 	// stable sort:
 	// get list of tables in map
 	var keys schema.TableList
-	for table, _ := range groupedFks {
+	for table := range groupedFks {
 		keys = append(keys, table)
 	}
 	// sort list of tables (requires TableList to implement sort interface)
