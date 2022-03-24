@@ -12,6 +12,8 @@ sudo apt install sqlite3
 # https://asdf-vm.com/
 # https://github.com/kennyp/asdf-golang
 
+asdf plugin add golang
+
 # ================
 
 # Manually Download & run https://www.jetbrains.com/go/
