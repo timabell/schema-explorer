@@ -26,3 +26,7 @@ echo $GOROOT
 
 # for windows build
 sudo apt install gcc-mingw-w64-x86-64
+
+# setup docker images to run tests and try things locally
+mssql/docker-first-run.sh
+pg/docker-start.sh
