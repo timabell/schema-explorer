@@ -188,6 +188,25 @@ insert into FkChild(id, parentId) values(110,11);
 insert into FkChild(id, parentId) values(111,11);
 insert into FkChild(id, parentId) values(112,11);
 
+
+create table FkGuidParent(
+    parentPk uniqueidentifier primary key
+);
+create table FkGuidChild(
+    id int primary key,
+    parentId uniqueidentifier references FkGuidParent(parentPk)
+);
+
+insert into FkGuidParent(parentPk) values('2c058040-7b0d-4419-bbf3-6ee8e149255b');
+insert into FkGuidParent(parentPk) values('c982f575-cf68-4ddd-a345-286f8f539587');
+insert into FkGuidParent(parentPk) values('d7d850bc-cd1f-421c-bf5e-60f97cfd0bca');
+insert into FkGuidChild(id, parentId) values(100,'2c058040-7b0d-4419-bbf3-6ee8e149255b');
+insert into FkGuidChild(id, parentId) values(101,'2c058040-7b0d-4419-bbf3-6ee8e149255b');
+insert into FkGuidChild(id, parentId) values(102,'2c058040-7b0d-4419-bbf3-6ee8e149255b');
+insert into FkGuidChild(id, parentId) values(110,'c982f575-cf68-4ddd-a345-286f8f539587');
+insert into FkGuidChild(id, parentId) values(111,'c982f575-cf68-4ddd-a345-286f8f539587');
+insert into FkGuidChild(id, parentId) values(112,'c982f575-cf68-4ddd-a345-286f8f539587');
+
 -- drop table index_test;
 create table index_test(
   id int primary key,
