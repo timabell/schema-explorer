@@ -1,3 +1,4 @@
+//go:build !skip_mssql
 // +build !skip_mssql
 
 package mssql
@@ -6,7 +7,6 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	_ "github.com/denisenkom/go-mssqldb"
 	"github.com/timabell/schema-explorer/about"
 	"github.com/timabell/schema-explorer/driver_interface"
 	"github.com/timabell/schema-explorer/drivers"
