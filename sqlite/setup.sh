@@ -1,4 +1,5 @@
 #!/bin/sh
+set -e
 if [ -d db ]; then
   # echo 'removing old test db'
   rm -rf db

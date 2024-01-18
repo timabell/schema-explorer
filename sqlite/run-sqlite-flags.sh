@@ -1,4 +1,5 @@
 #!/bin/sh
+set -e
 # relative path hack with pwd, otherwise not resolved.
 # create db first with sqlite/setup.sh
 cd ..

@@ -1,4 +1,6 @@
 #!/bin/bash
+set -e
+
 pushd . > /dev/null
 cd sqlite
 # test the three ways of configuring schemaexplorer

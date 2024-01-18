@@ -1,4 +1,5 @@
 #!/bin/sh
+set -e
 usr=ssetestusr
 db=ssetest
 # config for pg in docker as per dev-setup.sh

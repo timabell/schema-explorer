@@ -1,4 +1,5 @@
 #!/bin/sh
+set -e
 cd ..
 
 export schemaexplorer_driver=mysql
