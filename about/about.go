@@ -3,16 +3,15 @@ package about
 import "fmt"
 
 type AboutType struct {
-	Version, Email, ProductName, Website string
+	Version, ProductName, Website string
 }
 
 var gitVersion = "local-dev-build"
 
 var About = AboutType{
 	ProductName: "Sql Schema Explorer",
-	Version:     "0.67-" + gitVersion,
-	Website:     "http://schemaexplorer.io/",
-	Email:       "tim@schemaexplorer.io",
+	Version:     "0.68-" + gitVersion,
+	Website:     "https://github.com/timabell/schema-explorer",
 }
 
 func (about AboutType) Summary() string {

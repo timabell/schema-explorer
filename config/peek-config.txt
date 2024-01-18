@@ -1,4 +1,4 @@
-# http://schemaexplorer.io/
+# https://github.com/timabell/schema-explorer
 # This file configures which columns will be loaded from the other side of a foreign key.
 # Place this file next the schema explorer executable and name it peek-config.txt
 

@@ -1,6 +1,6 @@
 # SQL Schema Explorer
 
-Copyright 2015-20 Tim Abell
+Copyright 2015-2024 Tim Abell
 
 <https://timabell.github.io/schema-explorer/>
 

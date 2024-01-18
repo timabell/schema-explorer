@@ -4,7 +4,7 @@ import (
 	"fmt"
 )
 
-var copyrightYear = 2019
+var copyrightYear = 2024
 
 func LicenseText() string {
 	return fmt.Sprintf("Licensed under A-GPLv3")

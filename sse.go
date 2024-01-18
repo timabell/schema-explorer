@@ -1,5 +1,5 @@
 /*
-Sql Data Viewer, Copyright Tim Abell 2015-19
+Sql Data Viewer, Copyright Tim Abell 2015-2024
 All rights reserved.
 
 A tool for browsing the data in any rdbms databse
@@ -27,11 +27,10 @@ func main() {
 	options.SetupArgs()
 	options.ReadArgsAndEnv()
 
-	log.Printf("%s\n  %s\n  %s\n  Feeback/support/contact: <%s>",
+	log.Printf("%s\n  %s\n  %s",
 		about.About.Summary(),
 		licensing.CopyrightText(),
-		licensing.LicenseText(),
-		about.About.Email)
+		licensing.LicenseText())
 
 	// only spit out connection info if configured
 	if options.Options.Driver != "" {
