@@ -30,8 +30,13 @@ echo $GOROOT
 sudo apt install gcc-mingw-w64-x86-64
 
 # setup docker images to run tests and try things locally
+
 pg/docker-start.sh
-mysql/docker-first-run.sh
+
+(
+	cd mysql
+	./docker-first-run.sh
+)
 
 (
 	cd mssql
