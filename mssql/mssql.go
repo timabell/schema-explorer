@@ -7,6 +7,8 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	_ "github.com/microsoft/go-mssqldb"
+	_ "github.com/microsoft/go-mssqldb/integratedauth/krb5"
 	"github.com/timabell/schema-explorer/about"
 	"github.com/timabell/schema-explorer/driver_interface"
 	"github.com/timabell/schema-explorer/drivers"
