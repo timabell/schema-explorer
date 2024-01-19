@@ -189,6 +189,8 @@ func DbValueToString(colData interface{}, dataType string) *string {
 	// === //
 	case dataType == "numeric": // sqlite - best type for number. needs casting for pg
 		stringValue = fmt.Sprintf("%v", colData.(float64))
+	//case dataType == "DECIMAL(": // mssql decimal
+	//stringValue = fmt.Sprintf("%v", colData.(sql.NullFloat64))
 	case dataType == "varbinary":
 		fallthrough
 	case dataType == "blob":
@@ -211,7 +213,7 @@ func DbValueToString(colData interface{}, dataType string) *string {
 	case strings.HasPrefix(dataType, "double"):
 		fallthrough
 	case strings.HasPrefix(dataType, "decimal"): // todo: don't allow "decimal(10,5)"
-		fallthrough
+		stringValue = fmt.Sprintf("%v", colData.([]uint8))
 	case strings.Contains(dataType, "int"): // todo: expensive, optimise for supported values
 		stringValue = fmt.Sprintf("%v", colData)
 	// === //
