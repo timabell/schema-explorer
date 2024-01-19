@@ -770,6 +770,8 @@ var tests = []testCase{
 	{colName: "field_mysql_real", row: 0, expectedType: "double", expectedString: "1.234"},
 	{colName: "field_mysql_doubleprecision", row: 0, expectedType: "double", expectedString: "1.234"},
 	{colName: "field_mysql_boolean", row: 0, expectedType: "tinyint", expectedString: "1"}, // gah! mysql
+	// mssql
+	{colName: "field_mssql_decimal", row: 0, expectedType: "decimal", expectedString: "1.234"},
 }
 
 func Test_GetRows(t *testing.T) {

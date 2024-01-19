@@ -20,12 +20,12 @@ create table DataTypeTest (
 	field_int int,
 -- 	field_money MONEY,
 -- 	field_numeric numeric(18,7),
--- 	field_decimal decimal(18,7),
+    field_mssql_decimal decimal(18,7),
 -- 	field_varcharmax varchar(max),
 -- 	field_nvarchar nvarchar(123),
 	field_uniqueidentifier UNIQUEIDENTIFIER,
 	field_not_null_int int not null,
-	field_null_int int null
+    field_null_int int null
 );
 
 delete DataTypeTest;
@@ -35,18 +35,18 @@ insert into DataTypeTest (
 	field_int,
 -- 	field_money,
 -- 	field_numeric,
--- 	field_decimal,
+    field_mssql_decimal,
 -- 	field_varcharmax,
 -- 	field_nvarchar,
 	field_uniqueidentifier,
 	field_not_null_int
 ) values (
 	10, --intpk
-	6, --col_count
+	7, --col_count
 	20, --field_int
 -- 	1234.567, --field_money,
 -- 	987.1234500, --field_numeric,
--- 	666.1234500, --field_decimal,
+ 	666.1234500, --field_mssql_decimal,
 -- 	'this is a ''text'' field', -- nvarcharmax
 -- 	'a_NVARCHAR',
 	'b7a16c7a-a718-4ed8-97cb-20ccbadcc339',
@@ -57,7 +57,7 @@ insert into DataTypeTest (
 	-33, --field_int
 -- 	null, --field_money,
 -- 	null, --field_numeric,
--- 	null, --field_decimal,
+ 	null, --field_mssql_decimal,
 -- 	'this is a ''text'' field', -- nvarcharmax
 -- 	'blue', -- nvarchar
 	'b470fa05-2111-46f9-9c97-f103b594c5f0',
