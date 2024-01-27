@@ -23,7 +23,20 @@ jobs:
       - name: Install dependencies
         run: go get .
       - name: Test with Go
-        run: go test -json > TestResults-${{ matrix.go-version }}.json
+        run: |
+          pushd .
+          cd sqlite
+          ./setup.sh
+          file="`pwd`/db/test.db" # relative path hack with pwd, otherwise not resolved.
+          popd
+          go clean -testcache
+          go test -json sse_test.go \
+            --driver=sqlite \
+            --display-name=testing-flags \
+            --live=true \
+            --listen-on-port=9999 \
+            --sqlite-file="$file" \
+              > TestResults-${{ matrix.go-version }}.json
       - name: Upload Go test results
         uses: actions/upload-artifact@v3
         with:
