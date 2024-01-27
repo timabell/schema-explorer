@@ -19,6 +19,8 @@ jobs:
         uses: actions/setup-go@v4
         with:
           go-version: ${{ matrix.go-version }}
+      - name: install go-junit-report
+        run: go install github.com/jstemmer/go-junit-report/v2@latest
       - uses: actions/checkout@v4
       - name: Install dependencies
         run: go get .
@@ -36,9 +38,17 @@ jobs:
             --live=true \
             --listen-on-port=9999 \
             --sqlite-file="$file" \
-              > TestResults-${{ matrix.go-version }}.json
+              2>&1 | go-junit-report -parser gojson -iocopy -out results-sqlite-flags-${{ matrix.go-version }}.xml
       - name: Upload Go test results
         uses: actions/upload-artifact@v3
         with:
           name: Go-results-${{ matrix.go-version }}
           path: TestResults-${{ matrix.go-version }}.json
+
+      - name: Test Report
+        uses: dorny/test-reporter@v1
+        if: success() || failure()    # run this step even if previous step failed
+        with:
+          name: Tests            # Name of the check run which will be created
+          path: results-*.xml    # Path to test results
+          reporter: jest-junit        # Format of test results
