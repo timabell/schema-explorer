@@ -3,11 +3,11 @@ module github.com/timabell/schema-explorer
 go 1.21.6
 
 require (
-	github.com/go-sql-driver/mysql v1.4.1
-	github.com/gorilla/mux v1.7.3
-	github.com/lib/pq v1.2.0
-	github.com/mattn/go-sqlite3 v1.11.0
-	github.com/microsoft/go-mssqldb v1.5.0
+	github.com/go-sql-driver/mysql v1.7.1
+	github.com/gorilla/mux v1.8.1
+	github.com/lib/pq v1.10.9
+	github.com/mattn/go-sqlite3 v1.14.20
+	github.com/microsoft/go-mssqldb v1.6.0
 )
 
 require (
@@ -20,7 +20,7 @@ require (
 	github.com/jcmturner/goidentity/v6 v6.0.1 // indirect
 	github.com/jcmturner/gokrb5/v8 v8.4.4 // indirect
 	github.com/jcmturner/rpc/v2 v2.0.3 // indirect
-	golang.org/x/crypto v0.9.0 // indirect
-	golang.org/x/net v0.10.0 // indirect
-	google.golang.org/appengine v1.6.5 // indirect
+	golang.org/x/crypto v0.18.0 // indirect
+	golang.org/x/net v0.20.0 // indirect
+	golang.org/x/text v0.14.0 // indirect
 )
