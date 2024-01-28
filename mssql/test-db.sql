@@ -107,6 +107,12 @@ insert into toy(toyId, toyName, belongsToId) values(11,'mouse',5);
 insert into toy(toyId, toyName, belongsToId) values(12,'ball',6);
 update person set favouritePetId = 5 where personId = 2;
 
+insert into person(personId,personName) values(3,'franky
+   the    multiline
+person
+
+woo
+');
 
 -- sort-filter testing
 
