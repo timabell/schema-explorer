@@ -1,4 +1,4 @@
-name: Build+Test
+name: Build & Test
 
 on:
   push:
@@ -8,6 +8,7 @@ on:
 
 jobs:
   build:
+    name: Build & Test
 
     runs-on: ubuntu-latest
     strategy:
@@ -23,17 +24,26 @@ jobs:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
           POSTGRES_DB: ssetest
+      mysql:
+        image: mysql:8.3
+        ports:
+          - 3306:3306
+        env:
+          MYSQL_ROOT_PASSWORD: omgroot
+          MYSQL_DATABASE: ssetest
+          MYSQL_USER: ssetestusr
+          MYSQL_PASSWORD: ssetestusrpass
 
     steps:
       - name: Setup Go
         uses: actions/setup-go@v4
         with:
           go-version: ${{ matrix.go-version }}
+      - name: Apt packages
+        run: sudo apt install sqlite3 postgresql-client gcc-mingw-w64-x86-64 mysql-client
       - name: install go-junit-report
         run: go install github.com/jstemmer/go-junit-report/v2@latest
       - uses: actions/checkout@v4
-      - name: Apt packages
-        run: sudo apt install sqlite3 postgresql-client gcc-mingw-w64-x86-64
       - name: Install dependencies
         run: go get .
       - name: Test - sqlite flags
@@ -65,18 +75,40 @@ jobs:
           go clean -testcache
           go test -json sse_test.go \
               2>&1 | go-junit-report -parser gojson -iocopy -out results-sqlite-env-${{ matrix.go-version }}.xml
-      - name: Test - pg
-        env:
-          schemaexplorer_driver: pg
-          schemaexplorer_pg_connection_string: "postgres://ssetestusr:ssetestusr@localhost/ssetest?sslmode=disable"
+      - name: Setup - pg
         run: |
           pushd .
           cd pg
           ./setup-ssetest.sh
           popd
+      - name: Test - pg
+        env:
+          schemaexplorer_driver: pg
+          schemaexplorer_pg_connection_string: "postgres://ssetestusr:ssetestusr@localhost/ssetest?sslmode=disable"
+        run: |
           go clean -testcache
           go test -json sse_test.go \
               2>&1 | go-junit-report -parser gojson -iocopy -out results-pg-${{ matrix.go-version }}.xml
+      - name: Setup - mysql
+        run: |
+          #!/usr/bin/env bash -v
+          set -e
+          pushd .
+          cd mysql
+          # Use ip address to stop mysql trying to use sockets, which it does for "localhost"
+          mysql -h 127.0.0.1 -u root -pomgroot ssetest < test-db.sql
+          mysql -h 127.0.0.1 -u root -pomgroot ssetest -e "show tables;"
+          mysql -h 127.0.0.1 -u root -pomgroot ssetest -e "describe CompoundKeyChild;"
+          popd
+      - name: Test - mysql
+        env:
+          schemaexplorer_driver: mysql
+          schemaexplorer_live: false
+          schemaexplorer_mysql_connection_string: "ssetestusr:ssetestusrpass@tcp(localhost:3306)/ssetest"
+        run: |
+          go clean -testcache
+          go test -v sse_test.go \
+              2>&1 | go-junit-report  -iocopy -set-exit-code -out results-mysql-${{ matrix.go-version }}.xml
       - name: Upload Go test results
         uses: actions/upload-artifact@v3
         with:
@@ -87,6 +119,6 @@ jobs:
         uses: dorny/test-reporter@v1
         if: success() || failure()    # run this step even if previous step failed
         with:
-          name: Tests            # Name of the check run which will be created
+          name: Test Report            # Name of the check run which will be created
           path: results-*.xml    # Path to test results
-          reporter: jest-junit        # Format of test results
+          reporter: java-junit        # Format of test results
