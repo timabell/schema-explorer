@@ -18,6 +18,7 @@ popd > /dev/null
 pushd . > /dev/null
 cd mysql
 ./test-mysql.sh
+./test-mysql-connectionstring.sh
 popd > /dev/null
 
 pushd . > /dev/null
