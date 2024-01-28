@@ -24,7 +24,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Install dependencies
         run: go get .
-      - name: Test with Go
+      - name: Test - sqlite flags
         run: |
           pushd .
           cd sqlite
@@ -39,6 +39,20 @@ jobs:
             --listen-on-port=9999 \
             --sqlite-file="$file" \
               2>&1 | go-junit-report -parser gojson -iocopy -out results-sqlite-flags-${{ matrix.go-version }}.xml
+      - name: Test - sqlite env
+        env:
+          schemaexplorer_driver: sqlite
+          schemaexplorer_live: false
+        run: |
+          pushd .
+          cd sqlite
+          ./setup.sh
+          file="`pwd`/db/test.db" # relative path hack with pwd, otherwise not resolved.
+          export schemaexplorer_sqlite_file="$file"
+          popd
+          go clean -testcache
+          go test -json sse_test.go \
+              2>&1 | go-junit-report -parser gojson -iocopy -out results-sqlite-env-${{ matrix.go-version }}.xml
       - name: Upload Go test results
         uses: actions/upload-artifact@v3
         with:
