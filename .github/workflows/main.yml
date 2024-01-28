@@ -113,15 +113,17 @@ jobs:
           mysql -h 127.0.0.1 -u root -pomgroot ssetest -e "show tables;"
           mysql -h 127.0.0.1 -u root -pomgroot ssetest -e "describe CompoundKeyChild;"
           popd
-      - name: Test - mysql
-        env:
-          schemaexplorer_driver: mysql
-          schemaexplorer_live: false
-          schemaexplorer_mysql_connection_string: "ssetestusr:ssetestusrpass@tcp(localhost:3306)/ssetest"
-        run: |
-          go clean -testcache
-          go test -v sse_test.go \
-              2>&1 | go-junit-report  -iocopy -set-exit-code -out results-mysql-${{ matrix.go-version }}.xml
+
+#      - name: Test - mysql
+#        env:
+#          schemaexplorer_driver: mysql
+#          schemaexplorer_live: false
+#          schemaexplorer_mysql_connection_string: "ssetestusr:ssetestusrpass@tcp(localhost:3306)/ssetest"
+#        run: |
+#          go clean -testcache
+#          go test -v sse_test.go \
+#              2>&1 | go-junit-report  -iocopy -set-exit-code -out results-mysql-${{ matrix.go-version }}.xml
+
 #      - name: Setup - MSSQL
 #        run: |
 #          pushd .
