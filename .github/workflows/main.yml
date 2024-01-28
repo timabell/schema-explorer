@@ -14,6 +14,16 @@ jobs:
       matrix:
         go-version: [ '1.21.6' ]
 
+    services:
+      postgres:
+        image: postgres:9.6
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: ssetest
+
     steps:
       - name: Setup Go
         uses: actions/setup-go@v4
@@ -22,6 +32,8 @@ jobs:
       - name: install go-junit-report
         run: go install github.com/jstemmer/go-junit-report/v2@latest
       - uses: actions/checkout@v4
+      - name: Apt packages
+        run: sudo apt install sqlite3 postgresql-client gcc-mingw-w64-x86-64
       - name: Install dependencies
         run: go get .
       - name: Test - sqlite flags
@@ -53,6 +65,18 @@ jobs:
           go clean -testcache
           go test -json sse_test.go \
               2>&1 | go-junit-report -parser gojson -iocopy -out results-sqlite-env-${{ matrix.go-version }}.xml
+      - name: Test - pg
+        env:
+          schemaexplorer_driver: pg
+          schemaexplorer_pg_connection_string: "postgres://ssetestusr:ssetestusr@localhost/ssetest?sslmode=disable"
+        run: |
+          pushd .
+          cd pg
+          ./setup-ssetest.sh
+          popd
+          go clean -testcache
+          go test -json sse_test.go \
+              2>&1 | go-junit-report -parser gojson -iocopy -out results-pg-${{ matrix.go-version }}.xml
       - name: Upload Go test results
         uses: actions/upload-artifact@v3
         with:

@@ -7,8 +7,8 @@ export PGUSER=postgres
 export PGPASSWORD=postgres
 export PGHOST=localhost
 # echo "removing old test db"
-dropdb $db
-dropuser $usr
+dropdb --if-exists $db
+dropuser --if-exists $usr
 createuser $usr
 createdb $db
 psql -q -c "alter user $usr with password '$usr'";
