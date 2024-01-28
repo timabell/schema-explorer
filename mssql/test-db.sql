@@ -49,7 +49,7 @@ insert into DataTypeTest (
 -- 	666.1234500, --field_decimal,
 -- 	'this is a ''text'' field', -- nvarcharmax
 -- 	'a_NVARCHAR',
-	'b7a16c7a-a718-4ed8-97cb-20ccbadcc339',
+	'c7ebc802-7c75-4d0c-84af-093d1d004031',
 	1984
 ),(
 	11, --intpk
