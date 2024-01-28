@@ -10,7 +10,7 @@ var gitVersion = "local-dev-build"
 
 var About = AboutType{
 	ProductName: "Sql Schema Explorer",
-	Version:     "0.68-" + gitVersion,
+	Version:     "0.70-" + gitVersion,
 	Website:     "https://github.com/timabell/schema-explorer",
 }
 
