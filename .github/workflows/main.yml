@@ -80,17 +80,16 @@ jobs:
             --sqlite-file="$file" \
               2>&1 | go-junit-report -iocopy -set-exit-code -out results-sqlite-flags-${{ matrix.go-version }}.xml
 
+      - name: Setup - sqlite (2)
+        working-directory: sqlite
+        run: ./setup.sh
+
       - name: Test - sqlite env
         env:
           schemaexplorer_driver: sqlite
           schemaexplorer_live: false
         run: |
-          pushd .
-          cd sqlite
-          ./setup.sh
-          file="`pwd`/db/test.db" # relative path hack with pwd, otherwise not resolved.
-          export schemaexplorer_sqlite_file="$file"
-          popd
+          export schemaexplorer_sqlite_file="`pwd`/sqlite/db/test.db"                                               
           go clean -testcache
           go test -v sse_test.go \
               2>&1 | go-junit-report -iocopy -set-exit-code -out results-sqlite-env-${{ matrix.go-version }}.xml
