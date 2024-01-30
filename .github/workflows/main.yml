@@ -136,6 +136,9 @@ jobs:
           go test -v sse_test.go \
               2>&1 | go-junit-report -iocopy -set-exit-code -out results-MSSQL-${{ matrix.go-version }}.xml
 
+      - name: Report Debugger
+        run: for x in results-*.xml; do echo ======================= $x =========================; cat $x; done
+
       - name: Test Report
         uses: dorny/test-reporter@v1
         if: success() || failure()    # run this step even if previous step failed
