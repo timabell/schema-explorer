@@ -43,11 +43,6 @@ jobs:
 #        options: --health-cmd="SELECT 1;" --health-interval=10s --health-timeout=5s --health-retries=10
 
     steps:
-      - name: Setup Go
-        uses: actions/setup-go@v4
-        with:
-          go-version: ${{ matrix.go-version }}
-
       - name: Add mssql source
         run: |
           curl https://packages.microsoft.com/config/ubuntu/22.04/prod.list | sudo tee /etc/apt/sources.list.d/mssql-release.list
@@ -56,9 +51,15 @@ jobs:
       - name: Apt packages
         run: sudo apt-get install sqlite3 postgresql-client gcc-mingw-w64-x86-64 mysql-client mssql-tools18 unixodbc-dev
 
+      - uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: ${{ matrix.go-version }}
+
       - name: install go-junit-report
         run: go install github.com/jstemmer/go-junit-report/v2@latest
-      - uses: actions/checkout@v4
 
       - name: Install dependencies
         run: go get .
