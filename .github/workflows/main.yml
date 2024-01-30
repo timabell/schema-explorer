@@ -33,15 +33,14 @@ jobs:
           MYSQL_DATABASE: ssetest
           MYSQL_USER: ssetestusr
           MYSQL_PASSWORD: ssetestusrpass
-#      mssql:
-#        image: mcr.microsoft.com/mssql/server:2017-latest
-#        env:
-#          SA_PASSWORD: GithubIs2broken
-#          ACCEPT_EULA: Y
-#        ports:
-#          - 1433:1433
+      mssql:
+        image: mcr.microsoft.com/mssql/server:2017-latest
+        env:
+          SA_PASSWORD: GithubIs2broken
+          ACCEPT_EULA: Y
+        ports:
+          - 1433:1433
 #        options: --health-cmd="SELECT 1;" --health-interval=10s --health-timeout=5s --health-retries=10
-
 
     steps:
       - name: Setup Go
@@ -133,24 +132,23 @@ jobs:
           go test -v sse_test.go \
               2>&1 | go-junit-report  -iocopy -set-exit-code -out results-mysql-${{ matrix.go-version }}.xml
 
-#      - name: Setup - MSSQL
-#        run: |
-#          pushd .
-#          cd mssql
-#          #/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P '<YourPassword>'
-#          /opt/mssql-tools18/bin/sqlcmd -h
-#          /opt/mssql-tools18/bin/sqlcmd -S localhost -W -U sa -P GithubIs2broken -d "ssetest" -i test-db.sql
-#          /opt/mssql-tools18/bin/sqlcmd -S localhost -W -U sa -P GithubIs2broken -d "ssetest" -i  test-db-ms_descriptions.sql
-#          popd
+      - name: Setup - MSSQL
+        run: |
+          pushd .
+          cd mssql
+          /opt/mssql-tools18/bin/sqlcmd -C -S localhost -W -U sa -P GithubIs2broken -d "master" -Q "create database ssetest;"
+          /opt/mssql-tools18/bin/sqlcmd -C -S localhost -W -U sa -P GithubIs2broken -d "ssetest" -i test-db.sql
+          /opt/mssql-tools18/bin/sqlcmd -C -S localhost -W -U sa -P GithubIs2broken -d "ssetest" -i test-db-ms_descriptions.sql
+          popd
 
-#      - name: Test - MSSQL
-#        env:
-#          schemaexplorer_driver: mssql
-#          schemaexplorer_mssql_connection_string: "server=localhost;user id=sa;password=GithubIs2broken;database=ssetest"
-#        run: |
-#          go clean -testcache
-#          go test -json sse_test.go \
-#              2>&1 | go-junit-report -parser gojson -iocopy -out results-MSSQL-${{ matrix.go-version }}.xml
+      - name: Test - MSSQL
+        env:
+          schemaexplorer_driver: mssql
+          schemaexplorer_mssql_connection_string: "server=localhost;user id=sa;password=GithubIs2broken;database=ssetest"
+        run: |
+          go clean -testcache
+          go test -json sse_test.go \
+              2>&1 | go-junit-report -parser gojson -iocopy -out results-MSSQL-${{ matrix.go-version }}.xml
 
       - name: Upload Go test results
         uses: actions/upload-artifact@v3
