@@ -69,8 +69,9 @@ jobs:
           cd mssql
           #/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P '<YourPassword>'
           /opt/mssql-tools18/bin/sqlcmd -?
+          /opt/mssql-tools18/bin/sqlcmd -C -S localhost -W -U sa -P GithubIs2broken -d "master" -Q "create database ssetest;"
           /opt/mssql-tools18/bin/sqlcmd -C -S localhost -W -U sa -P GithubIs2broken -d "ssetest" -i test-db.sql
-          /opt/mssql-tools18/bin/sqlcmd -C -S localhost -W -U sa -P GithubIs2broken -d "ssetest" -i  test-db-ms_descriptions.sql
+          /opt/mssql-tools18/bin/sqlcmd -C -S localhost -W -U sa -P GithubIs2broken -d "ssetest" -i test-db-ms_descriptions.sql
           popd
 
       - name: Test - MSSQL
