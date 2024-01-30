@@ -71,13 +71,13 @@ jobs:
           file="`pwd`/db/test.db" # relative path hack with pwd, otherwise not resolved.
           popd
           go clean -testcache
-          go test -json sse_test.go \
+          go test sse_test.go \
             --driver=sqlite \
             --display-name=testing-flags \
             --live=true \
             --listen-on-port=9999 \
             --sqlite-file="$file" \
-              2>&1 | go-junit-report -parser gojson -iocopy -out results-sqlite-flags-${{ matrix.go-version }}.xml
+              2>&1 | go-junit-report -iocopy -set-exit-code -out results-sqlite-flags-${{ matrix.go-version }}.xml
 
       - name: Test - sqlite env
         env:
@@ -91,8 +91,8 @@ jobs:
           export schemaexplorer_sqlite_file="$file"
           popd
           go clean -testcache
-          go test -json sse_test.go \
-              2>&1 | go-junit-report -parser gojson -iocopy -out results-sqlite-env-${{ matrix.go-version }}.xml
+          go test sse_test.go \
+              2>&1 | go-junit-report -iocopy -set-exit-code -out results-sqlite-env-${{ matrix.go-version }}.xml
 
       - name: Setup - pg
         run: |
@@ -107,8 +107,8 @@ jobs:
           schemaexplorer_pg_connection_string: "postgres://ssetestusr:ssetestusr@localhost/ssetest?sslmode=disable"
         run: |
           go clean -testcache
-          go test -json sse_test.go \
-              2>&1 | go-junit-report -parser gojson -iocopy -out results-pg-${{ matrix.go-version }}.xml
+          go test sse_test.go \
+              2>&1 | go-junit-report -iocopy -set-exit-code -out results-pg-${{ matrix.go-version }}.xml
 
       - name: Setup - mysql
         run: |
@@ -130,7 +130,7 @@ jobs:
         run: |
           go clean -testcache
           go test -v sse_test.go \
-              2>&1 | go-junit-report  -iocopy -set-exit-code -out results-mysql-${{ matrix.go-version }}.xml
+              2>&1 | go-junit-report -iocopy -set-exit-code -out results-mysql-${{ matrix.go-version }}.xml
 
       - name: Setup - MSSQL
         run: |
@@ -147,7 +147,7 @@ jobs:
           schemaexplorer_mssql_connection_string: "server=localhost;user id=sa;password=GithubIs2broken;database=ssetest"
         run: |
           go clean -testcache
-          go test -json sse_test.go \
+          go test sse_test.go \
               2>&1 | go-junit-report -iocopy -set-exit-code -out results-MSSQL-${{ matrix.go-version }}.xml
 
 #      - name: Upload Go test results
