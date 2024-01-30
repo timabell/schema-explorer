@@ -72,7 +72,7 @@ jobs:
           file="`pwd`/db/test.db" # relative path hack with pwd, otherwise not resolved.
           popd
           go clean -testcache
-          go test sse_test.go \
+          go test -v sse_test.go \
             --driver=sqlite \
             --display-name=testing-flags \
             --live=true \
@@ -92,7 +92,7 @@ jobs:
           export schemaexplorer_sqlite_file="$file"
           popd
           go clean -testcache
-          go test sse_test.go \
+          go test -v sse_test.go \
               2>&1 | go-junit-report -iocopy -set-exit-code -out results-sqlite-env-${{ matrix.go-version }}.xml
 
       - name: Setup - pg
@@ -108,7 +108,7 @@ jobs:
           schemaexplorer_pg_connection_string: "postgres://ssetestusr:ssetestusr@localhost/ssetest?sslmode=disable"
         run: |
           go clean -testcache
-          go test sse_test.go \
+          go test -v sse_test.go \
               2>&1 | go-junit-report -iocopy -set-exit-code -out results-pg-${{ matrix.go-version }}.xml
 
       - name: Setup - mysql
@@ -148,7 +148,7 @@ jobs:
           schemaexplorer_mssql_connection_string: "server=localhost;user id=sa;password=GithubIs2broken;database=ssetest"
         run: |
           go clean -testcache
-          go test sse_test.go \
+          go test -v sse_test.go \
               2>&1 | go-junit-report -iocopy -set-exit-code -out results-MSSQL-${{ matrix.go-version }}.xml
 
 #      - name: Upload Go test results
