@@ -148,7 +148,7 @@ jobs:
         run: |
           go clean -testcache
           go test -json sse_test.go \
-              2>&1 | go-junit-report -parser gojson -iocopy -out results-MSSQL-${{ matrix.go-version }}.xml
+              2>&1 | go-junit-report -iocopy -set-exit-code -out results-MSSQL-${{ matrix.go-version }}.xml
 
       - name: Upload Go test results
         uses: actions/upload-artifact@v3
