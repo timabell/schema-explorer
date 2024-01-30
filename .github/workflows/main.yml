@@ -150,11 +150,11 @@ jobs:
           go test -json sse_test.go \
               2>&1 | go-junit-report -iocopy -set-exit-code -out results-MSSQL-${{ matrix.go-version }}.xml
 
-      - name: Upload Go test results
-        uses: actions/upload-artifact@v3
-        with:
-          name: Go-results-${{ matrix.go-version }}
-          path: TestResults-${{ matrix.go-version }}.json
+#      - name: Upload Go test results
+#        uses: actions/upload-artifact@v3
+#        with:
+#          name: Go-results-${{ matrix.go-version }}
+#          path: TestResults-${{ matrix.go-version }}.json
 
       - name: Test Report
         uses: dorny/test-reporter@v1
