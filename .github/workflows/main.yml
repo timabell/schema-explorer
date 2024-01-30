@@ -64,6 +64,10 @@ jobs:
       - name: Install dependencies
         run: go get .
 
+      - name: Setup - sqlite
+        working-directory: sqlite
+        run: ./setup.sh
+
       - name: Test - sqlite flags
         run: |
           pushd .
