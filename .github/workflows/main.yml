@@ -76,7 +76,7 @@ jobs:
             --display-name=testing-flags \
             --live=true \
             --listen-on-port=9999 \
-            --sqlite-file="`pwd`/sqlite/db/test.db" \
+            --sqlite-file="`pwd`/sqlite/db/test.db" \    
                 2>&1 | go-junit-report -iocopy -set-exit-code -out results-sqlite-flags-${{ matrix.go-version }}.xml
 
       - name: Setup - sqlite (2)
