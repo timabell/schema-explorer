@@ -94,11 +94,8 @@ jobs:
               2>&1 | go-junit-report -iocopy -set-exit-code -out results-sqlite-env-${{ matrix.go-version }}.xml
 
       - name: Setup - pg
-        run: |
-          pushd .
-          cd pg
-          ./setup-ssetest.sh
-          popd
+        working-directory: pg
+        run: ./setup-ssetest.sh
 
       - name: Test - pg
         env:
@@ -110,16 +107,8 @@ jobs:
               2>&1 | go-junit-report -iocopy -set-exit-code -out results-pg-${{ matrix.go-version }}.xml
 
       - name: Setup - mysql
-        run: |
-          #!/usr/bin/env bash -v
-          set -e
-          pushd .
-          cd mysql
-          # Use ip address to stop mysql trying to use sockets, which it does for "localhost"
-          mysql -h 127.0.0.1 -u root -pomgroot ssetest < test-db.sql
-          mysql -h 127.0.0.1 -u root -pomgroot ssetest -e "show tables;"
-          mysql -h 127.0.0.1 -u root -pomgroot ssetest -e "describe CompoundKeyChild;"
-          popd
+        working-directory: mysql
+        run: mysql -h 127.0.0.1 -u root -pomgroot ssetest < test-db.sql
 
       - name: Test - mysql
         env:
@@ -132,13 +121,11 @@ jobs:
               2>&1 | go-junit-report -iocopy -set-exit-code -out results-mysql-${{ matrix.go-version }}.xml
 
       - name: Setup - MSSQL
+        working-directory: mssql
         run: |
-          pushd .
-          cd mssql
           /opt/mssql-tools18/bin/sqlcmd -C -S localhost -W -U sa -P GithubIs2broken -d "master" -Q "create database ssetest;"
           /opt/mssql-tools18/bin/sqlcmd -C -S localhost -W -U sa -P GithubIs2broken -d "ssetest" -i test-db.sql
           /opt/mssql-tools18/bin/sqlcmd -C -S localhost -W -U sa -P GithubIs2broken -d "ssetest" -i test-db-ms_descriptions.sql
-          popd
 
       - name: Test - MSSQL
         env:
@@ -148,12 +135,6 @@ jobs:
           go clean -testcache
           go test -v sse_test.go \
               2>&1 | go-junit-report -iocopy -set-exit-code -out results-MSSQL-${{ matrix.go-version }}.xml
-
-#      - name: Upload Go test results
-#        uses: actions/upload-artifact@v3
-#        with:
-#          name: Go-results-${{ matrix.go-version }}
-#          path: TestResults-${{ matrix.go-version }}.json
 
       - name: Test Report
         uses: dorny/test-reporter@v1
